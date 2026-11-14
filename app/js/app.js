@@ -2403,6 +2403,62 @@ new MutationObserver((changes) => {
   for (const change of changes) for (const node of change.addedNodes) if (node.nodeType === 1) tidyParagraphs(node.parentElement || node);
 }).observe(document.documentElement, { childList: true, subtree: true });
 
+// ----- is this the newest version? -----
+// The server says which version is the newest and which is the oldest still allowed. An older app
+// shows a small notice; one that is too old shows only the "update needed" screen.
+const APP_VERSION = globalThis.chrome?.runtime?.getManifest?.().version || new URLSearchParams(location.search).get("v") || null;
+function olderThan(mine, other) {
+  const a = String(mine).split(".").map(Number), b = String(other).split(".").map(Number);
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    if ((a[i] || 0) !== (b[i] || 0)) return (a[i] || 0) < (b[i] || 0);
+  }
+  return false;
+}
+async function checkVersion() {
+  if (!APP_VERSION) return;
+  try {
+    const now = await api.appVersion();
+    if (!now?.latest) return;
+    const update = olderThan(APP_VERSION, now.minimum || "0") ? "force" : olderThan(APP_VERSION, now.latest) ? "soft" : null;
+    if (update !== state.update) { state.update = update; render(); }
+  } catch { /* not installed yet, or offline: nothing to say */ }
+}
+// Asks Chrome to fetch the new version now, and opens it as soon as it has arrived.
+function updateNow() {
+  const runtime = globalThis.chrome?.runtime;
+  if (!runtime?.requestUpdateCheck) {
+    state.updateNote = t("새 버전으로 바꿔 설치해 주세요.");
+    return render();
+  }
+  Object.assign(state, { updating: true, updateNote: null });
+  render();
+  runtime.onUpdateAvailable?.addListener(() => runtime.reload());
+  runtime.requestUpdateCheck((status) => {
+    if (status === "update_available") return; // onUpdateAvailable reopens the app
+    state.updating = false;
+    state.updateNote = status === "throttled" ? t("잠시 후 다시 눌러 주세요.") : t("아직 이 컴퓨터에 새 버전이 도착하지 않았어요. 조금 뒤에 다시 눌러 주세요.");
+    render();
+  });
+}
+const storeLink = () => STORE_URL && h("a", { class: "link", href: STORE_URL, target: "_blank", rel: "noopener" }, t("스토어에서 보기"));
+function updateBanner() {
+  if (state.update !== "soft" || state.updateLater) return null;
+  return h("div", { class: "update-banner", role: "status" },
+    h("span", { class: "update-text" }, h("b", null, t("새 버전이 나왔어요")), state.updateNote && h("small", null, state.updateNote)),
+    h("button", { class: "mini", disabled: Boolean(state.updating), onclick: updateNow }, state.updating ? t("받는 중…") : t("업데이트")),
+    h("button", { class: "update-later", "aria-label": t("나중에"), title: t("나중에"), onclick: () => { state.updateLater = true; render(); } }, "×"));
+}
+function updateGate() {
+  return h("div", { class: "step splash update-gate" },
+    h("div", { class: "big-logo art", "aria-hidden": "true" }, logoIcon(76)),
+    h("h2", null, t("업데이트가 필요해요")),
+    h("p", { class: "muted" }, t("이 버전은 더 이상 쓸 수 없어요. 새 버전으로 업데이트하면 바로 이어서 쓸 수 있어요.")),
+    h("button", { class: "btn wide", disabled: Boolean(state.updating), onclick: updateNow }, state.updating ? t("받는 중…") : t("지금 업데이트")),
+    state.updateNote && h("p", { class: "small muted" }, state.updateNote),
+    storeLink() && h("p", { class: "center" }, storeLink()),
+    h("p", { class: "small muted" }, t("지금 버전 {v}", { v: APP_VERSION })));
+}
+
 function render() {
   applyShop(state.user?.shop);
   const keepFocus = state.focus || document.activeElement?.id;
@@ -2417,6 +2473,7 @@ function render() {
   const banner = DEMO && h("div", { class: "banner" }, t("데모 모드 · 이 브라우저에만 저장돼요"));
 
   if (!hasChosenLang()) app.replaceChildren(languageStep());
+  else if (state.update === "force") app.replaceChildren(updateGate());
   else if (!state.user) app.replaceChildren(loginView());
   else if (state.member === undefined) app.replaceChildren(h("div", { class: "step splash" }, h("div", { class: "big-logo art", "aria-hidden": "true" }, logoIcon(76)), h("p", { class: "muted" }, t("확인하는 중…"))));
   else if (state.member === false) app.replaceChildren(...[banner, inviteGate()].filter(Boolean));
@@ -2432,6 +2489,7 @@ function render() {
           icon("friends"), friends().badge() > 0 && h("em", { class: "dot" }, String(friends().badge()))),
         h("button", { class: "gear", "aria-label": t("설정"), title: t("설정"), "aria-pressed": String(state.tab === "settings"), onclick: openSettings }, icon("settings"))),
       banner,
+      updateBanner(),
       h("main", { class: sameScreen ? "still" : null }, view),
       h("nav", null, tabs.map(([id, label]) => h("button", {
         "aria-current": state.tab === id ? "page" : null,
@@ -2473,6 +2531,8 @@ if (globalThis.chrome?.storage?.session) {
   });
 }
 
+checkVersion();
+setInterval(checkVersion, 3 * 3600 * 1000); // a panel left open for days still finds out
 globalThis.matchMedia?.("(prefers-color-scheme: dark)").addEventListener("change", () => render());
 // A member seen on this computer before is let straight in; anyone else is checked first.
 if (state.user) state.member = localStorage.getItem(memberKey()) ? true : undefined;

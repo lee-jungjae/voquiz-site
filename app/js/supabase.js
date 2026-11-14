@@ -237,6 +237,9 @@ export const answerDuel = (id, score, character, marks = []) =>
   rpc("answer_duel", { p_id: id, p_score: score, p_character: character, p_marks: marks })
     .catch((err) => (err.status === 404 ? rpc("answer_duel", { p_id: id, p_score: score, p_character: character }) : Promise.reject(err)));
 export const claimDuel = (id) => rpc("claim_duel", { p_id: id });
+// The newest version of the app and the oldest still allowed: { latest, minimum }. Asked without
+// signing in (needs 0011_app_version.sql).
+export const appVersion = () => request("/rest/v1/rpc/app_version", { method: "POST", body: {}, token: SUPABASE_ANON_KEY });
 // Last week's final points of the other students of a tier: [{ nickname, tag, character, score }]
 export const leagueLastWeek = (tier) => rpc("league_last_week", { p_tier: tier });
 export const duelRankings = (friends = false) =>

@@ -1413,3 +1413,13 @@ html:lang(zh) * { word-break: normal !important; }
 .segment button { white-space: nowrap; padding-left: 3px; padding-right: 3px; }
 .segment.three button { font-size: clamp(13px, 4vw, 15px); }
 .segment small { margin-left: 4px; padding: 1px 6px; }
+
+/* ---------- a newer version is ready / an update is needed ---------- */
+.update-banner { display: flex; align-items: center; gap: 8px; margin: 0 20px 8px; padding: 8px 8px 8px 14px; border-radius: 14px; background: #eef6dc; color: #23552b; }
+.update-text { flex: 1; min-width: 0; display: grid; gap: 1px; font-size: 13.5px; }
+.update-text small { font-size: 11.5px; opacity: .85; }
+.update-banner .mini { flex: none; width: auto; margin: 0; padding: 7px 14px; white-space: nowrap; background: #23552b; color: #fff; border-color: transparent; }
+.update-later { flex: none; width: 28px; height: 28px; border-radius: 50%; font-size: 18px; line-height: 1; color: inherit; opacity: .6; }
+.update-later:hover { opacity: 1; }
+.update-gate { text-align: center; gap: 12px; }
+.update-gate h2 { margin: 6px 0 0; }
