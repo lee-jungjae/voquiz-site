@@ -447,6 +447,9 @@ const T = {
   "이번 주 리그에 아직 참여하지 않았어요": ["You haven't joined this week's league yet", "你还没有参加本周联赛"],
   "단어를 찾거나 퀴즈를 풀어 포인트를 모으면 이번 주 리그가 열려요. 리그는 월요일마다 새로 시작해요.": ["Look up a word or take a quiz to earn points, and this week's league opens. It starts again every Monday.", "查单词或做测验获得积分后，本周联赛就会开启。联赛每周一重新开始。"],
   "단어 찾으러 가기": ["Go find a word", "去查单词"],
+  "한마디 바꾸기": ["Change your line", "修改一句话"],
+  "한마디 쓰기": ["Write your line", "写一句话"],
+  "내 이름 아래에 다른 친구들에게 보여요. (30자까지)": ["Others see it under your name. (Up to 30 characters)", "会显示在你的名字下面，其他同学也能看到。（最多30字）"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],
   "테마 상점 열기": ["Open the theme shop", "打开主题商店"],
 

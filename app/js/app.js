@@ -1658,8 +1658,27 @@ function rankView() {
     h("span", { class: "who" },
       h("span", { class: "who-name" }, row.bot ? row.nickname : nameOf(row.nickname, row.tag),
         row.me && h("small", null, t("나")), row.bot && h("small", { class: "bot" }, t("캐릭터"))),
-      (row.me ? state.user.motto : row.motto) && h("span", { class: "who-motto" }, row.me ? state.user.motto : row.motto)),
+      row.me
+        ? h("button", { class: "who-motto edit", title: t("한마디 바꾸기"), onclick: () => { state.mottoEdit = true; state.notice = null; render(); document.getElementById("motto")?.focus(); } },
+            state.user.motto || t("한마디 쓰기"), h("i", { "aria-hidden": "true" }, "✎"))
+        : row.motto && h("span", { class: "who-motto" }, row.motto)),
     h("b", null, score(row.score)));
+  // Writing the line happens right here, under the student's own row.
+  const mottoForm = () => h("li", { class: "motto-edit" },
+    h("form", { class: "row", onsubmit: async (e) => {
+      e.preventDefault();
+      state.notice = null;
+      if (await saveMotto(document.getElementById("motto").value)) {
+        state.mottoEdit = false;
+        toastText(state.user.motto ? t("한마디를 저장했어요.") : t("한마디를 지웠어요."));
+      }
+      render();
+    } },
+      h("input", { type: "text", id: "motto", maxLength: 30, autocomplete: "off", value: state.user.motto || "", placeholder: t("한마디 · 예: 오늘도 단어 10개!"), "aria-label": t("한마디"), style: "flex:1" }),
+      h("button", { class: "btn" }, t("저장")),
+      h("button", { type: "button", class: "link", onclick: () => { state.mottoEdit = false; state.notice = null; render(); } }, t("취소"))),
+    h("p", { class: "small muted hint" }, state.notice?.text || t("내 이름 아래에 다른 친구들에게 보여요. (30자까지)")));
+  const lines = (list) => list.flatMap((row) => (row.me && state.mottoEdit ? [line(row), mottoForm()] : [line(row)]));
 
   return [
     h("div", { class: "rank-head" },
@@ -1687,8 +1706,8 @@ function rankView() {
               state.rankScope === "friends" && h("p", { style: "margin-top:12px" }, h("button", { class: "btn ghost", onclick: () => openPage("friends") }, t("친구 추가하기"))))
           : [
               league && leagueCard(league),
-              h("ol", { class: "rank-list" }, top.map(line)),
-              mine && !top.includes(mine) && [h("div", { class: "rank-gap" }, "⋯"), h("ol", { class: "rank-list" }, line(mine))],
+              h("ol", { class: "rank-list" }, lines(top)),
+              mine && !top.includes(mine) && [h("div", { class: "rank-gap" }, "⋯"), h("ol", { class: "rank-list" }, lines([mine]))],
             ],
     h("p", { class: "small muted center", style: "margin-top:16px" },
       kind === "points" && weekEarned() === 0 ? null : kind === "points" ? t("이번 주에 모은 포인트로 겨뤄요. 월요일마다 새로 시작해요. ‘캐릭터’ 표시는 함께 뛰는 VOQUIZ 캐릭터예요.")
@@ -2103,15 +2122,6 @@ function settingsView() {
           : cost === 0 ? t("첫 이름은 무료예요. 비워 두면 임시 이름으로 불러요.")
           : short ? t("이름을 바꾸려면 {n}포인트가 필요해요. 포인트를 더 모아 보세요.", { n: cost })
           : t("이름을 바꾸려면 {n}포인트가 필요해요. 바꿀 때마다 두 배로 늘어나요.", { n: cost })),
-      h("form", { class: "row", style: "margin-top:10px", onsubmit: async (e) => {
-        e.preventDefault();
-        state.notice = null;
-        if (await saveMotto(document.getElementById("motto").value)) toastText(state.user.motto ? t("한마디를 저장했어요.") : t("한마디를 지웠어요."));
-        render();
-      } },
-        h("input", { type: "text", id: "motto", maxLength: 30, autocomplete: "off", value: state.user.motto || "", placeholder: t("한마디 · 예: 오늘도 단어 10개!"), "aria-label": t("한마디"), style: "flex:1" }),
-        h("button", { class: "btn ghost" }, t("저장"))),
-      h("p", { class: "small muted hint" }, t("랭킹에서 내 이름 아래에 다른 친구들에게 보여요. (30자까지)")),
       noticeBox(),
       h("div", { class: "pref-row" },
         h("div", { class: "chips", role: "group", "aria-label": t("언어") }, LANGS.map(([id, label]) =>
