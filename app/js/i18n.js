@@ -517,6 +517,7 @@ const T = {
   "그 주에 포인트를 한 번이라도 받으면 리그에 들어가요.": ["Earn a point in a week and you're in that week's league.", "那一周只要获得过积分就会加入联赛。"],
   "쉬면 한 등급 강등": ["Rest a week, move down a tier", "休息一周降一级"],
   "한 주 동안 포인트를 한 번도 받지 않으면 다음 주에 한 등급 내려가요. 단어 하나만 찾아도 참가예요!": ["If you don't earn a single point in a week, you move down a tier next week. Looking up just one word counts!", "如果一周内一分也没得，下周就降一级。只查一个单词也算参加！"],
+  "일곱 개의 세계": ["The seven worlds", "七个世界"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],
   "테마 상점 열기": ["Open the theme shop", "打开主题商店"],
 

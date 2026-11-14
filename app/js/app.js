@@ -1774,7 +1774,7 @@ function leagueInfoView() {
         rule("⚔️", t("대결"), t("친구와 겨뤄 이기면 포인트를 받아요.")),
         rule("🎯", t("이번 주 단어 목표"), t("목표를 채우면 목표만큼 보너스를 받아요. 지금 목표로는 +{p}점.", { p: weekBonus(weekGoal()) })))),
     h("section", { class: "block" },
-      h("h3", null, t("등급")),
+      h("h3", null, t("일곱 개의 세계")),
       h("ol", { class: "tier-ladder" }, TIERS.map((one, i) => h("li", { class: i === tier ? "now" : "", style: leagueStyle(one) },
         leagueBadge(one), h("b", null, tierName(i)),
         i === tier ? h("small", { class: "here" }, t("지금 여기")) : h("small", null, t("{n}단계", { n: i + 1 })))).reverse())),
