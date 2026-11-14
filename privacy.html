@@ -5,42 +5,239 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VOQUIZ 개인정보처리방침</title>
 <meta name="description" content="VOQUIZ 개인정보처리방침">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128' aria-hidden='true'> <rect width='128' height='128' rx='28' fill='%23655f9f'/> <path d='M64 30 v-10 M64 22 q-11 -9 -16 0 q9 6 16 0 M64 22 q11 -9 16 0 q-9 6 -16 0' fill='%23bbd86b' stroke='%2323552b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/> <path d='M50 30 h28 a30 30 0 0 1 30 30 v10 a30 30 0 0 1 -30 30 h-22 l-17 15 l3 -17 a30 30 0 0 1 -22 -28 v-10 a30 30 0 0 1 30 -30 z' fill='%23d6d2f0'/> <ellipse cx='39' cy='79' rx='8' ry='5' fill='%23ff8fab' opacity='.75'/><ellipse cx='89' cy='79' rx='8' ry='5' fill='%23ff8fab' opacity='.75'/> <circle cx='48' cy='66' r='7' fill='%232e2a47'/><circle cx='80' cy='66' r='7' fill='%232e2a47'/> <circle cx='50.5' cy='63.5' r='2.4' fill='%23fff'/><circle cx='82.5' cy='63.5' r='2.4' fill='%23fff'/> <path d='M57 77 q7 7 14 0' fill='none' stroke='%232e2a47' stroke-width='3.4' stroke-linecap='round'/> </svg>">
 <style>
-:root { --purple: #655f9f; --dark: #574f82; --green: #23552b; --lime: #bbd86b; --line: #e7e5ef; --muted: #6f6b85; }
+:root { --accent: #655f9f; --accent-dark: #574f82; --lime: #bbd86b; --good: #23552b; --text: #222; --bg: #fff; --surface: #f6f5fb; --line: #e9e7f1; --muted: #6f6b85; --m-ink: #2e2a47; }
 * { box-sizing: border-box; }
-body { margin: 0; font: 16px/1.7 -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", "Segoe UI", sans-serif; color: #26233a; background: #fff; }
-main { max-width: 760px; margin: 0 auto; padding: 40px 22px 72px; }
-header.top { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
-.icon { width: 56px; height: 56px; flex: none; }
-.name { font-size: 28px; font-weight: 800; letter-spacing: -.02em; color: var(--purple); line-height: 1.1; }
-.name small { display: block; font-size: 14px; font-weight: 600; color: var(--muted); letter-spacing: 0; margin-top: 4px; }
-h1 { font-size: 30px; line-height: 1.3; letter-spacing: -.02em; margin: 0 0 12px; }
-h2 { font-size: 20px; margin: 36px 0 8px; letter-spacing: -.01em; }
-h3 { font-size: 16px; margin: 22px 0 4px; }
-p, li { color: #3b3852; }
-ul { padding-left: 20px; margin: 6px 0; }
-a { color: var(--purple); }
-.lead { font-size: 18px; color: var(--muted); margin: 0 0 8px; }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 18px; }
-.card { border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
-.card b { display: block; margin-bottom: 4px; }
-.card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--muted); }
-.note { background: #f6f5fb; border-radius: 14px; padding: 14px 16px; font-size: 14px; }
-table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 8px 0; }
-th, td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: 9px 8px; }
-th { color: var(--muted); font-weight: 600; white-space: nowrap; }
-footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
-hr { border: 0; border-top: 1px solid var(--line); margin: 44px 0; }
-.lang { margin-left: auto; font-size: 14px; white-space: nowrap; }
-.lang a { text-decoration: none; padding: 5px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); }
-.lang a.on { background: var(--purple); border-color: var(--purple); color: #fff; }
+html { scroll-behavior: smooth; }
+body { margin: 0; font: 16px/1.7 -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", "Segoe UI", sans-serif; color: var(--text); background: var(--bg); }
+a { color: var(--accent); }
+.wrap { max-width: 920px; margin: 0 auto; padding: 0 22px; }
+header.top { display: flex; align-items: center; gap: 10px; padding: 18px 0; }
+.brand { display: inline-flex; align-items: center; gap: 8px; color: var(--accent); text-decoration: none; }
+.brand .icon svg { display: block; width: 38px; height: 38px; }
+.brand .word svg { display: block; height: 34px; width: auto; }
+.lang { margin-left: auto; display: inline-flex; padding: 3px; border-radius: 999px; background: var(--surface); }
+.lang a { text-decoration: none; padding: 5px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.lang a.on { background: var(--bg); color: var(--text); box-shadow: 0 1px 4px rgba(0, 0, 0, .12); }
+
+.hero { display: grid; grid-template-columns: 1.15fr .85fr; gap: 24px; align-items: center; padding: 34px 0 30px; }
+.hero h1 { font-size: 40px; line-height: 1.22; letter-spacing: -.03em; margin: 0 0 14px; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.lead { font-size: 17px; color: var(--muted); margin: 0; max-width: 34em; word-break: keep-all; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.tags span { border: 1px solid var(--line); border-radius: 999px; padding: 5px 13px; font-size: 13px; font-weight: 600; }
+.tags span.fill { background: var(--accent); border-color: var(--accent); color: #fff; }
+.stage { position: relative; border-radius: 28px; background: var(--surface); padding: 46px 10px 18px; text-align: center; }
+.stage .mascot { display: block; width: 210px; max-width: 80%; margin: 0 auto; cursor: default; }
+.say { position: absolute; left: 50%; top: 16px; transform: translateX(-50%); white-space: nowrap; background: var(--text); color: #fff; border-radius: 999px; padding: 6px 15px; font-size: 14px; font-weight: 700; animation: say-in .6s cubic-bezier(.3, 1.5, .5, 1) .4s both; }
+.say::after { content: ""; position: absolute; left: 50%; bottom: -4px; width: 10px; height: 10px; background: inherit; transform: translateX(-50%) rotate(45deg); border-radius: 2px; }
+@keyframes say-in { from { opacity: 0; transform: translate(-50%, 8px) scale(.8); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
+
+h2 { font-size: 24px; letter-spacing: -.02em; margin: 46px 0 6px; }
+h2 + .sub { color: var(--muted); margin: 0 0 16px; }
+.cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.card { display: flex; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: 20px; padding: 14px 18px 14px 8px; transition: transform .2s, box-shadow .2s; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(101, 95, 159, .14); }
+.card .mascot { flex: none; width: 96px; margin: 0; cursor: default; }
+.card b { display: block; font-size: 17px; margin-bottom: 2px; }
+.card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--muted); word-break: keep-all; }
+.shelf { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; border-radius: 24px; background: var(--surface); padding: 18px 12px 10px; }
+.shelf .mascot { width: 100%; margin: 0; cursor: default; }
+.steps { list-style: none; counter-reset: step; margin: 0; padding: 0; display: grid; gap: 10px; }
+.steps li { counter-increment: step; display: flex; gap: 12px; align-items: flex-start; word-break: keep-all; }
+.steps li::before { content: counter(step); flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 13px; font-weight: 800; display: grid; place-items: center; margin-top: 2px; }
+.note { border: 1.5px dashed var(--accent); border-radius: 20px; padding: 16px 18px; font-size: 15px; background: color-mix(in srgb, var(--accent) 5%, transparent); word-break: keep-all; }
+footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+
+/* the privacy policy */
+.doc { max-width: 760px; padding-bottom: 20px; }
+.doc h1 { font-size: 30px; letter-spacing: -.02em; margin: 26px 0 8px; }
+.doc h2 { font-size: 19px; margin: 34px 0 8px; }
+.doc p, .doc li { color: #3b3852; }
+.doc ul { padding-left: 20px; margin: 6px 0; }
+.doc table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 8px 0; }
+.doc th, .doc td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: 9px 8px; }
+.doc th { color: var(--muted); font-weight: 600; white-space: nowrap; }
+.doc .lead { font-size: 15px; }
+
+@media (max-width: 700px) {
+  .hero { grid-template-columns: 1fr; padding-top: 18px; }
+  .hero h1 { font-size: 31px; }
+  .cards { grid-template-columns: 1fr; }
+  .shelf { grid-template-columns: repeat(4, 1fr); }
+  .brand .word svg { height: 28px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+.mascot { display: block; width: 170px; margin: 14px auto 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.mascot svg { display: block; width: 100%; height: auto; overflow: visible; }
+.mascot .m-body { fill: var(--accent); }
+.mascot .m-arm, .mascot .m-leg { fill: none; stroke: var(--accent-dark); stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
+.mascot .m-eyes circle { fill: #fff; }
+.mascot .m-smile { fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; }
+.mascot .m-cheek { fill: #fff; opacity: .25; }
+.mascot .m-shadow { fill: var(--text); opacity: .1; transform-box: fill-box; transform-origin: center; animation: m-shadow 1.2s ease-in-out infinite; }
+.mascot .m-tile rect { fill: var(--lime); }
+.mascot .m-tile.t2 rect { fill: #fff; stroke: var(--accent); stroke-width: 2; }
+.mascot .m-tile.t3 rect { fill: var(--good); }
+.mascot .m-tile text { font: 800 13px/1 -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; text-anchor: middle; fill: #23552b; }
+.mascot .m-tile.t2 text { fill: var(--accent); }
+.mascot .m-tile.t3 text { fill: #fff; }
+.mascot .m-bob { animation: m-bob 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center bottom; }
+.mascot .m-eyes { transform-box: fill-box; transform-origin: center; animation: m-blink 4s infinite; }
+.mascot .m-arm { transform-box: fill-box; }
+.mascot .m-arm.l { transform-origin: 100% 100%; animation: m-toss 1.2s ease-in-out infinite; }
+.mascot .m-arm.r { transform-origin: 0% 100%; animation: m-toss-r 1.2s ease-in-out infinite; animation-delay: -.6s; }
+.mascot .m-leg.l { animation: m-step 1.2s ease-in-out infinite; }
+.mascot .m-leg.r { animation: m-step 1.2s ease-in-out infinite; animation-delay: -.6s; }
+.mascot .m-tile { animation: m-juggle 2.4s linear infinite; }
+.mascot .m-tile.t2 { animation-delay: -.8s; }
+.mascot .m-tile.t3 { animation-delay: -1.6s; }
+.mascot.jump svg { animation: m-jump .6s cubic-bezier(.3, 1.6, .5, 1); }
+.mascot { width: 150px; margin-top: 8px; }
+.empty:has(.mascot) { padding-top: 28px; }
+.empty:has(.mascot) .hint { margin-top: 14px; }
+.mascot { position: relative; user-select: none; touch-action: manipulation; }
+.mascot svg { transform-origin: 50% 92%; transition: transform .15s; }
+.mascot .m-eyes-happy, .mascot .m-laugh { display: none; }
+.mascot .m-eyes-happy path { fill: none; stroke: #fff; stroke-width: 3.2; stroke-linecap: round; }
+.mascot .m-laugh { fill: #fff; }
+.mascot.happy .m-eyes, .mascot.happy .m-smile { display: none; }
+.mascot.happy .m-eyes-happy, .mascot.happy .m-laugh { display: block; }
+.mascot.happy .m-cheek { opacity: .5; }
+.mascot.happy .m-tile { animation-duration: 1.1s; }
+.mascot.jump svg { animation: m-jump .6s cubic-bezier(.3, 1.6, .5, 1); }
+.mascot.spin svg { animation: m-spin .7s cubic-bezier(.3, .9, .3, 1); transform-origin: 50% 60%; }
+.mascot.wiggle svg { animation: m-wiggle .7s ease-in-out; }
+.mascot.squish svg { animation: m-squish .6s cubic-bezier(.3, 1.5, .5, 1); }
+.mascot.stretch svg { animation: m-stretch .6s cubic-bezier(.3, 1.5, .5, 1); }
+.mascot.flip svg { animation: m-flip .75s cubic-bezier(.4, 0, .2, 1); transform-origin: 50% 60%; }
+.mascot.party svg { animation: m-party 1.2s cubic-bezier(.3, 1, .4, 1); }
+.mascot { --m-ink: #2e2a47; }
+.mascot .m-body { fill: color-mix(in srgb, var(--accent) 62%, #fff); }
+.mascot .m-arm, .mascot .m-leg { stroke: color-mix(in srgb, var(--accent) 85%, #000); stroke-width: 4; }
+.mascot .m-shine { fill: none; stroke: #fff; stroke-width: 4; stroke-linecap: round; opacity: .45; }
+.mascot .m-sprout { fill: var(--lime); stroke: var(--good); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transform-box: fill-box; transform-origin: 50% 100%; animation: m-sway 2.4s ease-in-out infinite; }
+.mascot .m-eyes circle { fill: var(--m-ink); }
+.mascot .m-eyes .m-glint { fill: #fff; }
+.mascot .m-eyes-happy path { stroke: var(--m-ink); stroke-width: 3.4; }
+.mascot .m-smile { stroke: var(--m-ink); stroke-width: 2.6; }
+.mascot .m-cheek { fill: #ff8fab; opacity: .65; }
+.mascot.happy .m-cheek { opacity: .95; }
+.mascot .m-laugh { fill: var(--m-ink); }
+.mascot .m-laugh .m-tongue { fill: #ff8fab; }
+.mascot .m-tile.t3 rect { fill: #ffd166; }
+.mascot .m-tile.t3 text { fill: #6b4a00; }
+.mascot .m-tile.t2 rect { stroke: color-mix(in srgb, var(--accent) 62%, #fff); }
+.mascot.happy .m-sprout { animation-duration: .5s; }
+.empty:has(.mascot) { padding-top: 14px; }
+.empty:has(.mascot) .hello { margin-bottom: 6px; }
+.mascot .e, .mascot .mo { display: none; }
+.mascot[data-eyes="heart"] .e-heart, .mascot[data-eyes="star"] .e-star { display: block; }
+.mascot[data-mouth="laugh"] .mo-laugh { display: block; }
+.mascot .e circle { fill: var(--m-ink); }
+.mascot .e .m-glint { fill: #fff; }
+.mascot .line { fill: none; stroke: var(--m-ink); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+.mascot .mo-cat, .mascot .mo-wavy { stroke-width: 2.6; }
+.mascot .e-heart path { fill: #f0486b; }
+.mascot .e-star path { fill: #ffc12b; stroke: #e39a00; stroke-width: 1; stroke-linejoin: round; }
+.mascot .mo-o, .mascot .mo-yawn ellipse, .mascot .mo-laugh path { fill: var(--m-ink); }
+.mascot .mo .m-tongue { fill: #ff8fab !important; }
+.mascot .e-heart { transform-box: fill-box; transform-origin: center; animation: m-beat .5s ease-in-out infinite; }
+.mascot .e-star { transform-box: fill-box; transform-origin: center; animation: m-twinkle .6s ease-in-out infinite; }
+.mascot .e-dizzy { transform-box: fill-box; transform-origin: center; animation: m-woozy .5s linear infinite; }
+.mascot .mo-yawn { transform-box: fill-box; transform-origin: center top; animation: m-yawn 1.6s ease-in-out both; }
+.mascot .m-cheek { transform-box: fill-box; transform-origin: center; transition: transform .2s, opacity .2s; }
+.mascot[data-blush="1"] .m-cheek { opacity: 1; transform: scale(1.35); }
+.mascot .m-look { transition: transform .25s cubic-bezier(.3, 1.4, .5, 1); }
+.mascot[data-look="l"] .m-look { transform: translateX(-4px); }
+.mascot[data-look="r"] .m-look { transform: translateX(4px); }
+.mascot[data-look="u"] .m-look { transform: translateY(-3px); }
+.mascot[data-eyes]:not([data-eyes="default"]) .m-tile { animation-duration: 1.3s; }
+.mascot[data-eyes="closed"] .m-tile { animation-duration: 3.4s; }
+.mascot.shrink svg { animation: m-shrink 1s cubic-bezier(.3, 1.4, .5, 1); }
+.mascot.pop svg { animation: m-startle .6s cubic-bezier(.3, 1.8, .5, 1); }
+.mascot.sway svg { animation: m-sway-body 1.6s ease-in-out; }
+.mascot.shake svg { animation: m-shake .6s linear; }
+.mascot.tilt svg { animation: m-tilt .9s cubic-bezier(.3, 1.4, .5, 1); }
+.mascot.bounce svg { animation: m-bounce .9s cubic-bezier(.3, 1.3, .5, 1); }
+.mascot.hop svg { animation: m-hop .6s cubic-bezier(.3, 1.5, .5, 1); }
+.mascot .m-pose { display: block; transform-origin: 50% 92%; transition: transform .45s cubic-bezier(.3, 1.3, .5, 1); }
+.mascot .m-tiles, .mascot .m-legs, .mascot .m-arm { transition: opacity .3s; }
+@keyframes m-bob { 0%, 100% { transform: translateY(0) scale(1, 1); } 50% { transform: translateY(3px) scale(1.04, .96); } }
+@keyframes m-shadow { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(1.12); } }
+@keyframes m-blink { 0%, 44%, 50%, 100% { transform: scaleY(1); } 47% { transform: scaleY(.1); } }
+@keyframes m-toss { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-12deg); } }
+@keyframes m-toss-r { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(12deg); } }
+@keyframes m-step { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes m-juggle {
+  0% { transform: translate(60px, 46px) rotate(-10deg); }
+  14% { transform: translate(72px, 20px) rotate(8deg); }
+  28% { transform: translate(90px, 6px) rotate(16deg); }
+  42% { transform: translate(110px, 6px) rotate(8deg); }
+  56% { transform: translate(128px, 20px) rotate(-6deg); }
+  70% { transform: translate(140px, 46px) rotate(-14deg); }
+  85% { transform: translate(100px, 40px) rotate(-4deg); }
+  100% { transform: translate(60px, 46px) rotate(-10deg); }
+}
+@keyframes m-jump { 0% { transform: translateY(0); } 40% { transform: translateY(-18px) rotate(-4deg); } 100% { transform: translateY(0); } }
+@keyframes m-spin { to { transform: rotate(360deg); } }
+@keyframes m-wiggle { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(-12deg); } 40% { transform: rotate(11deg); } 60% { transform: rotate(-8deg); } 80% { transform: rotate(6deg); } }
+@keyframes m-squish { 0%, 100% { transform: scale(1); } 35% { transform: scale(1.22, .72); } 65% { transform: scale(.92, 1.1); } }
+@keyframes m-stretch { 0%, 100% { transform: scale(1); } 40% { transform: scale(.8, 1.28) translateY(-8px); } 70% { transform: scale(1.06, .95); } }
+@keyframes m-flip { 0% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-26px) rotate(-180deg); } 100% { transform: translateY(0) rotate(-360deg); } }
+@keyframes m-party { 0% { transform: translateY(0) rotate(0) scale(1); } 20% { transform: translateY(-22px) rotate(-10deg) scale(1.08); } 40% { transform: translateY(0) rotate(8deg) scale(1.05, .92); } 60% { transform: translateY(-16px) rotate(-6deg) scale(1.06); } 80% { transform: translateY(0) rotate(4deg) scale(1.03, .95); } 100% { transform: translateY(0) rotate(0) scale(1); } }
+@keyframes m-pop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.3); } 20% { opacity: 1; transform: translate(calc(-50% + var(--dx) * .4), calc(-50% + var(--dy) * .5)) scale(1.25) rotate(var(--turn)); } 100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.8) rotate(var(--turn)); } }
+@keyframes m-say { 0% { opacity: 0; transform: translate(-50%, 6px) scale(.8); } 12%, 80% { opacity: 1; transform: translate(-50%, -6px) scale(1); } 100% { opacity: 0; transform: translate(-50%, -12px) scale(.95); } }
+@keyframes m-sway { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+@keyframes m-beat { 50% { transform: scale(1.25); } }
+@keyframes m-twinkle { 50% { transform: scale(1.2) rotate(12deg); } }
+@keyframes m-woozy { to { transform: rotate(360deg); } }
+@keyframes m-yawn { 0%, 100% { transform: scale(.4, .3); } 35%, 70% { transform: scale(1); } }
+@keyframes m-shrink { 0%, 100% { transform: scale(1) rotate(0); } 30%, 75% { transform: scale(.86) rotate(-7deg) translateY(4px); } }
+@keyframes m-startle { 0%, 100% { transform: scale(1); } 30% { transform: scale(1.18, 1.24) translateY(-12px); } 60% { transform: scale(.96, 1.02); } }
+@keyframes m-sway-body { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-7deg); } 50% { transform: rotate(0) translateY(2px); } 75% { transform: rotate(7deg); } }
+@keyframes m-shake { 0%, 100% { transform: translateX(0) rotate(0); } 15% { transform: translateX(-6px) rotate(-4deg); } 30% { transform: translateX(6px) rotate(4deg); } 45% { transform: translateX(-5px) rotate(-3deg); } 60% { transform: translateX(5px) rotate(3deg); } 80% { transform: translateX(-2px); } }
+@keyframes m-tilt { 0%, 100% { transform: rotate(0); } 35%, 70% { transform: rotate(14deg) translateX(4px); } }
+@keyframes m-bounce { 0%, 100% { transform: translateY(0); } 20% { transform: translateY(-12px) rotate(-4deg); } 40% { transform: translateY(0) scale(1.05, .94); } 60% { transform: translateY(-12px) rotate(4deg); } 80% { transform: translateY(0) scale(1.05, .94); } }
+@keyframes m-hop { 0%, 100% { transform: translateY(0); } 45% { transform: translateY(-9px); } 70% { transform: translateY(0) scale(1.04, .95); } }
+@keyframes m-roll-r { to { transform: rotate(720deg); } }
+@keyframes m-roll-l { to { transform: rotate(-720deg); } }
 </style>
 </head>
 <body>
-<main>
-<header class="top"><svg class="icon" viewBox="0 0 128 128" aria-hidden="true"><rect width="128" height="128" rx="28" fill="#655f9f"/><path d="M64 30 v-10 M64 22 q-11 -9 -16 0 q9 6 16 0 M64 22 q11 -9 16 0 q-9 6 -16 0" fill="#bbd86b" stroke="#23552b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M50 30 h28 a30 30 0 0 1 30 30 v10 a30 30 0 0 1 -30 30 h-22 l-17 15 l3 -17 a30 30 0 0 1 -22 -28 v-10 a30 30 0 0 1 30 -30 z" fill="#d6d2f0"/><ellipse cx="39" cy="79" rx="8" ry="5" fill="#ff8fab" opacity=".75"/><ellipse cx="89" cy="79" rx="8" ry="5" fill="#ff8fab" opacity=".75"/><circle cx="48" cy="66" r="7" fill="#2e2a47"/><circle cx="80" cy="66" r="7" fill="#2e2a47"/><circle cx="50.5" cy="63.5" r="2.4" fill="#fff"/><circle cx="82.5" cy="63.5" r="2.4" fill="#fff"/><path d="M57 77 q7 7 14 0" fill="none" stroke="#2e2a47" stroke-width="3.4" stroke-linecap="round"/></svg><div class="name">VOQUIZ<small>한국어·영어 단어 사전과 퀴즈</small></div>
-  <nav class="lang"><a class="on" href="#" lang="ko">한국어</a> <a href="privacy-en.html" lang="en">English</a></nav></header>
-<h1>개인정보처리방침</h1>
+<div class="wrap">
+<header class="top">
+  <a class="brand" href="./" aria-label="VOQUIZ"><span class="icon"><svg viewBox="0 0 128 128" aria-hidden="true">
+  <rect width="128" height="128" rx="28" fill="#655f9f"/>
+  <path d="M64 30 v-10 M64 22 q-11 -9 -16 0 q9 6 16 0 M64 22 q11 -9 16 0 q-9 6 -16 0" fill="#bbd86b" stroke="#23552b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M50 30 h28 a30 30 0 0 1 30 30 v10 a30 30 0 0 1 -30 30 h-22 l-17 15 l3 -17 a30 30 0 0 1 -22 -28 v-10 a30 30 0 0 1 30 -30 z" fill="#d6d2f0"/>
+  <ellipse cx="39" cy="79" rx="8" ry="5" fill="#ff8fab" opacity=".75"/><ellipse cx="89" cy="79" rx="8" ry="5" fill="#ff8fab" opacity=".75"/>
+  <circle cx="48" cy="66" r="7" fill="#2e2a47"/><circle cx="80" cy="66" r="7" fill="#2e2a47"/>
+  <circle cx="50.5" cy="63.5" r="2.4" fill="#fff"/><circle cx="82.5" cy="63.5" r="2.4" fill="#fff"/>
+  <path d="M57 77 q7 7 14 0" fill="none" stroke="#2e2a47" stroke-width="3.4" stroke-linecap="round"/>
+</svg></span><span class="word"><svg viewBox="-6 -12 218 62" role="img" aria-label="VOQUIZ">
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="12">
+    <path d="M4 17 L14 33 L32 5" stroke="#23552b" transform="translate(0 3)"/>
+    <path d="M4 17 L14 33 L32 5" stroke="#bbd86b"/>
+    <g stroke="currentColor">
+      <g transform="translate(0 -4)"><circle cx="96" cy="21" r="13"/><path d="M103 29 l8 8"/></g>
+      <path d="M124 9 v13 a11 11 0 0 0 22 0 v-13" transform="rotate(5 135 20) translate(0 3)"/>
+      <path d="M163 10 v23" transform="rotate(-5 163 20) translate(0 -1)"/>
+      <path d="M178 9 h20 L178 35 h20" transform="rotate(4 188 20) translate(0 2)"/>
+    </g>
+  </g>
+  <circle cx="58" cy="23" r="17" fill="#d6d2f0" stroke="currentColor" stroke-width="5"/>
+  <circle cx="52" cy="21.5" r="2.8" fill="#2e2a47"/><circle cx="64" cy="21.5" r="2.8" fill="#2e2a47"/>
+  <circle cx="53" cy="20.5" r="1" fill="#fff"/><circle cx="65" cy="20.5" r="1" fill="#fff"/>
+  <path d="M55 27.5 q3 3.2 6 0" fill="none" stroke="#2e2a47" stroke-width="2" stroke-linecap="round"/>
+  <ellipse cx="47.5" cy="27" rx="3" ry="2" fill="#ff8fab" opacity=".8"/><ellipse cx="68.500" cy="27" rx="3" ry="2" fill="#ff8fab" opacity=".8"/>
+  <path d="M58 5 q-7 -9 -11 -2 q6 5 11 2 M58 5 q7 -9 11 -2 q-6 5 -11 2" fill="#bbd86b" stroke="#23552b" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M160 -7 l1.6 3.4 l3.4 1.6 l-3.4 1.6 l-1.6 3.4 l-1.6 -3.4 l-3.4 -1.6 l3.4 -1.6 z" fill="#ffd166"/>
+</svg></span></a>
+  <nav class="lang"><a class="on" href="#" lang="ko">한국어</a><a href="privacy-en.html" lang="en">English</a></nav>
+</header>
+<div class="doc"><h1>개인정보처리방침</h1>
 <p class="lead">시행일: 2026년 11월 14일</p>
 <p>VOQUIZ(이하 "서비스")는 한국어와 영어를 함께 배우는 학생을 위한 크롬 확장 프로그램입니다. 이 문서는 서비스가 어떤 정보를 왜 모으고, 어떻게 보관하며, 이용자가 어떤 권리를 갖는지 설명합니다.</p>
 
@@ -100,8 +297,9 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 44px 0; }
 <p>내용이 바뀌면 이 페이지에 새 시행일과 함께 올립니다. 중요한 변경은 서비스 안에서도 알립니다.</p>
 
 <h2>10. 문의</h2>
-<p>VOQUIZ 운영자(개인) · <a href="mailto:jjungjjai@gmail.com">jjungjjai@gmail.com</a></p>
+<p>VOQUIZ 운영자(개인) · <a href="mailto:jjungjjai@gmail.com">jjungjjai@gmail.com</a></p></div>
 <footer><a href="./">VOQUIZ 소개</a> &nbsp;·&nbsp; <a href="privacy.html">개인정보처리방침</a><br>문의: <a href="mailto:jjungjjai@gmail.com">jjungjjai@gmail.com</a></footer>
-</main>
+</div>
+
 </body>
 </html>
