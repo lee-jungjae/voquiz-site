@@ -389,6 +389,19 @@ body.home { background: radial-gradient(900px 420px at 88% -60px, #efeaff 0, tra
 .float.c { right: 8%; bottom: -14px; background: var(--accent); color: #fff; animation-delay: -2.4s; }
 @keyframes floaty { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
 section.block { margin-top: 62px; }
+.hero { grid-template-columns: 1.2fr .8fr; gap: 34px; align-items: center; }
+.hero .tags { margin: 0 0 14px; }
+.hero h1 { margin-bottom: 0; }
+.bridge { margin: 22px 0 8px; font-size: 14px; font-weight: 800; color: var(--accent); }
+.bridge::after { content: " ↓"; }
+.three { list-style: none; counter-reset: way; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.three li { counter-increment: way; position: relative; border-radius: 18px; padding: 30px 12px 12px; background: #fff; border: 2px solid #ece9f8; }
+.three li::before { content: counter(way); position: absolute; left: 12px; top: -12px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 15px; color: #fff; background: var(--accent); box-shadow: 0 4px 10px rgba(0, 0, 0, .12); }
+.three li:nth-child(2)::before { background: #ffc23d; color: #5b3d00; }
+.three li:nth-child(3)::before { background: var(--good); color: var(--lime); }
+.three b { display: block; font-size: 16px; line-height: 1.3; background: linear-gradient(transparent 60%, #ffe08a 60%); width: fit-content; }
+.three span { display: block; margin-top: 5px; font-size: 13.5px; line-height: 1.5; color: #4a4663; word-break: keep-all; }
+.cta { margin-top: 22px; }
 .letter { position: relative; margin: 26px 0 4px; padding: 20px 20px 14px; border-radius: 6px 20px 20px 20px; background: #fffbe9; box-shadow: 0 10px 24px rgba(120, 100, 40, .15); transform: rotate(-1deg); }
 .letter .tape { position: absolute; left: 28px; top: -11px; width: 78px; height: 22px; margin-left: 0; background: rgba(187, 216, 107, .85); transform: rotate(2.5deg); border-radius: 3px; }
 .letter p { margin: 0; font-size: 16px; line-height: 1.7; color: #3a3320; word-break: keep-all; }
@@ -426,7 +439,9 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
 .grown .facts b { display: block; }
 .steps li { font-size: 17px; }
 @media (max-width: 700px) {
-  .hero h1 { font-size: 33px; } .two, .perks, .grown .facts { grid-template-columns: 1fr; }
+  .hero { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 33px; } .two, .perks, .grown .facts, .three { grid-template-columns: 1fr; }
+  .three li { padding: 14px 12px 12px 52px; } .three li::before { top: 14px; }
   section.block h2 { font-size: 25px; } .float { display: none; }
 }
 </style>
@@ -465,14 +480,19 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
 </header>
 <section class="hero">
   <div>
-    <h1>Stuck on a word?<br>Get it in <em>two languages</em>!</h1>
-    <p class="lead">Search in Korean or in English. You get an easy explanation that fits your grade, then quiz yourself on your words and duel your friends.</p>
     <div class="tags"><span class="fill">Grades 3–12</span><span>한국어 · English</span><span>Right in Chrome</span></div>
+    <h1>Stuck on a word?<br>Get it in <em>two languages</em>!</h1>
     <div class="letter" role="note" aria-label="A note from the makers">
       <span class="tape" aria-hidden="true"></span>
       <p>Hi! I'm a G4 student at an international school. I made this with my dad so that I could <b>look up</b> Korean and English words easily, <b>remember</b> them easily, and <b>test myself</b> in an easy, fun way. I hope it helps you too <span class="heart" aria-label="heart">♥</span></p>
       <span class="from">A G4 student and Dad, the makers of VOQUIZ</span>
     </div>
+    <p class="bridge">So this is how we made VOQUIZ</p>
+    <ol class="three">
+      <li><b>Easy to look up</b><span>Search in Korean or in English, either works</span></li>
+      <li><b>Easy to remember</b><span>Simple explanations and memory tips for your grade</span></li>
+      <li><b>Fun to test</b><span>Quizzes from your words, and duels with friends</span></li>
+    </ol>
     <div class="cta"><a class="btn" href="#try">Try it now</a><a class="btn ghost" href="#start">How to start</a></div>
   </div>
   <div class="stage"><span class="float a" aria-hidden="true">A</span><span class="float b" aria-hidden="true">가</span><span class="float c" aria-hidden="true">?</span>
