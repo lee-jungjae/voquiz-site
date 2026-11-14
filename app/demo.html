@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>VOQUIZ</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module">
+    // The try-out: a student who is already signed in, with a few words looked up.
+    import { seed } from "./js/demo.js";
+    localStorage.setItem("wb_lang", new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko");
+    localStorage.setItem("wb_member_demo", "1");
+    seed(5);
+    await import("./js/app.js");
+  </script>
+</body>
+</html>

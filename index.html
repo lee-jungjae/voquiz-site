@@ -304,6 +304,73 @@ dialog[open] { animation: sheet-in .3s cubic-bezier(.2, 1.2, .4, 1); }
 .legend .k { background: var(--accent); color: #fff; } .legend .e { background: var(--good); color: var(--lime); }
 .legend .m { background: #ffd166; color: #6b4a00; } .legend .s { background: #ffb347; color: #5b3200; }
 @media (max-width: 700px) { .meaning { grid-template-columns: 1fr; } }
+
+/* ---------- explanation on one side, the real app on the other ---------- */
+dialog { width: min(940px, calc(100vw - 28px)); }
+.sheet { position: relative; display: grid; grid-template-columns: 1fr 420px; padding: 0; }
+.sheet > .close { position: absolute; right: 14px; top: 14px; width: 36px; height: 36px; border-radius: 50%; background: #fff; box-shadow: 0 2px 8px rgba(0, 0, 0, .15); font-size: 18px; line-height: 1; z-index: 2; }
+.guide-side { padding: 26px 26px 28px; }
+.live-side { padding: 26px 22px 20px; background: #efedf9; border-radius: 0 26px 26px 0; }
+.kind { display: inline-block; font-size: 12px; font-weight: 800; letter-spacing: .05em; border-radius: 999px; padding: 3px 12px; background: var(--surface); color: var(--muted); margin-bottom: 10px; }
+.kind.try { background: var(--accent); color: #fff; }
+.guide-side .sheet-head .mascot { width: 96px; }
+.guide-side h3 { font-size: 26px; }
+.guide-side ul.points { margin-top: 16px; gap: 11px; }
+.guide-side ul.points li { font-size: 16px; }
+.live { border-radius: 20px; background: #fff; box-shadow: 0 14px 34px rgba(60, 50, 120, .2); overflow: hidden; }
+.live-bar { display: flex; align-items: center; gap: 5px; padding: 9px 12px; background: #2e2a47; color: #fff; font-size: 12px; }
+.live-bar i { width: 9px; height: 9px; border-radius: 50%; background: #ff6b6b; } .live-bar i:nth-child(2) { background: #ffd166; } .live-bar i:nth-child(3) { background: #7fd67f; }
+.live-bar b { margin-left: 6px; font-weight: 700; }
+.live-bar em { margin-left: auto; font-style: normal; font-weight: 800; font-size: 10px; letter-spacing: .06em; background: var(--lime); color: var(--good); border-radius: 999px; padding: 1px 8px; }
+.live-tabs { display: flex; gap: 6px; padding: 8px 10px; background: #f6f5fb; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.live-tabs button { flex: none; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 700; color: var(--muted); background: #fff; }
+.live-tabs button[aria-pressed="true"] { background: var(--text); border-color: var(--text); color: #fff; }
+.live-screen { position: relative; height: 620px; background: #fff; }
+.live-screen iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; opacity: 0; transition: opacity .3s; }
+.live.ready iframe { opacity: 1; }
+.live-loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 14px; font-weight: 600; }
+.live.ready .live-loading { display: none; }
+.live-note { margin: 0; padding: 9px 12px 11px; font-size: 12px; line-height: 1.5; color: var(--muted); background: #f6f5fb; border-top: 1px solid var(--line); word-break: keep-all; }
+#try-dict .live { box-shadow: 0 18px 44px rgba(101, 95, 159, .2); border: 2px solid #ece9f8; }
+#try-dict .live-screen { height: 600px; }
+@media (max-width: 860px) {
+  .sheet { grid-template-columns: 1fr; }
+  .live-side { border-radius: 0 0 26px 26px; padding: 18px 14px 16px; }
+  .guide-side { padding: 22px 18px 18px; }
+  .live-screen { height: 560px; }
+}
+
+/* ---------- every character: a strip to scroll, and a window with all of them ---------- */
+.mascot.shade { filter: brightness(0) opacity(.14); }
+.parade { display: flex; gap: 2px; overflow-x: auto; padding: 14px 6px 8px; margin-top: 12px; scroll-snap-type: x proximity; scrollbar-width: thin; -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+.walker { position: relative; flex: none; width: 84px; border-radius: 16px; scroll-snap-align: start; transition: transform .15s; }
+.walker:hover { transform: translateY(-5px); }
+.walker .mascot { width: 100%; margin: 0; pointer-events: none; }
+.walker i, .face-card.secret .mascot + b::before { font-style: normal; }
+.walker i { position: absolute; left: 0; right: 0; top: 42%; text-align: center; font-size: 22px; font-weight: 900; color: var(--accent); opacity: .7; }
+.walker.secret:hover .mascot { animation: m-wiggle .7s ease-in-out; }
+.center { text-align: center; margin: 12px 0 0; }
+dialog#all { width: min(880px, calc(100vw - 28px)); }
+.all { padding: 24px 22px 22px; }
+.all-head { display: flex; gap: 12px; align-items: flex-start; position: sticky; top: 0; background: #fff; padding-bottom: 12px; z-index: 1; }
+.all-head h3 { margin: 0; font-size: 24px; letter-spacing: -.02em; }
+.all-head h3 em { font-style: normal; font-size: 13px; font-weight: 800; color: var(--accent); background: #efedf9; border-radius: 999px; padding: 2px 10px; vertical-align: 4px; margin-left: 6px; white-space: nowrap; }
+.all-head p { margin: 4px 0 0; font-size: 14px; color: var(--muted); line-height: 1.55; word-break: keep-all; }
+.all-head .close { flex: none; margin-left: auto; width: 36px; height: 36px; border-radius: 50%; background: var(--surface); font-size: 18px; line-height: 1; }
+.all-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; }
+.face-card { position: relative; border: 1.5px solid var(--line); border-radius: 18px; padding: 6px 6px 10px; text-align: center; background: #fff; transition: transform .15s, border-color .15s; }
+.face-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+.face-card .mascot { width: 100%; margin: 0; pointer-events: none; }
+.face-card b { display: block; font-size: 14px; }
+.face-card small { display: block; font-size: 11px; font-weight: 700; color: var(--accent); min-height: 1.4em; }
+.face-card.secret { background: #faf9fd; border-style: dashed; }
+.face-card.secret b { color: var(--muted); letter-spacing: .1em; }
+.face-card.secret small { color: #c79a00; }
+.face-card.special { border-color: #ffc23d; }
+.face-card u { position: absolute; left: 8px; top: 8px; text-decoration: none; font-size: 10px; font-weight: 900; color: #5b3d00; background: linear-gradient(135deg, #ffe08a, #ffc23d); border-radius: 999px; padding: 1px 7px; z-index: 1; }
+.face-card.peek .mascot { animation: m-wiggle .7s ease-in-out; filter: brightness(0) opacity(.3); }
+.face-card.peek b { color: var(--accent); letter-spacing: 0; animation: pop-name .3s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes pop-name { from { transform: scale(.6); } to { transform: none; } }
 /* ---------- the home page ---------- */
 body.home { background: radial-gradient(900px 420px at 88% -60px, #efeaff 0, transparent 70%), radial-gradient(700px 380px at -10% 12%, #f1f8dc 0, transparent 70%), #fff; }
 .hero { padding: 26px 0 34px; }
@@ -325,7 +392,7 @@ section.block { margin-top: 62px; }
 .eyebrow { display: inline-block; font-size: 13px; font-weight: 800; letter-spacing: .04em; color: var(--accent); background: #efedf9; border-radius: 999px; padding: 3px 12px; margin-bottom: 8px; }
 section.block h2 { font-size: 30px; margin: 0 0 6px; }
 section.block h2 + .sub { font-size: 17px; margin-bottom: 20px; }
-.two { display: grid; grid-template-columns: .9fr 1.1fr; gap: 26px; align-items: center; }
+.two { display: grid; grid-template-columns: 1fr 420px; gap: 30px; align-items: center; }
 .two ul { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 9px; }
 .two li { position: relative; padding-left: 28px; font-size: 16px; word-break: keep-all; }
 .two li::before { content: "✓"; position: absolute; left: 0; top: 4px; width: 19px; height: 19px; border-radius: 50%; background: var(--lime); color: var(--good); font-size: 12px; font-weight: 900; display: grid; place-items: center; }
@@ -344,6 +411,7 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
 .perk b { display: block; margin: 4px 0 2px; }
 .perk p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.55; word-break: keep-all; }
 .shelf { background: #fff; border: 2px solid #ece9f8; }
+.more-title { margin: 26px 0 0; font-size: 18px; color: var(--accent-dark); }
 .grown { border-radius: 26px; background: #f7f7fb; padding: 26px 26px 22px; }
 .grown h2 { font-size: 22px; }
 .grown .facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 26px; margin-top: 12px; }
@@ -458,7 +526,7 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
   <div>
     <span class="eyebrow">두 언어 사전</span>
     <h2>단어 하나를 찾으면<br>이만큼 나와</h2>
-    <p class="sub">위의 단어를 바꿔 가며 눌러 봐. 가려진 칸도 열어 보고!</p>
+    <p class="sub">옆은 진짜 VOQUIZ 화면이야. 단어를 바꿔 보고, 가려진 칸도 눌러서 열어 봐!</p>
     <div class="legend"><span class="k">한국어 뜻</span><span class="e">영어 뜻</span><span class="m">더 쉽게 외우기</span><span class="s">속담 · 사자성어</span></div>
     <ul>
       <li><b>한국어 뜻과 영어 뜻</b>을 한 번에, 내 학년에 맞는 쉬운 말로</li>
@@ -473,7 +541,7 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
 <section class="block">
   <span class="eyebrow">할 수 있는 것</span>
   <h2>찾고, 모으고, 풀고, 겨루고</h2>
-  <p class="sub">하나씩 눌러서 직접 해 봐.</p>
+  <p class="sub">하나씩 눌러 봐. 설명 옆에서 진짜 화면을 바로 써 볼 수 있어.</p>
   <div class="cards">
     <button type="button" class="card" data-feature="dict"><span class="mascot " data-art="rabbit" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
@@ -530,7 +598,7 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><div><b>두 언어 사전</b><p>한국어든 영어든, 찾으면 두 언어로 쉽게 설명해 줘.</p><span class="more">자세히 보기 →</span></div></button>
+</svg></span><div><b>두 언어 사전</b><p>한국어든 영어든, 찾으면 두 언어로 쉽게 설명해 줘.</p><span class="more">자세히 보고 해 보기 →</span></div></button>
     <button type="button" class="card" data-feature="list"><span class="mascot " data-art="cupcake" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
@@ -586,7 +654,7 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><div><b>내 단어장</b><p>찾은 단어가 날짜별로 알아서 모여. 따로 적을 필요 없어!</p><span class="more">자세히 보기 →</span></div></button>
+</svg></span><div><b>내 단어장</b><p>찾은 단어가 날짜별로 알아서 모여. 따로 적을 필요 없어!</p><span class="more">자세히 보고 해 보기 →</span></div></button>
     <button type="button" class="card" data-feature="quiz"><span class="mascot " data-art="robot" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
@@ -642,7 +710,7 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><div><b>퀴즈와 연속 도전</b><p>내가 찾은 단어로 퀴즈! 틀린 단어는 맞힐 때까지 다시 나와.</p><span class="more">자세히 보기 →</span></div></button>
+</svg></span><div><b>퀴즈와 연속 도전</b><p>내가 찾은 단어로 퀴즈! 틀린 단어는 맞힐 때까지 다시 나와.</p><span class="more">자세히 보고 해 보기 →</span></div></button>
     <button type="button" class="card" data-feature="duel"><span class="mascot " data-art="fox" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
@@ -698,7 +766,7 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><div><b>친구와 3분 대결</b><p>3분 동안 누가 더 많이 맞히나. 친구 기록이 옆에서 같이 달려!</p><span class="more">자세히 보기 →</span></div></button>
+</svg></span><div><b>친구와 3분 대결</b><p>3분 동안 누가 더 많이 맞히나. 친구 기록이 옆에서 같이 달려!</p><span class="more">자세히 보고 해 보기 →</span></div></button>
   </div>
 </section>
 
@@ -716,7 +784,7 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
 <section class="block">
   <span class="eyebrow">캐릭터</span>
   <h2>누구랑 공부할래?</h2>
-  <p class="sub">눌러서 위의 캐릭터를 바꿔 봐. 캐릭터마다 표정도 동작도 달라.</p>
+  <p class="sub">먼저 여덟 친구가 얼굴을 보여 줄게. 눌러서 위의 캐릭터를 바꿔 봐!</p>
   <div class="shelf"><button type="button" class="pick" aria-pressed="true" aria-label="bubble"><span class="mascot portrait" style="animation-delay:-0.0s" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
@@ -1158,6 +1226,9 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
     </g>
   </g>
 </svg></span></button></div>
+  <h3 class="more-title">그리고… 아직 만나지 못한 친구들</h3>
+  <div class="parade" id="parade" aria-label="모든 캐릭터"></div>
+  <p class="center"><button type="button" class="btn ghost" id="see-all" hidden>모두 보기</button></p>
 </section>
 
 <section class="block" id="start">
@@ -1189,6 +1260,7 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
 <footer><a href="./">VOQUIZ 소개</a> &nbsp;·&nbsp; <a href="privacy.html">개인정보처리방침</a><br>문의: <a href="mailto:jjungjjai@gmail.com">jjungjjai@gmail.com</a></footer>
 </div>
 <dialog id="detail" aria-labelledby="detail-title"><div class="sheet" id="sheet"></div></dialog>
+<dialog id="all" aria-labelledby="all-title"><div class="all" id="all-body"></div></dialog>
 <script>
 (() => {
   const ko = document.documentElement.lang === "ko";
@@ -1240,7 +1312,7 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
 
   // ----- what each feature is, and something to try -----
   const T = ko ? {
-    more: "자세히 보기 →", close: "닫기", tryIt: "직접 해 봐!",
+    more: "자세히 보고 해 보기 →", close: "닫기", guide: "안내", tryIt: "직접 해 보기",
     reveal: "눌러서 보기", again: "다시 풀기", start: "대결 시작!", restart: "한 판 더", me: "나", rival: "하린",
     right: ["정답! 대단해!", "완벽해!", "바로 그거야!"], wrong: "아깝다! 정답은 photosynthesis야.",
     win: (a, b) => `이겼다! ${a} : ${b}`, lose: (a, b) => `아깝다! ${a} : ${b}`, draw: (a, b) => `비겼어! ${a} : ${b}`,
@@ -1250,7 +1322,7 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
     quiz: { title: "퀴즈와 연속 도전", art: "robot", points: ["내가 찾은 단어로 문제가 나와. 쓰는 문제와 고르는 문제가 섞여 있고, 한 문제에 20초야.", "틀린 단어는 3번 연속으로 맞힐 때까지 다시 나와서 결국 외우게 돼.", "연속 도전은 우리 학년 권장 단어를 틀릴 때까지 쭉! 최고 기록에 도전해 봐.", "맞히면 내 캐릭터가 같이 신나 하고, 틀리면 위로해 줘."], q: "식물이 햇빛, 물, 이산화탄소로 스스로 양분을 만드는 일." },
     duel: { title: "친구와 3분 대결", art: "fox", points: ["3분 동안 누가 더 많이 맞히나 겨뤄. 둘 다 똑같은 문제를 풀어서 공정해.", "같은 시간에 접속하지 않아도 돼. 먼저 푼 친구의 기록이 옆에서 같이 달려!", "틀리면 3초 동안 얼음! 빠르고 정확하게.", "친구에게 도전하거나, 랜덤 상대와 붙어 볼 수도 있어."] },
   } : {
-    more: "See more →", close: "Close", tryIt: "Try it!",
+    more: "See more and try it →", close: "Close", guide: "About", tryIt: "Try it yourself",
     reveal: "Tap to see", again: "Try again", start: "Start the duel!", restart: "One more", me: "Me", rival: "Harin",
     right: ["Correct! Awesome!", "Perfect!", "That's the one!"], wrong: "So close! It's photosynthesis.",
     win: (a, b) => `You win! ${a} : ${b}`, lose: (a, b) => `So close! ${a} : ${b}`, draw: (a, b) => `A draw! ${a} : ${b}`,
@@ -1261,157 +1333,108 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
     duel: { title: "3-minute duels", art: "fox", points: ["See who gets more right in three minutes. You both get the very same questions.", "No need to be online together: your friend's run races right next to yours!", "Miss one and you freeze for three seconds. Be quick and careful.", "Challenge a friend, or take on a random opponent."] },
   };
 
-  const DEMOS = {
-    dict() {
-      // Three real-looking results. Each shows what a search gives: both meanings, ways to
-      // remember the word, an example, and a saying where there is one.
-      const WORDS = [
-        { word: "photosynthesis", pair: "광합성",
-          ko: "식물이 햇빛, 물, 이산화탄소로 스스로 양분을 만드는 일.", en: "The way plants make their own food from sunlight, water and carbon dioxide.",
-          origin: ["photo(빛) + synthesis(합쳐 만들기) → 빛으로 합쳐 만든다", "photo (light) + synthesis (putting together) → made with light"],
-          hanja: ["광(빛) + 합(합하다) + 성(이루다) → 빛으로 합쳐 이룬다", "광 (light) + 합 (join) + 성 (make) → made by joining with light"],
-          tip: ["photo는 사진(photo)처럼 '빛'! 빛으로 만드는 일.", "photo means light, as in a photo. Made with light!"],
-          example: ["Plants need sunlight for photosynthesis.", "식물은 광합성을 하려면 햇빛이 필요해요."] },
-        { word: "노력", pair: "effort",
-          ko: "어떤 일을 이루려고 몸과 마음을 다해 힘쓰는 것.", en: "Working hard with your body and mind to reach a goal.",
-          origin: ["effort ← 옛 프랑스어 esforz(힘) ← 라틴어 fortis(강한)", "effort ← Old French esforz (strength) ← Latin fortis (strong)"],
-          hanja: ["노(힘쓰다) + 력(힘) → 힘을 다해 애쓰다", "노 (to labour) + 력 (strength) → to try with all your strength"],
-          tip: ["effort 안에 fort(요새)가 있어. 요새를 지키려면 힘써야지!", "There's a fort in effort: holding a fort takes hard work!"],
-          example: ["노력하면 실력이 늘어요.", "With effort, you get better."],
-          saying: [["속담", "티끌 모아 태산", "작은 것도 꾸준히 모으면 큰 것이 된다 · Little by little, a lot."], ["사자성어", "우공이산", "꾸준히 노력하면 산도 옮길 수 있다 · Steady effort can move a mountain."]] },
-        { word: "friend", pair: "친구",
-          ko: "서로 가깝게 지내며 믿고 좋아하는 사람.", en: "A person you know well, like and trust.",
-          origin: ["옛 영어 frēond(사랑하는 사람)에서 왔어", "From Old English frēond, 'one who loves'"],
-          hanja: ["친(가깝다) + 구(오래되다) → 오래 가깝게 지낸 사이", "친 (close) + 구 (old) → someone close for a long time"],
-          tip: ["friend 끝에 end: 끝(end)까지 함께하는 사이!", "friend ends with end: together to the end!"],
-          example: ["She is my best friend.", "그 애는 나의 가장 친한 친구예요."],
-          saying: [["속담", "A friend in need is a friend indeed", "어려울 때 도와주는 친구가 진짜 친구다."]] },
-      ];
-      const L = ko
-        ? { ko: "한국어 뜻", en: "영어 뜻", easy: "더 쉽게 외우기", origin: "영어 어원", hanja: "한자어 풀이", tip: "기억법", example: "예문", saying: "속담 · 사자성어" }
-        : { ko: "In Korean", en: "In English", easy: "Easier to remember", origin: "Word origin", hanja: "Korean syllables", tip: "Memory tip", example: "Example", saying: "Sayings" };
-      const box = el(`<div class="demo result"><div class="words" role="tablist"></div><div class="body"></div></div>`);
-      const show = (item) => {
-        for (const tab of $(".words", box).children) tab.setAttribute("aria-selected", String(tab.textContent === item.word));
-        const i = ko ? 0 : 1;
-        const body = $(".body", box);
-        body.replaceChildren(
-          el(`<div class="word">${item.word}<span>⇄ ${item.pair}</span></div>`),
-          el(`<div class="meaning"><div class="m ko"><small>${L.ko}</small><p>${item.ko}</p></div><div class="m en"><small>${L.en}</small><p>${item.en}</p></div></div>`),
-          el(`<div class="section easy"><h4>${L.easy}</h4></div>`),
-          el(`<div class="section"><h4>${L.example}</h4><p class="ex">${item.example[0]}<br><span>${item.example[1]}</span></p></div>`));
-        const easy = $(".easy", body);
-        for (const [label, text] of [[L.origin, item.origin[i]], [L.hanja, item.hanja[i]], [L.tip, item.tip[i]]]) {
-          const veil = el(`<button type="button" class="veil"><small>${label}</small><em>${T.reveal}</em><span>${text}</span></button>`);
-          veil.addEventListener("click", () => veil.classList.add("open"));
-          easy.append(veil);
-        }
-        if (item.saying) {
-          body.append(el(`<div class="section saying"><h4>${L.saying}</h4>${item.saying.map(([kind, line, meaning]) => `<p><em>${ko ? kind : kind === "속담" ? "Proverb" : "Four-character idiom"}</em><b>${line}</b><span>${meaning}</span></p>`).join("")}</div>`));
-        }
-      };
-      for (const item of WORDS) {
-        const tab = el(`<button type="button" role="tab" class="word-tab">${item.word}</button>`);
-        tab.addEventListener("click", () => show(item));
-        $(".words", box).append(tab);
-      }
-      show(WORDS[1]);
-      return box;
-    },
-    list() {
-      const rows = [[T.today, "photosynthesis", "광합성"], [null, "민주주의", "democracy"], [T.yesterday, "gravity", "중력"], [null, "노력", "effort"]];
-      const box = el(`<div class="demo"></div>`);
-      for (const [day, word, pair] of rows) {
-        if (day) box.append(el(`<div class="day">${day}</div>`));
-        const row = el(`<div class="row"><i>${word[0].toUpperCase()}</i><div>${word}<small>${pair}</small></div><button type="button" class="star" aria-pressed="false" aria-label="★">★</button></div>`);
-        const star = $(".star", row);
-        star.addEventListener("click", () => star.setAttribute("aria-pressed", String(star.getAttribute("aria-pressed") !== "true")));
-        box.append(row);
-      }
-      return box;
-    },
-    quiz() {
-      const box = el(`<div class="demo"><p class="q">${T.quiz.q}</p><div class="choices"></div><p class="verdict" role="status"></p></div>`);
-      const draw = () => {
-        const list = $(".choices", box);
-        list.replaceChildren();
-        $(".verdict", box).textContent = "";
-        $(".verdict", box).className = "verdict";
-        box.querySelector(".go")?.remove();
-        for (const word of ["gravity", "photosynthesis", "democracy", "transport"].sort(() => Math.random() - 0.5)) {
-          const choice = el(`<button type="button" class="choice">${word}</button>`);
-          choice.addEventListener("click", () => {
-            const right = word === "photosynthesis";
-            for (const other of list.children) {
-              other.disabled = true;
-              other.classList.add(other.textContent === "photosynthesis" ? "ok" : other === choice ? "no" : "dim");
-            }
-            const verdict = $(".verdict", box);
-            verdict.textContent = right ? T.right[Math.floor(Math.random() * T.right.length)] : T.wrong;
-            verdict.classList.add(right ? "good" : "bad");
-            const face = $("#sheet .sheet-head .mascot");
-            face.dataset.eyes = right ? "star" : "closed";
-            face.dataset.mouth = right ? "laugh" : "wavy";
-            face.classList.remove("jump", "sway"); void face.offsetWidth; face.classList.add(right ? "jump" : "sway");
-            const again = el(`<button type="button" class="go ghost">${T.again}</button>`);
-            again.addEventListener("click", draw);
-            box.append(again);
-          });
-          list.append(choice);
-        }
-      };
-      draw();
-      return box;
-    },
-    duel() {
-      const lane = (kind, name, art) => `<div class="lane ${kind}"><b>${name}</b><div class="track"><div class="runner"><span class="mascot portrait">${drawing(art)}</span><u>0</u></div></div></div>`;
-      const box = el(`<div class="demo"><div class="clock">0:10</div>${lane("them", T.rival, "rabbit")}${lane("me", T.me, "bubble")}<p class="verdict" role="status"></p><button type="button" class="go">${T.start}</button></div>`);
-      let timer = 0;
-      $(".go", box).addEventListener("click", () => {
-        clearInterval(timer);
-        const start = Date.now(), total = 10000;
-        // The friend's run was recorded earlier; yours happens now. (Here both are made up.)
-        const theirs = Array.from({ length: 7 + Math.floor(Math.random() * 4) }, () => Math.random() * total).sort((a, b) => a - b);
-        const mine = Array.from({ length: 7 + Math.floor(Math.random() * 5) }, () => Math.random() * total).sort((a, b) => a - b);
-        const max = Math.max(theirs.length, mine.length) + 1;
-        const place = (kind, n) => { const r = $(`.lane.${kind} .runner`, box); r.style.left = `${(n / max) * 100}%`; $("u", r).textContent = n; };
-        $(".verdict", box).textContent = ""; $(".verdict", box).className = "verdict";
-        $(".go", box).disabled = true; $(".go", box).style.opacity = ".4";
-        timer = setInterval(() => {
-          const t = Date.now() - start;
-          const a = mine.filter((x) => x <= t).length, b = theirs.filter((x) => x <= t).length;
-          place("me", a); place("them", b);
-          $(".clock", box).textContent = `0:${String(Math.max(0, Math.ceil((total - t) / 1000))).padStart(2, "0")}`;
-          if (t < total) return;
-          clearInterval(timer);
-          const verdict = $(".verdict", box);
-          verdict.textContent = (a > b ? T.win : a < b ? T.lose : T.draw)(a, b);
-          verdict.classList.add(a >= b ? "good" : "bad");
-          Object.assign($(".go", box), { disabled: false, textContent: T.restart }); $(".go", box).style.opacity = "";
-        }, 120);
-      });
-      box.addEventListener("close-demo", () => clearInterval(timer));
-      return box;
-    },
+  // The real VOQUIZ app, running in try-out mode inside a frame (nothing is sent to a server;
+  // what you do stays in this browser). `where` says which screen to open.
+  const LIVE = ko
+    ? { label: "실제 VOQUIZ 화면", badge: "체험용", note: "진짜 앱 화면이야. 마음껏 눌러 봐! 체험용이라 기록은 이 브라우저에만 남아.", loading: "VOQUIZ 여는 중…" }
+    : { label: "The real VOQUIZ screen", badge: "Try-out", note: "This is the real app. Tap anything! In this try-out, what you do stays in this browser.", loading: "Opening VOQUIZ…" };
+  function live(where, tabs) {
+    const src = (w) => `app/demo.html?demo&lang=${ko ? "ko" : "en"}&${w}`;
+    const box = el(`<div class="live"><div class="live-bar"><i></i><i></i><i></i><b>${LIVE.label}</b><em>${LIVE.badge}</em></div>
+      ${tabs ? `<div class="live-tabs">${tabs.map(([label], i) => `<button type="button" aria-pressed="${i === 0}">${label}</button>`).join("")}</div>` : ""}
+      <div class="live-screen"><span class="live-loading">${LIVE.loading}</span><iframe title="${LIVE.label}" loading="lazy" src="${src(where)}"></iframe></div>
+      <p class="live-note">${LIVE.note}</p></div>`);
+    const frame = $("iframe", box);
+    frame.addEventListener("load", () => box.classList.add("ready"));
+    if (tabs) {
+      [...$(".live-tabs", box).children].forEach((tab, i) => tab.addEventListener("click", () => {
+        for (const other of $(".live-tabs", box).children) other.setAttribute("aria-pressed", String(other === tab));
+        box.classList.remove("ready");
+        frame.src = src(tabs[i][1]);
+      }));
+    }
+    return box;
+  }
+  const WHERE = {
+    dict: () => live(`q=${encodeURIComponent("photosynthesis")}`, [["photosynthesis", `q=${encodeURIComponent("photosynthesis")}`], ["friend", "q=friend"], ["노력", `q=${encodeURIComponent("노력")}`]]),
+    list: () => live("tab=words"),
+    quiz: () => live("tab=quiz&mode=review", [[ko ? "단어장 퀴즈" : "Word-list quiz", "tab=quiz&mode=review"], [ko ? "연속 도전" : "Streak challenge", "tab=quiz&mode=streak"]]),
+    duel: () => live("tab=quiz&mode=duel"),
   };
-
-  $("#try-dict")?.append(DEMOS.dict());
+  $("#try-dict")?.append(live(`q=${encodeURIComponent("노력")}`, [["노력", `q=${encodeURIComponent("노력")}`], ["photosynthesis", "q=photosynthesis"], ["friend", "q=friend"]]));
 
   const dialog = $("#detail");
   function open(name) {
     const f = T[name];
     const sheet = $("#sheet");
+    // Two clearly separate halves: the explanation, and the real screen to try.
     sheet.replaceChildren(
-      el(`<div class="sheet-head"><span class="mascot portrait" aria-hidden="true">${drawing(f.art)}</span><h3 id="detail-title">${f.title}</h3><button type="button" class="close" aria-label="${T.close}">✕</button></div>`),
-      el(`<ul class="points">${f.points.map((p) => `<li>${p}</li>`).join("")}</ul>`),
-      el(`<p class="try">${T.tryIt}</p>`),
-      DEMOS[name]());
+      el(`<div class="guide-side"><span class="kind">${T.guide}</span>
+        <div class="sheet-head"><span class="mascot portrait" aria-hidden="true">${drawing(f.art)}</span><h3 id="detail-title">${f.title}</h3></div>
+        <ul class="points">${f.points.map((p) => `<li>${p}</li>`).join("")}</ul></div>`),
+      el(`<div class="live-side"><span class="kind try">${T.tryIt}</span></div>`),
+      el(`<button type="button" class="close" aria-label="${T.close}">✕</button>`));
+    $(".live-side", sheet).append(WHERE[name]());
     $(".close", sheet).addEventListener("click", () => dialog.close());
     dialog.showModal();
   }
   dialog.addEventListener("click", (e) => { if (e.target === dialog) dialog.close(); });
-  dialog.addEventListener("close", () => $("#sheet .demo")?.dispatchEvent(new Event("close-demo")));
+  dialog.addEventListener("close", () => $("#sheet").replaceChildren()); // stops the app in the frame
   for (const card of document.querySelectorAll("[data-feature]")) card.addEventListener("click", () => open(card.dataset.feature));
+
+  // ----- every character: the ones on the shelf in colour, the rest as shadows to look forward to -----
+  const A = ko
+    ? { title: "VOQUIZ의 친구들", sub: "색이 보이는 친구는 지금 만날 수 있어. 그림자 친구는 포인트를 모아서 만나 봐! 눌러 보면 이름을 살짝 알려 줄게.", met: (n, all) => `${n} / ${all} 공개`, secret: "???", special: "스페셜", all: (n) => `${n}종 모두 보기`, pick: "이 친구로 바꾸기" }
+    : { title: "The VOQUIZ characters", sub: "The ones in colour you can meet right now. The shadows are waiting: collect points to meet them! Tap one and it will whisper its name.", met: (n, all) => `${n} / ${all} revealed`, secret: "???", special: "Special", all: (n) => `See all ${n}`, pick: "Use this one" };
+  const KNOWN = [...document.querySelectorAll(".pick")].map((pick) => pick.getAttribute("aria-label"));
+  fetch("chars.json").then((r) => r.json()).then((chars) => {
+    const name = (c) => (ko ? c.ko : c.en);
+    const art = (c, known) => `<span class="mascot portrait${known ? "" : " shade"}" aria-hidden="true">${c.svg}</span>`;
+    const order = [...chars.filter((c) => KNOWN.includes(c.id)), ...chars.filter((c) => !KNOWN.includes(c.id))];
+
+    // a strip to scroll through, under the shelf
+    const parade = $("#parade");
+    for (const c of order) {
+      const known = KNOWN.includes(c.id);
+      const item = el(`<button type="button" class="walker${known ? "" : " secret"}" aria-label="${known ? name(c) : A.secret}">${art(c, known)}${known ? "" : "<i>?</i>"}</button>`);
+      item.addEventListener("click", openAll);
+      parade.append(item);
+    }
+    const seeAll = $("#see-all");
+    seeAll.textContent = A.all(chars.length);
+    seeAll.hidden = false;
+    seeAll.addEventListener("click", openAll);
+
+    function openAll() {
+      const body = $("#all-body");
+      body.replaceChildren(
+        el(`<div class="all-head"><div><h3 id="all-title">${A.title} <em>${A.met(KNOWN.length, chars.length)}</em></h3><p>${A.sub}</p></div><button type="button" class="close" aria-label="${T.close}">✕</button></div>`),
+        el(`<div class="all-grid"></div>`));
+      for (const c of order) {
+        const known = KNOWN.includes(c.id);
+        const card = el(`<button type="button" class="face-card${known ? "" : " secret"}${c.special ? " special" : ""}">${c.special ? `<u>${A.special}</u>` : ""}${art(c, known)}<b>${known ? name(c) : A.secret}</b><small>${known ? A.pick : (c.cost ? `● ${c.cost}` : "")}</small></button>`);
+        card.addEventListener("click", () => {
+          if (known) {
+            // onto the stage
+            hero.innerHTML = c.svg;
+            for (const pick of document.querySelectorAll(".pick")) pick.setAttribute("aria-pressed", String(pick.getAttribute("aria-label") === c.id));
+            $("#all").close();
+            $(".stage").scrollIntoView({ block: "center", behavior: "smooth" });
+            react(true);
+          } else {
+            // a shadow only whispers its name
+            card.classList.remove("peek"); void card.offsetWidth; card.classList.add("peek");
+            $("b", card).textContent = name(c);
+            setTimeout(() => { card.classList.remove("peek"); $("b", card).textContent = A.secret; }, 1800);
+          }
+        });
+        $(".all-grid", body).append(card);
+      }
+      $(".close", body).addEventListener("click", () => $("#all").close());
+      $("#all").showModal();
+    }
+  }).catch(() => {});
+  $("#all").addEventListener("click", (e) => { if (e.target === $("#all")) $("#all").close(); });
 })();
 </script>
 </body>
