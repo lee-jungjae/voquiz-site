@@ -408,7 +408,14 @@ section.block { margin-top: 62px; }
 .three span { display: block; margin-top: 5px; font-size: 13.5px; line-height: 1.5; color: #4a4663; word-break: keep-all; }
 .cta { margin-top: 22px; }
 .letter { position: relative; margin: 26px 0 4px; padding: 20px 20px 14px; border-radius: 6px 20px 20px 20px; background: #fffbe9; box-shadow: 0 10px 24px rgba(120, 100, 40, .15); transform: rotate(-1deg); }
-.letter .tape { position: absolute; left: 28px; top: -11px; width: 78px; height: 22px; margin-left: 0; background: rgba(187, 216, 107, .85); transform: rotate(2.5deg); border-radius: 3px; }
+/* a strip of masking tape: see-through, a little glossy, with torn ends */
+.letter .tape { position: absolute; left: 30px; top: -13px; width: 96px; height: 26px; transform: rotate(-3deg);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .45), rgba(255, 255, 255, 0) 38%, rgba(0, 0, 0, .05)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .16) 0 2px, rgba(255, 255, 255, 0) 2px 7px),
+    rgba(176, 208, 92, .62);
+  clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 12%, calc(100% - 4px) 25%, 100% 38%, calc(100% - 3px) 50%, 100% 63%, calc(100% - 4px) 76%, 100% 88%, calc(100% - 4px) 100%, 4px 100%, 0 88%, 4px 75%, 0 62%, 3px 50%, 0 37%, 4px 25%, 0 12%);
+  backdrop-filter: blur(.5px); }
 .letter p { margin: 0; font-size: 16px; line-height: 1.7; color: #3a3320; word-break: keep-all; }
 .letter p b { background: linear-gradient(transparent 60%, #ffe08a 60%); font-weight: 700; }
 .letter .heart { color: #e8395a; display: inline-block; animation: heart-beat 1.2s ease-in-out infinite; }
@@ -532,7 +539,7 @@ section.block > h2, .two h2 { line-height: 1.3; }
     <h1>Stuck on a word?<br>Get it in <em>two languages</em>!</h1>
     <div class="letter" role="note" aria-label="A note from the makers">
       <span class="tape" aria-hidden="true"></span>
-      <p>Hi! I'm a G4 student at an international school. I made this with my dad so that I could <b>look up</b> Korean and English words easily, <b>remember</b> them easily, and <b>test myself</b> in a fun way. I hope it helps you too <span class="heart" aria-label="heart">♥</span></p>
+      <p>Hi! I'm a G4 student at an international school. I made this with my dad so that I could <b>look up</b> Korean and English words easily, <b>remember</b> them easily, and <b>test myself</b> in a fun way.<br>I hope it helps you too <span class="heart" aria-label="heart">♥</span></p>
       <span class="from">A G4 student and Dad, the makers of VOQUIZ</span>
     </div>
     <p class="bridge">So this is how we made VOQUIZ</p>
