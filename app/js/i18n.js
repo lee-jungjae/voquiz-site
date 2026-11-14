@@ -358,6 +358,11 @@ const T = {
   "오늘 검색 포인트를 다 모았어요. 단어는 계속 찾을 수 있어요.": ["You've collected today's search points. You can keep looking up words.", "今天的查词积分已经集满，还可以继续查词。"],
   "오늘 검색 포인트를 다 모았어요. 내일 또 만나요!": ["You've collected today's search points. See you tomorrow!", "今天的查词积分已经集满，明天见！"],
   "단어를 찾을 때마다 +{p}점": ["+{p} points for every word you look up", "每查一个单词 +{p}分"],
+  "{n}연속을 넘으면 새 기록!": ["Beat {n} in a row for a new record!", "超过{n}连对就是新纪录！"],
+  "첫 기록을 세워 봐요!": ["Set your first record!", "来创下第一个纪录吧！"],
+  "새 기록!": ["New record!", "新纪录！"],
+  "타이 기록!": ["Tied!", "平纪录！"],
+  "{n}개 남음": ["{n} to go", "还差{n}个"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],
   "테마 상점 열기": ["Open the theme shop", "打开主题商店"],
 

@@ -1116,3 +1116,24 @@ input[type="email"] { background: var(--bg); border: 1px solid var(--border); bo
 .pref-row .chip, .grade-pick select { height: 32px; padding-top: 0; padding-bottom: 0; line-height: 30px; box-sizing: border-box; }
 .grade-pick { height: 32px; margin: 0; }
 .grade-pick select { padding-left: 10px; padding-right: 6px; }
+
+/* ---------- streak challenge: my record, large ---------- */
+.record { position: relative; margin-top: 12px; border-radius: 22px; padding: 16px 16px 14px; text-align: center; color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent-dark, #574f82)); box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 35%, transparent); overflow: hidden; animation: rise .35s both; }
+.record::before, .record::after { content: "★"; position: absolute; font-size: 44px; color: #fff; opacity: .12; }
+.record::before { left: 14px; top: 6px; transform: rotate(-18deg); } .record::after { right: 16px; bottom: 0; font-size: 60px; transform: rotate(14deg); }
+.record-label { display: inline-block; font-size: 12px; font-weight: 800; letter-spacing: .06em; background: var(--lime); color: var(--good); border-radius: 999px; padding: 2px 12px; }
+.record-number { display: flex; align-items: baseline; justify-content: center; gap: 6px; margin-top: 4px; }
+.record-number b { font-size: 64px; font-weight: 900; line-height: 1; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.record-number span { font-size: 18px; font-weight: 800; opacity: .9; }
+.record p { margin: 4px 0 0; font-size: 13px; font-weight: 600; opacity: .9; }
+.record.none { background: var(--surface); color: var(--text); box-shadow: none; }
+.record.none .record-number b { color: var(--muted); }
+.ch-top { align-items: center; }
+.ch-best { display: grid; justify-items: center; line-height: 1.1; border-radius: 14px; padding: 5px 12px; background: var(--surface); }
+.ch-best small { font-size: 10px; font-weight: 800; color: var(--muted); }
+.ch-best b { font-size: 22px; font-weight: 900; color: var(--accent); font-variant-numeric: tabular-nums; }
+.ch-best span { font-size: 10px; font-weight: 700; color: var(--muted); }
+.ch-best.beaten { background: var(--lime); animation: pop .4s both; }
+.ch-best.beaten b, .ch-best.beaten span, .ch-best.beaten small { color: var(--good); }
+.settle .best-line { border-radius: 12px; background: color-mix(in srgb, var(--accent) 10%, transparent); padding: 8px 10px; margin: 0 -10px 4px; }
+.settle .best-line b { font-size: 20px; color: var(--accent); }

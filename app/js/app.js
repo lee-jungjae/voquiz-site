@@ -1136,13 +1136,17 @@ function challengeCard() {
   const grade = Math.min(12, Math.max(3, state.user.grade));
   return [
     guideHero(t("어디까지 갈 수 있을까?"), t("틀릴 때까지 이어지는 도전이야. 내 최고 기록을 깨 보자!")),
+    // My record, large: it is what this game is about.
+    h("div", { class: `record${bestStreak() > 0 ? "" : " none"}` },
+      h("span", { class: "record-label" }, t("내 최고 기록")),
+      h("div", { class: "record-number" }, h("b", null, String(bestStreak())), h("span", null, t("연속"))),
+      h("p", null, bestStreak() > 0 ? t("{n}연속을 넘으면 새 기록!", { n: bestStreak() }) : t("첫 기록을 세워 봐요!"))),
     guideSteps([
       t("G{g} 권장 단어 {n}개가 고르기와 쓰기로 섞여 나와요.", { g: grade, n: gradeList(grade).length }),
       t("맞힐 때마다 바로 포인트를 받고, 한 번 틀리면 끝나요."),
       t("한 학년을 다 맞히면 다음 학년으로 올라가요."),
     ]),
     h("div", { class: "guide-stats" },
-      guideStat(t("내 최고 기록"), t("{n}연속", { n: bestStreak() }), "best"),
       guideStat(t("쓰는 포인트"), [coin(), `-${Math.min(CHALLENGE_FEE, state.user.points || 0)}`], "use"),
       guideStat(t("맞힐 때마다"), [coin(), `+${CHALLENGE_POINT}~${CHALLENGE_TYPED}`], "gain"),
       guideStat(t("학년 통과"), [coin(), `+${LEVEL_BONUS}`], "gain")),
@@ -1263,7 +1267,7 @@ function challengeView() {
         c.record && h("p", { class: "earned" }, t("새 최고 기록!")),
         !c.clearedAll && c.question && h("p", { class: "small muted", style: "margin-top:8px" }, `${c.question.prompt} = ${c.question.answer}`),
         h("div", { class: "settle" },
-          h("div", null, h("span", null, t("내 최고 기록")), h("b", null, t("{n}연속", { n: bestStreak() }))),
+          h("div", { class: "best-line" }, h("span", null, t("내 최고 기록")), h("b", null, t("{n}연속", { n: bestStreak() }))),
           h("div", null, h("span", null, t("사용")), h("b", null, `-${c.fee}`)),
           h("div", null, h("span", null, t("획득")), h("b", null, `+${c.earned}`)),
           h("div", { class: `net ${c.earned > c.fee ? "up" : c.earned < c.fee ? "down" : ""}` }, h("span", null, t("결과")), h("b", null, `${c.earned - c.fee > 0 ? "+" : ""}${c.earned - c.fee}`)))),
@@ -1293,6 +1297,10 @@ function challengeView() {
   return [
     h("div", { class: "ch-top" },
       h("div", { class: `ch-streak${c.phase === "right" ? " bump" : ""}` }, h("b", null, String(c.streak)), h("span", null, t("연속"))),
+      h("div", { class: `ch-best${c.streak > bestStreak() ? " beaten" : ""}` },
+        h("small", null, t("내 최고 기록")),
+        h("b", null, String(Math.max(bestStreak(), c.streak))),
+        h("span", null, c.streak > bestStreak() ? t("새 기록!") : bestStreak() - c.streak === 0 ? t("타이 기록!") : t("{n}개 남음", { n: bestStreak() - c.streak }))),
       h("div", { class: "ch-level" }, `G${c.grade}`, h("small", null, `${answered} / ${total}`))),
     h("div", { class: "progress" }, h("div", { class: "bar" }, h("i", { style: `width:${(answered / total) * 100}%` }))),
     h("div", { class: `ch-prompt${c.question.shown.startsWith("d") ? " long" : ""}` }, c.question.prompt),
