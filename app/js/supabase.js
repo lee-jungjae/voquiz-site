@@ -207,10 +207,20 @@ const rpc = (name, body = {}) => authed(`/rest/v1/rpc/${name}`, { method: "POST"
 export const listDuels = () => rpc("my_duels");
 export const duelPlayers = () => rpc("duel_players", { p_limit: 30 });
 export const findPlayer = (email) => rpc("find_player", { p_email: email });
-// befriend: the duel is also a friend invitation (needs 0006_open_duels.sql).
-export const createDuel = ({ opponent, grade, seed, score, marks, character, befriend = false }) =>
-  rpc("create_duel", { p_opponent: opponent, p_grade: grade, p_seed: seed, p_score: score, p_marks: marks, p_character: character, p_befriend: befriend });
-export const answerDuel = (id, score, character) => rpc("answer_duel", { p_id: id, p_score: score, p_character: character });
+// befriend: the duel is also a friend invitation.  seconds: how long it lasts (60, 100 or 180).
+// A database that has not had 0008_duel_options_and_leaving.sql yet only knows three-minute duels.
+export async function createDuel({ opponent, grade, seed, score, marks, character, befriend = false, seconds = 180 }) {
+  const body = { p_opponent: opponent, p_grade: grade, p_seed: seed, p_score: score, p_marks: marks, p_character: character, p_befriend: befriend };
+  try {
+    return await rpc("create_duel", { ...body, p_seconds: seconds });
+  } catch (err) {
+    if (err.status !== 404 || seconds !== 180) throw err;
+    return rpc("create_duel", body);
+  }
+}
+export const answerDuel = (id, score, character, marks = []) =>
+  rpc("answer_duel", { p_id: id, p_score: score, p_character: character, p_marks: marks })
+    .catch((err) => (err.status === 404 ? rpc("answer_duel", { p_id: id, p_score: score, p_character: character }) : Promise.reject(err)));
 export const claimDuel = (id) => rpc("claim_duel", { p_id: id });
 export const duelRankings = (friends = false) =>
   rpc("duel_rankings", { p_limit: 20, p_friends: friends }).catch((err) => (err.status === 404 ? rpc("duel_rankings", { p_limit: 20 }) : Promise.reject(err)));
@@ -232,3 +242,9 @@ export const setDuelFrom = (from) => rpc("set_duel_from", { p_from: from });
 // ---------- VOQUIZ Plus (0007_plus.sql) ----------
 export const myPlan = () => rpc("my_plan"); // -> { plus, until }
 export const redeemCoupon = (code) => rpc("redeem_coupon", { p_code: code });
+
+// ---------- leaving (0008_duel_options_and_leaving.sql) ----------
+export async function deleteAccount() {
+  await rpc("delete_my_account");
+  save(null); // the session is gone with the account
+}

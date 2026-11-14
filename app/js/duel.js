@@ -7,7 +7,7 @@
 import { WORD_LISTS } from "./wordlists.js";
 import { WORD_DEFS } from "./worddefs.js";
 
-export const DUEL_MS = 3 * 60 * 1000;
+export const DUEL_LENGTHS = [60, 100, 180]; // seconds; the challenger chooses
 const FREEZE_MS = 3000; // a wrong answer costs three seconds
 const FEE = 10; // points to take part
 const WIN = 25;
@@ -72,6 +72,8 @@ export function initDuel(c) {
   // What a finished duel pays: a win, a draw, or a little for taking part.
   const reward = (mine, theirs) => (mine > theirs ? WIN : mine === theirs ? DRAW : Math.min(5, Math.floor(mine / 5)));
   const incoming = () => (state.duels || []).filter((d) => d.role === "opponent" && d.status === "open");
+  const seconds = () => (DUEL_LENGTHS.includes(state.duelSeconds) ? state.duelSeconds : 180);
+  const lengthLabel = (s) => (s === 60 ? t("1분") : s === 180 ? t("3분") : t("{n}초", { n: s }));
   const clockText = (ms) => {
     const s = Math.max(0, Math.ceil(ms / 1000));
     return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
@@ -162,7 +164,7 @@ export function initDuel(c) {
   // ---------- the duel tab ----------
 
   function home() {
-    const hero = c.guideHero(t("한판 붙어 볼까?"), t("3분 동안 누가 더 많이 맞히는지 겨뤄요. 둘 다 같은 문제를 풀어요!"));
+    const hero = c.guideHero(t("한판 붙어 볼까?"), t("정해진 시간 동안 누가 더 많이 맞히는지 겨뤄요. 둘 다 같은 문제를 풀어요!"));
     if (state.duelSetup) {
       return [hero, h("div", { class: "notice" }, t("대결을 쓰려면 Supabase SQL Editor에서 0004_duels.sql을 한 번 실행해야 해요."))];
     }
@@ -181,7 +183,7 @@ export function initDuel(c) {
               h("span", { class: "who" }, who(d.other), h("small", null, t("{n}개를 넘으면 승리", { n: d.their_score }))),
               h("button", { class: "mini buy", onclick: () => start(d) }, t("받기")))))
         : c.guideSteps([
-            t("상대를 고르고 3분 동안 문제를 풀어 기록을 세워요."),
+            t("상대와 시간(1분 · 100초 · 3분)을 고르고 문제를 풀어 기록을 세워요."),
             t("상대가 같은 문제로 내 기록에 도전해요. 틀리면 3초 동안 멈춰요."),
             t("더 많이 맞힌 쪽이 이겨요. 도전은 7일 동안 기다려요."),
           ]),
@@ -196,10 +198,11 @@ export function initDuel(c) {
           h("span", { class: "tagline" }, t("대기 중"))))),
       done.length > 0 && h("section", { class: "duel-list" },
         h("h3", null, t("최근 결과")),
-        done.map((d) => h("div", { class: "duel-row" },
+        done.map((d) => h("button", { class: "duel-row tap", title: t("결과 다시 보기"), onclick: () => openDetail(d) },
           h("span", { class: `mark ${outcome(d)[0]}` }, outcome(d)[1]),
-          h("span", { class: "who" }, who(d.other)),
-          h("b", { class: "tally" }, `${d.my_score} : ${d.their_score}`)))),
+          h("span", { class: "who" }, who(d.other), h("small", null, lengthLabel(d.seconds || 180))),
+          h("b", { class: "tally" }, `${d.my_score} : ${d.their_score}`),
+          h("span", { class: "chev", "aria-hidden": "true" }, "›")))),
       h("p", { class: "act" }, h("button", { class: "btn wide", onclick: openPicker }, t("상대 고르기"))),
     ];
   }
@@ -261,6 +264,10 @@ export function initDuel(c) {
         h("h2", { class: "page-title" }, t("상대 고르기"))),
       d.notice && h("div", { class: "notice" }, d.notice),
       h("section", { class: "duel-list" },
+        h("h3", null, t("대결 시간")),
+        h("div", { class: "chips lengths", role: "group", "aria-label": t("대결 시간") }, DUEL_LENGTHS.map((s) =>
+          h("button", { class: "chip", "aria-pressed": String(seconds() === s), onclick: () => { state.duelSeconds = s; c.render(); } }, lengthLabel(s))))),
+      h("section", { class: "duel-list" },
         h("h3", null, t("랜덤 대결")),
         h("button", { class: "random", onclick: random },
           h("span", { class: "dice", "aria-hidden": "true" }, "?"),
@@ -301,8 +308,9 @@ export function initDuel(c) {
     const myGrade = state.user.grade || 12;
     const grade = Math.min(12, Math.max(3, answering ? target.grade : Math.min(myGrade, target.other.grade || myGrade)));
     const seed = answering ? target.seed : Math.floor(Math.random() * 2147483647);
+    const length = answering ? (DUEL_LENGTHS.includes(target.seconds) ? target.seconds : 180) : seconds();
     const d = (state.duel = {
-      mode: "intro", answering, id: target.id, other: target.other, grade, seed, befriend: Boolean(target.befriend),
+      mode: "intro", answering, seconds: length, ms: length * 1000, id: target.id, other: target.other, grade, seed, befriend: Boolean(target.befriend),
       questions: duelQuestions(grade, seed), index: 0, score: 0, marks: [], picked: null, frozenUntil: 0, ghost: 0,
       their: answering ? { score: target.their_score, marks: target.their_marks || [], character: target.their_character || "bubble" } : null,
     });
@@ -316,7 +324,7 @@ export function initDuel(c) {
     const d = state.duel;
     d.fee = Math.min(FEE, state.user.points || 0);
     c.award(-d.fee, t("대결에 사용"));
-    Object.assign(d, { mode: "play", startedAt: Date.now(), endsAt: Date.now() + DUEL_MS });
+    Object.assign(d, { mode: "play", startedAt: Date.now(), endsAt: Date.now() + d.ms });
     clearInterval(ticker);
     ticker = setInterval(tick, 200);
     c.render();
@@ -326,7 +334,7 @@ export function initDuel(c) {
   function ghostNow(d) {
     const elapsed = (Date.now() - d.startedAt) / 1000;
     if (d.their.marks.length) return d.their.marks.filter((second) => second <= elapsed).length;
-    return Math.min(d.their.score, Math.floor((d.their.score * elapsed * 1000) / DUEL_MS)); // no record of the pace: an even one
+    return Math.min(d.their.score, Math.floor((d.their.score * elapsed * 1000) / d.ms)); // no record of the pace: an even one
   }
   const raceMax = (d) => Math.max(d.their ? d.their.score : 0, d.score, 5) + 2;
   const raceAt = (d, n) => `${Math.min(100, (n / raceMax(d)) * 100)}%`;
@@ -349,7 +357,7 @@ export function initDuel(c) {
       clock.classList.toggle("hurry", left < 20000);
     }
     const bar = document.querySelector("#duel-bar i");
-    if (bar) bar.style.width = `${(left / DUEL_MS) * 100}%`;
+    if (bar) bar.style.width = `${(left / d.ms) * 100}%`;
     if (d.their) {
       d.ghost = ghostNow(d);
       const runner = document.getElementById("race-them");
@@ -394,9 +402,9 @@ export function initDuel(c) {
     const character = c.myShop().character;
     try {
       if (d.answering) {
-        await api.answerDuel(d.id, d.score, character);
+        await api.answerDuel(d.id, d.score, character, d.marks);
         const row = (state.duels || []).find((x) => x.id === d.id);
-        if (row) Object.assign(row, { my_score: d.score, my_character: character, status: "done" });
+        if (row) Object.assign(row, { my_score: d.score, my_character: character, my_marks: d.marks, status: "done" });
         d.won = reward(d.score, d.their.score);
         d.mode = "result";
         c.render();
@@ -407,7 +415,7 @@ export function initDuel(c) {
           c.refreshFriends(true);
         }
       } else {
-        await api.createDuel({ opponent: d.other.id, grade: d.grade, seed: d.seed, score: d.score, marks: d.marks, character, befriend: d.befriend });
+        await api.createDuel({ opponent: d.other.id, grade: d.grade, seed: d.seed, score: d.score, marks: d.marks, character, befriend: d.befriend, seconds: d.seconds });
         d.mode = "result";
         lastFetch = 0;
       }
@@ -421,11 +429,77 @@ export function initDuel(c) {
     c.render();
   }
 
-  // Leaving in the middle: what was scored so far counts.
+  // Giving up while setting a score: nothing is sent to the other student, and the points come back.
+  function cancel() {
+    const d = state.duel;
+    if (!d || d.mode !== "play" || d.answering) return;
+    clearInterval(ticker);
+    state.duel = null;
+    if (d.fee) c.award(d.fee, t("대결 취소 환불"));
+    c.toastText(t("도전을 그만뒀어요. 도전장은 보내지 않았어요."));
+    c.render();
+  }
+
+  // Leaving in the middle: a challenge being set is dropped; an answer counts as far as it got.
   function stop() {
     const d = state.duel;
-    if (d?.mode === "play") finish();
+    if (d?.mode === "play") (d.answering ? finish : cancel)();
     else if (d?.mode === "intro") state.duel = null;
+  }
+
+  // ----- looking at a finished duel again -----
+  function openDetail(row) {
+    state.duel = { mode: "detail", row };
+    c.render();
+  }
+  // Both runs on one chart: right answers so far (up) against time (across).
+  function chart(mine, theirs, length, theirName) {
+    const W = 300, H = 120, L = 22, B = 16, T = 6;
+    const top = Math.max(mine.length, theirs.length, 1);
+    const x = (s) => L + (Math.min(s, length) / length) * (W - L - 4);
+    const y = (n) => H - B - (n / top) * (H - B - T);
+    const steps = (marks) => `M${x(0)} ${y(0)}` + marks.map((s, i) => ` H${x(s).toFixed(1)} V${y(i + 1).toFixed(1)}`).join("") + ` H${x(length)}`;
+    const el = document.createElement("div");
+    el.className = "duel-chart";
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${t("시간에 따른 맞힌 개수")}">
+      <line x1="${L}" y1="${y(0)}" x2="${W - 4}" y2="${y(0)}" class="axis"/><line x1="${L}" y1="${T}" x2="${L}" y2="${y(0)}" class="axis"/>
+      <line x1="${x(length / 2)}" y1="${T}" x2="${x(length / 2)}" y2="${y(0)}" class="half"/>
+      <text x="${L - 4}" y="${y(top) + 4}" class="tick end">${top}</text><text x="${L - 4}" y="${y(0) + 3}" class="tick end">0</text>
+      <text x="${x(length / 2)}" y="${H - 3}" class="tick mid">${clockText((length / 2) * 1000)}</text><text x="${W - 4}" y="${H - 3}" class="tick end">${clockText(length * 1000)}</text>
+      <path d="${steps(theirs)}" class="them"/><path d="${steps(mine)}" class="me"/></svg>
+      <div class="legend"><span class="me">${t("나")} ${mine.length}</span><span class="them">${theirName} ${theirs.length}</span></div>`;
+    // Where it was decided: the first half against the second.
+    const half = (marks, late) => marks.filter((s) => (s > length / 2) === late).length;
+    const note = document.createElement("p");
+    note.className = "small muted";
+    note.textContent = t("전반 {a} : {b} · 후반 {c} : {d}", { a: half(mine, false), b: half(theirs, false), c: half(mine, true), d: half(theirs, true) });
+    el.append(note);
+    return el;
+  }
+  function detailView() {
+    const r = state.duel.row;
+    const win = r.my_score > r.their_score, draw = r.my_score === r.their_score;
+    const gap = Math.abs(r.my_score - r.their_score);
+    const mine = r.my_marks || [], theirs = r.their_marks || [];
+    const when = new Date(r.finished_at || r.created_at).toLocaleDateString(c.locale(), { month: "long", day: "numeric" });
+    return [
+      h("div", { class: "page-head" },
+        h("button", { class: "back", "aria-label": t("뒤로"), title: t("뒤로"), onclick: close }, "←"),
+        h("h2", { class: "page-title" }, t("대결 결과"))),
+      h("div", { class: `duel-result detail ${win ? "win" : draw ? "draw" : "lose"}` },
+        h("div", { class: "duel-title" }, win ? t("승리!") : draw ? t("무승부!") : t("아쉬워요!")),
+        h("div", { class: "versus" },
+          h("div", { class: "side me" }, face(r.my_character || c.myShop().character, win || draw ? "cheer" : "comfort"), h("em", null, String(r.my_score)), h("b", null, c.displayName())),
+          h("div", { class: "vs" }, ":"),
+          h("div", { class: "side them" }, face(r.their_character || "bubble", win ? "comfort" : "cheer"), h("em", null, String(r.their_score)), h("b", null, who(r.other)))),
+        h("p", { class: "duel-sum" }, win ? t("{n}개 차이로 이겼어요!", { n: gap }) : draw ? t("똑같이 맞혔어요.") : t("{name}이(가) {n}개 더 맞혔어요.", { name: who(r.other), n: gap })),
+        h("p", { class: "small muted" }, `${when} · G${r.grade} · ${lengthLabel(r.seconds || 180)}`),
+        mine.length || theirs.length
+          ? chart(mine, theirs, r.seconds || 180, who(r.other))
+          : h("p", { class: "small muted" }, t("이 대결은 진행 기록이 남아 있지 않아요."))),
+      h("p", { class: "center act-note" }, h("button", { class: "link", onclick: () => start({ other: r.other }) }, t("이번엔 내가 도전하기"))),
+      h("p", { class: "act" }, h("button", { class: "btn wide", onclick: close }, t("확인"))),
+    ];
   }
 
   function close() {
@@ -448,9 +522,9 @@ export function initDuel(c) {
         h("div", { class: "side me" }, face(c.myShop().character, "cheer"), h("b", null, c.displayName())),
         h("div", { class: "vs" }, "VS"),
         h("div", { class: "side them" }, face(d.their ? d.their.character : "bubble", "cheer", !d.their), h("b", null, who(d.other)))),
-      h("p", { class: "duel-goal" }, d.answering ? t("{n}개를 넘으면 승리!", { n: d.their.score }) : t("3분 동안 기록을 세워 도전장을 보내요!")),
+      h("p", { class: "duel-goal" }, d.answering ? t("{n}개를 넘으면 승리!", { n: d.their.score }) : t("{time} 동안 기록을 세워 도전장을 보내요!", { time: lengthLabel(d.seconds) })),
       d.befriend && h("p", { class: "duel-friend" }, d.answering ? t("이 대결을 받으면 {name}와(과) 친구가 돼요.", { name: who(d.other) }) : t("대결을 받으면 자동으로 친구가 돼요.")),
-      h("p", { class: "small muted center" }, t("G{g} 권장 단어 · 3분 · 틀리면 3초 멈춤", { g: d.grade })));
+      h("p", { class: "small muted center" }, t("G{g} 권장 단어 · {time} · 틀리면 3초 멈춤", { g: d.grade, time: lengthLabel(d.seconds) })));
   }
 
   function raceView() {
@@ -477,14 +551,16 @@ export function initDuel(c) {
         h("div", { class: `duel-clock${left < 20000 ? " hurry" : ""}`, id: "duel-clock", role: "timer" }, clockText(left)),
         d.their && h("div", { class: "duel-target" }, t("목표"), h("b", null, String(d.their.score))),
         h("div", { class: "duel-score" }, h("b", null, String(d.score)), h("span", null, t("개")))),
-      h("div", { class: "duel-bar", id: "duel-bar" }, h("i", { style: `width:${(left / DUEL_MS) * 100}%` })),
+      h("div", { class: "duel-bar", id: "duel-bar" }, h("i", { style: `width:${(left / d.ms) * 100}%` })),
       raceView(),
       h("div", { class: `ch-prompt${q.long ? " long" : ""}` }, q.prompt),
       frozen && h("p", { class: "duel-freeze act-note" }, t("틀렸어요! 잠깐 멈춤"), h("b", { id: "duel-freeze" }, String(Math.ceil((d.frozenUntil - Date.now()) / 1000)))),
       h("div", { class: `choices act${q.options.some((o) => o.length > 9) ? " wide" : ""}` }, q.options.map((option, i) =>
         h("button", { class: `choice${mark(option)}`, disabled: frozen, onclick: () => pick(option) },
           h("span", { class: "num" }, String(i + 1)), option))),
-      h("p", { class: "center act-note" }, h("button", { class: "link", onclick: finish }, t("여기까지 하기"))),
+      h("p", { class: "center act-note" }, d.answering
+        ? h("button", { class: "link", onclick: finish }, t("여기까지 하기"))
+        : h("button", { class: "link", onclick: cancel }, t("포기하기 (도전장을 보내지 않아요)"))),
     ];
   }
 
@@ -516,6 +592,7 @@ export function initDuel(c) {
           h("div", { class: "side me" }, face(c.myShop().character, win || draw ? "cheer" : "comfort"), h("em", null, String(d.score)), h("b", null, c.displayName())),
           h("div", { class: "vs" }, ":"),
           h("div", { class: "side them" }, face(d.their.character, win ? "comfort" : "cheer"), h("em", null, String(d.their.score)), h("b", null, who(d.other)))),
+        (d.marks.length > 0 || d.their.marks.length > 0) && chart(d.marks, d.their.marks, d.seconds, who(d.other)),
         h("div", { class: "settle" },
           h("div", null, h("span", null, t("사용")), h("b", null, `-${d.fee}`)),
           h("div", null, h("span", null, t("획득")), h("b", null, `+${d.won}`)))),
@@ -527,6 +604,7 @@ export function initDuel(c) {
   function view() {
     const d = state.duel;
     if (d.mode === "pick") return pickView();
+    if (d.mode === "detail") return detailView();
     if (d.mode === "intro") return introView();
     if (d.mode === "play") return playView();
     if (d.mode === "saving") return h("div", { class: "empty" }, t("기록을 보내는 중…"));

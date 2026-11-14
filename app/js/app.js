@@ -274,6 +274,34 @@ async function signIn() {
   if (state.member && state.user?.grade) loadWords();
 }
 
+// Deletes the account and everything that belongs to it, after the student has typed the word.
+async function leave(typed) {
+  if (state.busy) return;
+  if (![t("탈퇴"), "탈퇴", "DELETE", "delete"].includes(typed)) {
+    state.notice = { text: t("“탈퇴”라고 정확히 써 주세요.") };
+    return render();
+  }
+  state.busy = true;
+  state.notice = null;
+  render();
+  try {
+    const id = state.user.id;
+    await api.deleteAccount();
+    for (const key of Object.keys(localStorage)) if (key.endsWith(`_${id}`)) localStorage.removeItem(key);
+    Object.assign(state, { user: null, words: [], entry: null, quiz: null, challenge: null, duel: null, duels: null, friends: null, invites: undefined, plan: null, leaving: false, tab: "search", busy: false });
+    render();
+    toastText(t("탈퇴했어요. 그동안 고마웠어요!"));
+    return;
+  } catch (err) {
+    console.error(err);
+    state.notice = { text: err?.status === 404
+      ? t("탈퇴 기능을 쓰려면 Supabase SQL Editor에서 0008_duel_options_and_leaving.sql을 한 번 실행해야 해요.")
+      : t("탈퇴하지 못했어요. 잠시 후 다시 시도해 주세요.") };
+  }
+  state.busy = false;
+  render();
+}
+
 async function signOut() {
   await api.signOut();
   Object.assign(state, { user: null, words: [], entry: null, quiz: null, notice: null, query: "" });
@@ -429,7 +457,7 @@ function quizMax(questions) {
 }
 
 // Each quiz question has a time limit. When it runs out the question counts as not known.
-const QUESTION_MS = 20000;
+const QUESTION_MS = 10000;
 let questionTimer = 0;
 function startQuestionTimer() {
   clearTimeout(questionTimer);
@@ -746,6 +774,15 @@ function happyMoment() {
 // ---------- helpers ----------
 
 const both = (ko, en) => [ko && h("p", null, ko), en && h("p", { class: "en" }, en)];
+// Where a saying comes from. Entries written before this was recorded get a plain guess from the
+// text itself: Hangul means a Korean saying, anything else an English one.
+function sayingSource(r) {
+  const given = getLang() === "ko" ? r.source_ko : r.source_en;
+  if (given) return given;
+  const korean = /[가-힣]/.test(r.text || "");
+  if (r.kind === "four_character_idiom") return t("한자 문화권의 사자성어");
+  return korean ? t("한국 속담") : r.kind === "idiom" ? t("영어 관용구") : t("영어 속담");
+}
 const KIND = () => ({ proverb: t("속담 · Proverb"), idiom: t("관용구 · Idiom"), four_character_idiom: t("사자성어") });
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
 
@@ -824,17 +861,29 @@ function block(word, name, heading, content) {
 function entryBlocks(word) {
   const c = word.content;
   const sections = [
-    ["build", title(t("단어 쪼개 보기"), "WORD BUILDING"), buildBlock(c)],
+    // Breaking the word into parts and the memory tip belong together: both are ways to remember it.
+    ["easy", title(t("쉽게 기억하기"), "REMEMBER IT"),
+      (buildBlock(c) || c.memory_tip_ko || c.memory_tip_en) && [
+        buildBlock(c),
+        (c.memory_tip_ko || c.memory_tip_en) && h("div", { class: "note tip" }, h("b", null, t("이렇게 기억해요")), both(c.memory_tip_ko, c.memory_tip_en)),
+      ]],
     ["story", title(t("어디서 온 말일까?"), "ORIGIN"), (c.origin_ko || c.origin_en) && both(c.origin_ko, c.origin_en)],
-    ["tip", title(t("이렇게 기억해요"), "MEMORY TIP"),
-      (c.memory_tip_ko || c.memory_tip_en) && h("div", { class: "note" }, both(c.memory_tip_ko, c.memory_tip_en))],
     ["ex", title(t("예문"), "EXAMPLES"),
       c.examples?.length > 0 && h("ol", null, c.examples.map((e, i) => h("li", null,
         h("span", { class: "num" }, String(i + 1)),
         h("div", null, h("p", null, highlight(e.ko, c)), h("p", { class: "en" }, highlight(e.en, c))))))],
+    ["kin", title(t("비슷한 말 · 반대말"), "SYNONYMS · ANTONYMS"),
+      (c.synonyms?.length > 0 || c.antonyms?.length > 0) && h("div", { class: "kin" },
+        [[t("비슷한 말"), c.synonyms, "syn"], [t("반대말"), c.antonyms, "ant"]].map(([label, list, kind]) =>
+          list?.length > 0 && h("div", { class: `kin-row ${kind}` },
+            h("span", { class: "kin-label" }, label),
+            h("div", { class: "kin-words" }, list.map((w) =>
+              h("button", { class: "kin-word", title: t("이 단어 찾기"), onclick: () => search(c.language === "ko" ? w.ko : w.en) },
+                h("b", null, w.en), h("span", null, w.ko)))))))],
     ["say", title(t("속담·사자성어"), "SAYINGS"),
       c.related?.length > 0 && h("ul", null, c.related.map((r) => h("li", null,
         h("span", { class: "tag" }, KIND()[r.kind] || ""),
+        h("span", { class: "tag from" }, sayingSource(r)),
         h("p", { class: "saying" }, r.text),
         both(r.meaning_ko, r.meaning_en))))],
   ].filter(([, , content]) => content);
@@ -1027,7 +1076,7 @@ function searchHome() {
       : [h("p", { class: "small" }, t("한국어나 영어 단어를 찾아보세요.")),
          h("p", { class: "small" }, t("웹페이지에서 단어를 선택해 우클릭해도 돼요."))],
     mascot({
-      character: myShop().character, t, onTap: mascotGift,
+      character: myShop().character, t, onTap: () => mascotGift() || mascotSuggests(),
       signature: isPlus() ? { pops: SIGNATURES[myShop().character] || ["✦", "♥", "★"], line: CHARACTER_LINES[myShop().character]?.[["ko", "en", "zh"].indexOf(getLang())] || "" } : null,
       gift: giftWaiting(), onGift: takeDailyGift,
       resting: limitReached() ? t("오늘은 여기까지! 내일 또 만나요") : null,
@@ -1043,14 +1092,37 @@ function searchHome() {
          h("div", { class: "chips center" }, ["democracy", "노력", "transport"].map((t) => h("button", { class: "chip", onclick: () => search(t) }, t)))]);
 }
 
+// A word to try, from the recommended words of the student's grade (academic ones in the upper
+// grades). It sits faintly in the search box; searching with the box empty looks it up.
+function suggestWord() {
+  const list = gradeList(Math.min(12, Math.max(3, state.user.grade || 3)));
+  const known = new Set(state.words.map((w) => w.term_norm));
+  const fresh = list.filter(([english]) => !known.has(english));
+  const from = fresh.length ? fresh : list;
+  return from.length ? from[Math.floor(Math.random() * from.length)][0] : "";
+}
+// The character sometimes suggests one when tapped.
+function mascotSuggests() {
+  if (Math.random() >= 0.3) return null;
+  state.suggest = suggestWord();
+  const box = document.getElementById("q");
+  if (!state.suggest || !box) return null;
+  box.placeholder = state.suggest;
+  box.classList.remove("hinted");
+  void box.offsetWidth;
+  box.classList.add("hinted");
+  return t("이 단어 어때? {w}", { w: state.suggest });
+}
+
 function searchView() {
+  state.suggest ||= suggestWord();
   const input = h("input", {
     type: "text", id: "q", value: state.query, maxLength: 40, autocomplete: "off",
-    placeholder: t("단어 입력 · Type a word"), "aria-label": t("찾을 단어"),
+    placeholder: state.suggest || t("단어 입력 · Type a word"), "aria-label": t("찾을 단어"),
     oninput: (e) => (state.query = e.target.value),
   });
   return [
-    h("form", { class: `search${searchPointsToday() < SEARCH_DAILY_MAX ? " tempt" : ""}`, onsubmit: (e) => { e.preventDefault(); search(input.value); } },
+    h("form", { class: `search${searchPointsToday() < SEARCH_DAILY_MAX ? " tempt" : ""}`, onsubmit: (e) => { e.preventDefault(); const typed = input.value.trim(); if (!typed) state.suggest = null; search(typed || input.placeholder); } },
       input, h("button", { class: "btn", disabled: state.busy }, t("찾기"))),
     dailyGoal(),
     noticeBox(),
@@ -1075,7 +1147,11 @@ function wordRow(w) {
     h("button", { class: "open", onclick: () => { Object.assign(state, { entry: w, tab: "search", query: "", notice: null }); render(); } },
       h("div", { class: "word" }, w.headword, w.discovered && h("span", { class: "badge found" }, t("첫 발견")), w.needs_review && h("span", { class: "badge" }, t("복습"))),
       h("div", { class: "sub" }, w.content.counterpart)),
-    star(w));
+    star(w),
+    // Deleting asks once more, right in the row.
+    state.confirmDelete === w.term_norm
+      ? h("button", { class: "trash sure", onclick: () => { state.confirmDelete = null; removeWord(w); } }, t("삭제"))
+      : h("button", { class: "trash", "aria-label": t("단어 삭제"), title: t("단어 삭제"), onclick: () => { state.confirmDelete = w.term_norm; render(); } }, "✕"));
 }
 
 function wordsView() {
@@ -1098,7 +1174,7 @@ function wordsView() {
     h("div", { class: "segment three", role: "tablist" }, langs.map(([id, label]) =>
       h("button", { role: "tab", "aria-selected": String(state.wordLang === id), onclick: () => { state.wordLang = id; render(); } },
         label, h("small", null, String(inLang(id).length))))),
-    h("div", { class: "chips" }, filters.map(([id, label]) =>
+    h("div", { class: "chips one-line" }, filters.map(([id, label]) =>
       h("button", { class: "chip", "aria-pressed": String(state.filter === id), onclick: () => { state.filter = id; render(); } }, label))),
     noticeBox(),
     shown.length === 0
@@ -1213,11 +1289,24 @@ function nextChallengeWord() {
     },
   });
   if (typed) state.focus = "answer";
+  // The same time limit as the quiz. Running out of time ends the run like a wrong answer.
+  clearTimeout(challengeTimer);
+  c.deadline = Date.now() + QUESTION_MS;
+  c.timedOut = false;
+  const question = c.question;
+  challengeTimer = setTimeout(() => {
+    if (state.challenge !== c || c.phase !== "ask" || c.question !== question) return;
+    Object.assign(c, { timedOut: true, picked: "", phase: "wrong" });
+    render();
+    setTimeout(() => { if (state.challenge === c && c.phase === "wrong") finishChallenge(false); }, 1700);
+  }, QUESTION_MS);
 }
+let challengeTimer = 0;
 
 function pickChallenge(option) {
   const c = state.challenge;
   if (c.phase !== "ask") return;
+  clearTimeout(challengeTimer);
   c.picked = option;
   // Typed Korean is judged kindly: 수출 is as right as 수출하다.
   const plain = (s) => s.trim().toLowerCase().replace(/\s+/g, "");
@@ -1245,6 +1334,7 @@ function pickChallenge(option) {
 function finishChallenge(clearedAll) {
   const c = state.challenge;
   if (c.phase === "over") return;
+  clearTimeout(challengeTimer);
   c.phase = "over";
   c.clearedAll = clearedAll;
   c.record = c.streak > bestStreak();
@@ -1303,6 +1393,9 @@ function challengeView() {
         h("span", null, c.streak > bestStreak() ? t("새 기록!") : bestStreak() - c.streak === 0 ? t("타이 기록!") : t("{n}개 남음", { n: bestStreak() - c.streak }))),
       h("div", { class: "ch-level" }, `G${c.grade}`, h("small", null, `${answered} / ${total}`))),
     h("div", { class: "progress" }, h("div", { class: "bar" }, h("i", { style: `width:${(answered / total) * 100}%` }))),
+    c.phase === "ask" && h("div", { class: "timer", role: "timer", "aria-label": t("남은 시간") },
+      h("i", { style: `animation-duration:${QUESTION_MS}ms;animation-delay:-${Math.max(0, QUESTION_MS - (c.deadline - Date.now()))}ms` })),
+    c.timedOut && h("p", { class: "center act-note timeout" }, t("시간이 다 됐어요!")),
     h("div", { class: `ch-prompt${c.question.shown.startsWith("d") ? " long" : ""}` }, c.question.prompt),
     c.question.kind === "type" ? typedAnswer() : h("div", { class: `choices act${c.question.asked.startsWith("d") ? " wide defs" : c.question.options.some((o) => o.length > 9) ? " wide" : ""}` },
       c.question.options.map((option, i) =>
@@ -1563,7 +1656,7 @@ let duelModule = null;
 function duel() {
   return (duelModule ||= initDuel({
     h, t, state, api, render, award, fail, reaction, portrait, myShop, displayName, nameOf,
-    guideHero, guideSteps, guideStat, coin, toastText,
+    guideHero, guideSteps, guideStat, coin, toastText, locale,
     askFriend: (email) => friends().ask(email),
     refreshFriends: (force) => friends().refresh(force),
     openFriends: () => { state.duel = null; friends().open(); },
@@ -1799,7 +1892,18 @@ function settingsView() {
     h("section", { class: "block" },
       h("h3", null, t("계정")),
       h("p", { class: "muted" }, state.user.email),
-      h("p", { style: "margin-top:14px" }, h("button", { class: "btn ghost", onclick: signOut }, t("로그아웃")))),
+      h("p", { style: "margin-top:14px" }, h("button", { class: "btn ghost", onclick: signOut }, t("로그아웃"))),
+      state.leaving
+        ? h("div", { class: "leave" },
+            h("b", null, t("정말 탈퇴할까요?")),
+            h("p", null, t("단어장, 포인트, 캐릭터, 친구, 대결 기록, 초대장, 플러스가 모두 지워지고 되돌릴 수 없어요. 다시 쓰려면 초대 코드가 필요해요.")),
+            h("label", { htmlFor: "leave-word" }, t("확인을 위해 아래에 “탈퇴”라고 써 주세요.")),
+            h("form", { class: "row", onsubmit: (e) => { e.preventDefault(); leave(document.getElementById("leave-word").value.trim()); } },
+              h("input", { type: "text", id: "leave-word", autocomplete: "off", maxLength: 10, placeholder: t("탈퇴"), style: "flex:1" }),
+              h("button", { class: "btn danger", disabled: state.busy }, t("탈퇴하기"))),
+            noticeBox(),
+            h("p", null, h("button", { class: "link", onclick: () => { state.leaving = false; state.notice = null; render(); } }, t("취소"))))
+        : h("p", { style: "margin-top:18px" }, h("button", { class: "link quiet", onclick: () => { state.leaving = true; state.notice = null; state.focus = "leave-word"; render(); } }, t("회원 탈퇴")))),
     // Required credit for the recommended word lists (CC BY-SA 4.0).
     h("p", { class: "small muted credit" },
       t("연속 도전의 권장 단어는 New General Service List와 New Academic Word List(Browne, Culligan, Phillips)를 바탕으로 했으며, CC BY-SA 4.0에 따라 이용합니다."),

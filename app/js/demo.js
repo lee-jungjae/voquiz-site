@@ -56,9 +56,11 @@ const SAMPLES = {
       { ko: "그는 노력 끝에 시험에 합격했다.", en: "After a lot of effort, he passed the exam." },
     ],
     related: [
-      { kind: "proverb", text: "티끌 모아 태산", hanja: "", meaning_ko: "작은 것도 꾸준히 모으면 큰 것이 된다.", meaning_en: "Many small efforts add up to something huge." },
-      { kind: "proverb", text: "Practice makes perfect.", hanja: "", meaning_ko: "꾸준히 연습하면 완벽해진다.", meaning_en: "Doing something again and again makes you good at it." },
+      { kind: "proverb", text: "티끌 모아 태산", hanja: "", meaning_ko: "작은 것도 꾸준히 모으면 큰 것이 된다.", meaning_en: "Many small efforts add up to something huge.", source_ko: "한국 속담", source_en: "Korean proverb" },
+      { kind: "proverb", text: "Practice makes perfect.", hanja: "", meaning_ko: "꾸준히 연습하면 완벽해진다.", meaning_en: "Doing something again and again makes you good at it.", source_ko: "영어 속담 · 영미권", source_en: "English proverb" },
     ],
+    synonyms: [{ en: "hard work", ko: "수고" }, { en: "endeavor", ko: "애씀" }],
+    antonyms: [{ en: "laziness", ko: "게으름" }],
   },
   photosynthesis: {
     valid: true, suggestion: "", headword: "photosynthesis", language: "en", counterpart: "광합성",
@@ -106,8 +108,10 @@ const SAMPLES = {
     ],
     related: [
       { kind: "proverb", text: "A friend in need is a friend indeed.", hanja: "", meaning_ko: "어려울 때 도와주는 친구가 진짜 친구다.", meaning_en: "A real friend is the one who helps when you are in trouble." },
-      { kind: "four_character_idiom", text: "죽마고우", hanja: "竹馬故友", meaning_ko: "어릴 때부터 함께 놀며 자란 오랜 친구.", meaning_en: "A friend you have known since you were little." },
+      { kind: "four_character_idiom", text: "죽마고우", hanja: "竹馬故友", meaning_ko: "어릴 때부터 함께 놀며 자란 오랜 친구.", meaning_en: "A friend you have known since you were little.", source_ko: "사자성어 · 한자 문화권", source_en: "Four-character idiom from classical Chinese" },
     ],
+    synonyms: [{ en: "pal", ko: "동무" }, { en: "companion", ko: "벗" }, { en: "buddy", ko: "짝꿍" }],
+    antonyms: [{ en: "enemy", ko: "적" }, { en: "stranger", ko: "낯선 사람" }],
   },
   gravity: {
     valid: true, suggestion: "", headword: "gravity", language: "en", counterpart: "중력",
@@ -286,7 +290,7 @@ function duels() {
     // The first time, a classmate has already sent a challenge.
     list = [{
       id: "d-first", role: "opponent", other: rivalOf("r1"), grade: Math.min(getUser().grade || 5, 5), seed: 20261114,
-      my_score: null, their_score: 12, my_character: null, their_character: "rabbit", their_marks: fakeMarks(12),
+      seconds: 180, my_score: null, their_score: 12, my_character: null, their_character: "rabbit", their_marks: fakeMarks(12),
       status: "open", claimed: false, created_at: new Date().toISOString(),
     }];
     write(DUELS_KEY, list);
@@ -298,24 +302,26 @@ export async function duelPlayers() { return RIVALS; }
 export async function findPlayer(email) {
   return /@/.test(email) ? { id: "r-mail", nickname: email.split("@")[0].slice(0, 12), tag: 640, grade: getUser().grade || 5, no_duels: false } : null;
 }
-export async function createDuel({ opponent, grade, seed, score }) {
+export async function createDuel({ opponent, grade, seed, score, marks = [], seconds = 180 }) {
   const list = duels();
   // The pretend classmate answers at once, sometimes better and sometimes worse.
   const theirs = Math.max(0, score + Math.round((Math.random() - 0.55) * 6));
   const rival = opponent === "r-mail" ? { id: opponent, nickname: "friend", tag: 640, grade, character: "cat" } : rivalOf(opponent);
   list.unshift({
-    id: `d-${Date.now()}`, role: "challenger", other: rival, grade, seed, my_score: score, their_score: theirs,
-    my_character: getUser().shop?.character || "bubble", their_character: rival.character, their_marks: [],
+    id: `d-${Date.now()}`, role: "challenger", other: rival, grade, seed, seconds, my_score: score, their_score: theirs,
+    my_marks: marks, finished_at: new Date().toISOString(),
+    my_character: getUser().shop?.character || "bubble", their_character: rival.character,
+    their_marks: Array.from({ length: theirs }, (_, i) => Math.round(((i + 1) / (theirs + 1)) * (seconds - 6) + Math.random() * 4)),
     status: "done", claimed: false, created_at: new Date().toISOString(),
   });
   write(DUELS_KEY, list);
   return list[0].id;
 }
-export async function answerDuel(id, score, character) {
+export async function answerDuel(id, score, character, marks = []) {
   const list = duels();
   const duel = list.find((d) => d.id === id);
   if (!duel || duel.status !== "open") throw Object.assign(new Error("duel_closed"), { code: "duel_closed" });
-  Object.assign(duel, { my_score: score, my_character: character, status: "done" });
+  Object.assign(duel, { my_score: score, my_character: character, my_marks: marks, status: "done", finished_at: new Date().toISOString() });
   write(DUELS_KEY, list);
 }
 export async function claimDuel(id) {
@@ -430,4 +436,9 @@ export function seed(grade = 5) {
     };
   });
   write(WORDS_KEY, words);
+}
+
+// Leaving: the try-out student and everything saved for them is cleared.
+export async function deleteAccount() {
+  for (const key of Object.keys(localStorage)) if (key.startsWith("wb_demo_")) localStorage.removeItem(key);
 }

@@ -1137,3 +1137,72 @@ input[type="email"] { background: var(--bg); border: 1px solid var(--border); bo
 .ch-best.beaten b, .ch-best.beaten span, .ch-best.beaten small { color: var(--good); }
 .settle .best-line { border-radius: 12px; background: color-mix(in srgb, var(--accent) 10%, transparent); padding: 8px 10px; margin: 0 -10px 4px; }
 .settle .best-line b { font-size: 20px; color: var(--accent); }
+
+/* ---------- feedback round: word list, tabs, entry, duel detail, leaving ---------- */
+/* the character keeps its own colours whatever theme colour is bought */
+.mascot { --accent: #655f9f; --accent-dark: #574f82; --lime: #bbd86b; --good: #23552b; }
+/* filters on one line */
+.chips.one-line { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-left: -20px; margin-right: -20px; padding: 2px 20px; }
+.chips.one-line::-webkit-scrollbar { display: none; }
+.chips.one-line .chip { flex: none; }
+/* delete in the row */
+.item .trash { flex: none; width: 30px; height: 30px; border-radius: 50%; font-size: 13px; color: var(--muted); opacity: .55; transition: opacity .15s, background .15s; }
+.item .trash:hover { opacity: 1; background: var(--surface); }
+.item .trash.sure { width: auto; padding: 0 12px; opacity: 1; background: #d93a2b; color: #fff; font-size: 12px; font-weight: 800; }
+.item { gap: 10px; }
+/* the tab you are on */
+nav { padding: 6px 6px 8px; }
+nav button .ico { display: grid; place-items: center; width: 54px; height: 30px; border-radius: 999px; transition: background .2s, transform .2s; }
+nav button[aria-current="page"] { color: var(--accent); }
+nav button[aria-current="page"] .ico { background: color-mix(in srgb, var(--accent) 18%, transparent); transform: translateY(-1px); }
+nav button[aria-current="page"] .ico svg { stroke-width: 2.6; }
+nav button[aria-current="page"] > span:not(.ico) { font-weight: 800; }
+nav button em.dot { top: 0; left: calc(50% + 12px); }
+/* remembering: parts and tip together */
+.note.tip { margin-top: 12px; }
+.note.tip > b { display: block; font-size: 12px; color: var(--accent); margin-bottom: 2px; }
+/* synonyms and antonyms */
+.kin { display: grid; gap: 10px; }
+.kin-row { display: flex; gap: 10px; align-items: flex-start; }
+.kin-label { flex: none; width: 58px; padding-top: 6px; font-size: 12px; font-weight: 800; color: var(--muted); }
+.kin-words { display: flex; flex-wrap: wrap; gap: 6px; }
+.kin-word { display: inline-flex; align-items: baseline; gap: 6px; border-radius: 999px; padding: 5px 12px; border: 1px solid var(--border); background: var(--bg); transition: border-color .15s, transform .15s; }
+.kin-word:hover { border-color: var(--text); transform: translateY(-1px); }
+.kin-word b { font-size: 14px; }
+.kin-word span { font-size: 12px; color: var(--muted); }
+.kin-row.syn .kin-word { background: #eef6dc; border-color: transparent; }
+.kin-row.ant .kin-word { background: #fdecea; border-color: transparent; }
+/* where a saying is from */
+.tag.from { margin-left: 4px; background: #fff6dd; color: #8a5a00; }
+/* the suggested word in the search box */
+.search input::placeholder { color: color-mix(in srgb, var(--text) 32%, transparent); font-weight: 500; }
+.search input.hinted::placeholder { animation: hint-in .7s cubic-bezier(.3, 1.4, .5, 1); }
+@keyframes hint-in { from { color: var(--accent); letter-spacing: .06em; } }
+/* streak challenge: out of time */
+.timeout { font-weight: 800; color: #d93a2b; }
+/* duel: lengths, tappable results, the chart */
+.chips.lengths { margin: 0; }
+.chips.lengths .chip { flex: 1; text-align: center; }
+button.duel-row { width: 100%; text-align: left; }
+.duel-row.tap:hover { background: var(--surface); }
+.duel-row .chev { flex: none; color: var(--muted); font-size: 18px; }
+.duel-sum { font-weight: 800; margin-top: 10px; }
+.duel-chart { margin: 12px auto 0; max-width: 340px; }
+.duel-chart svg { display: block; width: 100%; height: auto; }
+.duel-chart .axis { stroke: var(--line); stroke-width: 1; }
+.duel-chart .half { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 3; }
+.duel-chart .tick { font-size: 9px; fill: var(--muted); }
+.duel-chart .tick.end { text-anchor: end; } .duel-chart .tick.mid { text-anchor: middle; }
+.duel-chart path { fill: none; stroke-width: 2.6; stroke-linejoin: round; stroke-linecap: round; }
+.duel-chart path.me { stroke: #655f9f; }
+.duel-chart path.them { stroke: #b9b5c9; stroke-dasharray: 5 4; }
+.duel-chart .legend { display: flex; justify-content: center; gap: 14px; margin-top: 4px; font-size: 12px; font-weight: 700; }
+.duel-chart .legend span::before { content: ""; display: inline-block; width: 14px; height: 3px; border-radius: 2px; margin-right: 5px; vertical-align: 3px; background: #655f9f; }
+.duel-chart .legend .them::before { background: #b9b5c9; }
+.duel-result.detail { margin: 6px 0 0; }
+/* leaving */
+.link.quiet { font-size: 12px; color: var(--muted); }
+.leave { margin-top: 16px; border: 1.5px solid #e2725f; border-radius: 16px; padding: 14px; background: #fff7f5; display: grid; gap: 8px; }
+.leave b { color: #b93a2b; }
+.leave p, .leave label { margin: 0; font-size: 13px; line-height: 1.55; }
+.btn.danger { background: #d93a2b; color: #fff; }
