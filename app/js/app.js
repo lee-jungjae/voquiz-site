@@ -627,37 +627,55 @@ function checkWeekly() {
   saveWeekly({ claimed: weekKey() });
   setTimeout(() => award(weekBonus(weekGoal()), t("주간 목표 달성!"), true), 1500);
 }
+// The goal is chosen once a week: after that it stands until next Monday, so it means something.
+const weekLocked = () => state.user.weekly?.set === weekKey();
 function weeklyGoalSheet() {
+  if (weekLocked()) {
+    return sheet({
+      art: "🎯", title: t("이번 주 목표: {n}개", { n: weekGoal() }),
+      text: t("이번 주 목표는 이미 정했어요. 다음 주 월요일에 다시 정할 수 있어요. 목표를 채우면 +{p}포인트!", { p: weekBonus(weekGoal()) }),
+      actions: [{ label: t("확인"), kind: "main", run: () => true }],
+    });
+  }
+  let chosen = weekGoal();
   sheet({
     art: "🎯", title: t("이번 주 목표"),
-    text: t("일주일(월~일) 동안 찾을 단어 수를 정해요. 목표를 채우면 목표만큼 보너스 포인트를 받아요."),
-    actions: [{ label: t("닫기"), run: () => true }],
+    text: t("일주일(월~일) 동안 찾을 단어 수를 정해요. 목표를 채우면 목표만큼 보너스 포인트를 받아요. 한 번 정하면 이번 주에는 바꿀 수 없어요."),
+    actions: [
+      { label: t("이 목표로 정하기"), kind: "main", run: () => {
+        saveWeekly({ goal: chosen, set: weekKey() });
+        render();
+        toastText(t("이번 주 목표: {n}개", { n: chosen }));
+        checkWeekly();
+      } },
+      { label: t("나중에 정하기"), run: () => true },
+    ],
   });
   const row = h("div", { class: "goal-picks" }, WEEK_GOALS.map((goal) =>
     h("button", {
-      class: "goal-pick", "aria-pressed": String(weekGoal() === goal),
-      onclick: () => { saveWeekly({ goal }); document.getElementById("sheet")?.remove(); render(); toastText(t("이번 주 목표: {n}개", { n: goal })); checkWeekly(); },
+      class: "goal-pick", "aria-pressed": String(chosen === goal),
+      onclick: (e) => {
+        chosen = goal;
+        for (const pick of row.children) pick.setAttribute("aria-pressed", String(pick === e.currentTarget));
+      },
     }, h("b", null, String(goal)), h("small", null, `+${weekBonus(goal)}`))));
   document.querySelector("#sheet .sheet p")?.after(row);
 }
-function weeklyChip() {
-  const count = weekCount(), goal = weekGoal();
-  const done = count >= goal;
-  return h("button", { class: `week-chip${done ? " done" : ""}`, title: t("이번 주 목표 바꾸기"), onclick: weeklyGoalSheet },
-    h("i", { style: `--p:${Math.min(1, count / goal) * 360}deg`, "aria-hidden": "true" }),
-    t("이번 주"), h("b", null, `${Math.min(count, 999)} / ${goal}`), done && "✓");
-}
 
+// Two small pills under the search box, the same shape: today's search points, and this week's
+// words against the goal. (How many searches are left, and tips, are the character's to say.)
 function dailyGoal() {
   const got = searchPointsToday();
-  const done = got >= SEARCH_DAILY_MAX;
-  return h("div", { class: `daily${done ? " done" : ""}` },
-    h("div", { class: "daily-label" }, h("span", null, t("오늘 검색 포인트"), isPlus() && h("em", { class: "plus-badge" }, "PLUS")), weeklyChip(), h("b", null, `${got} / ${SEARCH_DAILY_MAX}`)),
-    h("div", { class: "bar" }, h("i", { style: `width:${(got / SEARCH_DAILY_MAX) * 100}%` })),
-    // One short line. How many searches are left is the character's to say, so it is not repeated here.
-    h("div", { class: "daily-hint" }, done
-      ? (isPlus() ? t("오늘 검색 포인트를 다 모았어요. 단어는 계속 찾을 수 있어요.") : t("오늘 검색 포인트를 다 모았어요. 내일 또 만나요!"))
-      : t("단어를 찾을 때마다 +{p}점", { p: SEARCH_POINTS })));
+  const count = weekCount(), goal = weekGoal();
+  const ring = (ratio) => h("i", { class: "goal-ring", style: `--p:${Math.min(1, ratio) * 360}deg`, "aria-hidden": "true" });
+  return h("div", { class: "goals" },
+    h("div", { class: `goal${got >= SEARCH_DAILY_MAX ? " done" : ""}`, title: t("단어를 찾을 때마다 +{p}점", { p: SEARCH_POINTS }) },
+      ring(got / SEARCH_DAILY_MAX),
+      h("span", { class: "goal-text" }, h("small", null, t("오늘 포인트"), isPlus() && h("em", { class: "plus-badge" }, "PLUS")), h("b", null, `${got} / ${SEARCH_DAILY_MAX}`))),
+    h("button", { class: `goal${count >= goal ? " done" : ""}`, title: weekLocked() ? t("이번 주 목표") : t("이번 주 목표 정하기"), onclick: weeklyGoalSheet },
+      ring(count / goal),
+      h("span", { class: "goal-text" }, h("small", null, t("이번 주 단어")), h("b", null, `${count} / ${goal}`)),
+      !weekLocked() && h("span", { class: "goal-set" }, t("정하기"))));
 }
 
 // Every change to the score is shown in one place: right under the score in the header.
@@ -822,7 +840,13 @@ function happyMoment() {
 
 // ---------- helpers ----------
 
-const both = (ko, en) => [ko && h("p", null, ko), en && h("p", { class: "en" }, en)];
+// Explanations come in both languages. With the screen in Korean or Chinese the Korean one is
+// first; with the screen in English the English one is. The second is shown a little quieter.
+const koFirst = () => getLang() !== "en";
+const both = (ko, en) => {
+  const [first, second] = koFirst() ? [ko, en] : [en, ko];
+  return [first && h("p", null, first), second && h("p", { class: "en" }, second)];
+};
 // Where a saying comes from. Entries written before this was recorded get a plain guess from the
 // text itself: Hangul means a Korean saying, anything else an English one.
 function sayingSource(r) {
@@ -910,6 +934,14 @@ function block(word, name, heading, content) {
 function entryBlocks(word) {
   const c = word.content;
   const sections = [
+    ["kin", title(t("비슷한 말 · 반대말"), "SYNONYMS · ANTONYMS"),
+      (c.synonyms?.length > 0 || c.antonyms?.length > 0) && h("div", { class: "kin" },
+        [[t("비슷한 말"), c.synonyms, "syn"], [t("반대말"), c.antonyms, "ant"]].map(([label, list, kind]) =>
+          list?.length > 0 && h("div", { class: `kin-row ${kind}` },
+            h("span", { class: "kin-label" }, label),
+            h("div", { class: "kin-words" }, list.map((w) =>
+              h("button", { class: "kin-word", title: t("이 단어 찾기"), onclick: () => search(c.language === "ko" ? w.ko : w.en) },
+                h("b", null, w.en), h("span", null, w.ko)))))))],
     // Breaking the word into parts and the memory tip belong together: both are ways to remember it.
     ["easy", title(t("쉽게 기억하기"), "REMEMBER IT"),
       (buildBlock(c) || c.memory_tip_ko || c.memory_tip_en) && [
@@ -920,15 +952,9 @@ function entryBlocks(word) {
     ["ex", title(t("예문"), "EXAMPLES"),
       c.examples?.length > 0 && h("ol", null, c.examples.map((e, i) => h("li", null,
         h("span", { class: "num" }, String(i + 1)),
-        h("div", null, h("p", null, highlight(e.ko, c)), h("p", { class: "en" }, highlight(e.en, c))))))],
-    ["kin", title(t("비슷한 말 · 반대말"), "SYNONYMS · ANTONYMS"),
-      (c.synonyms?.length > 0 || c.antonyms?.length > 0) && h("div", { class: "kin" },
-        [[t("비슷한 말"), c.synonyms, "syn"], [t("반대말"), c.antonyms, "ant"]].map(([label, list, kind]) =>
-          list?.length > 0 && h("div", { class: `kin-row ${kind}` },
-            h("span", { class: "kin-label" }, label),
-            h("div", { class: "kin-words" }, list.map((w) =>
-              h("button", { class: "kin-word", title: t("이 단어 찾기"), onclick: () => search(c.language === "ko" ? w.ko : w.en) },
-                h("b", null, w.en), h("span", null, w.ko)))))))],
+        h("div", null, koFirst()
+          ? [h("p", null, highlight(e.ko, c)), h("p", { class: "en" }, highlight(e.en, c))]
+          : [h("p", null, highlight(e.en, c)), h("p", { class: "en" }, highlight(e.ko, c))]))))],
     ["say", title(t("속담·사자성어"), "SAYINGS"),
       c.related?.length > 0 && h("ul", null, c.related.map((r) => h("li", null,
         h("span", { class: "tag" }, KIND()[r.kind] || ""),
@@ -951,7 +977,9 @@ function hero(c, word) {
     h("h2", null, c.headword),
     h("div", { class: "cp" }, h("small", null, "⇄"), c.counterpart),
     h("div", { class: "meta" }, [c.pronunciation, c.part_of_speech].filter(Boolean).join("  ·  ")),
-    h("div", { class: "def" }, h("p", null, c.definition_ko), h("p", null, c.definition_en)));
+    h("div", { class: "def" }, koFirst()
+      ? [h("p", null, c.definition_ko), h("p", null, c.definition_en)]
+      : [h("p", null, c.definition_en), h("p", null, c.definition_ko)]));
 }
 
 function entryCard(word) {
@@ -1200,10 +1228,12 @@ function wordRow(w) {
     h("button", { class: "open", onclick: () => { Object.assign(state, { entry: w, tab: "search", query: "", notice: null }); render(); } },
       h("div", { class: "word" }, w.headword, w.discovered && h("span", { class: "badge found" }, t("첫 발견")), w.needs_review && h("span", { class: "badge" }, t("복습"))),
       h("div", { class: "sub" }, w.content.counterpart)),
-    star(w),
-    // Deleting asks once more, right in the row.
+    state.confirmDelete !== w.term_norm && star(w),
+    // Deleting asks once more, right in the row, with a way back next to it.
     state.confirmDelete === w.term_norm
-      ? h("button", { class: "trash sure", onclick: () => { state.confirmDelete = null; removeWord(w); } }, t("삭제"))
+      ? h("span", { class: "trash-ask" },
+          h("button", { class: "trash keep", onclick: () => { state.confirmDelete = null; render(); } }, t("취소")),
+          h("button", { class: "trash sure", onclick: () => { state.confirmDelete = null; removeWord(w); } }, t("삭제")))
       : h("button", { class: "trash", "aria-label": t("단어 삭제"), title: t("단어 삭제"), onclick: () => { state.confirmDelete = w.term_norm; render(); } }, "✕"));
 }
 
@@ -1616,7 +1646,7 @@ function quizProgress() {
 }
 
 // The quiz leads with the language of the screen: Korean on a Korean screen, English otherwise.
-const quizMain = () => (getLang() === "ko" ? "ko" : "en");
+const quizMain = () => (getLang() === "en" ? "en" : "ko"); // Korean and Chinese screens lead with Korean
 // The Korean or the English word of an entry, whichever way round it was searched.
 function wordIn(c, lang) {
   const headIsKorean = /[가-힣]/.test(c.headword);

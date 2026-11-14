@@ -1234,3 +1234,22 @@ button.duel-row { width: 100%; text-align: left; }
 .week-bar { height: 4px; border-radius: 999px; background: var(--surface); overflow: hidden; margin: 2px 0 4px; }
 .week-bar i { display: block; height: 100%; border-radius: 999px; background: var(--accent); }
 .day.week:not(.open) { padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+
+/* ---------- home: today and this week, two matching pills ---------- */
+.goals { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0 0; }
+.goal { display: flex; align-items: center; gap: 9px; min-width: 0; border-radius: 16px; padding: 8px 12px 8px 9px; background: var(--surface); text-align: left; transition: background .15s; }
+button.goal:hover { background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+.goal .goal-ring { flex: none; width: 26px; height: 26px; border-radius: 50%; background: conic-gradient(var(--accent) var(--p), color-mix(in srgb, var(--accent) 18%, transparent) 0); -webkit-mask: radial-gradient(circle, transparent 7px, #000 7.5px); mask: radial-gradient(circle, transparent 7px, #000 7.5px); transition: background .5s; }
+.goal-text { flex: 1; min-width: 0; display: grid; line-height: 1.25; }
+.goal-text small { font-size: 11px; font-weight: 600; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.goal-text b { font-size: 15px; font-variant-numeric: tabular-nums; }
+.goal-text .plus-badge { margin-left: 5px; }
+.goal .goal-set { flex: none; font-size: 11px; font-weight: 800; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 2px 8px; }
+.goal.done { background: #eef6dc; }
+.goal.done .ring { background: var(--good); }
+.goal.done .goal-text b { color: var(--good); }
+
+/* deleting from the list: cancel sits right beside delete */
+.trash-ask { flex: none; display: inline-flex; gap: 6px; animation: pop .2s both; }
+.item .trash.keep { width: auto; padding: 0 12px; opacity: 1; background: var(--surface); color: var(--text); font-size: 12px; font-weight: 700; }
+.item:has(.trash-ask) { background: #fff7f5; margin: 0 -10px; padding-left: 10px; padding-right: 10px; border-radius: 12px; }
