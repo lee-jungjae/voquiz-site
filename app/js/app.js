@@ -631,10 +631,24 @@ function checkWeekly() {
 const weekLocked = () => state.user.weekly?.set === weekKey();
 function weeklyGoalSheet() {
   if (weekLocked()) {
+    // Once chosen, the pill cheers the student on, or congratulates them when the goal is reached.
+    const goal = weekGoal(), count = weekCount(), left = goal - count, p = weekBonus(goal);
+    const next = t("다음 주 월요일에 새 목표를 정할 수 있어요.");
+    if (left <= 0) {
+      return sheet({
+        art: "🎉", title: t("이번 주 목표 달성!"),
+        text: `${t("이번 주에 단어를 {c}개나 찾았어요. 목표 {n}개를 해냈어요, 정말 멋져요! 보너스 +{p}포인트도 받았어요.", { c: count, n: goal, p })} ${next}`,
+        actions: [{ label: t("야호!"), kind: "main", run: () => true }],
+      });
+    }
+    const cheer = count === 0 ? t("첫 단어부터 시작해 봐요. {n}개까지 함께 가요!", { n: goal })
+      : left <= 3 ? t("거의 다 왔어요! {l}개만 더 찾으면 목표 달성이에요.", { l: left })
+      : count * 2 >= goal ? t("벌써 절반을 넘었어요! {l}개만 더 찾으면 돼요.", { l: left })
+      : t("잘하고 있어요! 벌써 {c}개 찾았어요. {l}개 더 찾아봐요.", { c: count, l: left });
     return sheet({
-      art: "🎯", title: t("이번 주 목표: {n}개", { n: weekGoal() }),
-      text: t("이번 주 목표는 이미 정했어요. 다음 주 월요일에 다시 정할 수 있어요. 목표를 채우면 +{p}포인트!", { p: weekBonus(weekGoal()) }),
-      actions: [{ label: t("확인"), kind: "main", run: () => true }],
+      art: "💪", title: t("이번 주 {c} / {n}개", { c: count, n: goal }),
+      text: `${cheer} ${t("목표를 채우면 +{p}포인트!", { p })}`,
+      actions: [{ label: t("힘낼게요!"), kind: "main", run: () => true }],
     });
   }
   let chosen = weekGoal();
