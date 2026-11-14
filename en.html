@@ -389,6 +389,13 @@ body.home { background: radial-gradient(900px 420px at 88% -60px, #efeaff 0, tra
 .float.c { right: 8%; bottom: -14px; background: var(--accent); color: #fff; animation-delay: -2.4s; }
 @keyframes floaty { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
 section.block { margin-top: 62px; }
+.letter { position: relative; max-width: 640px; margin: 8px auto 0; padding: 26px 28px 20px; border-radius: 6px 22px 22px 22px; background: #fffbe9; box-shadow: 0 12px 28px rgba(120, 100, 40, .16); transform: rotate(-1.2deg); }
+.letter .tape { position: absolute; left: 50%; top: -12px; width: 92px; height: 24px; margin-left: -46px; background: rgba(187, 216, 107, .85); transform: rotate(2.5deg); border-radius: 3px; }
+.letter p { margin: 0; font-size: 19px; line-height: 1.75; color: #3a3320; word-break: keep-all; }
+.letter p b { background: linear-gradient(transparent 60%, #ffe08a 60%); font-weight: 700; }
+.letter .heart { color: #e8395a; display: inline-block; animation: heart-beat 1.2s ease-in-out infinite; }
+.letter .from { display: block; margin-top: 10px; text-align: right; font-size: 13px; font-weight: 700; color: #8a7a4a; }
+@keyframes heart-beat { 0%, 100% { transform: scale(1); } 30% { transform: scale(1.3); } 60% { transform: scale(.95); } }
 .eyebrow { display: inline-block; font-size: 13px; font-weight: 800; letter-spacing: .04em; color: var(--accent); background: #efedf9; border-radius: 999px; padding: 3px 12px; margin-bottom: 8px; }
 section.block h2 { font-size: 30px; margin: 0 0 6px; }
 section.block h2 + .sub { font-size: 17px; margin-bottom: 20px; }
@@ -520,6 +527,12 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
     </g>
   </g>
 </svg></span><p class="hint">Tap the character · pick another friend below</p></div>
+</section>
+
+<section class="letter" aria-label="A note from the makers">
+  <span class="tape" aria-hidden="true"></span>
+  <p>Hi! I'm a G4 student at an international school. I made this with my dad so that I could <b>look up</b> Korean and English words easily, <b>remember</b> them easily, and <b>test myself</b> in an easy, fun way. I hope it helps you too <span class="heart" aria-label="heart">♥</span></p>
+  <span class="from">A G4 student and Dad, the makers of VOQUIZ</span>
 </section>
 
 <section class="block two" id="try">
