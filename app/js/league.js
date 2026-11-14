@@ -28,7 +28,7 @@ export const TIERS = [
   { emoji: "❄️", names: ["얼음 왕국", "Ice Kingdom", "冰雪王国"], bg: "#e6e8fb", mid: "#bcc2f3", ink: "#27307a", pace: 1.5 },
   { emoji: "🌈", names: ["무지개", "Rainbow", "彩虹"], bg: "#fde5d2", mid: "#f6b98c", ink: "#6e2f08", pace: 1.7 },
   { emoji: "☁️", names: ["구름 성", "Cloud Castle", "云中城堡"], bg: "#e3f1fb", mid: "#b3d7f1", ink: "#16466e", pace: 1.9 },
-  { emoji: "🌟", names: ["별나라", "Star World", "星星王国"], bg: "#e9e1fa", mid: "#c5b2f0", ink: "#3a2370", pace: 2.1 },
+  { emoji: "⭐", names: ["별나라", "Star World", "星星王国"], bg: "#e9e1fa", mid: "#c5b2f0", ink: "#3a2370", pace: 2.1 },
 ];
 export const MOVE = 3;
 export const CHARACTERS_PER_LEAGUE = 8;
