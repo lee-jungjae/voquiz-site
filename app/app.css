@@ -1253,3 +1253,18 @@ button.goal:hover { background: color-mix(in srgb, var(--accent) 12%, var(--surf
 .trash-ask { flex: none; display: inline-flex; gap: 6px; animation: pop .2s both; }
 .item .trash.keep { width: auto; padding: 0 12px; opacity: 1; background: var(--surface); color: var(--text); font-size: 12px; font-weight: 700; }
 .item:has(.trash-ask) { background: #fff7f5; margin: 0 -10px; padding-left: 10px; padding-right: 10px; border-radius: 12px; }
+
+/* ---------- filters that scroll: a fade and an arrow where more is hidden ---------- */
+.chip-scroll { position: relative; flex: 1; min-width: 0; margin-left: -20px; }
+.filter-row .chip-scroll .chips.one-line { margin: 0; padding: 2px 6px 2px 20px; --l: 0px; --r: 0px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--l), #000 calc(100% - var(--r)), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 var(--l), #000 calc(100% - var(--r)), transparent); }
+.chip-scroll.more-left .chips.one-line { --l: 44px; }
+.chip-scroll.more-right .chips.one-line { --r: 44px; }
+.chip-more { position: absolute; top: 50%; width: 24px; height: 24px; margin-top: -12px; border-radius: 50%; background: var(--bg); box-shadow: 0 1px 5px rgba(0, 0, 0, .22); font-size: 16px; line-height: 22px; font-weight: 700; color: var(--text); display: none; }
+.chip-more.left { left: 12px; } .chip-more.right { right: 0; }
+.chip-scroll.more-left .chip-more.left, .chip-scroll.more-right .chip-more.right { display: block; animation: pop .2s both; }
+.chip-scroll.more-right .chip-more.right { animation: pop .2s both, nudge 1.6s ease-in-out .4s 2; }
+@keyframes nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(4px); } }
+.chip-more { z-index: 2; background: var(--text); color: var(--bg); box-shadow: 0 2px 6px rgba(0, 0, 0, .25); font-size: 15px; line-height: 23px; text-align: center; padding: 0; }
+.chip-more.left { left: 14px; } .chip-more.right { right: 2px; }

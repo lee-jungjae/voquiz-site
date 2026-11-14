@@ -1237,6 +1237,23 @@ function wordRow(w) {
       : h("button", { class: "trash", "aria-label": t("단어 삭제"), title: t("단어 삭제"), onclick: () => { state.confirmDelete = w.term_norm; render(); } }, "✕"));
 }
 
+// The filters scroll sideways when they do not fit. So that this shows, the row fades out at
+// the side where more is hidden, and an arrow there scrolls to it.
+function filterChips(filters) {
+  const chips = h("div", { class: "chips one-line" }, filters.map(([id, label]) =>
+    h("button", { class: "chip", "aria-pressed": String(state.filter === id), onclick: () => { state.chipScroll = chips.scrollLeft; state.filter = id; render(); } }, label)));
+  const box = h("div", { class: "chip-scroll" }, chips,
+    h("button", { class: "chip-more left", "aria-hidden": "true", tabindex: "-1", onclick: () => chips.scrollBy({ left: -140, behavior: "smooth" }) }, "‹"),
+    h("button", { class: "chip-more right", "aria-hidden": "true", tabindex: "-1", onclick: () => chips.scrollBy({ left: 140, behavior: "smooth" }) }, "›"));
+  const mark = () => {
+    box.classList.toggle("more-left", chips.scrollLeft > 4);
+    box.classList.toggle("more-right", chips.scrollLeft + chips.clientWidth < chips.scrollWidth - 4);
+  };
+  chips.addEventListener("scroll", mark, { passive: true });
+  requestAnimationFrame(() => { chips.scrollLeft = state.chipScroll || 0; mark(); });
+  return box;
+}
+
 function wordsView() {
   const langs = [["recent", t("최근")], ["en", t("영어")], ["ko", t("한국어")]];
   const filters = [["all", t("전체")], ["favorites", t("★ 즐겨찾기")], ["review", t("복습 필요")], ["found", t("✦ 내가 발견")]];
@@ -1273,8 +1290,7 @@ function wordsView() {
       h("button", { role: "tab", "aria-selected": String(state.wordLang === id), onclick: () => { state.wordLang = id; render(); } },
         label, h("small", null, String(inLang(id).length))))),
     h("div", { class: "filter-row" },
-      h("div", { class: "chips one-line" }, filters.map(([id, label]) =>
-        h("button", { class: "chip", "aria-pressed": String(state.filter === id), onclick: () => { state.filter = id; render(); } }, label))),
+      filterChips(filters),
       // the same words, gathered by day or by week
       h("div", { class: "scope small", role: "group", "aria-label": t("묶어 보기") }, [["day", t("날짜")], ["week", t("주")]].map(([id, label]) =>
         h("button", { "aria-pressed": String((state.groupBy || "day") === id), onclick: () => { state.groupBy = id; render(); } }, label)))),
