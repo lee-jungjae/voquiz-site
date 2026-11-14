@@ -2174,94 +2174,13 @@ function goHome() {
 // Settings and the point shop are pages of their own, opened from the header. Opening one from
 // the other keeps the place to go back to.
 function openPage(page) {
-  const fromPage = ["settings", "shop", "friends", "board"].includes(state.tab);
+  const fromPage = ["settings", "shop", "friends"].includes(state.tab);
   if (state.tab === page) Object.assign(state, { tab: state.backTo || "search" });
   else Object.assign(state, { backTo: fromPage ? state.backTo : state.tab, tab: page });
   Object.assign(state, { notice: null, nameSaved: false, confirmBuy: null });
   render();
 }
-const openSettings = () => { openPage("settings"); loadBoard(false); };
-
-// ----- the board for the people who run VOQUIZ -----
-// Asked once when Settings opens: an admin gets the numbers (and a line in Settings that opens the
-// board); for everyone else the server refuses and nothing is shown.
-async function loadBoard(again) {
-  if (state.board === false || (state.board && !again)) return;
-  try {
-    state.board = await api.adminBoard();
-  } catch {
-    state.board = state.board || false; // not an admin, or not installed
-  }
-  render();
-}
-const STORE_ID = "ofbdlindljeoffhooafjjefebcdpkedi";
-function boardView() {
-  const b = state.board;
-  const head = h("div", { class: "page-head" },
-    h("button", { class: "back", "aria-label": t("뒤로"), title: t("뒤로"), onclick: () => openPage("settings") }, "←"),
-    h("h2", { class: "page-title" }, "운영 보드"));
-  if (!b) return [head, h("div", { class: "empty" }, "불러오는 중…")];
-  const tile = (label, value, note, tone) => h("div", { class: `board-tile${tone ? ` ${tone}` : ""}` }, h("small", null, label), h("b", null, String(value ?? 0)), note && h("span", null, note));
-  const bars = (key, label) => {
-    const top = Math.max(1, ...b.daily.map((d) => d[key]));
-    return h("div", { class: "board-chart" },
-      h("small", null, label, h("em", null, ` 최고 ${top}`)),
-      h("div", { class: "board-bars", role: "img", "aria-label": `${label}: ${b.daily.map((d) => d[key]).join(", ")}` },
-        b.daily.map((d) => h("i", { title: `${d.day}: ${d[key]}`, style: `height:${Math.max(4, Math.round((d[key] / top) * 100))}%` }))),
-      h("div", { class: "board-axis" }, h("span", null, b.daily[0].day.slice(5)), h("span", null, t("오늘"))));
-  };
-  const link = (label, href, note) => h("a", { class: "board-link", href, target: "_blank", rel: "noopener" }, h("b", null, label), note && h("small", null, note), h("i", { "aria-hidden": "true" }, "↗"));
-  const who = (row) => `${nameOf(row.nickname, row.tag)} · ${row.email}`;
-  const worry = b.rankings.flagged + b.rankings.odd_rows.length;
-  return [
-    head,
-    h("p", { class: "small muted", style: "margin:-8px 0 12px" }, `${new Date(b.at).toLocaleString(locale())} 기준 · `, h("button", { class: "link", onclick: () => loadBoard(true) }, "새로 고침")),
-
-    h("h3", { class: "board-h" }, "이용자"),
-    h("div", { class: "board-grid" },
-      tile("가입자", b.users.members, `오늘 +${b.users.new_today} · 7일 +${b.users.new_7d}`),
-      tile("오늘 활성", b.users.active_today, `7일 ${b.users.active_7d} · 30일 ${b.users.active_30d}`),
-      tile("로그인만 한 계정", b.users.signed_in - b.users.members, "초대 코드 미입력"),
-      tile("플러스", b.users.plus, `쿠폰 사용 ${b.social.coupons_used}`)),
-    bars("active", "하루 활성 이용자 (최근 14일)"),
-    bars("joined", "하루 가입자"),
-
-    h("h3", { class: "board-h" }, "단어"),
-    h("div", { class: "board-grid" },
-      tile("사전 단어", b.words.dictionary, `단어 아님 ${b.words.not_words}`),
-      tile("단어장에 담긴 수", b.words.saved, `오늘 찾은 수 ${b.words.searched_today}`)),
-
-    h("h3", { class: "board-h" }, "AI 사용"),
-    h("div", { class: "board-grid" },
-      tile("오늘 새로 만든 단어", b.ai.today, "= Claude 호출 수"),
-      tile("7일 / 30일", `${b.ai.d7} / ${b.ai.d30}`, `전체 ${b.ai.total}`)),
-    bars("made", "하루 AI 호출"),
-    link("Anthropic 콘솔 사용량", "https://console.anthropic.com/usage", "실제 비용은 여기서 확인해요"),
-
-    h("h3", { class: "board-h" }, "랭킹 점검", worry > 0 && h("em", { class: "board-warn" }, String(worry))),
-    h("div", { class: "board-grid" },
-      tile("서버가 깎은 계정", b.rankings.flagged, null, b.rankings.flagged ? "warn" : ""),
-      tile("랭킹에서 숨긴 계정", b.rankings.hidden)),
-    b.rankings.flagged_rows.map((row) => h("div", { class: "board-row warn" }, h("b", null, who(row)), h("small", null, row.reason))),
-    b.rankings.odd_rows.map((row) => h("div", { class: "board-row" }, h("b", null, who(row)),
-      h("small", null, `이번 주 ${row.week_points}점 · 단어 ${row.words}개 · 단어당 ${row.per_word}점`))),
-    worry === 0 && h("p", { class: "small muted" }, "지금은 살펴볼 계정이 없어요."),
-    h("p", { class: "small muted" }, "자세한 점검은 supabase/checks/ranking_audit.sql을 SQL Editor에서 실행하세요."),
-
-    h("h3", { class: "board-h" }, "리그·친구"),
-    h("div", { class: "board-grid" },
-      tile("이번 주 리그 참여", b.league.playing, TIERS.map((one, i) => `${one.emoji}${b.league.tiers[i] || 0}`).join(" ")),
-      tile("7일 대결", b.social.duels_7d, `친구 관계 ${b.social.friendships}`),
-      tile("쓰인 초대장", b.social.invites_used, `남은 초대장 ${b.social.invites_left}`),
-      tile("진행 중 공지", b.notices, `최신 ${b.version?.latest || "-"} · 최소 ${b.version?.minimum || "-"}`)),
-
-    h("h3", { class: "board-h" }, "바로 가기"),
-    link("스토어 리뷰와 평점", `https://chromewebstore.google.com/detail/${STORE_ID}/reviews`),
-    link("스토어 개발자 대시보드", "https://chrome.google.com/webstore/devconsole", "설치 수, 심사 상태"),
-    link("Supabase SQL Editor", "https://supabase.com/dashboard/project/axstdfuufvgdjanahght/sql/new", "공지 쓰기, 버전 숫자, 랭킹 점검"),
-    link("서버 함수 로그", "https://supabase.com/dashboard/project/axstdfuufvgdjanahght/functions/lookup/logs"),
-  ];
-}
+const openSettings = () => openPage("settings");
 const openShop = () => openPage("shop");
 
 const myShop = () => ({ ...DEFAULT_SHOP, ...(state.user?.shop || {}) });
@@ -2384,8 +2303,6 @@ function settingsView() {
     h("div", { class: "page-head" },
       h("button", { class: "back", "aria-label": t("뒤로"), title: t("뒤로"), onclick: openSettings }, "←"),
       h("h2", { class: "page-title" }, t("설정"))),
-    state.board && h("button", { class: "board-open", onclick: () => { state.tab = "board"; render(); } },
-      h("b", null, "운영 보드"), h("small", null, `가입자 ${state.board.users.members} · 오늘 활성 ${state.board.users.active_today}`), h("i", { "aria-hidden": "true" }, "›")),
     h("section", { class: "block prefs" },
       h("form", { class: "row", onsubmit: async (e) => {
         e.preventDefault();
@@ -2617,7 +2534,7 @@ function render() {
   else if (!state.user.grade) app.replaceChildren(...[banner, gradePicker()].filter(Boolean));
   else {
     const tabs = [["search", t("사전")], ["words", t("단어장")], ["quiz", t("퀴즈")], ["rank", t("랭킹")]];
-    const view = { search: searchView, words: wordsView, quiz: quizView, rank: rankView, settings: settingsView, shop: shopView, board: boardView, friends: () => friends().view() }[state.tab]();
+    const view = { search: searchView, words: wordsView, quiz: quizView, rank: rankView, settings: settingsView, shop: shopView, friends: () => friends().view() }[state.tab]();
     app.replaceChildren(...[
       h("header", null,
         h("h1", null, h("button", { class: "home", title: t("처음 화면으로"), onclick: goHome }, logoIcon(28), wordmark(25))),

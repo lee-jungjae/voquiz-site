@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>VOQUIZ 운영 보드</title>
+<style>
+  :root { --accent: #655f9f; --ink: #2b2840; --muted: #6f6b85; --line: #e7e5ef; --surface: #f6f5fb; --warn-bg: #fde2d6; --warn: #7a2408; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; color: var(--ink); background: #fff; word-break: keep-all; }
+  main { max-width: 1080px; margin: 0 auto; padding: 28px 20px 60px; }
+  header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+  h1 { font-size: 24px; margin: 0; letter-spacing: -.02em; }
+  h1 span { color: var(--accent); }
+  .stamp { color: var(--muted); font-size: 13px; margin: 0 0 8px; }
+  .spacer { flex: 1; }
+  button, .btn { font: inherit; cursor: pointer; border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 999px; padding: 7px 16px; font-size: 13.5px; font-weight: 600; }
+  button.main { background: var(--accent); border-color: var(--accent); color: #fff; padding: 12px 22px; font-size: 15px; }
+  button:hover { border-color: var(--ink); }
+  h2 { display: flex; align-items: center; gap: 8px; font-size: 16px; margin: 30px 0 10px; }
+  .count { font-size: 11px; font-weight: 800; color: #fff; background: #c2452f; border-radius: 999px; padding: 1px 8px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .tile { min-width: 0; display: grid; gap: 1px; padding: 12px 14px; border-radius: 14px; background: var(--surface); }
+  .tile small { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .tile b { font-size: 26px; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+  .tile span { font-size: 12px; color: var(--muted); }
+  .tile.warn { background: var(--warn-bg); }
+  .tile.warn b { color: var(--warn); }
+  .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-top: 10px; }
+  .chart { padding: 12px 14px 10px; border: 1px solid var(--line); border-radius: 14px; }
+  .chart small { font-size: 12px; font-weight: 600; color: var(--muted); }
+  .chart em { font-style: normal; font-weight: 500; }
+  .bars { display: flex; align-items: flex-end; gap: 4px; height: 90px; margin-top: 10px; }
+  .bars i { flex: 1; min-width: 0; border-radius: 3px 3px 0 0; background: var(--accent); opacity: .5; position: relative; }
+  .bars i:last-child { opacity: 1; }
+  .bars i:hover { opacity: 1; }
+  .bars i:hover::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 11px; background: var(--ink); color: #fff; border-radius: 6px; padding: 2px 6px; z-index: 1; }
+  .axis { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 10px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; color: var(--muted); font-weight: 600; }
+  tr.warn td { background: #fff4ef; }
+  .links { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+  .links a { display: grid; gap: 2px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); color: inherit; text-decoration: none; }
+  .links a:hover { border-color: var(--ink); }
+  .links b { font-size: 14px; }
+  .links small { font-size: 12px; color: var(--muted); }
+  .center { min-height: 60vh; display: grid; place-content: center; justify-items: center; gap: 14px; text-align: center; }
+  .note { color: var(--muted); font-size: 13px; }
+  .error { color: var(--warn); background: var(--warn-bg); border-radius: 12px; padding: 10px 14px; font-size: 13.5px; }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+// The board for the people who run VOQUIZ. Anyone can open this page, but the numbers come from
+// the server function admin_board(), which answers only an account listed in `admins`
+// (supabase/migrations/0013_admin_board.sql). Signing in is Google, through Supabase.
+// The address and key below are the public ones the extension itself ships with.
+const SUPABASE_URL = "https://axstdfuufvgdjanahght.supabase.co";
+const PUBLIC_KEY = "sb_publishable_BPj_xNsd9JWjDGVsXK0MtA_Ydov6fol";
+const PROJECT = "axstdfuufvgdjanahght";
+const STORE_ID = "ofbdlindljeoffhooafjjefebcdpkedi";
+const SESSION = "voquiz_admin_session"; // kept for this browser tab only
+const TIERS = ["🌸", "🏝️", "🐳", "❄️", "🌈", "☁️", "⭐"];
+
+const app = document.getElementById("app");
+const DEMO = new URLSearchParams(location.search).has("demo");
+const esc = (text) => String(text ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+let session = null;
+try { session = JSON.parse(sessionStorage.getItem(SESSION)); } catch { /* none */ }
+const keep = (next) => { session = next; next ? sessionStorage.setItem(SESSION, JSON.stringify(next)) : sessionStorage.removeItem(SESSION); };
+
+// Back from Google: the tokens arrive after the "#". They are taken out of the address at once.
+if (location.hash.includes("access_token=")) {
+  const got = new URLSearchParams(location.hash.slice(1));
+  keep({ access: got.get("access_token"), refresh: got.get("refresh_token"), until: Date.now() + Number(got.get("expires_in") || 3600) * 1000 });
+  history.replaceState(null, "", location.pathname + location.search);
+}
+
+function signIn() {
+  const back = location.origin + location.pathname;
+  location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(back)}`;
+}
+async function token() {
+  if (!session) throw new Error("signed_out");
+  if (session.until - Date.now() > 60000) return session.access;
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+    method: "POST", headers: { apikey: PUBLIC_KEY, "Content-Type": "application/json" }, body: JSON.stringify({ refresh_token: session.refresh }),
+  });
+  if (!res.ok) { keep(null); throw new Error("signed_out"); }
+  const next = await res.json();
+  keep({ access: next.access_token, refresh: next.refresh_token, until: Date.now() + next.expires_in * 1000 });
+  return session.access;
+}
+async function board() {
+  if (DEMO) return sample();
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/admin_board`, {
+    method: "POST", headers: { apikey: PUBLIC_KEY, Authorization: `Bearer ${await token()}`, "Content-Type": "application/json" }, body: "{}",
+  });
+  const data = await res.json().catch(() => null);
+  if (res.status === 401) { keep(null); throw new Error("signed_out"); }
+  if (!res.ok) throw new Error(data?.message === "forbidden" ? "forbidden" : res.status === 404 ? "not_installed" : data?.message || "failed");
+  return data;
+}
+
+function gate(message) {
+  app.innerHTML = `<div class="center">
+    <h1><span>VOQUIZ</span> 운영 보드</h1>
+    <p class="note">운영자로 등록된 Google 계정으로 로그인하면 볼 수 있어요.</p>
+    ${message ? `<p class="error">${esc(message)}</p>` : ""}
+    <button class="main" id="in">Google로 로그인</button>
+    ${session ? `<button id="out">다른 계정으로</button>` : ""}
+  </div>`;
+  document.getElementById("in").onclick = signIn;
+  if (session) document.getElementById("out").onclick = () => { keep(null); gate(); };
+}
+
+const tile = (label, value, note, warn) => `<div class="tile${warn ? " warn" : ""}"><small>${esc(label)}</small><b>${esc(value ?? 0)}</b>${note ? `<span>${esc(note)}</span>` : ""}</div>`;
+function chart(daily, key, label) {
+  const top = Math.max(1, ...daily.map((d) => d[key]));
+  return `<div class="chart"><small>${esc(label)} <em>· 최고 ${top}</em></small>
+    <div class="bars" role="img" aria-label="${esc(label)}: ${daily.map((d) => d[key]).join(", ")}">${daily.map((d) =>
+      `<i data-tip="${esc(d.day.slice(5))} · ${d[key]}" style="height:${Math.max(3, Math.round((d[key] / top) * 100))}%"></i>`).join("")}</div>
+    <div class="axis"><span>${esc(daily[0].day.slice(5))}</span><span>오늘</span></div></div>`;
+}
+const link = (label, href, note) => `<a href="${esc(href)}" target="_blank" rel="noopener"><b>${esc(label)} ↗</b>${note ? `<small>${esc(note)}</small>` : ""}</a>`;
+const who = (row) => `${esc(row.nickname || `탐험가 ${row.tag}`)}<br><span class="note">${esc(row.email)}</span>`;
+
+function show(b) {
+  const worry = b.rankings.flagged + b.rankings.odd_rows.length;
+  app.innerHTML = `
+    <header><h1><span>VOQUIZ</span> 운영 보드</h1><span class="spacer"></span>
+      <button id="again">새로 고침</button>${DEMO ? "" : `<button id="out">로그아웃</button>`}</header>
+    <p class="stamp">${esc(new Date(b.at).toLocaleString("ko-KR"))} 기준${DEMO ? " · 보기용 가짜 숫자" : ""}</p>
+
+    <h2>이용자</h2>
+    <div class="grid">
+      ${tile("가입자", b.users.members, `오늘 +${b.users.new_today} · 7일 +${b.users.new_7d}`)}
+      ${tile("오늘 활성", b.users.active_today, "단어를 찾거나 포인트를 받은 사람")}
+      ${tile("7일 활성", b.users.active_7d, `30일 ${b.users.active_30d}`)}
+      ${tile("로그인만 한 계정", b.users.signed_in - b.users.members, "초대 코드 미입력")}
+      ${tile("플러스", b.users.plus, `쿠폰 사용 ${b.social.coupons_used}`)}
+    </div>
+    <div class="charts">${chart(b.daily, "active", "하루 활성 이용자 (14일)")}${chart(b.daily, "joined", "하루 가입자 (14일)")}</div>
+
+    <h2>단어와 AI 사용</h2>
+    <div class="grid">
+      ${tile("사전 단어", b.words.dictionary, `단어가 아니라고 판단한 것 ${b.words.not_words}`)}
+      ${tile("단어장에 담긴 수", b.words.saved, `오늘 찾은 수 ${b.words.searched_today}`)}
+      ${tile("오늘 AI 호출", b.ai.today, "새로 만든 단어 1개 = 1회")}
+      ${tile("7일 / 30일 AI 호출", `${b.ai.d7} / ${b.ai.d30}`, `전체 ${b.ai.total}`)}
+    </div>
+    <div class="charts">${chart(b.daily, "made", "하루 AI 호출 (14일)")}</div>
+
+    <h2>랭킹 점검 ${worry ? `<span class="count">${worry}</span>` : ""}</h2>
+    <div class="grid">
+      ${tile("서버가 점수를 깎은 계정", b.rankings.flagged, "하루 한도 초과 등", b.rankings.flagged > 0)}
+      ${tile("랭킹에서 숨긴 계정", b.rankings.hidden)}
+      ${tile("주간 점수가 이상한 계정", b.rankings.odd_rows.length, "300점 이상인데 단어당 30점 이상", b.rankings.odd_rows.length > 0)}
+    </div>
+    ${worry ? `<table><thead><tr><th>계정</th><th>내용</th></tr></thead><tbody>
+      ${b.rankings.flagged_rows.map((row) => `<tr class="warn"><td>${who(row)}</td><td>${esc(row.reason)}<br><span class="note">${esc(new Date(row.at).toLocaleString("ko-KR"))}${row.hidden ? " · 랭킹에서 숨김" : ""}</span></td></tr>`).join("")}
+      ${b.rankings.odd_rows.map((row) => `<tr><td>${who(row)}</td><td>이번 주 ${row.week_points}점 · 찾은 단어 ${row.words}개 · 단어당 ${row.per_word}점</td></tr>`).join("")}
+    </tbody></table>` : `<p class="note">지금은 살펴볼 계정이 없어요.</p>`}
+
+    <h2>리그 · 친구 · 운영</h2>
+    <div class="grid">
+      ${tile("이번 주 리그 참여", b.league.playing, TIERS.map((emoji, i) => `${emoji}${b.league.tiers[i] || 0}`).join(" "))}
+      ${tile("7일 대결", b.social.duels_7d, `친구 관계 ${b.social.friendships}`)}
+      ${tile("쓰인 초대장", b.social.invites_used, `남은 초대장 ${b.social.invites_left}`)}
+      ${tile("진행 중 공지", b.notices)}
+      ${tile("앱 버전", b.version?.latest || "-", `최소 허용 ${b.version?.minimum || "-"}`)}
+    </div>
+
+    <h2>바로 가기</h2>
+    <div class="links">
+      ${link("Anthropic 사용량", "https://console.anthropic.com/usage", "실제 AI 비용")}
+      ${link("스토어 리뷰와 평점", `https://chromewebstore.google.com/detail/${STORE_ID}/reviews`)}
+      ${link("스토어 개발자 대시보드", "https://chrome.google.com/webstore/devconsole", "설치 수, 심사 상태")}
+      ${link("Supabase SQL Editor", `https://supabase.com/dashboard/project/${PROJECT}/sql/new`, "공지, 버전 숫자, 랭킹 점검")}
+      ${link("서버 함수 로그", `https://supabase.com/dashboard/project/${PROJECT}/functions/lookup/logs`)}
+      ${link("로그인한 계정 목록", `https://supabase.com/dashboard/project/${PROJECT}/auth/users`)}
+    </div>`;
+  document.getElementById("again").onclick = load;
+  if (!DEMO) document.getElementById("out").onclick = () => { keep(null); gate(); };
+}
+
+async function load() {
+  if (!DEMO && !session) return gate();
+  app.innerHTML = `<div class="center"><p class="note">불러오는 중…</p></div>`;
+  try {
+    show(await board());
+  } catch (err) {
+    gate({ signed_out: "", forbidden: "이 계정은 운영자로 등록되어 있지 않아요.", not_installed: "서버에 0013_admin_board.sql이 아직 실행되지 않았어요." }[err.message] ?? `불러오지 못했어요. (${err.message})`);
+  }
+}
+
+// Made-up numbers, for looking at the layout: admin.html?demo
+function sample() {
+  const day = (n) => new Date(Date.now() - n * 86400000).toLocaleDateString("sv");
+  return {
+    at: new Date().toISOString(),
+    users: { signed_in: 58, members: 46, new_today: 2, new_7d: 9, plus: 5, active_today: 14, active_7d: 31, active_30d: 40 },
+    words: { dictionary: 1284, not_words: 37, saved: 5210, searched_today: 96 },
+    ai: { today: 23, d7: 188, d30: 640, total: 1321 },
+    social: { friendships: 71, duels_7d: 44, invites_used: 39, invites_left: 191, coupons_used: 5 },
+    league: { playing: 27, tiers: { 0: 30, 1: 11, 2: 4, 3: 1 } },
+    rankings: { flagged: 1, hidden: 0,
+      flagged_rows: [{ email: "someone@example.com", nickname: "준서", tag: 733, reason: "points: +2600 in one day, limit 2000 (sent 9100)", at: new Date().toISOString(), hidden: false }],
+      odd_rows: [{ email: "other@example.com", nickname: "", tag: 482, week_points: 640, words: 9, per_word: 71.1 }] },
+    notices: 1, version: { latest: "0.1.2", minimum: "0.1.0" },
+    daily: Array.from({ length: 14 }, (_, i) => ({ day: day(13 - i), joined: [0, 1, 0, 2, 1, 0, 0, 3, 1, 0, 1, 2, 0, 2][i], active: [8, 11, 9, 14, 12, 6, 5, 13, 15, 12, 16, 14, 7, 14][i], made: [12, 20, 15, 31, 22, 9, 6, 28, 35, 24, 30, 27, 11, 23][i] })),
+  };
+}
+
+load();
+</script>
+</body>
+</html>

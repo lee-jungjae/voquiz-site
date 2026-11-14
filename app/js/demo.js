@@ -414,24 +414,6 @@ export async function useInvite(code) {
 // Invite only: the demo student is a member unless wb_demo_member says otherwise (to try the gate).
 // For trying the update notice: localStorage wb_demo_version = {"latest":"9.0.0","minimum":"0.1.0"}
 export async function appVersion() { return read("wb_demo_version", null); }
-// The admin board with made-up numbers. Shown in the demo only with wb_demo_admin = true.
-export async function adminBoard() {
-  if (!read("wb_demo_admin", false)) throw Object.assign(new Error("forbidden"), { code: "forbidden", status: 400 });
-  const day = (n) => new Date(Date.now() - n * 86400000).toLocaleDateString("sv");
-  return {
-    at: new Date().toISOString(),
-    users: { signed_in: 58, members: 46, new_today: 2, new_7d: 9, plus: 5, active_today: 14, active_7d: 31, active_30d: 40 },
-    words: { dictionary: 1284, not_words: 37, saved: 5210, searched_today: 96 },
-    ai: { today: 23, d7: 188, d30: 640, total: 1321 },
-    social: { friendships: 71, duels_7d: 44, invites_used: 39, invites_left: 191, coupons_used: 5 },
-    league: { playing: 27, tiers: { 0: 30, 1: 11, 2: 4, 3: 1 } },
-    rankings: { flagged: 1, hidden: 0,
-      flagged_rows: [{ email: "someone@example.com", nickname: "준서", tag: 733, reason: "points: +2600 in one day, limit 2000 (sent 9100)", at: new Date().toISOString(), hidden: false }],
-      odd_rows: [{ email: "other@example.com", nickname: "", tag: 482, week_points: 640, words: 9, per_word: 71.1 }] },
-    notices: 1, version: { latest: "0.1.2", minimum: "0.1.0" },
-    daily: Array.from({ length: 14 }, (_, i) => ({ day: day(13 - i), joined: [0, 1, 0, 2, 1, 0, 0, 3, 1, 0, 1, 2, 0, 2][i], active: [8, 11, 9, 14, 12, 6, 5, 13, 15, 12, 16, 14, 7, 14][i], made: [12, 20, 15, 31, 22, 9, 6, 28, 35, 24, 30, 27, 11, 23][i] })),
-  };
-}
 // For trying notices: localStorage wb_demo_notices = [{"id":1,"kind":"news","title":{"ko":"..."},"body":{"ko":"..."},"action":"shop"}]
 export async function notices() { return read("wb_demo_notices", []); }
 export async function isMember() { return read("wb_demo_member", true); }
