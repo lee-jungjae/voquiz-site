@@ -1,6 +1,6 @@
 import { api, DEMO } from "./api.js";
 import { STORE_URL } from "./config.js";
-import { t, getLang, setLang, hasChosenLang, locale, LANGS } from "./i18n.js";
+import { t, getLang, setLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js";
 import { THEMES, BACKGROUNDS, DEFAULT_SHOP, applyShop, themeColor } from "./shop.js";
 import { cleanEntry } from "./clean.js";
 import { mascot, portrait, reaction } from "./mascot.js";
@@ -2382,6 +2382,26 @@ function loginView() {
 }
 
 let lastScreen = null;
+
+// Explanations (the text of a sheet, a hint under a field, a rule, a step of a guide) get one
+// sentence per line. What a character says, toasts, banners, buttons and titles are left as written.
+const PARAGRAPHS = ".sheet p, .league-join p, .info-list p, .hint, .guide-steps li, main p.small, main section > p, .gate p";
+const NOT_PARAGRAPHS = ".mascot, .guide-say, .hello, button, a, .chip, .league, .lang-box, .entry";
+function tidyParagraphs(root) {
+  for (const el of root.querySelectorAll?.(PARAGRAPHS) || []) {
+    if (el.closest(NOT_PARAGRAPHS)) continue;
+    let changed = false;
+    for (const node of el.childNodes) {
+      if (node.nodeType !== 3 || node.parentElement.closest(NOT_PARAGRAPHS)) continue;
+      const text = sentences(node.nodeValue);
+      if (text !== node.nodeValue) { node.nodeValue = text; changed = true; }
+    }
+    if (changed) el.classList.add("by-sentence");
+  }
+}
+new MutationObserver((changes) => {
+  for (const change of changes) for (const node of change.addedNodes) if (node.nodeType === 1) tidyParagraphs(node.parentElement || node);
+}).observe(document.documentElement, { childList: true, subtree: true });
 
 function render() {
   applyShop(state.user?.shop);

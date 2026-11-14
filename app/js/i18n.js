@@ -30,6 +30,22 @@ export function t(key, vars) {
   return text;
 }
 
+// An explanation of several sentences reads better with each sentence on its own line, so a line
+// break goes between them. Only for explanations (see tidyParagraphs in app.js): never for what a
+// character says, a toast, a banner or a button. Very short pieces such as "정답! 대단해요!" stay
+// together, and so do things like "e.g. this".
+export function sentences(text) {
+  if (text.length < 30 || !/[.!?。！？] /.test(text)) return text;
+  const parts = text.split(/(?<=[.!?。！？]) +(?=(?![a-z])[\p{L}\p{N}"“‘'(+{])/u);
+  let out = parts[0], line = parts[0].length;
+  for (const part of parts.slice(1)) {
+    const apart = line >= 12 && part.length >= 8;
+    out += (apart ? "\n" : " ") + part;
+    line = apart ? part.length : line + 1 + part.length;
+  }
+  return out;
+}
+
 // Korean phrase: [English, 简体中文]
 const T = {
   // shell

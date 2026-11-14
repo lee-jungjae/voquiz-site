@@ -1388,3 +1388,8 @@ button.league { width: 100%; text-align: left; border: 0; font: inherit; color: 
 .rank-row .place.medal .spark.late { animation-delay: 1.2s; }
 @keyframes spark { 0%, 100% { transform: scale(.5); opacity: .4; } 50% { transform: scale(1.15); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .rank-row .place.medal .spark { animation: none; } }
+
+/* ---------- explanations: each sentence starts on its own line (see tidyParagraphs in app.js) ---------- */
+.by-sentence { white-space: pre-line; }
+/* Korean lines break between words, never in the middle of one. */
+html:lang(ko) body { word-break: keep-all; overflow-wrap: break-word; }
