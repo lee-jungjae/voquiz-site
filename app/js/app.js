@@ -1786,6 +1786,31 @@ function leagueInfoView() {
   ];
 }
 
+// Medals for the first three places, drawn like the characters: round shapes, a soft shine, a
+// ribbon in the app's own purple and lime.
+const MEDALS = {
+  1: { rim: "#e0a92e", face: "#ffd966", glow: "#fff3bf", ink: "#6b4700" },
+  2: { rim: "#9aa3b2", face: "#dfe4ec", glow: "#f6f8fb", ink: "#3a4250" },
+  3: { rim: "#b9713f", face: "#eab489", glow: "#f8d9c0", ink: "#5a2e10" },
+};
+function medal(rank) {
+  const c = MEDALS[rank];
+  const el = document.createElement("span");
+  el.className = `place medal m${rank}`;
+  el.setAttribute("role", "img");
+  el.setAttribute("aria-label", String(rank));
+  el.innerHTML = `<svg viewBox="0 0 40 46" aria-hidden="true">
+    <path d="M9 1 h9 l5 15 h-10 z" fill="#655f9f"/><path d="M31 1 h-9 l-5 15 h10 z" fill="#7d77b6"/>
+    <path d="M12.2 1 h2.6 l5 15 h-2.6 z" fill="#bbd86b"/><path d="M27.8 1 h-2.6 l-5 15 h2.6 z" fill="#bbd86b"/>
+    <circle cx="20" cy="29" r="15" fill="${c.rim}"/>
+    <circle cx="20" cy="29" r="11.5" fill="${c.face}"/>
+    <path d="M11.5 25 a9.5 9.5 0 0 1 10 -5.6" fill="none" stroke="${c.glow}" stroke-width="2.6" stroke-linecap="round"/>
+    <text x="20" y="34.4" text-anchor="middle" font-size="15" font-weight="800" fill="${c.ink}">${rank}</text>
+    ${rank === 1 ? `<path class="spark" d="M33 14 l1.2 2.8 l2.8 1.2 l-2.8 1.2 l-1.2 2.8 l-1.2 -2.8 l-2.8 -1.2 l2.8 -1.2 z" fill="#fff" stroke="${c.rim}" stroke-width=".8" stroke-linejoin="round"/>` : ""}
+  </svg>`;
+  return el;
+}
+
 function rankView() {
   if (state.leagueInfo) return leagueInfoView();
   const boards = [["points", t("주간 리그")], ["found", t("첫 발견")], ["streak", t("연속 도전")], ["duel", t("대결")]];
@@ -1797,7 +1822,7 @@ function rankView() {
   const mine = rows.find((row) => row.me);
   // Each row: place, the student's own character, name (with their line under it), score.
   const line = (row) => h("li", { class: `rank-row${row.me ? " me" : ""}${row.rank <= 3 && row.score > 0 ? ` top${row.rank}` : ""}${row.zone ? ` zone-${row.zone}` : ""}` },
-    h("span", { class: "place" }, String(row.rank)),
+    row.rank <= 3 && row.score > 0 ? medal(row.rank) : h("span", { class: "place" }, String(row.rank)),
     h("span", { class: "ava", "aria-hidden": "true" }, portrait(row.me ? myShop().character : row.character || "bubble")),
     h("span", { class: "who" },
       h("span", { class: "who-name" }, row.bot ? row.nickname : nameOf(row.nickname, row.tag),
