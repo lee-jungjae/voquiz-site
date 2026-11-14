@@ -1695,7 +1695,7 @@ function leagueRows() {
   const mine = { me: true, nickname: state.user.nickname || "", tag: myTag(), score: weekEarned(), character: myShop().character, motto: state.user.motto || "" };
   const others = weekly ? (state.rankings?.points || []).filter((row) => !row.me && row.score > 0) : [];
   const characters = friendsOnly ? [] : leagueCharacters(weekKey(), weekStart(), myTier()).map((c) => ({
-    bot: true, nickname: c.character.name, character: c.character.id, score: c.score, final: c.final,
+    bot: true, nickname: t(c.character.name), character: c.character.id, score: c.score, final: c.final,
     motto: CHARACTER_LINES[c.character.id]?.[Math.max(0, lang)] || "",
   }));
   // On the board of everyone, the top places go up a tier and the bottom ones go down.
