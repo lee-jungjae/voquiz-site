@@ -9,6 +9,7 @@ import { logoIcon, wordmark } from "./logo.js";
 import { CHARACTER_LINES } from "./character-lines.js";
 import { initDuel } from "./duel.js";
 import { initFriends } from "./friends.js";
+import { MOTTOS } from "./mottos.js";
 import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js";
 import { SIGNATURES } from "./signatures.js";
 import { WORD_LISTS } from "./wordlists.js";
@@ -326,13 +327,11 @@ async function chooseGrade(grade) {
 // Choosing a name is free the first time. After that each change costs points, and the price
 // doubles every time (50, 100, 200, ...), so a name is something to settle on, not to keep flipping.
 const NAME_BASE_COST = 50;
-// A short line others see under the student's name on the rankings. No links or contact details.
-async function saveMotto(typed) {
-  const motto = String(typed || "").replace(/\s+/g, " ").trim().slice(0, 30);
-  if (/https?:|www\.|@|\d{7,}|\d{2,4}[-\s.]\d{3,4}[-\s.]\d{4}/i.test(motto)) {
-    state.notice = { text: t("한마디에는 연락처나 링크를 넣을 수 없어요.") };
-    return false;
-  }
+// A short line others see under the student's name on the rankings. It is picked from a list
+// (mottos.js) and saved as its id; anything else that may be stored is simply not shown.
+const mottoOf = (id) => MOTTOS[id]?.[Math.max(0, ["ko", "en", "zh"].indexOf(getLang()))] || "";
+async function saveMotto(id) {
+  const motto = MOTTOS[id] ? id : "";
   state.user.motto = motto;
   await api.saveProfile({ motto }).catch(console.error);
   publishRank();
@@ -1808,25 +1807,24 @@ function rankView() {
       h("span", { class: "who-name" }, row.bot ? row.nickname : nameOf(row.nickname, row.tag),
         row.me && h("small", null, t("나")), row.bot && h("small", { class: "bot" }, t("캐릭터"))),
       row.me
-        ? h("button", { class: "who-motto edit", title: t("한마디 바꾸기"), onclick: () => { state.mottoEdit = true; state.notice = null; render(); document.getElementById("motto")?.focus(); } },
-            state.user.motto || t("한마디 쓰기"), h("i", { "aria-hidden": "true" }, "✎"))
-        : row.motto && h("span", { class: "who-motto" }, row.motto)),
+        ? h("button", { class: "who-motto edit", title: t("한마디 바꾸기"), onclick: () => { state.mottoEdit = !state.mottoEdit; render(); } },
+            mottoOf(state.user.motto) || t("한마디 고르기"), h("i", { "aria-hidden": "true" }, "✎"))
+        : (row.bot ? row.motto : mottoOf(row.motto)) && h("span", { class: "who-motto" }, row.bot ? row.motto : mottoOf(row.motto))),
     h("b", null, score(row.score)));
-  // Writing the line happens right here, under the student's own row.
+  // Picking the line happens right here, under the student's own row.
+  const choose = async (id) => {
+    await saveMotto(id);
+    state.mottoEdit = false;
+    toastText(id ? t("한마디를 저장했어요.") : t("한마디를 지웠어요."));
+    render();
+  };
   const mottoForm = () => h("li", { class: "motto-edit" },
-    h("form", { class: "row", onsubmit: async (e) => {
-      e.preventDefault();
-      state.notice = null;
-      if (await saveMotto(document.getElementById("motto").value)) {
-        state.mottoEdit = false;
-        toastText(state.user.motto ? t("한마디를 저장했어요.") : t("한마디를 지웠어요."));
-      }
-      render();
-    } },
-      h("input", { type: "text", id: "motto", maxLength: 30, autocomplete: "off", value: state.user.motto || "", placeholder: t("한마디 · 예: 오늘도 단어 10개!"), "aria-label": t("한마디"), style: "flex:1" }),
-      h("button", { class: "btn" }, t("저장")),
-      h("button", { type: "button", class: "link", onclick: () => { state.mottoEdit = false; state.notice = null; render(); } }, t("취소"))),
-    h("p", { class: "small muted hint" }, state.notice?.text || t("내 이름 아래에 다른 친구들에게 보여요. (30자까지)")));
+    h("p", { class: "small muted hint" }, t("내 이름 아래에 보일 한마디를 골라요.")),
+    h("div", { class: "motto-chips", role: "group", "aria-label": t("한마디") },
+      Object.keys(MOTTOS).map((id) => h("button", { class: "chip", "aria-pressed": String(state.user.motto === id), onclick: () => choose(id) }, mottoOf(id)))),
+    h("p", { class: "center", style: "margin:8px 0 0" },
+      state.user.motto && MOTTOS[state.user.motto] && h("button", { class: "link", onclick: () => choose("") }, t("한마디 없이")),
+      " ", h("button", { class: "link", onclick: () => { state.mottoEdit = false; render(); } }, t("닫기"))));
   // Between the places that go up, stay and go down, a line says so.
   const lines = (list) => list.flatMap((row, i) => [
     row.zone === "down" && list[i - 1] && list[i - 1].zone !== "down" && h("li", { class: "zone-line down" }, t("▼ 여기부터 강등")),

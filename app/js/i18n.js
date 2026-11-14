@@ -520,6 +520,10 @@ const T = {
   "일곱 개의 세계": ["The seven worlds", "七个世界"],
   "아직 가 보지 못한 세계": ["A world you haven't reached yet", "还没到过的世界"],
   "??? 아직 가 보지 못한 세계": ["??? A world you haven't reached yet", "??? 还没到过的世界"],
+  "한마디 고르기": ["Pick your line", "选一句话"],
+  "내 이름 아래에 보일 한마디를 골라요.": ["Pick the line shown under your name.", "选一句显示在你名字下面的话。"],
+  "한마디 없이": ["No line", "不显示"],
+  "닫기": ["Close", "关闭"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],
   "테마 상점 열기": ["Open the theme shop", "打开主题商店"],
 
@@ -648,7 +652,6 @@ const T = {
   "연속": ["in a row", "连续"],
   "도전 시작": ["Start challenge", "开始挑战"],
   "다시 도전": ["Try again", "再挑战一次"],
-  "닫기": ["Close", "关闭"],
   "레벨 업!": ["Level up!", "升级！"],
   "새 최고 기록!": ["New best!", "新纪录！"],
   "연속으로 맞힌 단어": ["Words in a row", "连续答对的单词"],

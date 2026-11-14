@@ -201,9 +201,9 @@ export async function getRankings(grade, friends = false) {
   const me = getUser();
   const mine = read(WORDS_KEY, []);
   const others = [
-    { nickname: "하늘", tag: 311, points: 210, found: 9, words: 64, streak: 17, grade: 3, character: "rabbit", motto: "오늘도 단어 10개!" },
+    { nickname: "하늘", tag: 311, points: 210, found: 9, words: 64, streak: 17, grade: 3, character: "rabbit", motto: "m02" },
     { nickname: "", tag: 482, points: 130, found: 14, words: 51, streak: 31, grade: 7, character: "pudding", motto: "" },
-    { nickname: "Mina", tag: 205, points: 85, found: 3, words: 77, streak: 12, grade: 7, character: "mushroom", motto: "Let's duel!" },
+    { nickname: "Mina", tag: 205, points: 85, found: 3, words: 77, streak: 12, grade: 7, character: "mushroom", motto: "m03" },
     { nickname: "준서", tag: 733, points: 40, found: 6, words: 22, streak: 8, grade: 3, character: "bubble", motto: "" },
     { nickname: "", tag: 918, points: 12, found: 0, words: 8, streak: 3, grade: 7, character: "bubble", motto: "" },
   ];
