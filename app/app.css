@@ -1393,3 +1393,23 @@ button.league { width: 100%; text-align: left; border: 0; font: inherit; color: 
 .by-sentence { white-space: pre-line; }
 /* Korean lines break between words, never in the middle of one. */
 html:lang(ko) body { word-break: keep-all; overflow-wrap: break-word; }
+
+/* ---------- the three numbers on a guide never spill out of their tiles ---------- */
+.guide-stats .stat { overflow: hidden; }
+.guide-stats .stat b { min-width: 0; max-width: 100%; font-size: clamp(13px, 4.1vw, 16px); gap: 3px; }
+
+/* ---------- fixes from the layout check (every screen, 360 and 420 wide, three languages) ---------- */
+/* Chinese has no spaces to break at: "keep-all" made whole sentences run off the screen. */
+html:lang(zh) * { word-break: normal !important; }
+.shelf { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.shelf > * { min-width: 0; }
+/* A long line under a name wraps to a second line instead of being cut. */
+.rank-row .who-motto, .rank-row .who-motto.edit { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-height: 1.3; }
+.duel-text b { white-space: normal; }
+.invite-card { flex-wrap: wrap; }
+.invite-left { flex-basis: 150px; }
+/* Tabs take the room their own label needs, so a long label ("Characters 84") never pushes the row wider than the screen. */
+.segment.three, .segment.four { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(min-content, 1fr); }
+.segment button { white-space: nowrap; padding-left: 3px; padding-right: 3px; }
+.segment.three button { font-size: clamp(13px, 4vw, 15px); }
+.segment small { margin-left: 4px; padding: 1px 6px; }

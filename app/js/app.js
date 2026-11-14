@@ -1851,7 +1851,7 @@ function rankView() {
     h("span", { class: "ava", "aria-hidden": "true" }, portrait(row.me ? myShop().character : row.character || "bubble")),
     h("span", { class: "who" },
       h("span", { class: "who-name" }, row.bot ? row.nickname : nameOf(row.nickname, row.tag),
-        row.me && h("small", null, t("나")), row.bot && h("small", { class: "bot" }, t("캐릭터"))),
+        row.me && h("small", null, t("나")), row.bot && h("small", { class: "bot" }, getLang() === "en" ? "character" : t("캐릭터"))),
       row.me
         ? h("button", { class: "who-motto edit", title: t("한마디 바꾸기"), onclick: () => { state.mottoEdit = !state.mottoEdit; render(); } },
             mottoOf(state.user.motto) || t("한마디 고르기"), h("i", { "aria-hidden": "true" }, "✎"))
@@ -1967,7 +1967,7 @@ function quizSetup() {
     h("div", { class: "guide-stats" },
       guideStat(t("문제 수"), t("{n}개", { n: cards.length }), "best"),
       guideStat(t("쓰는 포인트"), [coin(), `-${quizFee(cards.length)}`], "use"),
-      guideStat(t("다 맞히면"), [coin(), t("최대 +{n}", { n: quizMax(cards.length) })], "gain")),
+      guideStat(t("다 맞히면 최대"), [coin(), `+${quizMax(cards.length)}`], "gain")),
     h("p", { class: "small muted center", id: "quiz-count" },
       cards.length === 0 ? (scope.type === "review" ? t("지금은 틀린 단어가 없어요!") : t("이 범위에는 단어가 없어요. 범위를 바꿔 보세요."))
         : review > 0 && scope.type !== "review" ? t("지난번에 틀린 복습 단어 {n}개 포함", { n: review }) : ""),
