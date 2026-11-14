@@ -58,7 +58,7 @@ async function accessToken() {
 
 const authed = async (path, options = {}) => request(path, { ...options, token: await accessToken() });
 
-const toUser = (u) => ({ id: u.id, email: u.email, grade: u.user_metadata?.grade ?? null, points: u.user_metadata?.points ?? 0, search: u.user_metadata?.search ?? null, nickname: u.user_metadata?.nickname ?? "", shop: u.user_metadata?.shop ?? null, challenge: u.user_metadata?.challenge ?? null, nameChanges: u.user_metadata?.nameChanges ?? 0, noDuels: u.user_metadata?.noDuels ?? false, gift: u.user_metadata?.gift ?? null, duelFrom: u.user_metadata?.duelFrom ?? (u.user_metadata?.noDuels ? "none" : "all") });
+const toUser = (u) => ({ id: u.id, email: u.email, grade: u.user_metadata?.grade ?? null, points: u.user_metadata?.points ?? 0, search: u.user_metadata?.search ?? null, nickname: u.user_metadata?.nickname ?? "", shop: u.user_metadata?.shop ?? null, challenge: u.user_metadata?.challenge ?? null, nameChanges: u.user_metadata?.nameChanges ?? 0, noDuels: u.user_metadata?.noDuels ?? false, gift: u.user_metadata?.gift ?? null, weekly: u.user_metadata?.weekly ?? null, duelFrom: u.user_metadata?.duelFrom ?? (u.user_metadata?.noDuels ? "none" : "all") });
 
 export function getUser() {
   return session ? toUser(session.user) : null;

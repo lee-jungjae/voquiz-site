@@ -1206,3 +1206,31 @@ button.duel-row { width: 100%; text-align: left; }
 .leave b { color: #b93a2b; }
 .leave p, .leave label { margin: 0; font-size: 13px; line-height: 1.55; }
 .btn.danger { background: #d93a2b; color: #fff; }
+
+/* ---------- weekly goal ---------- */
+.daily-label { display: flex; align-items: center; gap: 8px; }
+.daily-label > span { margin-right: auto; }
+.week-chip { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 2px 9px 2px 4px; font-size: 11px; font-weight: 600; color: var(--muted); background: var(--surface); transition: background .15s; }
+.week-chip:hover { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.week-chip b { color: var(--text); font-variant-numeric: tabular-nums; }
+.week-chip i { width: 14px; height: 14px; border-radius: 50%; background: conic-gradient(var(--accent) var(--p), color-mix(in srgb, var(--accent) 22%, transparent) 0); -webkit-mask: radial-gradient(circle, transparent 3.5px, #000 4px); mask: radial-gradient(circle, transparent 3.5px, #000 4px); }
+.week-chip.done { background: var(--lime); color: var(--good); }
+.week-chip.done b { color: var(--good); }
+.goal-picks { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 12px 0 14px; }
+.goal-pick { border: 1.5px solid var(--border); border-radius: 14px; padding: 9px 0 7px; display: grid; gap: 1px; transition: border-color .15s, background .15s; }
+.goal-pick b { font-size: 18px; }
+.goal-pick small { font-size: 10px; font-weight: 700; color: var(--good); }
+.goal-pick:hover { border-color: var(--text); }
+.goal-pick[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); box-shadow: 0 0 0 1px var(--accent); }
+/* word list: day or week */
+.filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.filter-row .chips.one-line { flex: 1; min-width: 0; margin: 0 0 0 -20px; padding: 2px 4px 2px 20px; }
+.scope.small { flex: none; }
+.scope.small button { padding: 4px 10px; font-size: 12px; }
+.week-head { display: flex; align-items: baseline; gap: 8px; width: 100%; text-align: left; padding: 4px 0; }
+.week-head .week-name { font-size: 16px; font-weight: 700; }
+.week-head small { color: var(--muted); font-size: 12px; font-weight: 600; }
+.week-head .chev { margin-left: auto; color: var(--muted); font-size: 13px; }
+.week-bar { height: 4px; border-radius: 999px; background: var(--surface); overflow: hidden; margin: 2px 0 4px; }
+.week-bar i { display: block; height: 100%; border-radius: 999px; background: var(--accent); }
+.day.week:not(.open) { padding-bottom: 6px; border-bottom: 1px solid var(--line); }

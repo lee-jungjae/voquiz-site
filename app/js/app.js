@@ -407,6 +407,7 @@ async function search(term) {
       state.words = [result.word, ...state.words.filter((w) => w.term_norm !== result.word.term_norm)];
       state.entry = result.word;
       if (firstToday) awardSearch();
+      checkWeekly();
       // Nobody had looked this word up before: it goes down as this student's discovery.
       if (result.discovered) setTimeout(() => award(DISCOVERY_POINTS, t("처음 발견한 단어!"), true), firstToday ? 1300 : 0);
     } else {
@@ -457,20 +458,23 @@ function quizMax(questions) {
 }
 
 // Each quiz question has a time limit. When it runs out the question counts as not known.
-const QUESTION_MS = 10000;
+const QUESTION_MS = 10000; // to pick an answer
+const TYPED_MS = 20000; // to type one
+const limitFor = (typed) => (typed ? TYPED_MS : QUESTION_MS);
 let questionTimer = 0;
 function startQuestionTimer() {
   clearTimeout(questionTimer);
   const quiz = state.quiz;
   if (!quiz || quiz.index >= quiz.cards.length) return;
   const index = quiz.index;
-  quiz.deadline = Date.now() + QUESTION_MS;
+  quiz.limit = limitFor(quiz.questions[index].kind === "type");
+  quiz.deadline = Date.now() + quiz.limit;
   questionTimer = setTimeout(() => {
     if (state.quiz !== quiz || quiz.index !== index || quiz.phase !== "ask") return;
     quiz.timedOut = true;
     submitAnswer("");
     render();
-  }, QUESTION_MS);
+  }, quiz.limit);
 }
 
 function startQuiz() {
@@ -599,11 +603,56 @@ function awardSearch() {
 }
 
 // Today's search goal, shown right under the search bar.
+// ----- a goal for the week -----
+// "Look up N different words this week" (the week starts on Monday). Reaching it pays a bonus
+// in proportion to the goal, once a week. Kept with the account: { goal, claimed: <week> }.
+const WEEK_GOALS = [10, 20, 35, 50, 70];
+const WEEK_DEFAULT = 35;
+function weekStart(when = new Date()) {
+  const d = new Date(when.getFullYear(), when.getMonth(), when.getDate());
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); // back to Monday
+  return d;
+}
+const weekKey = (when) => dayOf(weekStart(when));
+const weekGoal = () => (WEEK_GOALS.includes(state.user.weekly?.goal) ? state.user.weekly.goal : WEEK_DEFAULT);
+const weekCount = () => state.words.filter((w) => new Date(w.last_searched_at) >= weekStart()).length;
+const weekBonus = (goal) => goal; // one point for every word of the goal
+function saveWeekly(change) {
+  state.user.weekly = { goal: weekGoal(), ...(state.user.weekly || {}), ...change };
+  api.saveProfile({ weekly: state.user.weekly }).catch(console.error);
+}
+// Called after a search: the first time the count reaches the goal in a week, the bonus is paid.
+function checkWeekly() {
+  if (weekCount() < weekGoal() || state.user.weekly?.claimed === weekKey()) return;
+  saveWeekly({ claimed: weekKey() });
+  setTimeout(() => award(weekBonus(weekGoal()), t("주간 목표 달성!"), true), 1500);
+}
+function weeklyGoalSheet() {
+  sheet({
+    art: "🎯", title: t("이번 주 목표"),
+    text: t("일주일(월~일) 동안 찾을 단어 수를 정해요. 목표를 채우면 목표만큼 보너스 포인트를 받아요."),
+    actions: [{ label: t("닫기"), run: () => true }],
+  });
+  const row = h("div", { class: "goal-picks" }, WEEK_GOALS.map((goal) =>
+    h("button", {
+      class: "goal-pick", "aria-pressed": String(weekGoal() === goal),
+      onclick: () => { saveWeekly({ goal }); document.getElementById("sheet")?.remove(); render(); toastText(t("이번 주 목표: {n}개", { n: goal })); checkWeekly(); },
+    }, h("b", null, String(goal)), h("small", null, `+${weekBonus(goal)}`))));
+  document.querySelector("#sheet .sheet p")?.after(row);
+}
+function weeklyChip() {
+  const count = weekCount(), goal = weekGoal();
+  const done = count >= goal;
+  return h("button", { class: `week-chip${done ? " done" : ""}`, title: t("이번 주 목표 바꾸기"), onclick: weeklyGoalSheet },
+    h("i", { style: `--p:${Math.min(1, count / goal) * 360}deg`, "aria-hidden": "true" }),
+    t("이번 주"), h("b", null, `${Math.min(count, 999)} / ${goal}`), done && "✓");
+}
+
 function dailyGoal() {
   const got = searchPointsToday();
   const done = got >= SEARCH_DAILY_MAX;
   return h("div", { class: `daily${done ? " done" : ""}` },
-    h("div", { class: "daily-label" }, h("span", null, t("오늘 검색 포인트"), isPlus() && h("em", { class: "plus-badge" }, "PLUS")), h("b", null, `${got} / ${SEARCH_DAILY_MAX}`)),
+    h("div", { class: "daily-label" }, h("span", null, t("오늘 검색 포인트"), isPlus() && h("em", { class: "plus-badge" }, "PLUS")), weeklyChip(), h("b", null, `${got} / ${SEARCH_DAILY_MAX}`)),
     h("div", { class: "bar" }, h("i", { style: `width:${(got / SEARCH_DAILY_MAX) * 100}%` })),
     // One short line. How many searches are left is the character's to say, so it is not repeated here.
     h("div", { class: "daily-hint" }, done
@@ -1050,13 +1099,17 @@ function mascotGift() {
   return t("선물이야!");
 }
 
-const quotaKey = () => `${dayOf(new Date())}:${searchesLeft()}`;
+const quotaKey = () => `${dayOf(new Date())}:${searchesLeft()}:${weekCount()}`;
 // How many searches are left today, in the character's own words. It says so when the home
 // screen opens and again whenever the number has changed, not on every redraw.
 function quotaLine() {
-  if (!plansOn() || isPlus() || limitReached()) return null;
-  const left = searchesLeft();
   if (state.quotaSaid === quotaKey()) return null;
+  // Sometimes it is about the week instead of the day.
+  const toGo = weekGoal() - weekCount();
+  const week = toGo > 0 ? t("이번 주 목표까지 {n}개 남았어!", { n: toGo }) : null;
+  if (!plansOn() || isPlus() || limitReached()) return week;
+  if (week && Math.random() < 0.4) return week;
+  const left = searchesLeft();
   return left === FREE_SEARCHES ? t("오늘은 단어 {n}개를 찾을 수 있어!", { n: left })
     : left <= 3 ? t("오늘은 {n}번만 더 찾을 수 있어!", { n: left })
     : t("오늘 {n}번 더 찾을 수 있어!", { n: left });
@@ -1162,28 +1215,58 @@ function wordsView() {
   const shown = inLang(state.wordLang).filter((w) =>
     state.filter === "favorites" ? w.favorite : state.filter === "review" ? w.needs_review : state.filter === "found" ? w.discovered : true);
 
-  // Words arrive newest first, so the days come out newest first too.
-  const days = new Map();
+  // Words arrive newest first, so the days (or weeks) come out newest first too.
+  const byWeek = state.groupBy === "week";
+  const groups = new Map();
   for (const w of shown) {
-    const day = dayOf(w.last_searched_at);
-    if (!days.has(day)) days.set(day, []);
-    days.get(day).push(w);
+    const key = byWeek ? weekKey(new Date(w.last_searched_at)) : dayOf(w.last_searched_at);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(w);
   }
+  // By week, only this week starts open; the others open when their title is pressed.
+  state.openWeeks ||= new Set([weekKey()]);
+  const weekSection = ([key, words]) => {
+    const current = key === weekKey();
+    const open = state.openWeeks.has(key);
+    const whole = state.filter === "all" && state.wordLang === "recent"; // the goal counts every word of the week
+    return h("section", { class: `day week${open ? " open" : ""}` },
+      h("button", { class: "week-head", "aria-expanded": String(open), onclick: () => { state.openWeeks[open ? "delete" : "add"](key); render(); } },
+        h("span", { class: "week-name" }, weekLabel(key)),
+        h("small", null, current && whole ? t("{n}개 / 목표 {g}", { n: words.length, g: weekGoal() }) : t("{n}개", { n: words.length })),
+        h("span", { class: "chev", "aria-hidden": "true" }, open ? "▾" : "▸")),
+      current && whole && h("div", { class: "week-bar" }, h("i", { style: `width:${Math.min(100, (words.length / weekGoal()) * 100)}%` })),
+      open && h("div", { class: "list" }, words.map(wordRow)));
+  };
 
   return [
     h("div", { class: "segment three", role: "tablist" }, langs.map(([id, label]) =>
       h("button", { role: "tab", "aria-selected": String(state.wordLang === id), onclick: () => { state.wordLang = id; render(); } },
         label, h("small", null, String(inLang(id).length))))),
-    h("div", { class: "chips one-line" }, filters.map(([id, label]) =>
-      h("button", { class: "chip", "aria-pressed": String(state.filter === id), onclick: () => { state.filter = id; render(); } }, label))),
+    h("div", { class: "filter-row" },
+      h("div", { class: "chips one-line" }, filters.map(([id, label]) =>
+        h("button", { class: "chip", "aria-pressed": String(state.filter === id), onclick: () => { state.filter = id; render(); } }, label))),
+      // the same words, gathered by day or by week
+      h("div", { class: "scope small", role: "group", "aria-label": t("묶어 보기") }, [["day", t("날짜")], ["week", t("주")]].map(([id, label]) =>
+        h("button", { "aria-pressed": String((state.groupBy || "day") === id), onclick: () => { state.groupBy = id; render(); } }, label)))),
     noticeBox(),
     shown.length === 0
       ? h("div", { class: "empty" },
           state.words.length ? t("여기에 해당하는 단어가 없어요.") : t("아직 찾아본 단어가 없어요."))
-      : [...days].map(([day, words]) => h("section", { class: "day" },
+      : byWeek ? [...groups].map(weekSection)
+      : [...groups].map(([day, words]) => h("section", { class: "day" },
           h("h3", null, dayLabel(day), h("small", null, t("{n}개", { n: words.length }))),
           h("div", { class: "list" }, words.map(wordRow)))),
   ];
+}
+// "This week", "Last week", or the dates the week ran from and to.
+function weekLabel(key) {
+  const start = new Date(key + "T12:00:00");
+  if (key === weekKey()) return t("이번 주");
+  const lastWeek = new Date(); lastWeek.setDate(lastWeek.getDate() - 7);
+  if (key === weekKey(lastWeek)) return t("지난주");
+  const end = new Date(start); end.setDate(end.getDate() + 6);
+  const show = (d) => d.toLocaleDateString(locale(), { month: "long", day: "numeric" });
+  return `${show(start)} ~ ${show(end)}`;
 }
 
 // ---------- streak challenge ----------
@@ -1291,7 +1374,8 @@ function nextChallengeWord() {
   if (typed) state.focus = "answer";
   // The same time limit as the quiz. Running out of time ends the run like a wrong answer.
   clearTimeout(challengeTimer);
-  c.deadline = Date.now() + QUESTION_MS;
+  c.limit = limitFor(typed);
+  c.deadline = Date.now() + c.limit;
   c.timedOut = false;
   const question = c.question;
   challengeTimer = setTimeout(() => {
@@ -1299,7 +1383,7 @@ function nextChallengeWord() {
     Object.assign(c, { timedOut: true, picked: "", phase: "wrong" });
     render();
     setTimeout(() => { if (state.challenge === c && c.phase === "wrong") finishChallenge(false); }, 1700);
-  }, QUESTION_MS);
+  }, c.limit);
 }
 let challengeTimer = 0;
 
@@ -1394,7 +1478,7 @@ function challengeView() {
       h("div", { class: "ch-level" }, `G${c.grade}`, h("small", null, `${answered} / ${total}`))),
     h("div", { class: "progress" }, h("div", { class: "bar" }, h("i", { style: `width:${(answered / total) * 100}%` }))),
     c.phase === "ask" && h("div", { class: "timer", role: "timer", "aria-label": t("남은 시간") },
-      h("i", { style: `animation-duration:${QUESTION_MS}ms;animation-delay:-${Math.max(0, QUESTION_MS - (c.deadline - Date.now()))}ms` })),
+      h("i", { style: `animation-duration:${c.limit}ms;animation-delay:-${Math.max(0, c.limit - (c.deadline - Date.now()))}ms` })),
     c.timedOut && h("p", { class: "center act-note timeout" }, t("시간이 다 됐어요!")),
     h("div", { class: `ch-prompt${c.question.shown.startsWith("d") ? " long" : ""}` }, c.question.prompt),
     c.question.kind === "type" ? typedAnswer() : h("div", { class: `choices act${c.question.asked.startsWith("d") ? " wide defs" : c.question.options.some((o) => o.length > 9) ? " wide" : ""}` },
@@ -1494,7 +1578,7 @@ function quizSetup() {
     guideHero(t("오늘 찾은 단어, 기억나?"), t("내 단어장에서 문제를 낼게. 틀려도 괜찮아, 다시 나오니까!")),
     guideSteps([
       t("뜻을 보고 단어를 쓰거나 골라요."),
-      t("한 문제에 {n}초예요.", { n: QUESTION_MS / 1000 }),
+      t("고르는 문제는 {a}초, 쓰는 문제는 {b}초예요.", { a: QUESTION_MS / 1000, b: TYPED_MS / 1000 }),
       t("틀린 단어는 {n}번 연속으로 맞힐 때까지 다시 나와요.", { n: MASTER_STREAK }),
     ]),
     h("div", { class: "guide-form" },
@@ -1553,7 +1637,7 @@ function quizAsk() {
   return [
     quizProgress(),
     h("div", { class: "timer", role: "timer", "aria-label": t("남은 시간") },
-      h("i", { style: `animation-duration:${QUESTION_MS}ms;animation-delay:-${Math.max(0, QUESTION_MS - (quiz.deadline - Date.now()))}ms` })),
+      h("i", { style: `animation-duration:${quiz.limit}ms;animation-delay:-${Math.max(0, quiz.limit - (quiz.deadline - Date.now()))}ms` })),
     h("div", { class: `question${(first || "").length > (main === "ko" ? 55 : 95) ? " long" : ""}` },
       h("div", { class: "q-label" }, t("이 뜻을 가진 단어는?"),
         word.needs_review && h("span", { class: "badge" },
@@ -1936,7 +2020,7 @@ function render() {
   const keepFocus = state.focus || document.activeElement?.id;
   state.focus = null;
   // Same screen as before (a section uncovered, a star toggled)? Then stay exactly where the student was.
-  const screen = [state.tab, state.entry?.term_norm, state.busy, state.quiz && `${state.quiz.index}:${state.quiz.phase}`, state.tab === "rank" && `${state.rankKind}:${state.rankGrade}:${state.rankScope}`, state.tab === "quiz" && state.quizMode, state.duel && `${state.duel.mode}:${state.duel.index}:${state.duel.frozenUntil}`,
+  const screen = [state.tab, state.entry?.term_norm, state.busy, state.quiz && `${state.quiz.index}:${state.quiz.phase}`, state.tab === "rank" && `${state.rankKind}:${state.rankGrade}:${state.rankScope}`, state.tab === "quiz" && state.quizMode, state.tab === "words" && `${state.wordLang}:${state.groupBy}`, state.duel && `${state.duel.mode}:${state.duel.index}:${state.duel.frozenUntil}`,
     state.challenge && `${state.challenge.streak}:${state.challenge.phase}:${state.challenge.grade}`].join("|");
   const sameScreen = screen === lastScreen;
   const scrollTop = sameScreen ? document.querySelector("main")?.scrollTop || 0 : 0;
