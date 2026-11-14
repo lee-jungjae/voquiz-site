@@ -1378,11 +1378,13 @@ button.league { width: 100%; text-align: left; border: 0; font: inherit; color: 
 .motto-chips .chip { font-size: 12.5px; padding: 6px 10px; }
 .motto-edit .hint { margin: 0 2px; }
 
-/* ---------- medals for the first three places ---------- */
-.rank-row .place.medal { width: 34px; height: 39px; border-radius: 0; background: none !important; display: block; margin: -4px -2px -2px; }
+/* ---------- medals for the first three places: grander towards first ---------- */
+.rank-row .place.medal { width: 36px; height: 41px; border-radius: 0; background: none !important; display: block; margin: -5px -3px -3px; }
 .rank-row .place.medal svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 1.5px 0 rgba(0, 0, 0, .12)); }
 .rank-row .place.medal text { font-family: inherit; }
-.rank-row .place.medal.m1 { width: 38px; height: 44px; margin: -6px -4px -4px; }
-.rank-row .place.medal .spark { transform-origin: 33px 18px; animation: spark 2.4s ease-in-out infinite; }
-@keyframes spark { 0%, 100% { transform: scale(.6); opacity: .5; } 50% { transform: scale(1.15); opacity: 1; } }
+.rank-row .place.medal.m1 { width: 42px; height: 48px; margin: -9px -6px -5px; }
+.rank-row .place.medal.m3 { width: 34px; height: 39px; margin: -4px -2px -2px; }
+.rank-row .place.medal .spark { transform-box: fill-box; transform-origin: center; animation: spark 2.4s ease-in-out infinite; }
+.rank-row .place.medal .spark.late { animation-delay: 1.2s; }
+@keyframes spark { 0%, 100% { transform: scale(.5); opacity: .4; } 50% { transform: scale(1.15); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .rank-row .place.medal .spark { animation: none; } }

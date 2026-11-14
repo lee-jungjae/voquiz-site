@@ -1793,20 +1793,45 @@ const MEDALS = {
   2: { rim: "#9aa3b2", face: "#dfe4ec", glow: "#f6f8fb", deep: "#7f8898" },
   3: { rim: "#b9713f", face: "#eab489", glow: "#f8d9c0", deep: "#a45f30" },
 };
+// The higher the place, the grander the medal: third has a plain ribbon, second a striped one
+// and a ring, first a wide ribbon, a sunburst rim, a crown and sparkles.
 function medal(rank) {
   const c = MEDALS[rank];
   const el = document.createElement("span");
   el.className = `place medal m${rank}`;
   el.setAttribute("role", "img");
   el.setAttribute("aria-label", String(rank));
-  el.innerHTML = `<svg viewBox="0 0 40 46" aria-hidden="true">
-    <path d="M9 1 h9 l5 15 h-10 z" fill="#655f9f"/><path d="M31 1 h-9 l-5 15 h10 z" fill="#7d77b6"/>
-    <path d="M12.2 1 h2.6 l5 15 h-2.6 z" fill="#bbd86b"/><path d="M27.8 1 h-2.6 l-5 15 h2.6 z" fill="#bbd86b"/>
-    <circle cx="20" cy="29" r="15" fill="${c.rim}"/>
-    <circle cx="20" cy="29" r="11.5" fill="${c.face}"/>
-    <path d="M11.5 25 a9.5 9.5 0 0 1 10 -5.6" fill="none" stroke="${c.glow}" stroke-width="2.6" stroke-linecap="round"/>
-    <text x="20" y="34.6" text-anchor="middle" font-size="16" font-weight="900" fill="#fff" stroke="${c.deep}" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke">${rank}</text>
-    ${rank === 1 ? `<path class="spark" d="M33 14 l1.2 2.8 l2.8 1.2 l-2.8 1.2 l-1.2 2.8 l-1.2 -2.8 l-2.8 -1.2 l2.8 -1.2 z" fill="#fff" stroke="${c.rim}" stroke-width=".8" stroke-linejoin="round"/>` : ""}
+  const burst = Array.from({ length: 28 }, (_, i) => {
+    const r = i % 2 ? 14.6 : 17, a = (Math.PI * 2 * i) / 28;
+    return `${(22 + r * Math.sin(a)).toFixed(1)},${(32 - r * Math.cos(a)).toFixed(1)}`;
+  }).join(" ");
+  const ribbon = {
+    3: `<path d="M12 3 h8 l4.5 13 h-9 z" fill="#655f9f"/><path d="M32 3 h-8 l-4.5 13 h9 z" fill="#7d77b6"/>`,
+    2: `<path d="M11 1 h9 l5 15 h-10 z" fill="#655f9f"/><path d="M33 1 h-9 l-5 15 h10 z" fill="#7d77b6"/>
+        <path d="M14.2 1 h2.6 l5 15 h-2.6 z" fill="#bbd86b"/><path d="M29.8 1 h-2.6 l-5 15 h2.6 z" fill="#bbd86b"/>`,
+    1: `<path d="M7 0 h13 l5 17 h-14 z" fill="#655f9f"/><path d="M37 0 h-13 l-5 17 h14 z" fill="#7d77b6"/>
+        <path d="M9.6 0 h2.2 l5 17 h-2.2 z" fill="#ffd966"/><path d="M15 0 h2.4 l5 17 h-2.4 z" fill="#bbd86b"/>
+        <path d="M34.4 0 h-2.2 l-5 17 h2.2 z" fill="#ffd966"/><path d="M29 0 h-2.4 l-5 17 h2.4 z" fill="#bbd86b"/>`,
+  }[rank];
+  const disc = {
+    3: `<circle cx="22" cy="32" r="13" fill="${c.rim}"/><circle cx="22" cy="32" r="10" fill="${c.face}"/>`,
+    2: `<circle cx="22" cy="32" r="14.5" fill="${c.rim}"/><circle cx="22" cy="32" r="11.5" fill="${c.face}"/>
+        <circle cx="22" cy="32" r="9" fill="none" stroke="${c.rim}" stroke-width="1" opacity=".7"/>`,
+    1: `<polygon points="${burst}" fill="${c.rim}" stroke="${c.deep}" stroke-width=".8" stroke-linejoin="round"/>
+        <circle cx="22" cy="32" r="12" fill="${c.face}"/>
+        <circle cx="22" cy="32" r="9.6" fill="none" stroke="${c.rim}" stroke-width="1.1"/>`,
+  }[rank];
+  const extras = rank === 1 ? `
+    <path d="M15.5 19.5 l-1.6 -7.6 l4.3 3.6 l3.8 -6 l3.8 6 l4.3 -3.6 l-1.6 7.6 z" fill="#ffd966" stroke="${c.deep}" stroke-width="1.1" stroke-linejoin="round"/>
+    <circle cx="22" cy="9.6" r="1.3" fill="#ff8fab"/><circle cx="13.9" cy="11.9" r="1.1" fill="#bbd86b"/><circle cx="30.1" cy="11.9" r="1.1" fill="#bbd86b"/>
+    <path class="spark" d="M40 20 l1.2 2.8 l2.8 1.2 l-2.8 1.2 l-1.2 2.8 l-1.2 -2.8 l-2.8 -1.2 l2.8 -1.2 z" fill="#fff" stroke="${c.rim}" stroke-width=".8" stroke-linejoin="round"/>
+    <path class="spark late" d="M3.5 36 l.9 2 l2 .9 l-2 .9 l-.9 2 l-.9 -2 l-2 -.9 l2 -.9 z" fill="#fff" stroke="${c.rim}" stroke-width=".7" stroke-linejoin="round"/>` : "";
+  const size = { 1: 16.5, 2: 15, 3: 13.5 }[rank];
+  el.innerHTML = `<svg viewBox="0 0 44 50" aria-hidden="true">
+    ${ribbon}${disc}
+    <path d="M${rank === 3 ? 14.6 : 13.6} 28 a9 9 0 0 1 ${rank === 3 ? 8 : 9.4} -${rank === 3 ? 4.6 : 5.4}" fill="none" stroke="${c.glow}" stroke-width="2.4" stroke-linecap="round"/>
+    <text x="22" y="${(32 + size * 0.36).toFixed(1)}" text-anchor="middle" font-size="${size}" font-weight="900" fill="#fff" stroke="${c.deep}" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke">${rank}</text>
+    ${extras}
   </svg>`;
   return el;
 }
