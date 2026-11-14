@@ -9,7 +9,7 @@ import { logoIcon, wordmark } from "./logo.js";
 import { CHARACTER_LINES } from "./character-lines.js";
 import { initDuel } from "./duel.js";
 import { initFriends } from "./friends.js";
-import { leagueCharacters, place, leagueOf, leagueAt, LEAGUES } from "./league.js";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js";
 import { SIGNATURES } from "./signatures.js";
 import { WORD_LISTS } from "./wordlists.js";
 import { WORD_DEFS } from "./worddefs.js";
@@ -111,6 +111,7 @@ async function loadWords() {
   openAtStart();
   if (state.user?.grade) {
     loadPlan();
+    settleLeague(); // last week's league: up, down or the same tier
     duel().refresh(true); // challenges received, and what finished duels paid
     friends().refresh(true); // friend requests received
   }
@@ -378,7 +379,7 @@ function publishRank() {
   api.publishRank({
     nickname: state.user.nickname || "", tag: myTag(), points: state.user.points || 0,
     grade: state.user.grade || null, best_streak: state.user.challenge?.best || 0,
-    week_start: weekKey(), week_points: weekEarned(), character: myShop().character, motto: state.user.motto || "",
+    week_start: weekKey(), week_points: weekEarned(), tier: myTier(), character: myShop().character, motto: state.user.motto || "",
   }).catch(() => {});
 }
 
@@ -566,6 +567,7 @@ let saveTimer = null;
 function award(points, label, big) {
   if (!points || !state.user) return;
   state.user.points = (state.user.points || 0) + points;
+  rollWeek();
   // What is earned (never what is spent) also counts for this week's league.
   state.user.weekly = { ...(state.user.weekly || {}), week: weekKey(), earned: weekEarned() + points };
   (big ? celebrate : toast)(points, label || t("단어포인트"));
@@ -1588,6 +1590,7 @@ async function openRankings() {
   Object.assign(state, { tab: "rank", notice: null, nameSaved: false, confirmBuy: null, rankError: false, leagueInfo: false });
   state.rankGrade ||= state.user.grade;
   render();
+  await settleLeague();
   try {
     const onlyFriends = state.rankScope === "friends";
     state.rankings = await api.getRankings(state.rankGrade, onlyFriends);
@@ -1606,17 +1609,88 @@ async function openRankings() {
 // This week's points of the students, with some of the app's characters playing along (only on
 // the board of everyone). Without 0009_weekly_league.sql the server still sends all-time points,
 // which cannot be compared with a week: then the student is shown among the characters only.
+// ----- tiers: up, down or the same, once a week -----
+const PROMOTION_BONUS = 30;
+const myTier = () => Math.min(TIERS.length - 1, Math.max(0, Number(state.user?.weekly?.tier) || 0));
+const tierName = (tier) => {
+  const name = TIERS[tier].names[Math.max(0, ["ko", "en", "zh"].indexOf(getLang()))];
+  return getLang() === "en" ? `${name} League` : getLang() === "zh" ? `${name}联赛` : `${name} 리그`;
+};
+// When a new week has begun, the finished week is set aside to be settled.
+function rollWeek() {
+  const w = state.user?.weekly;
+  if (!w?.week || w.week === weekKey() || w.settle) return;
+  state.user.weekly = { ...w, settle: { week: w.week, earned: w.earned || 0 }, week: weekKey(), earned: 0 };
+}
+// Works out where the student finished last week (among the students of the tier and the
+// characters) and moves them up or down a tier. A week without a single point changes nothing.
+async function settleLeague() {
+  if (!state.user || state.settling) return;
+  rollWeek();
+  const done = state.user.weekly?.settle;
+  if (!done) return;
+  state.settling = true;
+  try {
+    const tier = myTier();
+    let result = "none", rank = 0;
+    if (done.earned > 0) {
+      const lastWeek = weekKey(new Date(weekStart().getTime() - 3 * 86400000));
+      let others = [];
+      if (done.week === lastWeek) {
+        try {
+          others = await api.leagueLastWeek(tier);
+        } catch (err) {
+          if (err?.status !== 404 && err?.code !== "PGRST202") return; // try again later
+        }
+      }
+      const monday = new Date(`${done.week}T00:00:00`);
+      const characters = leagueCharacters(done.week, monday, tier, monday.getTime() + 8 * 86400000).map((c) => ({ bot: true, score: c.final }));
+      const rows = place([...others, { me: true, score: done.earned }, ...characters]);
+      rank = rows.find((row) => row.me).rank;
+      result = outcome(rows, tier);
+    }
+    const next = tier + (result === "up" ? 1 : result === "down" ? -1 : 0);
+    const { settle, ...weekly } = state.user.weekly;
+    state.user.weekly = { ...weekly, tier: next };
+    await api.saveProfile({ weekly: state.user.weekly }).catch(console.error);
+    publishRank();
+    if (result === "up") {
+      sheet({ art: TIERS[next].emoji, title: t("{name}로 승급!", { name: tierName(next) }),
+        text: t("지난주 {old}에서 {r}등을 했어요. 정말 멋져요! 승급 보너스 +{p}포인트를 받았어요.", { old: tierName(tier), r: rank, p: PROMOTION_BONUS }),
+        actions: [{ label: t("야호!"), kind: "main", run: () => true }] });
+      award(PROMOTION_BONUS, t("승급 보너스"));
+    } else if (result === "down") {
+      sheet({ art: TIERS[next].emoji, title: t("{name}로 내려왔어요", { name: tierName(next) }),
+        text: t("지난주 {old}에서 {r}등이었어요. 괜찮아요, 이번 주에 다시 올라가 봐요!", { old: tierName(tier), r: rank }),
+        actions: [{ label: t("다시 도전!"), kind: "main", run: () => true }] });
+    } else if (result === "stay") {
+      sheet({ art: TIERS[next].emoji, title: t("{name} 유지", { name: tierName(next) }),
+        text: t("지난주에 {r}등이었어요. 이번 주도 힘내요!", { r: rank }),
+        actions: [{ label: t("확인"), kind: "main", run: () => true }] });
+    }
+    render();
+  } finally {
+    state.settling = false;
+  }
+}
+
 function leagueRows() {
   const lang = ["ko", "en", "zh"].indexOf(getLang());
   const friendsOnly = state.rankScope === "friends";
   const weekly = Boolean(state.rankings?.week);
   const mine = { me: true, nickname: state.user.nickname || "", tag: myTag(), score: weekEarned(), character: myShop().character, motto: state.user.motto || "" };
   const others = weekly ? (state.rankings?.points || []).filter((row) => !row.me && row.score > 0) : [];
-  const characters = friendsOnly ? [] : leagueCharacters(weekKey(), weekStart(), Math.max(4, 11 - others.length)).map((c) => ({
+  const characters = friendsOnly ? [] : leagueCharacters(weekKey(), weekStart(), myTier()).map((c) => ({
     bot: true, nickname: c.character.name, character: c.character.id, score: c.score, final: c.final,
     motto: CHARACTER_LINES[c.character.id]?.[Math.max(0, lang)] || "",
   }));
-  return place([...others, mine, ...characters]);
+  // On the board of everyone, the top places go up a tier and the bottom ones go down.
+  const rows = place([...others, mine, ...characters]);
+  const tier = myTier();
+  return rows.map((row, i) => ({
+    ...row,
+    zone: friendsOnly ? "" : tier < TIERS.length - 1 && row.rank <= MOVE ? "up" : tier > 0 && i >= rows.length - MOVE ? "down" : "",
+  }));
 }
 // Remembers the place seen last time this week, to say "you went up" when it got better.
 function noteClimb() {
@@ -1629,27 +1703,30 @@ function noteClimb() {
   if (seen?.week === weekKey() && rank < seen.rank) state.leagueUp = seen.rank - rank;
   localStorage.setItem(key, JSON.stringify({ week: weekKey(), rank }));
 }
-// This week's league: its name in the screen language, its picture and its colours.
-const leagueName = (league) => {
-  const name = league.names[Math.max(0, ["ko", "en", "zh"].indexOf(getLang()))];
-  return getLang() === "en" ? `${name} League` : getLang() === "zh" ? `${name}联赛` : `${name} 리그`;
-};
+// A tier's colours and picture.
 const leagueStyle = (league) => `--league-bg:${league.bg};--league-mid:${league.mid};--league-ink:${league.ink}`;
 const leagueBadge = (league) => h("span", { class: "league-badge", "aria-hidden": "true" }, league.emoji);
 
 function leagueCard(rows) {
-  const league = leagueOf(weekStart());
-  const me = rows.find((row) => row.me);
+  const tier = myTier(), league = TIERS[tier];
+  const index = rows.findIndex((row) => row.me), me = rows[index];
   const ahead = [...rows].reverse().find((row) => row.score > me.score);
   const left = 7 - ((new Date().getDay() + 6) % 7);
   const up = state.leagueUp > 0;
+  const friendsOnly = state.rankScope === "friends";
+  const safe = rows[rows.length - MOVE - 1]; // the last place that stays
+  const hint = friendsOnly || (tier === TIERS.length - 1 && me.zone !== "down")
+    ? (!ahead ? t("1등이에요! 이 자리를 지켜 봐요.")
+        : t("{n}점만 더 모으면 {r}등 {name}을(를) 앞질러요.", { name: ahead.bot ? ahead.nickname : nameOf(ahead.nickname, ahead.tag), n: ahead.score - me.score + 1, r: ahead.rank }))
+    : me.zone === "up" ? t("승급권이에요! 일요일까지 지키면 {name}로 올라가요.", { name: tierName(tier + 1) })
+    : me.zone === "down" ? t("강등권이에요. {n}점만 더 모으면 벗어나요.", { n: safe.score - me.score + 1 })
+    : t("{n}점만 더 모으면 승급권({r}등)이에요.", { n: rows[MOVE - 1].score - me.score + 1, r: MOVE });
   return h("button", { class: `league themed${up ? " up" : ""}`, style: leagueStyle(league), title: t("리그 안내 보기"), onclick: () => { state.leagueInfo = true; render(); } },
     leagueBadge(league),
     h("div", { class: "league-text" },
-      h("small", null, h("strong", null, leagueName(league)), " · ", left <= 1 ? t("오늘 끝나요") : t("{n}일 남음", { n: left })),
+      h("small", null, h("strong", null, tierName(tier)), " · ", left <= 1 ? t("오늘 끝나요") : t("{n}일 남음", { n: left })),
       h("b", null, up ? t("▲ {n}계단 올랐어요! 지금 {r}등", { n: state.leagueUp, r: me.rank }) : t("지금 {r}등 · 이번 주 {p}점", { r: me.rank, p: me.score })),
-      h("span", null, !ahead ? t("1등이에요! 이 자리를 지켜 봐요.")
-        : t("{n}점만 더 모으면 {r}등 {name}을(를) 앞질러요.", { name: ahead.bot ? ahead.nickname : nameOf(ahead.nickname, ahead.tag), n: ahead.score - me.score + 1, r: ahead.rank }))),
+      h("span", null, hint)),
     h("i", { class: "league-more", "aria-hidden": "true" }, "›"));
 }
 
@@ -1659,10 +1736,7 @@ function leagueInfoView() {
   const from = weekStart(), to = new Date(from.getTime() + 6 * 86400000);
   const date = (d) => d.toLocaleDateString(locale(), { month: "short", day: "numeric", weekday: "short" });
   const left = 7 - ((new Date().getDay() + 6) % 7);
-  const league = leagueOf(weekStart());
-  const short = (d) => d.toLocaleDateString(locale(), { month: "numeric", day: "numeric" });
-  // The leagues still to come (the next four), or all 52 when asked.
-  const coming = [1, 2, 3, 4].map((n) => ({ league: leagueAt(league.index + n), monday: new Date(from.getTime() + n * 7 * 86400000 + 3600000) }));
+  const tier = myTier(), league = TIERS[tier];
   const rows = leagueRows();
   const me = rows.find((row) => row.me);
   const characters = rows.filter((row) => row.bot).sort((a, b) => b.final - a.final);
@@ -1674,17 +1748,19 @@ function leagueInfoView() {
     h("div", { class: "league themed static", style: leagueStyle(league) },
       leagueBadge(league),
       h("div", { class: "league-text" },
-        h("small", null, t("이번 주 리그"), " · ", t("{n}번째 / 52", { n: league.week })),
-        h("b", null, leagueName(league)),
+        h("small", null, t("내 등급"), " · ", t("{n}단계 / {m}", { n: tier + 1, m: TIERS.length })),
+        h("b", null, tierName(tier)),
         h("span", null, `${date(from)} ~ ${date(to)}`),
         h("span", null, left <= 1 ? t("오늘 밤에 끝나고, 내일 새 리그가 시작돼요.") : t("{n}일 남았어요. 다음 월요일에 새 리그가 시작돼요.", { n: left })))),
     h("section", { class: "block" },
       h("h3", null, t("리그는 이렇게 돼요")),
       h("ul", { class: "info-list" },
-        rule("🏁", t("매주 새 이름의 리그"), t("새싹 리그에서 우주 리그까지, 1년 52주 동안 매주 이름이 달라져요. 등급은 없어요. 모두 같은 리그에서 겨루고, 월요일마다 0점에서 다시 시작해요.")),
+        rule("🏁", t("같은 등급끼리, 매주 새로"), t("같은 등급의 친구들과 겨뤄요. 월요일마다 0점에서 다시 시작해요.")),
+        rule("⬆️", t("{n}등 안에 들면 승급", { n: MOVE }), t("일요일 밤에 {n}등 안에 있으면 다음 주에 한 등급 올라가고, 승급 보너스 +{p}포인트를 받아요.", { n: MOVE, p: PROMOTION_BONUS })),
+        rule("⬇️", t("아래 {n}명은 강등", { n: MOVE }), t("순위표의 마지막 {n}명은 한 등급 내려가요. 새싹 리그에서는 내려가지 않아요.", { n: MOVE })),
         rule("⭐", t("이번 주에 모은 포인트로"), t("이번 주에 받은 포인트만 세요. 포인트샵에서 써도 리그 점수는 줄지 않아요.")),
-        rule("🚪", t("첫 포인트를 받으면 참가"), t("그 주에 포인트를 한 번이라도 받으면 리그에 들어가요. 쉬는 주에는 순위에 나오지 않아요.")),
-        rule("🧸", t("캐릭터도 함께 뛰어요"), t("‘캐릭터’ 표시가 있는 친구는 VOQUIZ 캐릭터예요. 매주 다른 캐릭터가 나오고, 낮 동안 조금씩 점수를 올려요.")))),
+        rule("🚪", t("첫 포인트를 받으면 참가"), t("그 주에 포인트를 한 번이라도 받으면 리그에 들어가요. 쉬는 주에는 순위에 나오지 않고, 등급은 그대로예요.")),
+        rule("🧸", t("캐릭터도 함께 뛰어요"), t("‘캐릭터’ 표시가 있는 친구는 VOQUIZ 캐릭터예요. 매주 다른 캐릭터가 나오고, 등급이 높을수록 더 빨라요.")))),
     h("section", { class: "block" },
       h("h3", null, t("포인트는 이렇게 모아요")),
       h("ul", { class: "info-list small-gap" },
@@ -1693,16 +1769,10 @@ function leagueInfoView() {
         rule("⚔️", t("대결"), t("친구와 겨뤄 이기면 포인트를 받아요.")),
         rule("🎯", t("이번 주 단어 목표"), t("목표를 채우면 목표만큼 보너스를 받아요. 지금 목표로는 +{p}점.", { p: weekBonus(weekGoal()) })))),
     h("section", { class: "block" },
-      h("h3", null, t("다음 리그")),
-      h("ul", { class: "league-next" }, coming.map((c) => h("li", { style: leagueStyle(c.league) },
-        leagueBadge(c.league), h("b", null, leagueName(c.league)), h("small", null, t("{d} 시작", { d: short(c.monday) }))))),
-      h("p", { class: "center", style: "margin:10px 0 0" },
-        h("button", { class: "link", onclick: () => { state.leagueAll = !state.leagueAll; render(); } }, state.leagueAll ? t("접기") : t("52개 리그 모두 보기"))),
-      state.leagueAll && h("ol", { class: "league-all" }, LEAGUES.map((_, i) => {
-        const one = leagueAt(i);
-        return h("li", { class: i === league.index ? "now" : i < league.index ? "past" : "", style: leagueStyle(one), title: leagueName(one) },
-          h("span", { "aria-hidden": "true" }, one.emoji), h("small", null, one.names[Math.max(0, ["ko", "en", "zh"].indexOf(getLang()))]));
-      }))),
+      h("h3", null, t("등급")),
+      h("ol", { class: "tier-ladder" }, TIERS.map((one, i) => h("li", { class: i === tier ? "now" : "", style: leagueStyle(one) },
+        leagueBadge(one), h("b", null, tierName(i)),
+        i === tier ? h("small", { class: "here" }, t("지금 여기")) : h("small", null, t("{n}단계", { n: i + 1 })))).reverse())),
     characters.length > 0 && h("section", { class: "block" },
       h("h3", null, t("이번 주 함께 뛰는 캐릭터")),
       h("p", { class: "small muted", style: "margin:0 0 8px" }, t("일요일 밤에 닿을 점수를 미리 알려 줄게요. 이 점수를 넘기면 그 캐릭터를 이겨요.")),
@@ -1723,7 +1793,7 @@ function rankView() {
   const top = league || rows.filter((row) => row.score > 0 && row.rank <= 20);
   const mine = rows.find((row) => row.me);
   // Each row: place, the student's own character, name (with their line under it), score.
-  const line = (row) => h("li", { class: `rank-row${row.me ? " me" : ""}${row.rank <= 3 && row.score > 0 ? ` top${row.rank}` : ""}` },
+  const line = (row) => h("li", { class: `rank-row${row.me ? " me" : ""}${row.rank <= 3 && row.score > 0 ? ` top${row.rank}` : ""}${row.zone ? ` zone-${row.zone}` : ""}` },
     h("span", { class: "place" }, String(row.rank)),
     h("span", { class: "ava", "aria-hidden": "true" }, portrait(row.me ? myShop().character : row.character || "bubble")),
     h("span", { class: "who" },
@@ -1749,7 +1819,13 @@ function rankView() {
       h("button", { class: "btn" }, t("저장")),
       h("button", { type: "button", class: "link", onclick: () => { state.mottoEdit = false; state.notice = null; render(); } }, t("취소"))),
     h("p", { class: "small muted hint" }, state.notice?.text || t("내 이름 아래에 다른 친구들에게 보여요. (30자까지)")));
-  const lines = (list) => list.flatMap((row) => (row.me && state.mottoEdit ? [line(row), mottoForm()] : [line(row)]));
+  // Between the places that go up, stay and go down, a line says so.
+  const lines = (list) => list.flatMap((row, i) => [
+    row.zone === "down" && list[i - 1] && list[i - 1].zone !== "down" && h("li", { class: "zone-line down" }, t("▼ 여기부터 강등")),
+    line(row),
+    row.me && state.mottoEdit && mottoForm(),
+    row.zone === "up" && list[i + 1] && list[i + 1].zone !== "up" && h("li", { class: "zone-line up" }, t("▲ 여기까지 승급")),
+  ].filter(Boolean));
 
   return [
     h("div", { class: "rank-head" },
@@ -1765,7 +1841,7 @@ function rankView() {
     kind === "points" && weekEarned() === 0
       ? h("div", { class: "league-join" },
           h("div", { class: "league-join-art", "aria-hidden": "true" }, portrait(myShop().character)),
-          h("span", { class: "league-chip", style: leagueStyle(leagueOf(weekStart())) }, leagueOf(weekStart()).emoji, " ", t("이번 주는 {name}", { name: leagueName(leagueOf(weekStart())) })),
+          h("span", { class: "league-chip", style: leagueStyle(TIERS[myTier()]) }, TIERS[myTier()].emoji, " ", t("내 등급: {name}", { name: tierName(myTier()) })),
           h("b", null, t("이번 주 리그에 아직 참여하지 않았어요")),
           h("p", null, t("단어를 찾거나 퀴즈를 풀어 포인트를 모으면 이번 주 리그가 열려요. 리그는 월요일마다 새로 시작해요.")),
           h("button", { class: "btn wide", onclick: () => { Object.assign(state, { tab: "search", entry: null, query: "", notice: null }); render(); } }, t("단어 찾으러 가기")))

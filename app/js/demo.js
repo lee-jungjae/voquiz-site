@@ -224,7 +224,7 @@ export async function getRankings(grade, friends = false) {
     .map((row, i) => ({ rank: i + 1, nickname: row.nickname, tag: row.tag, score: row[key], me: !!row.me, character: row.character, motto: row.motto }));
   await new Promise((done) => setTimeout(done, 300));
   return {
-    week, points: board("points"), found: board("found"), words: board("words"),
+    week, tier: me.weekly?.tier || 0, points: board("points"), found: board("found"), words: board("words"),
     streak: board("streak", [...others, self].filter((row) => row.grade === grade)),
   };
 }
@@ -335,6 +335,14 @@ export async function claimDuel(id) {
   duel.claimed = true;
   write(DUELS_KEY, list);
   return true;
+}
+// Last week's classmates of the tier (pretend ones).
+export async function leagueLastWeek() {
+  return [
+    { nickname: "하늘", tag: 311, character: "rabbit", score: 230 },
+    { nickname: "Mina", tag: 205, character: "mushroom", score: 120 },
+    { nickname: "준서", tag: 733, character: "bubble", score: 45 },
+  ];
 }
 export async function duelRankings(friends = false) {
   const mine = duels().filter((d) => d.status === "done" && d.my_score > d.their_score).length;

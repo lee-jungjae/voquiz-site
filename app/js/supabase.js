@@ -114,8 +114,14 @@ export async function publishRank(row) {
     // Without 0009_weekly_league.sql the table has no place for the week's points, the character
     // and the line: the rest is still published.
     if (err.status !== 400) throw err;
-    const { week_start, week_points, character, motto, ...old } = row;
-    await send(old);
+    const { tier, ...noTier } = row; // 0010_league_tiers.sql is not there yet
+    try {
+      await send(noTier);
+    } catch (again) {
+      if (again.status !== 400) throw again;
+      const { week_start, week_points, character, motto, ...old } = noTier;
+      await send(old);
+    }
   }
 }
 
@@ -231,6 +237,8 @@ export const answerDuel = (id, score, character, marks = []) =>
   rpc("answer_duel", { p_id: id, p_score: score, p_character: character, p_marks: marks })
     .catch((err) => (err.status === 404 ? rpc("answer_duel", { p_id: id, p_score: score, p_character: character }) : Promise.reject(err)));
 export const claimDuel = (id) => rpc("claim_duel", { p_id: id });
+// Last week's final points of the other students of a tier: [{ nickname, tag, character, score }]
+export const leagueLastWeek = (tier) => rpc("league_last_week", { p_tier: tier });
 export const duelRankings = (friends = false) =>
   rpc("duel_rankings", { p_limit: 20, p_friends: friends }).catch((err) => (err.status === 404 ? rpc("duel_rankings", { p_limit: 20 }) : Promise.reject(err)));
 export const setNoDuels = (off) => rpc("set_no_duels", { p_off: off });
