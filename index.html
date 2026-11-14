@@ -443,7 +443,50 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
 .grown .facts div { font-size: 15px; line-height: 1.6; word-break: keep-all; }
 .grown .facts b { display: block; }
 .steps li { font-size: 17px; }
+/* ----- reviewed at full width ----- */
+h2, .hero h1 { font-weight: 800; }
+p, li { word-break: keep-all; }
+.hero { align-items: center; }
+.two { align-items: start; }
+.two > div:first-child { position: sticky; top: 28px; padding-top: 34px; }
+.cta .btn { justify-content: center; min-width: 150px; }
+section.block > h2, .two h2 { line-height: 1.3; }
+.shelf { padding: 16px 14px 10px; }
+
+/* ----- reviewed at phone width ----- */
 @media (max-width: 700px) {
+  .wrap { padding: 0 18px; }
+  header.top { padding: 14px 0 10px; }
+  .hero { padding: 10px 0 8px; gap: 8px; }
+  .hero .tags { gap: 6px; margin-bottom: 12px; }
+  .hero .tags span { padding: 4px 11px; font-size: 12px; }
+  .letter { transform: rotate(-.6deg); margin-top: 20px; padding: 20px 16px 14px; }
+  .bridge { margin-top: 20px; }
+  .three { gap: 8px; }
+  /* the two buttons share the row, so neither hangs to the left */
+  .cta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cta .btn { min-width: 0; padding: 13px 8px; }
+  .stage { padding-top: 58px; margin-top: 6px; }
+  .stage .mascot { width: 220px; }
+  section.block { margin-top: 48px; }
+  .two > div:first-child { position: static; padding-top: 0; }
+  #try-dict { margin-top: 6px; }
+  .legend { gap: 6px; }
+  .legend span { font-size: 13px; padding: 5px 12px; }
+  button.card { padding: 14px 16px 14px 4px; }
+  .card .mascot { width: 92px; }
+  /* numbers on the left, words on the right: shorter, and aligned with everything else */
+  .perk { display: grid; grid-template-columns: 76px 1fr; column-gap: 12px; align-items: center; text-align: left; padding: 14px 16px; }
+  .perk .big { grid-row: span 2; text-align: center; font-size: 30px; }
+  .perk b { margin: 0; align-self: end; }
+  .perk p { align-self: start; }
+  .shelf { grid-template-columns: repeat(4, 1fr); padding: 12px 8px 6px; }
+  .walker { width: 72px; }
+  .center .btn { display: flex; width: 100%; justify-content: center; }
+  .steps li { font-size: 16px; }
+  .grown { padding: 20px 18px 18px; border-radius: 22px; }
+  .note { padding: 14px 15px; }
+  footer { margin-top: 40px; }
   .hero { grid-template-columns: 1fr; }
   .hero h1 { font-size: 33px; } .two, .perks, .grown .facts, .three { grid-template-columns: 1fr; }
   .three li { padding: 14px 12px 12px 52px; } .three li::before { top: 14px; }
@@ -562,7 +605,7 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
 <section class="block two" id="try">
   <div>
     <span class="eyebrow">두 언어 사전</span>
-    <h2>단어 하나를 찾으면<br>이만큼 나와</h2>
+    <h2>한 번만 찾으면<br>뜻부터 속담까지 한눈에!</h2>
     <p class="sub">옆은 진짜 VOQUIZ 화면이야. 단어를 바꿔 보고, 가려진 칸도 눌러서 열어 봐!</p>
     <div class="legend"><span class="k">한국어 뜻</span><span class="e">영어 뜻</span><span class="m">더 쉽게 외우기</span><span class="s">속담 · 사자성어</span></div>
     <ul>
@@ -1431,7 +1474,7 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
 
     // a strip to scroll through, under the shelf
     const parade = $("#parade");
-    for (const c of order) {
+    for (const c of order.filter((c) => !KNOWN.includes(c.id))) { // only the ones not met yet: the others stand on the shelf above
       const known = KNOWN.includes(c.id);
       const item = el(`<button type="button" class="walker${known ? "" : " secret"}" aria-label="${known ? name(c) : A.secret}">${art(c, known)}${known ? "" : "<i>?</i>"}</button>`);
       item.addEventListener("click", openAll);
