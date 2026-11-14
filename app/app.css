@@ -1430,3 +1430,10 @@ html:lang(zh) * { word-break: normal !important; }
 .urgent b { font-size: 13.5px; }
 .urgent b::before { content: "📢 "; }
 .sheet p { white-space: pre-line; }
+
+/* ---------- invite code screen: how to get a code ---------- */
+.gate-help { width: 100%; box-sizing: border-box; margin-top: 6px; padding: 14px 16px; border-radius: 16px; background: var(--surface); text-align: left; display: grid; gap: 8px; }
+.gate-help b { font-size: 14.5px; }
+.gate-help .guide-steps { margin: 0; }
+.gate-help .guide-steps li { font-size: 13px; }
+.gate-help p { margin: 0; }

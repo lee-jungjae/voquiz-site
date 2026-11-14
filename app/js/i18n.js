@@ -553,6 +553,12 @@ const T = {
   "랭킹 보러 가기": ["Go to the rankings", "去看排行榜"],
   "퀴즈 하러 가기": ["Go to the quiz", "去做测验"],
   "친구 보러 가기": ["Go to friends", "去看朋友"],
+  "초대 코드가 없나요?": ["No invite code?", "没有邀请码吗？"],
+  "VOQUIZ를 쓰는 친구에게 초대를 부탁해요.": ["Ask a friend who uses VOQUIZ to invite you.", "请正在使用VOQUIZ的朋友邀请你。"],
+  "친구가 화면 위의 사람 아이콘 → ‘친구에게 공유하기’를 누르면 초대 코드가 나와요. (한 사람당 5장)": ["Your friend taps the people icon at the top → “Share with a friend” to get a code. (Five per person)", "朋友点击上方的人物图标 →“分享给朋友”就能看到邀请码。（每人5张）"],
+  "받은 코드 6자리를 위 칸에 입력하면 바로 가입돼요.": ["Enter the 6-character code above and you're in.", "在上面输入收到的6位邀请码就能立即加入。"],
+  "지금은 초대받은 학생만 가입할 수 있어요. 초대 코드는 따로 신청받거나 판매하지 않아요.": ["For now only invited students can join. Invite codes can't be requested or bought.", "目前只有受邀的学生可以加入。邀请码不接受申请，也不出售。"],
+  "VOQUIZ가 어떤 서비스인지 보기": ["See what VOQUIZ is", "了解VOQUIZ是什么"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],
   "테마 상점 열기": ["Open the theme shop", "打开主题商店"],
 

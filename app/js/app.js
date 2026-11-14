@@ -257,7 +257,15 @@ function inviteGate() {
       h("input", { type: "text", id: "gate-code", maxLength: 8, autocomplete: "off", autocapitalize: "characters", spellcheck: false, placeholder: t("초대 코드 6자리"), "aria-label": t("초대 코드 6자리") }),
       h("button", { class: "btn", disabled: state.busy }, t("가입하기"))),
     noticeBox(),
-    h("p", { class: "small muted" }, t("VOQUIZ를 쓰는 친구의 친구 페이지에 초대 코드가 5장씩 있어요.")),
+    // For someone who installed VOQUIZ without a code: how to get one.
+    h("div", { class: "gate-help" },
+      h("b", null, t("초대 코드가 없나요?")),
+      h("ol", { class: "guide-steps" },
+        h("li", null, t("VOQUIZ를 쓰는 친구에게 초대를 부탁해요.")),
+        h("li", null, t("친구가 화면 위의 사람 아이콘 → ‘친구에게 공유하기’를 누르면 초대 코드가 나와요. (한 사람당 5장)")),
+        h("li", null, t("받은 코드 6자리를 위 칸에 입력하면 바로 가입돼요."))),
+      h("p", { class: "small muted" }, t("지금은 초대받은 학생만 가입할 수 있어요. 초대 코드는 따로 신청받거나 판매하지 않아요.")),
+      h("p", { class: "small" }, h("a", { class: "link", href: "https://lee-jungjae.github.io/voquiz-site/", target: "_blank", rel: "noopener" }, t("VOQUIZ가 어떤 서비스인지 보기")))),
     h("p", null, h("button", { class: "link", onclick: signOut }, t("다른 계정으로 로그인"))));
 }
 
