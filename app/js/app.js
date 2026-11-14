@@ -1789,9 +1789,9 @@ function leagueInfoView() {
 // Medals for the first three places, drawn like the characters: round shapes, a soft shine, a
 // ribbon in the app's own purple and lime.
 const MEDALS = {
-  1: { rim: "#e0a92e", face: "#ffd966", glow: "#fff3bf", ink: "#6b4700" },
-  2: { rim: "#9aa3b2", face: "#dfe4ec", glow: "#f6f8fb", ink: "#3a4250" },
-  3: { rim: "#b9713f", face: "#eab489", glow: "#f8d9c0", ink: "#5a2e10" },
+  1: { rim: "#e0a92e", face: "#ffd966", glow: "#fff3bf", deep: "#c98a12" },
+  2: { rim: "#9aa3b2", face: "#dfe4ec", glow: "#f6f8fb", deep: "#7f8898" },
+  3: { rim: "#b9713f", face: "#eab489", glow: "#f8d9c0", deep: "#a45f30" },
 };
 function medal(rank) {
   const c = MEDALS[rank];
@@ -1805,7 +1805,7 @@ function medal(rank) {
     <circle cx="20" cy="29" r="15" fill="${c.rim}"/>
     <circle cx="20" cy="29" r="11.5" fill="${c.face}"/>
     <path d="M11.5 25 a9.5 9.5 0 0 1 10 -5.6" fill="none" stroke="${c.glow}" stroke-width="2.6" stroke-linecap="round"/>
-    <text x="20" y="34.4" text-anchor="middle" font-size="15" font-weight="800" fill="${c.ink}">${rank}</text>
+    <text x="20" y="34.6" text-anchor="middle" font-size="16" font-weight="900" fill="#fff" stroke="${c.deep}" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke">${rank}</text>
     ${rank === 1 ? `<path class="spark" d="M33 14 l1.2 2.8 l2.8 1.2 l-2.8 1.2 l-1.2 2.8 l-1.2 -2.8 l-2.8 -1.2 l2.8 -1.2 z" fill="#fff" stroke="${c.rim}" stroke-width=".8" stroke-linejoin="round"/>` : ""}
   </svg>`;
   return el;
