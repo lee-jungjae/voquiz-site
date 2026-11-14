@@ -9,7 +9,7 @@ import { logoIcon, wordmark } from "./logo.js";
 import { CHARACTER_LINES } from "./character-lines.js";
 import { initDuel } from "./duel.js";
 import { initFriends } from "./friends.js";
-import { leagueCharacters, place } from "./league.js";
+import { leagueCharacters, place, leagueOf, leagueAt, LEAGUES } from "./league.js";
 import { SIGNATURES } from "./signatures.js";
 import { WORD_LISTS } from "./wordlists.js";
 import { WORD_DEFS } from "./worddefs.js";
@@ -1585,7 +1585,7 @@ function challengeView() {
 // ---------- rankings tab ----------
 
 async function openRankings() {
-  Object.assign(state, { tab: "rank", notice: null, nameSaved: false, confirmBuy: null, rankError: false });
+  Object.assign(state, { tab: "rank", notice: null, nameSaved: false, confirmBuy: null, rankError: false, leagueInfo: false });
   state.rankGrade ||= state.user.grade;
   render();
   try {
@@ -1613,7 +1613,7 @@ function leagueRows() {
   const mine = { me: true, nickname: state.user.nickname || "", tag: myTag(), score: weekEarned(), character: myShop().character, motto: state.user.motto || "" };
   const others = weekly ? (state.rankings?.points || []).filter((row) => !row.me && row.score > 0) : [];
   const characters = friendsOnly ? [] : leagueCharacters(weekKey(), weekStart(), Math.max(4, 11 - others.length)).map((c) => ({
-    bot: true, nickname: c.character.name, character: c.character.id, score: c.score,
+    bot: true, nickname: c.character.name, character: c.character.id, score: c.score, final: c.final,
     motto: CHARACTER_LINES[c.character.id]?.[Math.max(0, lang)] || "",
   }));
   return place([...others, mine, ...characters]);
@@ -1629,21 +1629,92 @@ function noteClimb() {
   if (seen?.week === weekKey() && rank < seen.rank) state.leagueUp = seen.rank - rank;
   localStorage.setItem(key, JSON.stringify({ week: weekKey(), rank }));
 }
+// This week's league: its name in the screen language, its picture and its colours.
+const leagueName = (league) => {
+  const name = league.names[Math.max(0, ["ko", "en", "zh"].indexOf(getLang()))];
+  return getLang() === "en" ? `${name} League` : getLang() === "zh" ? `${name}联赛` : `${name} 리그`;
+};
+const leagueStyle = (league) => `--league-bg:${league.bg};--league-mid:${league.mid};--league-ink:${league.ink}`;
+const leagueBadge = (league) => h("span", { class: "league-badge", "aria-hidden": "true" }, league.emoji);
+
 function leagueCard(rows) {
+  const league = leagueOf(weekStart());
   const me = rows.find((row) => row.me);
   const ahead = [...rows].reverse().find((row) => row.score > me.score);
   const left = 7 - ((new Date().getDay() + 6) % 7);
   const up = state.leagueUp > 0;
-  return h("div", { class: `league${up ? " up" : ""}` },
-    h("div", { class: "league-art", "aria-hidden": "true" }, up ? reaction(myShop().character, "cheer") : portrait(myShop().character)),
+  return h("button", { class: `league themed${up ? " up" : ""}`, style: leagueStyle(league), title: t("리그 안내 보기"), onclick: () => { state.leagueInfo = true; render(); } },
+    leagueBadge(league),
     h("div", { class: "league-text" },
-      h("small", null, t("이번 주 리그"), " · ", left <= 1 ? t("오늘 끝나요") : t("{n}일 남음", { n: left })),
+      h("small", null, h("strong", null, leagueName(league)), " · ", left <= 1 ? t("오늘 끝나요") : t("{n}일 남음", { n: left })),
       h("b", null, up ? t("▲ {n}계단 올랐어요! 지금 {r}등", { n: state.leagueUp, r: me.rank }) : t("지금 {r}등 · 이번 주 {p}점", { r: me.rank, p: me.score })),
       h("span", null, !ahead ? t("1등이에요! 이 자리를 지켜 봐요.")
-        : t("{name}까지 {n}점! 조금만 더 하면 올라가요.", { name: ahead.bot ? ahead.nickname : nameOf(ahead.nickname, ahead.tag), n: ahead.score - me.score + 1 }))));
+        : t("{n}점만 더 모으면 {r}등 {name}을(를) 앞질러요.", { name: ahead.bot ? ahead.nickname : nameOf(ahead.nickname, ahead.tag), n: ahead.score - me.score + 1, r: ahead.rank }))),
+    h("i", { class: "league-more", "aria-hidden": "true" }, "›"));
+}
+
+// What the league is, when it starts again, how points are earned, and who is playing this week
+// (with where each character will stand on Sunday night, so the week can be planned).
+function leagueInfoView() {
+  const from = weekStart(), to = new Date(from.getTime() + 6 * 86400000);
+  const date = (d) => d.toLocaleDateString(locale(), { month: "short", day: "numeric", weekday: "short" });
+  const left = 7 - ((new Date().getDay() + 6) % 7);
+  const league = leagueOf(weekStart());
+  const short = (d) => d.toLocaleDateString(locale(), { month: "numeric", day: "numeric" });
+  // The leagues still to come (the next four), or all 52 when asked.
+  const coming = [1, 2, 3, 4].map((n) => ({ league: leagueAt(league.index + n), monday: new Date(from.getTime() + n * 7 * 86400000 + 3600000) }));
+  const rows = leagueRows();
+  const me = rows.find((row) => row.me);
+  const characters = rows.filter((row) => row.bot).sort((a, b) => b.final - a.final);
+  const rule = (icon, title, text) => h("li", null, h("span", { class: "info-icon", "aria-hidden": "true" }, icon), h("div", null, h("b", null, title), h("p", null, text)));
+  return [
+    h("div", { class: "page-head" },
+      h("button", { class: "back", "aria-label": t("뒤로"), title: t("뒤로"), onclick: () => { state.leagueInfo = false; render(); } }, "←"),
+      h("h2", { class: "page-title" }, t("주간 리그 안내"))),
+    h("div", { class: "league themed static", style: leagueStyle(league) },
+      leagueBadge(league),
+      h("div", { class: "league-text" },
+        h("small", null, t("이번 주 리그"), " · ", t("{n}번째 / 52", { n: league.week })),
+        h("b", null, leagueName(league)),
+        h("span", null, `${date(from)} ~ ${date(to)}`),
+        h("span", null, left <= 1 ? t("오늘 밤에 끝나고, 내일 새 리그가 시작돼요.") : t("{n}일 남았어요. 다음 월요일에 새 리그가 시작돼요.", { n: left })))),
+    h("section", { class: "block" },
+      h("h3", null, t("리그는 이렇게 돼요")),
+      h("ul", { class: "info-list" },
+        rule("🏁", t("매주 새 이름의 리그"), t("새싹 리그에서 우주 리그까지, 1년 52주 동안 매주 이름이 달라져요. 등급은 없어요. 모두 같은 리그에서 겨루고, 월요일마다 0점에서 다시 시작해요.")),
+        rule("⭐", t("이번 주에 모은 포인트로"), t("이번 주에 받은 포인트만 세요. 포인트샵에서 써도 리그 점수는 줄지 않아요.")),
+        rule("🚪", t("첫 포인트를 받으면 참가"), t("그 주에 포인트를 한 번이라도 받으면 리그에 들어가요. 쉬는 주에는 순위에 나오지 않아요.")),
+        rule("🧸", t("캐릭터도 함께 뛰어요"), t("‘캐릭터’ 표시가 있는 친구는 VOQUIZ 캐릭터예요. 매주 다른 캐릭터가 나오고, 낮 동안 조금씩 점수를 올려요.")))),
+    h("section", { class: "block" },
+      h("h3", null, t("포인트는 이렇게 모아요")),
+      h("ul", { class: "info-list small-gap" },
+        rule("🔎", t("단어 찾기"), t("새 단어를 찾을 때마다 포인트를 받아요. 하루 {n}점까지.", { n: SEARCH_DAILY_MAX })),
+        rule("✏️", t("퀴즈와 연속 도전"), t("맞힐 때마다 포인트가 쌓여요.")),
+        rule("⚔️", t("대결"), t("친구와 겨뤄 이기면 포인트를 받아요.")),
+        rule("🎯", t("이번 주 단어 목표"), t("목표를 채우면 목표만큼 보너스를 받아요. 지금 목표로는 +{p}점.", { p: weekBonus(weekGoal()) })))),
+    h("section", { class: "block" },
+      h("h3", null, t("다음 리그")),
+      h("ul", { class: "league-next" }, coming.map((c) => h("li", { style: leagueStyle(c.league) },
+        leagueBadge(c.league), h("b", null, leagueName(c.league)), h("small", null, t("{d} 시작", { d: short(c.monday) }))))),
+      h("p", { class: "center", style: "margin:10px 0 0" },
+        h("button", { class: "link", onclick: () => { state.leagueAll = !state.leagueAll; render(); } }, state.leagueAll ? t("접기") : t("52개 리그 모두 보기"))),
+      state.leagueAll && h("ol", { class: "league-all" }, LEAGUES.map((_, i) => {
+        const one = leagueAt(i);
+        return h("li", { class: i === league.index ? "now" : i < league.index ? "past" : "", style: leagueStyle(one), title: leagueName(one) },
+          h("span", { "aria-hidden": "true" }, one.emoji), h("small", null, one.names[Math.max(0, ["ko", "en", "zh"].indexOf(getLang()))]));
+      }))),
+    characters.length > 0 && h("section", { class: "block" },
+      h("h3", null, t("이번 주 함께 뛰는 캐릭터")),
+      h("p", { class: "small muted", style: "margin:0 0 8px" }, t("일요일 밤에 닿을 점수를 미리 알려 줄게요. 이 점수를 넘기면 그 캐릭터를 이겨요.")),
+      h("ol", { class: "rank-list" }, characters.map((row) => h("li", { class: `rank-row${me.score > row.final ? " beaten" : ""}` },
+        h("span", { class: "ava", "aria-hidden": "true" }, portrait(row.character)),
+        h("span", { class: "who" }, h("span", { class: "who-name" }, row.nickname), h("span", { class: "who-motto" }, t("지금 {n}점", { n: row.score }))),
+        h("b", null, me.score > row.final ? t("✓ 이겼어요") : t("일요일 {n}점", { n: row.final })))))),
+  ];
 }
 
 function rankView() {
+  if (state.leagueInfo) return leagueInfoView();
   const boards = [["points", t("주간 리그")], ["found", t("첫 발견")], ["streak", t("연속 도전")], ["duel", t("대결")]];
   const kind = state.rankKind || "points";
   const league = kind === "points" && state.rankings ? leagueRows() : null;
@@ -1694,6 +1765,7 @@ function rankView() {
     kind === "points" && weekEarned() === 0
       ? h("div", { class: "league-join" },
           h("div", { class: "league-join-art", "aria-hidden": "true" }, portrait(myShop().character)),
+          h("span", { class: "league-chip", style: leagueStyle(leagueOf(weekStart())) }, leagueOf(weekStart()).emoji, " ", t("이번 주는 {name}", { name: leagueName(leagueOf(weekStart())) })),
           h("b", null, t("이번 주 리그에 아직 참여하지 않았어요")),
           h("p", null, t("단어를 찾거나 퀴즈를 풀어 포인트를 모으면 이번 주 리그가 열려요. 리그는 월요일마다 새로 시작해요.")),
           h("button", { class: "btn wide", onclick: () => { Object.assign(state, { tab: "search", entry: null, query: "", notice: null }); render(); } }, t("단어 찾으러 가기")))

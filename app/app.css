@@ -1312,3 +1312,34 @@ button.goal:hover { background: color-mix(in srgb, var(--accent) 12%, var(--surf
 .rank-row .who-motto.edit:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 .motto-edit { list-style: none; padding: 8px 4px 10px; border-bottom: 1px solid var(--line); }
 .motto-edit .hint { margin: 6px 2px 0; }
+button.league { width: 100%; text-align: left; border: 0; font: inherit; color: inherit; cursor: pointer; }
+.league-text { flex: 1; }
+.league-more { flex: none; font-style: normal; font-size: 24px; color: var(--muted); }
+.league.static { margin-top: 0; }
+.info-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.info-list.small-gap { gap: 10px; }
+.info-list li { display: flex; gap: 12px; align-items: flex-start; }
+.info-icon { flex: none; width: 36px; height: 36px; border-radius: 12px; background: var(--surface); display: grid; place-items: center; font-size: 18px; }
+.info-list b { display: block; font-size: 14.5px; }
+.info-list p { margin: 2px 0 0; font-size: 13px; line-height: 1.5; color: var(--muted); word-break: keep-all; }
+.rank-row.beaten b { color: #23552b; }
+.rank-row.beaten .ava { opacity: .6; }
+
+/* ---------- a league with its own name, picture and colour each week ---------- */
+.league.themed, .league.themed.up { background: linear-gradient(135deg, var(--league-bg), var(--league-mid)); color: var(--league-ink); }
+.league.themed .league-text small, .league.themed .league-text span, .league.themed .league-more { color: var(--league-ink); opacity: .85; }
+.league.themed .league-text small strong { font-weight: 800; opacity: 1; }
+.league-badge { flex: none; width: 56px; height: 56px; border-radius: 50%; background: #fff; display: grid; place-items: center; font-size: 30px; line-height: 1; box-shadow: 0 2px 0 rgba(0, 0, 0, .08); }
+.league.up .league-badge { animation: pop .5s both; }
+.league-chip { display: inline-block; border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 700; background: var(--league-bg); color: var(--league-ink); }
+.league-next { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.league-next li { display: grid; grid-template-columns: auto 1fr; column-gap: 10px; align-items: center; padding: 8px 10px; border-radius: 14px; background: var(--league-bg); color: var(--league-ink); }
+.league-next .league-badge { grid-row: span 2; width: 38px; height: 38px; font-size: 20px; }
+.league-next b { font-size: 13.5px; align-self: end; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.league-next small { font-size: 11px; opacity: .8; align-self: start; }
+.league-all { list-style: none; margin: 12px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.league-all li { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px 6px; border-radius: 12px; background: var(--league-bg); color: var(--league-ink); }
+.league-all li span { font-size: 22px; line-height: 1.1; }
+.league-all li small { font-size: 10.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.league-all li.past { opacity: .45; }
+.league-all li.now { outline: 2.5px solid var(--league-ink); }
