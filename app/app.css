@@ -1268,3 +1268,19 @@ button.goal:hover { background: color-mix(in srgb, var(--accent) 12%, var(--surf
 @keyframes nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(4px); } }
 .chip-more { z-index: 2; background: var(--text); color: var(--bg); box-shadow: 0 2px 6px rgba(0, 0, 0, .25); font-size: 15px; line-height: 23px; text-align: center; padding: 0; }
 .chip-more.left { left: 14px; } .chip-more.right { right: 2px; }
+
+/* ---------- Korean and English, each in its own labelled box ---------- */
+.langs-2 { display: grid; gap: 8px; }
+.lang-box { position: relative; border-radius: 14px; padding: 26px 14px 12px; }
+.lang-box p, .lang-box.en p, .lang-box.ko p { margin: 0; line-height: 1.6; color: #2b2840; font-size: 14.5px; }
+.lang-box.ko { background: #efedf9; }
+.lang-box.en { background: #eef6dc; }
+.lang-tag { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .04em; border-radius: 999px; padding: 1px 9px; }
+.lang-box .lang-tag { position: absolute; left: 12px; top: 8px; }
+.lang-box.ko .lang-tag, .eq-row.ko .lang-tag { background: #655f9f; color: #fff; }
+.lang-box.en .lang-tag, .eq-row.en .lang-tag { background: #23552b; color: #bbd86b; }
+.tip-box { margin-top: 14px; }
+.tip-title { display: block; font-size: 13px; margin-bottom: 6px; }
+.eq-rows { display: grid; gap: 12px; }
+.eq-row { display: grid; gap: 6px; justify-items: start; }
+.eq-row .eq { margin: 0; }

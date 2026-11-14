@@ -856,6 +856,14 @@ function sayingSource(r) {
   if (r.kind === "four_character_idiom") return t("한자 문화권의 사자성어");
   return korean ? t("한국 속담") : r.kind === "idiom" ? t("영어 관용구") : t("영어 속담");
 }
+// The same explanation in the two languages, each in its own labelled box so that it is plain
+// which is which. The language of the screen comes first.
+function inBoth(ko, en) {
+  const parts = [["ko", "한국어", ko], ["en", "English", en]].filter(([, , text]) => text);
+  if (!koFirst()) parts.reverse();
+  return h("div", { class: "langs-2" }, parts.map(([lang, label, text]) =>
+    h("div", { class: `lang-box ${lang}`, lang }, h("span", { class: "lang-tag" }, label), h("p", null, text))));
+}
 const KIND = () => ({ proverb: t("속담 · Proverb"), idiom: t("관용구 · Idiom"), four_character_idiom: t("사자성어") });
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
 
@@ -907,16 +915,20 @@ function buildBlock(c) {
   const parts = c.word_parts || [];
   const hanja = c.hanja || [];
   if (!parts.length && !hanja.length) return null;
-  return h("div", null,
-    parts.length > 0 && h("div", { class: "eq" },
+  const english = parts.length > 0 && h("div", { class: "eq-row en" },
+    h("span", { class: "lang-tag" }, "English"),
+    h("div", { class: "eq" },
       parts.map((p, i) => [
         i > 0 && h("span", { class: "op" }, "+"),
         h("div", { class: "tile" }, h("b", null, p.part), h("span", null, p.meaning_ko), h("small", null, p.meaning_en)),
       ]),
-      h("span", { class: "sum" }, h("span", { class: "op" }, "="), h("span", { class: "result" }, en))),
-    hanja.length > 0 && h("div", { class: "eq" },
+      h("span", { class: "sum" }, h("span", { class: "op" }, "="), h("span", { class: "result" }, en))));
+  const korean = hanja.length > 0 && h("div", { class: "eq-row ko" },
+    h("span", { class: "lang-tag" }, "한국어"),
+    h("div", { class: "eq" },
       hanja.map(syllableTile),
       h("span", { class: "sum" }, h("span", { class: "op" }, "="), h("span", { class: "result" }, ko))));
+  return h("div", { class: "eq-rows" }, koFirst() ? [korean, english] : [english, korean]);
 }
 
 // One section of an entry. Until the student taps it, only the title shows and the content is blurred.
@@ -946,9 +958,9 @@ function entryBlocks(word) {
     ["easy", title(t("쉽게 기억하기"), "REMEMBER IT"),
       (buildBlock(c) || c.memory_tip_ko || c.memory_tip_en) && [
         buildBlock(c),
-        (c.memory_tip_ko || c.memory_tip_en) && h("div", { class: "note tip" }, h("b", null, t("이렇게 기억해요")), both(c.memory_tip_ko, c.memory_tip_en)),
+        (c.memory_tip_ko || c.memory_tip_en) && h("div", { class: "tip-box" }, h("b", { class: "tip-title" }, t("이렇게 기억해요")), inBoth(c.memory_tip_ko, c.memory_tip_en)),
       ]],
-    ["story", title(t("어디서 온 말일까?"), "ORIGIN"), (c.origin_ko || c.origin_en) && both(c.origin_ko, c.origin_en)],
+    ["story", title(t("어디서 온 말일까?"), "ORIGIN"), (c.origin_ko || c.origin_en) && inBoth(c.origin_ko, c.origin_en)],
     ["ex", title(t("예문"), "EXAMPLES"),
       c.examples?.length > 0 && h("ol", null, c.examples.map((e, i) => h("li", null,
         h("span", { class: "num" }, String(i + 1)),
