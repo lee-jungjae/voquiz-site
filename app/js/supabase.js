@@ -58,7 +58,7 @@ async function accessToken() {
 
 const authed = async (path, options = {}) => request(path, { ...options, token: await accessToken() });
 
-const toUser = (u) => ({ id: u.id, email: u.email, grade: u.user_metadata?.grade ?? null, points: u.user_metadata?.points ?? 0, search: u.user_metadata?.search ?? null, nickname: u.user_metadata?.nickname ?? "", shop: u.user_metadata?.shop ?? null, challenge: u.user_metadata?.challenge ?? null, nameChanges: u.user_metadata?.nameChanges ?? 0, noDuels: u.user_metadata?.noDuels ?? false, gift: u.user_metadata?.gift ?? null, weekly: u.user_metadata?.weekly ?? null, duelFrom: u.user_metadata?.duelFrom ?? (u.user_metadata?.noDuels ? "none" : "all") });
+const toUser = (u) => ({ id: u.id, email: u.email, grade: u.user_metadata?.grade ?? null, points: u.user_metadata?.points ?? 0, search: u.user_metadata?.search ?? null, nickname: u.user_metadata?.nickname ?? "", shop: u.user_metadata?.shop ?? null, challenge: u.user_metadata?.challenge ?? null, nameChanges: u.user_metadata?.nameChanges ?? 0, noDuels: u.user_metadata?.noDuels ?? false, gift: u.user_metadata?.gift ?? null, weekly: u.user_metadata?.weekly ?? null, motto: u.user_metadata?.motto ?? "", duelFrom: u.user_metadata?.duelFrom ?? (u.user_metadata?.noDuels ? "none" : "all") });
 
 export function getUser() {
   return session ? toUser(session.user) : null;
@@ -103,11 +103,20 @@ export async function saveProfile(data) {
 // What this student shows on the rankings. Kept in its own table so that names and points can be
 // ranked across students without exposing anyone's account.
 export async function publishRank(row) {
-  await authed("/rest/v1/profiles?on_conflict=user_id", {
+  const send = (body) => authed("/rest/v1/profiles?on_conflict=user_id", {
     method: "POST",
     headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
-    body: { user_id: session.user.id, ...row, updated_at: new Date().toISOString() },
+    body: { user_id: session.user.id, ...body, updated_at: new Date().toISOString() },
   });
+  try {
+    await send(row);
+  } catch (err) {
+    // Without 0009_weekly_league.sql the table has no place for the week's points, the character
+    // and the line: the rest is still published.
+    if (err.status !== 400) throw err;
+    const { week_start, week_points, character, motto, ...old } = row;
+    await send(old);
+  }
 }
 
 // -> { points: [...], found: [...], words: [...], streak: [...] }, each row { rank, nickname, tag, score, me }

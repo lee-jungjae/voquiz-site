@@ -201,14 +201,18 @@ export async function getRankings(grade, friends = false) {
   const me = getUser();
   const mine = read(WORDS_KEY, []);
   const others = [
-    { nickname: "하늘", tag: 311, points: 420, found: 9, words: 64, streak: 17, grade: 3 },
-    { nickname: "", tag: 482, points: 260, found: 14, words: 51, streak: 31, grade: 7 },
-    { nickname: "Mina", tag: 205, points: 180, found: 3, words: 77, streak: 12, grade: 7 },
-    { nickname: "준서", tag: 733, points: 95, found: 6, words: 22, streak: 8, grade: 3 },
-    { nickname: "", tag: 918, points: 30, found: 0, words: 8, streak: 3, grade: 7 },
+    { nickname: "하늘", tag: 311, points: 210, found: 9, words: 64, streak: 17, grade: 3, character: "rabbit", motto: "오늘도 단어 10개!" },
+    { nickname: "", tag: 482, points: 130, found: 14, words: 51, streak: 31, grade: 7, character: "pudding", motto: "" },
+    { nickname: "Mina", tag: 205, points: 85, found: 3, words: 77, streak: 12, grade: 7, character: "mushroom", motto: "Let's duel!" },
+    { nickname: "준서", tag: 733, points: 40, found: 6, words: 22, streak: 8, grade: 3, character: "bubble", motto: "" },
+    { nickname: "", tag: 918, points: 12, found: 0, words: 8, streak: 3, grade: 7, character: "bubble", motto: "" },
   ];
+  // "points" is what was earned this week (it starts again on Monday).
+  const monday = new Date(); monday.setHours(0, 0, 0, 0); monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+  const week = monday.toLocaleDateString("sv");
   const self = {
-    nickname: me.nickname || "", tag: 851, me: true, points: me.points || 0,
+    nickname: me.nickname || "", tag: 851, me: true, points: me.weekly?.week === week ? me.weekly.earned || 0 : 0,
+    character: me.shop?.character || "bubble", motto: me.motto || "",
     found: mine.filter((w) => w.discovered).length, words: mine.length,
     streak: me.challenge?.best || 0, grade: me.grade,
   };
@@ -217,10 +221,10 @@ export async function getRankings(grade, friends = false) {
   if (names) others.splice(0, others.length, ...others.filter((row) => names.includes(row.tag)));
   const board = (key, rows = [...others, self]) => rows
     .sort((a, b) => b[key] - a[key])
-    .map((row, i) => ({ rank: i + 1, nickname: row.nickname, tag: row.tag, score: row[key], me: !!row.me }));
+    .map((row, i) => ({ rank: i + 1, nickname: row.nickname, tag: row.tag, score: row[key], me: !!row.me, character: row.character, motto: row.motto }));
   await new Promise((done) => setTimeout(done, 300));
   return {
-    points: board("points"), found: board("found"), words: board("words"),
+    week, points: board("points"), found: board("found"), words: board("words"),
     streak: board("streak", [...others, self].filter((row) => row.grade === grade)),
   };
 }

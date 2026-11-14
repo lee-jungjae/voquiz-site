@@ -9,6 +9,7 @@ import { logoIcon, wordmark } from "./logo.js";
 import { CHARACTER_LINES } from "./character-lines.js";
 import { initDuel } from "./duel.js";
 import { initFriends } from "./friends.js";
+import { leagueCharacters, place } from "./league.js";
 import { SIGNATURES } from "./signatures.js";
 import { WORD_LISTS } from "./wordlists.js";
 import { WORD_DEFS } from "./worddefs.js";
@@ -324,6 +325,19 @@ async function chooseGrade(grade) {
 // Choosing a name is free the first time. After that each change costs points, and the price
 // doubles every time (50, 100, 200, ...), so a name is something to settle on, not to keep flipping.
 const NAME_BASE_COST = 50;
+// A short line others see under the student's name on the rankings. No links or contact details.
+async function saveMotto(typed) {
+  const motto = String(typed || "").replace(/\s+/g, " ").trim().slice(0, 30);
+  if (/https?:|www\.|@|\d{7,}|\d{2,4}[-\s.]\d{3,4}[-\s.]\d{4}/i.test(motto)) {
+    state.notice = { text: t("한마디에는 연락처나 링크를 넣을 수 없어요.") };
+    return false;
+  }
+  state.user.motto = motto;
+  await api.saveProfile({ motto }).catch(console.error);
+  publishRank();
+  return true;
+}
+
 function nameCost() {
   const changes = state.user.nameChanges || 0;
   if (!state.user.nickname && !changes) return 0;
@@ -364,6 +378,7 @@ function publishRank() {
   api.publishRank({
     nickname: state.user.nickname || "", tag: myTag(), points: state.user.points || 0,
     grade: state.user.grade || null, best_streak: state.user.challenge?.best || 0,
+    week_start: weekKey(), week_points: weekEarned(), character: myShop().character, motto: state.user.motto || "",
   }).catch(() => {});
 }
 
@@ -551,6 +566,8 @@ let saveTimer = null;
 function award(points, label, big) {
   if (!points || !state.user) return;
   state.user.points = (state.user.points || 0) + points;
+  // What is earned (never what is spent) also counts for this week's league.
+  state.user.weekly = { ...(state.user.weekly || {}), week: weekKey(), earned: weekEarned() + points };
   (big ? celebrate : toast)(points, label || t("단어포인트"));
   countUp(points);
   saveSoon();
@@ -558,7 +575,7 @@ function award(points, label, big) {
 function saveSoon() {
   clearTimeout(saveTimer); // several changes in a row become one save
   saveTimer = setTimeout(() => {
-    api.saveProfile({ points: state.user.points, search: state.user.search, shop: state.user.shop, challenge: state.user.challenge }).catch(console.error);
+    api.saveProfile({ points: state.user.points, search: state.user.search, shop: state.user.shop, challenge: state.user.challenge, weekly: state.user.weekly }).catch(console.error);
     publishRank();
   }, 1500);
 }
@@ -616,6 +633,8 @@ function weekStart(when = new Date()) {
 const weekKey = (when) => dayOf(weekStart(when));
 const weekGoal = () => (WEEK_GOALS.includes(state.user.weekly?.goal) ? state.user.weekly.goal : WEEK_DEFAULT);
 const weekCount = () => state.words.filter((w) => new Date(w.last_searched_at) >= weekStart()).length;
+// Points earned since Monday: what the weekly league ranks.
+const weekEarned = () => (state.user?.weekly?.week === weekKey() ? state.user.weekly.earned || 0 : 0);
 const weekBonus = (goal) => goal; // one point for every word of the goal
 function saveWeekly(change) {
   state.user.weekly = { goal: weekGoal(), ...(state.user.weekly || {}), ...change };
@@ -1574,6 +1593,7 @@ async function openRankings() {
     state.rankings = await api.getRankings(state.rankGrade, onlyFriends);
     // Duels won come from their own function, which may not be installed yet.
     state.rankings.duel = await api.duelRankings(onlyFriends).catch(() => []);
+    noteClimb();
   } catch (err) {
     console.error(err);
     if (err?.status === 401) await fail(err);
@@ -1582,16 +1602,63 @@ async function openRankings() {
   render();
 }
 
+// ----- the weekly league (the points board) -----
+// This week's points of the students, with some of the app's characters playing along (only on
+// the board of everyone). Without 0009_weekly_league.sql the server still sends all-time points,
+// which cannot be compared with a week: then the student is shown among the characters only.
+function leagueRows() {
+  const lang = ["ko", "en", "zh"].indexOf(getLang());
+  const friendsOnly = state.rankScope === "friends";
+  const weekly = Boolean(state.rankings?.week);
+  const mine = { me: true, nickname: state.user.nickname || "", tag: myTag(), score: weekEarned(), character: myShop().character, motto: state.user.motto || "" };
+  const others = weekly ? (state.rankings?.points || []).filter((row) => !row.me && row.score > 0) : [];
+  const characters = friendsOnly ? [] : leagueCharacters(weekKey(), weekStart(), Math.max(4, 11 - others.length)).map((c) => ({
+    bot: true, nickname: c.character.name, character: c.character.id, score: c.score,
+    motto: CHARACTER_LINES[c.character.id]?.[Math.max(0, lang)] || "",
+  }));
+  return place([...others, mine, ...characters]);
+}
+// Remembers the place seen last time this week, to say "you went up" when it got better.
+function noteClimb() {
+  state.leagueUp = 0;
+  if (state.rankScope === "friends" || weekEarned() === 0) return;
+  const key = `wb_league_${state.user.id}`;
+  const rank = leagueRows().find((row) => row.me)?.rank;
+  let seen = null;
+  try { seen = JSON.parse(localStorage.getItem(key)); } catch { /* first time */ }
+  if (seen?.week === weekKey() && rank < seen.rank) state.leagueUp = seen.rank - rank;
+  localStorage.setItem(key, JSON.stringify({ week: weekKey(), rank }));
+}
+function leagueCard(rows) {
+  const me = rows.find((row) => row.me);
+  const ahead = [...rows].reverse().find((row) => row.score > me.score);
+  const left = 7 - ((new Date().getDay() + 6) % 7);
+  const up = state.leagueUp > 0;
+  return h("div", { class: `league${up ? " up" : ""}` },
+    h("div", { class: "league-art", "aria-hidden": "true" }, up ? reaction(myShop().character, "cheer") : portrait(myShop().character)),
+    h("div", { class: "league-text" },
+      h("small", null, t("이번 주 리그"), " · ", left <= 1 ? t("오늘 끝나요") : t("{n}일 남음", { n: left })),
+      h("b", null, up ? t("▲ {n}계단 올랐어요! 지금 {r}등", { n: state.leagueUp, r: me.rank }) : t("지금 {r}등 · 이번 주 {p}점", { r: me.rank, p: me.score })),
+      h("span", null, !ahead ? t("1등이에요! 이 자리를 지켜 봐요.")
+        : t("{name}까지 {n}점! 조금만 더 하면 올라가요.", { name: ahead.bot ? ahead.nickname : nameOf(ahead.nickname, ahead.tag), n: ahead.score - me.score + 1 }))));
+}
+
 function rankView() {
-  const boards = [["points", t("포인트")], ["found", t("첫 발견")], ["streak", t("연속 도전")], ["duel", t("대결")]];
+  const boards = [["points", t("주간 리그")], ["found", t("첫 발견")], ["streak", t("연속 도전")], ["duel", t("대결")]];
   const kind = state.rankKind || "points";
-  const rows = state.rankings?.[kind] || [];
+  const league = kind === "points" && state.rankings ? leagueRows() : null;
+  const rows = league || state.rankings?.[kind] || [];
   const score = (n) => (kind === "points" ? `P ${n}` : kind === "streak" ? t("{n}연속", { n }) : kind === "duel" ? t("{n}승", { n }) : t("{n}개", { n }));
-  const top = rows.filter((row) => row.score > 0 && row.rank <= 20);
+  const top = league || rows.filter((row) => row.score > 0 && row.rank <= 20);
   const mine = rows.find((row) => row.me);
+  // Each row: place, the student's own character, name (with their line under it), score.
   const line = (row) => h("li", { class: `rank-row${row.me ? " me" : ""}${row.rank <= 3 && row.score > 0 ? ` top${row.rank}` : ""}` },
     h("span", { class: "place" }, String(row.rank)),
-    h("span", { class: "who" }, nameOf(row.nickname, row.tag), row.me && h("small", null, t("나"))),
+    h("span", { class: "ava", "aria-hidden": "true" }, portrait(row.me ? myShop().character : row.character || "bubble")),
+    h("span", { class: "who" },
+      h("span", { class: "who-name" }, row.bot ? row.nickname : nameOf(row.nickname, row.tag),
+        row.me && h("small", null, t("나")), row.bot && h("small", { class: "bot" }, t("캐릭터"))),
+      (row.me ? state.user.motto : row.motto) && h("span", { class: "who-motto" }, row.me ? state.user.motto : row.motto)),
     h("b", null, score(row.score)));
 
   return [
@@ -1604,7 +1671,14 @@ function rankView() {
       h("button", { role: "tab", "aria-selected": String(kind === id), onclick: () => { state.rankKind = id; render(); } }, label))),
     kind === "streak" && h("div", { class: "chips grade-chips" }, GRADES.map((g) =>
       h("button", { class: "chip", "aria-pressed": String(state.rankGrade === g), onclick: () => { state.rankGrade = g; openRankings(); } }, `G${g}`))),
-    state.rankError
+    // Like other leagues, this week's board opens with the first point earned this week.
+    kind === "points" && weekEarned() === 0
+      ? h("div", { class: "league-join" },
+          h("div", { class: "league-join-art", "aria-hidden": "true" }, portrait(myShop().character)),
+          h("b", null, t("이번 주 리그에 아직 참여하지 않았어요")),
+          h("p", null, t("단어를 찾거나 퀴즈를 풀어 포인트를 모으면 이번 주 리그가 열려요. 리그는 월요일마다 새로 시작해요.")),
+          h("button", { class: "btn wide", onclick: () => { Object.assign(state, { tab: "search", entry: null, query: "", notice: null }); render(); } }, t("단어 찾으러 가기")))
+      : state.rankError
       ? h("div", { class: "empty" }, t("랭킹을 불러오지 못했어요."))
       : !state.rankings
         ? h("div", { class: "empty" }, t("랭킹을 불러오는 중…"))
@@ -1612,10 +1686,13 @@ function rankView() {
           ? h("div", { class: "empty" }, t("아직 순위가 없어요. 첫 순위에 올라 보세요!"),
               state.rankScope === "friends" && h("p", { style: "margin-top:12px" }, h("button", { class: "btn ghost", onclick: () => openPage("friends") }, t("친구 추가하기"))))
           : [
+              league && leagueCard(league),
               h("ol", { class: "rank-list" }, top.map(line)),
               mine && !top.includes(mine) && [h("div", { class: "rank-gap" }, "⋯"), h("ol", { class: "rank-list" }, line(mine))],
             ],
-    h("p", { class: "small muted center", style: "margin-top:16px" }, t("이름을 정하지 않으면 임시 이름으로 보여요. 설정에서 바꿀 수 있어요.")),
+    h("p", { class: "small muted center", style: "margin-top:16px" },
+      kind === "points" && weekEarned() === 0 ? null : kind === "points" ? t("이번 주에 모은 포인트로 겨뤄요. 월요일마다 새로 시작해요. ‘캐릭터’ 표시는 함께 뛰는 VOQUIZ 캐릭터예요.")
+        : t("이름을 정하지 않으면 임시 이름으로 보여요. 설정에서 바꿀 수 있어요.")),
   ];
 }
 
@@ -2026,6 +2103,15 @@ function settingsView() {
           : cost === 0 ? t("첫 이름은 무료예요. 비워 두면 임시 이름으로 불러요.")
           : short ? t("이름을 바꾸려면 {n}포인트가 필요해요. 포인트를 더 모아 보세요.", { n: cost })
           : t("이름을 바꾸려면 {n}포인트가 필요해요. 바꿀 때마다 두 배로 늘어나요.", { n: cost })),
+      h("form", { class: "row", style: "margin-top:10px", onsubmit: async (e) => {
+        e.preventDefault();
+        state.notice = null;
+        if (await saveMotto(document.getElementById("motto").value)) toastText(state.user.motto ? t("한마디를 저장했어요.") : t("한마디를 지웠어요."));
+        render();
+      } },
+        h("input", { type: "text", id: "motto", maxLength: 30, autocomplete: "off", value: state.user.motto || "", placeholder: t("한마디 · 예: 오늘도 단어 10개!"), "aria-label": t("한마디"), style: "flex:1" }),
+        h("button", { class: "btn ghost" }, t("저장"))),
+      h("p", { class: "small muted hint" }, t("랭킹에서 내 이름 아래에 다른 친구들에게 보여요. (30자까지)")),
       noticeBox(),
       h("div", { class: "pref-row" },
         h("div", { class: "chips", role: "group", "aria-label": t("언어") }, LANGS.map(([id, label]) =>
