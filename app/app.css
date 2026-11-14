@@ -1437,3 +1437,33 @@ html:lang(zh) * { word-break: normal !important; }
 .gate-help .guide-steps { margin: 0; }
 .gate-help .guide-steps li { font-size: 13px; }
 .gate-help p { margin: 0; }
+
+/* ---------- the board for the people who run VOQUIZ ---------- */
+.board-open { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; margin: 0 0 14px; padding: 12px 14px; border-radius: 14px; background: #2b2840; color: #fff; }
+.board-open b { font-size: 14.5px; }
+.board-open small { flex: 1; font-size: 12px; opacity: .8; }
+.board-open i { font-style: normal; font-size: 20px; opacity: .7; }
+.board-h { display: flex; align-items: center; gap: 8px; margin: 22px 0 8px; font-size: 15px; }
+.board-warn { font-style: normal; font-size: 11px; font-weight: 800; color: #fff; background: #c2452f; border-radius: 999px; padding: 1px 8px; }
+.board-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.board-tile { min-width: 0; display: grid; gap: 1px; padding: 10px 12px; border-radius: 14px; background: var(--surface); }
+.board-tile small { font-size: 11.5px; color: var(--muted); font-weight: 600; }
+.board-tile b { font-size: 22px; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.board-tile span { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.board-tile.warn { background: #fde2d6; }
+.board-tile.warn b { color: #7a2408; }
+.board-chart { margin-top: 10px; padding: 10px 12px 8px; border: 1px solid var(--line); border-radius: 14px; }
+.board-chart small { font-size: 11.5px; font-weight: 600; color: var(--muted); }
+.board-chart em { font-style: normal; font-weight: 500; }
+.board-bars { display: flex; align-items: flex-end; gap: 3px; height: 54px; margin-top: 8px; }
+.board-bars i { flex: 1; min-width: 0; border-radius: 3px 3px 0 0; background: var(--accent); opacity: .55; }
+.board-bars i:last-child { opacity: 1; }
+.board-axis { display: flex; justify-content: space-between; margin-top: 4px; font-size: 10px; color: var(--muted); }
+.board-row { display: grid; gap: 1px; padding: 8px 12px; margin-top: 6px; border-radius: 12px; background: var(--surface); }
+.board-row b { font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.board-row small { font-size: 11.5px; color: var(--muted); }
+.board-row.warn { background: #fde2d6; }
+.board-link { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 11px 14px; border-radius: 14px; border: 1px solid var(--border); color: inherit; text-decoration: none; }
+.board-link b { font-size: 13.5px; }
+.board-link small { flex: 1; font-size: 11.5px; color: var(--muted); }
+.board-link i { margin-left: auto; font-style: normal; color: var(--muted); }
