@@ -549,6 +549,10 @@ const T = {
   "이 버전은 더 이상 쓸 수 없어요. 새 버전으로 업데이트하면 바로 이어서 쓸 수 있어요.": ["This version can no longer be used. Update to the new version and carry on right where you were.", "这个版本不能再使用了。更新到新版本后就能接着使用。"],
   "지금 업데이트": ["Update now", "立即更新"],
   "지금 버전 {v}": ["This version: {v}", "当前版本 {v}"],
+  "포인트샵 보러 가기": ["Go to the point shop", "去积分商店看看"],
+  "랭킹 보러 가기": ["Go to the rankings", "去看排行榜"],
+  "퀴즈 하러 가기": ["Go to the quiz", "去做测验"],
+  "친구 보러 가기": ["Go to friends", "去看朋友"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],
   "테마 상점 열기": ["Open the theme shop", "打开主题商店"],
 

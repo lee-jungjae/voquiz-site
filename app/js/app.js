@@ -2403,6 +2403,52 @@ new MutationObserver((changes) => {
   for (const change of changes) for (const node of change.addedNodes) if (node.nodeType === 1) tidyParagraphs(node.parentElement || node);
 }).observe(document.documentElement, { childList: true, subtree: true });
 
+// ----- notices from the people who run VOQUIZ -----
+// Urgent ones are a band on every screen while they last. News is a pop-up shown once (which ones
+// were seen is remembered on this computer), with a button that can open a page of the app.
+const SEEN_NOTICES = "wb_seen_notices";
+const inMyLanguage = (text) => text?.[getLang()] || text?.ko || "";
+const seenNotices = () => { try { return JSON.parse(localStorage.getItem(SEEN_NOTICES)) || []; } catch { return []; } };
+async function loadNotices() {
+  try {
+    const list = await api.notices();
+    if (!Array.isArray(list)) return;
+    const before = JSON.stringify(state.notices || []);
+    state.notices = list;
+    if (JSON.stringify(list) !== before) render();
+    showNews();
+  } catch { /* not installed yet, or offline */ }
+}
+const NOTICE_ACTIONS = () => ({
+  shop: [t("포인트샵 보러 가기"), () => openShop()],
+  rank: [t("랭킹 보러 가기"), () => openRankings()],
+  quiz: [t("퀴즈 하러 가기"), () => { Object.assign(state, { tab: "quiz", notice: null }); render(); }],
+  friends: [t("친구 보러 가기"), () => openPage("friends")],
+  update: [t("업데이트"), () => updateNow()],
+});
+// One piece of news at a time, and never in the middle of a quiz, a duel or another pop-up.
+function showNews() {
+  if (!state.user?.grade || !state.member || state.update === "force") return;
+  if (state.quiz || state.challenge || state.duel || document.getElementById("sheet")) return;
+  const seen = seenNotices();
+  const news = (state.notices || []).find((n) => n.kind === "news" && !seen.includes(n.id));
+  if (!news) return;
+  localStorage.setItem(SEEN_NOTICES, JSON.stringify([...seen, news.id].slice(-50)));
+  const action = NOTICE_ACTIONS()[news.action];
+  sheet({
+    art: "📣", title: inMyLanguage(news.title), text: inMyLanguage(news.body),
+    actions: action
+      ? [{ label: action[0], kind: "main", run: () => { action[1](); } }, { label: t("닫기"), run: () => true }]
+      : [{ label: t("확인"), kind: "main", run: () => true }],
+  });
+}
+function urgentBand() {
+  const urgent = (state.notices || []).filter((n) => n.kind === "urgent").slice(0, 2);
+  if (!urgent.length) return null;
+  return h("div", { class: "urgent", role: "alert" }, urgent.map((n) =>
+    h("p", null, h("b", null, inMyLanguage(n.title)), inMyLanguage(n.body) && h("span", null, inMyLanguage(n.body)))));
+}
+
 // ----- is this the newest version? -----
 // The server says which version is the newest and which is the oldest still allowed. An older app
 // shows a small notice; one that is too old shows only the "update needed" screen.
@@ -2474,7 +2520,7 @@ function render() {
 
   if (!hasChosenLang()) app.replaceChildren(languageStep());
   else if (state.update === "force") app.replaceChildren(updateGate());
-  else if (!state.user) app.replaceChildren(loginView());
+  else if (!state.user) app.replaceChildren(...[urgentBand(), loginView()].filter(Boolean));
   else if (state.member === undefined) app.replaceChildren(h("div", { class: "step splash" }, h("div", { class: "big-logo art", "aria-hidden": "true" }, logoIcon(76)), h("p", { class: "muted" }, t("확인하는 중…"))));
   else if (state.member === false) app.replaceChildren(...[banner, inviteGate()].filter(Boolean));
   else if (!state.user.grade) app.replaceChildren(...[banner, gradePicker()].filter(Boolean));
@@ -2489,6 +2535,7 @@ function render() {
           icon("friends"), friends().badge() > 0 && h("em", { class: "dot" }, String(friends().badge()))),
         h("button", { class: "gear", "aria-label": t("설정"), title: t("설정"), "aria-pressed": String(state.tab === "settings"), onclick: openSettings }, icon("settings"))),
       banner,
+      urgentBand(),
       updateBanner(),
       h("main", { class: sameScreen ? "still" : null }, view),
       h("nav", null, tabs.map(([id, label]) => h("button", {
@@ -2531,6 +2578,8 @@ if (globalThis.chrome?.storage?.session) {
   });
 }
 
+setTimeout(loadNotices, 3500); // after the first screen (and last week's league result) has settled
+setInterval(loadNotices, 15 * 60 * 1000);
 checkVersion();
 setInterval(checkVersion, 3 * 3600 * 1000); // a panel left open for days still finds out
 globalThis.matchMedia?.("(prefers-color-scheme: dark)").addEventListener("change", () => render());

@@ -1423,3 +1423,10 @@ html:lang(zh) * { word-break: normal !important; }
 .update-later:hover { opacity: 1; }
 .update-gate { text-align: center; gap: 12px; }
 .update-gate h2 { margin: 6px 0 0; }
+
+/* ---------- notices: an urgent band on every screen; news is a pop-up ---------- */
+.urgent { margin: 0 20px 8px; padding: 9px 14px; border-radius: 14px; background: #fde2d6; color: #7a2408; display: grid; gap: 6px; }
+.urgent p { margin: 0; display: grid; gap: 1px; font-size: 13px; line-height: 1.45; white-space: pre-line; }
+.urgent b { font-size: 13.5px; }
+.urgent b::before { content: "📢 "; }
+.sheet p { white-space: pre-line; }
