@@ -1617,11 +1617,11 @@ const tierName = (tier) => {
 };
 // The highest tier ever reached: the worlds beyond it are still a mystery.
 const topTier = () => Math.max(myTier(), Number(state.user?.weekly?.top) || 0);
-// All the worlds in a row at the top of the league: where I am, where I have been, and the
+// All the worlds in a row at the top of the league's info page: where I am, where I have been, and the
 // ones not reached yet as silhouettes.
 function tierStrip() {
   const tier = myTier(), top = topTier();
-  return h("button", { class: "tier-strip", title: t("리그 안내 보기"), "aria-label": t("내 등급: {name}", { name: tierName(tier) }), onclick: () => { state.leagueInfo = true; render(); } },
+  return h("div", { class: "tier-strip", role: "img", "aria-label": t("내 등급: {name}", { name: tierName(tier) }) },
     TIERS.map((one, i) => h("span", { class: `tier-dot ${i === tier ? "now" : i <= top ? "seen" : "locked"}`, style: leagueStyle(one), title: i <= top ? tierName(i) : t("아직 가 보지 못한 세계") },
       h("i", { "aria-hidden": "true" }, one.emoji),
       i === tier && h("em", null, tierName(tier)))));
@@ -1758,6 +1758,7 @@ function leagueInfoView() {
     h("div", { class: "page-head" },
       h("button", { class: "back", "aria-label": t("뒤로"), title: t("뒤로"), onclick: () => { state.leagueInfo = false; render(); } }, "←"),
       h("h2", { class: "page-title" }, t("주간 리그 안내"))),
+    tierStrip(),
     h("div", { class: "league themed static", style: leagueStyle(league) },
       leagueBadge(league),
       h("div", { class: "league-text" },
@@ -1782,11 +1783,6 @@ function leagueInfoView() {
         rule("✏️", t("퀴즈와 연속 도전"), t("맞힐 때마다 포인트가 쌓여요.")),
         rule("⚔️", t("대결"), t("친구와 겨뤄 이기면 포인트를 받아요.")),
         rule("🎯", t("이번 주 단어 목표"), t("목표를 채우면 목표만큼 보너스를 받아요. 지금 목표로는 +{p}점.", { p: weekBonus(weekGoal()) })))),
-    h("section", { class: "block" },
-      h("h3", null, t("일곱 개의 세계")),
-      h("ol", { class: "tier-ladder" }, TIERS.map((one, i) => h("li", { class: i === tier ? "now" : i > topTier() ? "locked" : "", style: leagueStyle(one) },
-        leagueBadge(one), h("b", null, i > topTier() ? t("??? 아직 가 보지 못한 세계") : tierName(i)),
-        i === tier ? h("small", { class: "here" }, t("지금 여기")) : h("small", null, t("{n}단계", { n: i + 1 })))).reverse())),
   ];
 }
 
@@ -1843,7 +1839,6 @@ function rankView() {
       h("button", { role: "tab", "aria-selected": String(kind === id), onclick: () => { state.rankKind = id; render(); } }, label))),
     kind === "streak" && h("div", { class: "chips grade-chips" }, GRADES.map((g) =>
       h("button", { class: "chip", "aria-pressed": String(state.rankGrade === g), onclick: () => { state.rankGrade = g; openRankings(); } }, `G${g}`))),
-    kind === "points" && tierStrip(),
     // Like other leagues, this week's board opens with the first point earned this week.
     kind === "points" && weekEarned() === 0
       ? h("div", { class: "league-join" },

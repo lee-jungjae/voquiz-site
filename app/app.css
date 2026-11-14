@@ -1359,7 +1359,7 @@ button.league { width: 100%; text-align: left; border: 0; font: inherit; color: 
 .tier-ladder small.here { opacity: 1; background: var(--league-ink); color: #fff; border-radius: 999px; padding: 2px 9px; }
 
 /* ---------- all the worlds in a row; the ones not reached yet are silhouettes ---------- */
-.tier-strip { position: relative; display: flex; align-items: center; justify-content: space-between; width: 100%; margin: 14px 0 26px; padding: 6px 2px; border: 0; background: none; cursor: pointer; }
+.tier-strip { position: relative; display: flex; align-items: center; justify-content: space-between; width: 100%; margin: 14px 0 26px; padding: 6px 2px; border: 0; background: none; }
 .tier-strip::before { content: ""; position: absolute; left: 18px; right: 18px; top: 50%; height: 3px; margin-top: -1.5px; border-radius: 3px; background: var(--line); }
 .tier-dot { position: relative; flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--league-bg); font-size: 18px; line-height: 1; }
 .tier-dot i { font-style: normal; }
