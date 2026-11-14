@@ -1616,6 +1616,17 @@ const tierName = (tier) => {
   const name = TIERS[tier].names[Math.max(0, ["ko", "en", "zh"].indexOf(getLang()))];
   return getLang() === "en" ? `${name} League` : getLang() === "zh" ? `${name}联赛` : `${name} 리그`;
 };
+// The highest tier ever reached: the worlds beyond it are still a mystery.
+const topTier = () => Math.max(myTier(), Number(state.user?.weekly?.top) || 0);
+// All the worlds in a row at the top of the league: where I am, where I have been, and the
+// ones not reached yet as silhouettes.
+function tierStrip() {
+  const tier = myTier(), top = topTier();
+  return h("button", { class: "tier-strip", title: t("리그 안내 보기"), "aria-label": t("내 등급: {name}", { name: tierName(tier) }), onclick: () => { state.leagueInfo = true; render(); } },
+    TIERS.map((one, i) => h("span", { class: `tier-dot ${i === tier ? "now" : i <= top ? "seen" : "locked"}`, style: leagueStyle(one), title: i <= top ? tierName(i) : t("아직 가 보지 못한 세계") },
+      h("i", { "aria-hidden": "true" }, one.emoji),
+      i === tier && h("em", null, tierName(tier)))));
+}
 // When a new week has begun, the finished week is set aside to be settled.
 function rollWeek() {
   const w = state.user?.weekly;
@@ -1651,7 +1662,7 @@ async function settleLeague() {
     }
     const next = tier + (result === "up" ? 1 : result === "down" || result === "rest" ? -1 : 0);
     const { settle, ...weekly } = state.user.weekly;
-    state.user.weekly = { ...weekly, tier: next };
+    state.user.weekly = { ...weekly, tier: next, top: Math.max(topTier(), next) };
     await api.saveProfile({ weekly: state.user.weekly }).catch(console.error);
     publishRank();
     if (result === "up") {
@@ -1743,7 +1754,6 @@ function leagueInfoView() {
   const tier = myTier(), league = TIERS[tier];
   const rows = leagueRows();
   const me = rows.find((row) => row.me);
-  const characters = rows.filter((row) => row.bot).sort((a, b) => b.final - a.final);
   const rule = (icon, title, text) => h("li", null, h("span", { class: "info-icon", "aria-hidden": "true" }, icon), h("div", null, h("b", null, title), h("p", null, text)));
   return [
     h("div", { class: "page-head" },
@@ -1775,16 +1785,9 @@ function leagueInfoView() {
         rule("🎯", t("이번 주 단어 목표"), t("목표를 채우면 목표만큼 보너스를 받아요. 지금 목표로는 +{p}점.", { p: weekBonus(weekGoal()) })))),
     h("section", { class: "block" },
       h("h3", null, t("일곱 개의 세계")),
-      h("ol", { class: "tier-ladder" }, TIERS.map((one, i) => h("li", { class: i === tier ? "now" : "", style: leagueStyle(one) },
-        leagueBadge(one), h("b", null, tierName(i)),
+      h("ol", { class: "tier-ladder" }, TIERS.map((one, i) => h("li", { class: i === tier ? "now" : i > topTier() ? "locked" : "", style: leagueStyle(one) },
+        leagueBadge(one), h("b", null, i > topTier() ? t("??? 아직 가 보지 못한 세계") : tierName(i)),
         i === tier ? h("small", { class: "here" }, t("지금 여기")) : h("small", null, t("{n}단계", { n: i + 1 })))).reverse())),
-    characters.length > 0 && h("section", { class: "block" },
-      h("h3", null, t("이번 주 함께 뛰는 캐릭터")),
-      h("p", { class: "small muted", style: "margin:0 0 8px" }, t("일요일 밤에 닿을 점수를 미리 알려 줄게요. 이 점수를 넘기면 그 캐릭터를 이겨요.")),
-      h("ol", { class: "rank-list" }, characters.map((row) => h("li", { class: `rank-row${me.score > row.final ? " beaten" : ""}` },
-        h("span", { class: "ava", "aria-hidden": "true" }, portrait(row.character)),
-        h("span", { class: "who" }, h("span", { class: "who-name" }, row.nickname), h("span", { class: "who-motto" }, t("지금 {n}점", { n: row.score }))),
-        h("b", null, me.score > row.final ? t("✓ 이겼어요") : t("일요일 {n}점", { n: row.final })))))),
   ];
 }
 
@@ -1842,6 +1845,7 @@ function rankView() {
       h("button", { role: "tab", "aria-selected": String(kind === id), onclick: () => { state.rankKind = id; render(); } }, label))),
     kind === "streak" && h("div", { class: "chips grade-chips" }, GRADES.map((g) =>
       h("button", { class: "chip", "aria-pressed": String(state.rankGrade === g), onclick: () => { state.rankGrade = g; openRankings(); } }, `G${g}`))),
+    kind === "points" && tierStrip(),
     // Like other leagues, this week's board opens with the first point earned this week.
     kind === "points" && weekEarned() === 0
       ? h("div", { class: "league-join" },
