@@ -19,15 +19,15 @@ function random(seed) {
 }
 
 // ----- tiers -----
-// Seven worlds, one adventure: from the mushroom forest up to the star world. The top MOVE of a week's
+// Seven worlds, one adventure: from the flower land up to the star world. The top MOVE of a week's
 // board go up one tier, the bottom MOVE go down one. [emoji, Korean, English, Chinese]
 export const TIERS = [
-  { emoji: "🍄", names: ["버섯 숲", "Mushroom Forest", "蘑菇森林"], bg: "#e4f3d8", mid: "#b9dea0", ink: "#23552b", pace: 1 },
+  { emoji: "🌸", names: ["꽃 나라", "Flower Land", "花之国"], bg: "#fde6ee", mid: "#f6b9cf", ink: "#7a2346", pace: 1 },
   { emoji: "🏝️", names: ["보물섬", "Treasure Island", "宝藏岛"], bg: "#fdf1c9", mid: "#f3d67c", ink: "#5c4300", pace: 1.15 },
   { emoji: "🐙", names: ["바닷속", "Deep Sea", "海底世界"], bg: "#d9f0f6", mid: "#9dd5e6", ink: "#0d4a5e", pace: 1.3 },
-  { emoji: "❄️", names: ["얼음 왕국", "Ice Kingdom", "冰雪王国"], bg: "#e6eefb", mid: "#bcd0f3", ink: "#1f3d75", pace: 1.5 },
-  { emoji: "🌋", names: ["용암 화산", "Lava Volcano", "熔岩火山"], bg: "#fde2d6", mid: "#f5a98b", ink: "#7a2408", pace: 1.7 },
-  { emoji: "🏰", names: ["구름 성", "Cloud Castle", "云中城堡"], bg: "#fbe4f1", mid: "#f1b3d6", ink: "#6e1f4c", pace: 1.9 },
+  { emoji: "❄️", names: ["얼음 왕국", "Ice Kingdom", "冰雪王国"], bg: "#e6e8fb", mid: "#bcc2f3", ink: "#27307a", pace: 1.5 },
+  { emoji: "🌈", names: ["무지개", "Rainbow", "彩虹"], bg: "#fde5d2", mid: "#f6b98c", ink: "#6e2f08", pace: 1.7 },
+  { emoji: "🏰", names: ["구름 성", "Cloud Castle", "云中城堡"], bg: "#e3f1fb", mid: "#b3d7f1", ink: "#16466e", pace: 1.9 },
   { emoji: "🪐", names: ["별나라", "Star World", "星星王国"], bg: "#e9e1fa", mid: "#c5b2f0", ink: "#3a2370", pace: 2.1 },
 ];
 export const MOVE = 3;
