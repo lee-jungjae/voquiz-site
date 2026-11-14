@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VOQUIZ · 한국어·영어 단어 사전과 퀴즈</title>
-<meta name="description" content="VOQUIZ는 한국어와 영어를 함께 쓰는 학생을 위한 단어 사전, 단어장, 퀴즈 크롬 확장 프로그램입니다.">
+<title>VOQUIZ · 두 언어로 배우는 단어 사전과 퀴즈</title>
+<meta name="description" content="모르는 단어를 한국어와 영어 두 언어로 쉽게. 찾은 단어로 퀴즈를 풀고 친구와 대결하는 크롬 확장 프로그램 VOQUIZ.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128' aria-hidden='true'> <rect width='128' height='128' rx='28' fill='%23655f9f'/> <path d='M64 30 v-10 M64 22 q-11 -9 -16 0 q9 6 16 0 M64 22 q11 -9 16 0 q-9 6 -16 0' fill='%23bbd86b' stroke='%2323552b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/> <path d='M50 30 h28 a30 30 0 0 1 30 30 v10 a30 30 0 0 1 -30 30 h-22 l-17 15 l3 -17 a30 30 0 0 1 -22 -28 v-10 a30 30 0 0 1 30 -30 z' fill='%23d6d2f0'/> <ellipse cx='39' cy='79' rx='8' ry='5' fill='%23ff8fab' opacity='.75'/><ellipse cx='89' cy='79' rx='8' ry='5' fill='%23ff8fab' opacity='.75'/> <circle cx='48' cy='66' r='7' fill='%232e2a47'/><circle cx='80' cy='66' r='7' fill='%232e2a47'/> <circle cx='50.5' cy='63.5' r='2.4' fill='%23fff'/><circle cx='82.5' cy='63.5' r='2.4' fill='%23fff'/> <path d='M57 77 q7 7 14 0' fill='none' stroke='%232e2a47' stroke-width='3.4' stroke-linecap='round'/> </svg>">
 <style>
 :root { --accent: #655f9f; --accent-dark: #574f82; --lime: #bbd86b; --good: #23552b; --text: #222; --bg: #fff; --surface: #f6f5fb; --line: #e9e7f1; --muted: #6f6b85; --m-ink: #2e2a47; }
@@ -95,8 +95,6 @@ footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--lin
 .mascot .m-tile.t3 { animation-delay: -1.6s; }
 .mascot.jump svg { animation: m-jump .6s cubic-bezier(.3, 1.6, .5, 1); }
 .mascot { width: 150px; margin-top: 8px; }
-.empty:has(.mascot) { padding-top: 28px; }
-.empty:has(.mascot) .hint { margin-top: 14px; }
 .mascot { position: relative; user-select: none; touch-action: manipulation; }
 .mascot svg { transform-origin: 50% 92%; transition: transform .15s; }
 .mascot .m-eyes-happy, .mascot .m-laugh { display: none; }
@@ -130,10 +128,13 @@ footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--lin
 .mascot .m-tile.t3 text { fill: #6b4a00; }
 .mascot .m-tile.t2 rect { stroke: color-mix(in srgb, var(--accent) 62%, #fff); }
 .mascot.happy .m-sprout { animation-duration: .5s; }
-.empty:has(.mascot) { padding-top: 14px; }
-.empty:has(.mascot) .hello { margin-bottom: 6px; }
 .mascot .e, .mascot .mo { display: none; }
+.mascot:not([data-eyes]) .e-default, .mascot[data-eyes="default"] .e-default,
+.mascot[data-eyes="wide"] .e-wide, .mascot[data-eyes="wink"] .e-wink, .mascot[data-eyes="happy"] .e-happy,
+.mascot[data-eyes="closed"] .e-closed, .mascot[data-eyes="laugh"] .e-laugh, .mascot[data-eyes="dizzy"] .e-dizzy,
 .mascot[data-eyes="heart"] .e-heart, .mascot[data-eyes="star"] .e-star { display: block; }
+.mascot:not([data-mouth]) .mo-smile, .mascot[data-mouth="smile"] .mo-smile, .mascot[data-mouth="cat"] .mo-cat,
+.mascot[data-mouth="wavy"] .mo-wavy, .mascot[data-mouth="o"] .mo-o, .mascot[data-mouth="yawn"] .mo-yawn,
 .mascot[data-mouth="laugh"] .mo-laugh { display: block; }
 .mascot .e circle { fill: var(--m-ink); }
 .mascot .e .m-glint { fill: #fff; }
@@ -203,9 +204,159 @@ footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--lin
 @keyframes m-hop { 0%, 100% { transform: translateY(0); } 45% { transform: translateY(-9px); } 70% { transform: translateY(0) scale(1.04, .95); } }
 @keyframes m-roll-r { to { transform: rotate(720deg); } }
 @keyframes m-roll-l { to { transform: rotate(-720deg); } }
+/* ---------- interactive parts ---------- */
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+.stage .mascot { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.stage .hint { margin: 6px 0 0; font-size: 12px; font-weight: 600; color: var(--muted); }
+.stage .pop { position: absolute; left: 50%; top: 52%; font-size: 20px; pointer-events: none; animation: pop-fly .95s cubic-bezier(.2, .8, .3, 1) forwards; }
+@keyframes pop-fly { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.3); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--turn)) scale(1.1); } }
+button.card { width: 100%; text-align: left; position: relative; background: var(--bg); }
+button.card:focus-visible, .pick:focus-visible, dialog button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.card .more { display: inline-block; margin-top: 6px; font-size: 13px; font-weight: 700; color: var(--accent); }
+.card:hover .more { text-decoration: underline; }
+.card:hover .mascot svg { animation: m-jump .6s cubic-bezier(.3, 1.6, .5, 1); }
+.shelf .pick { border-radius: 16px; padding: 4px 0 0; transition: background .15s, transform .15s; }
+.shelf .pick:hover { background: var(--bg); transform: translateY(-4px); }
+.shelf .pick[aria-pressed="true"] { background: var(--bg); box-shadow: 0 0 0 2px var(--accent); }
+.shelf .pick .mascot { pointer-events: none; }
+
+dialog { width: min(560px, calc(100vw - 28px)); max-height: calc(100vh - 28px); border: 0; border-radius: 26px; padding: 0; color: var(--text); box-shadow: 0 30px 80px rgba(30, 26, 60, .35); }
+dialog::backdrop { background: rgba(30, 26, 60, .45); backdrop-filter: blur(3px); }
+dialog[open] { animation: sheet-in .3s cubic-bezier(.2, 1.2, .4, 1); }
+@keyframes sheet-in { from { opacity: 0; transform: translateY(24px) scale(.97); } to { opacity: 1; transform: none; } }
+.sheet { padding: 22px 22px 24px; }
+.sheet-head { display: flex; align-items: center; gap: 10px; }
+.sheet-head .mascot { flex: none; width: 84px; margin: -10px 0 -6px -10px; cursor: default; }
+.sheet-head h3 { flex: 1; margin: 0; font-size: 22px; letter-spacing: -.02em; }
+.sheet-head .close { flex: none; width: 36px; height: 36px; border-radius: 50%; background: var(--surface); font-size: 18px; line-height: 1; }
+.sheet ul.points { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 7px; }
+.sheet ul.points li { position: relative; padding-left: 24px; font-size: 15px; line-height: 1.55; word-break: keep-all; }
+.sheet ul.points li::before { content: "✓"; position: absolute; left: 0; top: 3px; width: 17px; height: 17px; border-radius: 50%; background: var(--lime); color: var(--good); font-size: 11px; font-weight: 900; display: grid; place-items: center; }
+.try { margin: 18px 0 8px; font-size: 13px; font-weight: 800; color: var(--accent); letter-spacing: .02em; }
+.demo { border: 1px solid var(--line); border-radius: 18px; padding: 16px; }
+.demo .word { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+.demo .word span { font-size: 15px; font-weight: 600; color: var(--muted); margin-left: 8px; }
+.demo .def { margin: 6px 0 0; font-size: 15px; line-height: 1.55; }
+.demo .def.second { color: var(--muted); font-size: 14px; }
+.veil { display: block; width: 100%; margin-top: 10px; text-align: left; border-radius: 12px; padding: 10px 12px; background: var(--surface); font-size: 14px; }
+.veil small { display: block; font-size: 11px; font-weight: 800; color: var(--accent); margin-bottom: 2px; }
+.veil span { filter: blur(6px); transition: filter .35s; user-select: none; }
+.veil em { font-style: normal; float: right; font-size: 12px; font-weight: 700; color: var(--accent); }
+.veil.open span { filter: none; user-select: auto; }
+.veil.open em { display: none; }
+.day { font-size: 12px; font-weight: 800; color: var(--muted); margin: 10px 0 2px; }
+.day:first-child { margin-top: 0; }
+.row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }
+.row i { flex: none; width: 34px; height: 34px; border-radius: 10px; background: var(--surface); font-style: normal; font-weight: 800; color: var(--accent); display: grid; place-items: center; }
+.row div { flex: 1; min-width: 0; font-weight: 700; }
+.row div small { display: block; font-weight: 500; color: var(--muted); }
+.row .star { flex: none; width: 36px; height: 36px; border-radius: 50%; font-size: 20px; color: #c9c6d8; transition: transform .2s; }
+.row .star[aria-pressed="true"] { color: #f5b301; transform: scale(1.2) rotate(72deg); }
+.q { font-size: 17px; font-weight: 700; line-height: 1.5; word-break: keep-all; }
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.choice { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; text-align: left; font-weight: 700; transition: border-color .15s, background .15s, transform .15s; }
+.choice:hover:not(:disabled) { border-color: var(--text); }
+.choice.ok { border-color: var(--good); background: #eef6dc; color: var(--good); transform: scale(1.03); }
+.choice.no { border-color: #d93a2b; background: #fdecea; color: #b93a2b; animation: shake .4s; }
+.choice.dim { opacity: .45; }
+@keyframes shake { 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
+.verdict { min-height: 1.7em; margin: 10px 0 0; font-weight: 800; text-align: center; }
+.verdict.good { color: var(--good); } .verdict.bad { color: #b93a2b; }
+.go { display: block; width: 100%; margin-top: 12px; border-radius: 999px; padding: 11px 0; background: var(--accent); color: #fff; font-weight: 800; }
+.go.ghost { background: none; color: var(--text); border: 1px solid var(--text); }
+.lane { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.lane b { flex: none; width: 44px; font-size: 12px; color: var(--muted); }
+.lane.me b { color: var(--accent); }
+.track { position: relative; flex: 1; height: 46px; margin-right: 26px; border-bottom: 2px dashed var(--line); }
+.runner { position: absolute; bottom: -4px; left: 0; width: 48px; margin-left: -24px; transition: left .35s cubic-bezier(.3, 1.3, .5, 1); }
+.runner .mascot { width: 100%; margin: 0; cursor: default; }
+.runner u { position: absolute; left: 50%; top: -4px; transform: translateX(-50%); text-decoration: none; min-width: 18px; padding: 0 5px; border-radius: 999px; background: var(--text); color: #fff; font-size: 10px; font-weight: 800; line-height: 15px; text-align: center; }
+.lane.me .runner u { background: var(--accent); }
+.clock { text-align: center; font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+@media (max-width: 700px) { .choices { grid-template-columns: 1fr; } .sheet { padding: 18px 16px 20px; } }
+
+/* ---------- a search result, with each part named ---------- */
+.demo.result { padding: 14px 16px 16px; }
+.words { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.word-tab { border: 1px solid var(--line); border-radius: 999px; padding: 4px 13px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.word-tab[aria-selected="true"] { background: var(--text); border-color: var(--text); color: #fff; }
+.demo.result .word { font-size: 26px; }
+.meaning { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.meaning .m { border-radius: 14px; padding: 10px 12px; }
+.meaning .m.ko { background: #efedf9; } .meaning .m.en { background: #eef6dc; }
+.meaning small, .section h4 { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .03em; border-radius: 999px; padding: 1px 9px; margin: 0 0 4px; }
+.meaning .ko small { background: var(--accent); color: #fff; } .meaning .en small { background: var(--good); color: var(--lime); }
+.meaning p { margin: 0; font-size: 15px; line-height: 1.5; font-weight: 600; word-break: keep-all; }
+.section { margin-top: 12px; }
+.section h4 { background: var(--surface); color: var(--accent); }
+.section.easy h4 { background: #ffd166; color: #6b4a00; }
+.section.easy .veil { margin-top: 6px; }
+.section .ex { margin: 0; font-size: 15px; font-weight: 600; line-height: 1.5; }
+.section .ex span { font-weight: 500; color: var(--muted); }
+.section.saying { border-radius: 14px; background: #fff6dd; padding: 10px 12px; }
+.section.saying h4 { background: #ffb347; color: #5b3200; }
+.section.saying p { margin: 4px 0 0; font-size: 14px; line-height: 1.5; }
+.section.saying p em { font-style: normal; font-size: 11px; font-weight: 800; color: #a05a00; margin-right: 6px; }
+.section.saying p b { font-size: 16px; }
+.section.saying p span { display: block; color: #6b5a3a; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.legend span { border-radius: 999px; padding: 6px 14px; font-size: 14px; font-weight: 800; }
+.legend .k { background: var(--accent); color: #fff; } .legend .e { background: var(--good); color: var(--lime); }
+.legend .m { background: #ffd166; color: #6b4a00; } .legend .s { background: #ffb347; color: #5b3200; }
+@media (max-width: 700px) { .meaning { grid-template-columns: 1fr; } }
+/* ---------- the home page ---------- */
+body.home { background: radial-gradient(900px 420px at 88% -60px, #efeaff 0, transparent 70%), radial-gradient(700px 380px at -10% 12%, #f1f8dc 0, transparent 70%), #fff; }
+.hero { padding: 26px 0 34px; }
+.hero h1 { font-size: 46px; line-height: 1.16; }
+.hero h1 em { display: inline-block; background: linear-gradient(transparent 62%, #dcecab 62%); color: var(--accent-dark); padding: 0 4px; }
+.hero .lead { font-size: 18px; color: #4a4663; margin-top: 4px; }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 12px 22px; font-weight: 800; text-decoration: none; background: var(--accent); color: #fff; box-shadow: 0 8px 20px rgba(101, 95, 159, .3); transition: transform .15s; }
+.btn:hover { transform: translateY(-2px); }
+.btn.ghost { background: #fff; color: var(--text); box-shadow: none; border: 1.5px solid var(--text); }
+.stage { background: #fff; border: 2px solid #ece9f8; box-shadow: 0 18px 44px rgba(101, 95, 159, .16); }
+.stage .mascot { width: 230px; }
+.float { position: absolute; width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; font-weight: 900; font-size: 17px; box-shadow: 0 6px 14px rgba(0, 0, 0, .1); animation: floaty 4s ease-in-out infinite; }
+.float.a { left: -14px; top: 34%; background: var(--lime); color: var(--good); transform: rotate(-10deg); }
+.float.b { right: -12px; top: 22%; background: #ffd166; color: #6b4a00; animation-delay: -1.3s; }
+.float.c { right: 8%; bottom: -14px; background: var(--accent); color: #fff; animation-delay: -2.4s; }
+@keyframes floaty { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
+section.block { margin-top: 62px; }
+.eyebrow { display: inline-block; font-size: 13px; font-weight: 800; letter-spacing: .04em; color: var(--accent); background: #efedf9; border-radius: 999px; padding: 3px 12px; margin-bottom: 8px; }
+section.block h2 { font-size: 30px; margin: 0 0 6px; }
+section.block h2 + .sub { font-size: 17px; margin-bottom: 20px; }
+.two { display: grid; grid-template-columns: .9fr 1.1fr; gap: 26px; align-items: center; }
+.two ul { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 9px; }
+.two li { position: relative; padding-left: 28px; font-size: 16px; word-break: keep-all; }
+.two li::before { content: "✓"; position: absolute; left: 0; top: 4px; width: 19px; height: 19px; border-radius: 50%; background: var(--lime); color: var(--good); font-size: 12px; font-weight: 900; display: grid; place-items: center; }
+#try-dict .demo { background: #fff; box-shadow: 0 14px 34px rgba(101, 95, 159, .14); border-color: #ece9f8; border-radius: 22px; }
+.cards { gap: 16px; }
+button.card { border: 2px solid transparent; border-radius: 24px; padding: 18px 20px 18px 8px; align-items: center; }
+button.card:nth-child(1) { background: #fff0f4; } button.card:nth-child(2) { background: #fff6dd; }
+button.card:nth-child(3) { background: #e9f3ff; } button.card:nth-child(4) { background: #fff0e4; }
+button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(101, 95, 159, .16); }
+.card .mascot { width: 112px; }
+.card b { font-size: 19px; }
+.card p { font-size: 15px; color: #4a4663; }
+.perks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.perk { border-radius: 22px; background: var(--surface); padding: 18px; text-align: center; }
+.perk .big { font-size: 34px; font-weight: 900; letter-spacing: -.03em; color: var(--accent); line-height: 1.1; }
+.perk b { display: block; margin: 4px 0 2px; }
+.perk p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.55; word-break: keep-all; }
+.shelf { background: #fff; border: 2px solid #ece9f8; }
+.grown { border-radius: 26px; background: #f7f7fb; padding: 26px 26px 22px; }
+.grown h2 { font-size: 22px; }
+.grown .facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 26px; margin-top: 12px; }
+.grown .facts div { font-size: 15px; line-height: 1.6; word-break: keep-all; }
+.grown .facts b { display: block; }
+.steps li { font-size: 17px; }
+@media (max-width: 700px) {
+  .hero h1 { font-size: 33px; } .two, .perks, .grown .facts { grid-template-columns: 1fr; }
+  section.block h2 { font-size: 25px; } .float { display: none; }
+}
 </style>
 </head>
-<body>
+<body class="home">
 <div class="wrap">
 <header class="top">
   <a class="brand" href="./" aria-label="VOQUIZ"><span class="icon"><svg viewBox="0 0 128 128" aria-hidden="true">
@@ -239,11 +390,13 @@ footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--lin
 </header>
 <section class="hero">
   <div>
-    <h1>두 언어로 배우는 단어,<br><em>찾고 · 모으고 · 겨루기</em></h1>
-    <p class="lead">VOQUIZ는 한국어와 영어를 함께 쓰는 학생을 위한 크롬 확장 프로그램입니다. 모르는 단어를 찾으면 학년에 맞는 설명을 두 언어로 보여 주고, 찾은 단어로 퀴즈를 풀 수 있습니다.</p>
-    <div class="tags"><span class="fill">G3–G12</span><span>한국어 · English</span><span>크롬 확장 프로그램</span></div>
+    <h1>모르는 단어?<br><em>두 언어로</em> 쉽게 알려 줄게!</h1>
+    <p class="lead">한국어로 찾아도, 영어로 찾아도 OK. 내 학년에 맞는 쉬운 설명으로 알려 주고, 찾은 단어로 퀴즈도 풀고 친구랑 대결도 해.</p>
+    <div class="tags"><span class="fill">G3–G12</span><span>한국어 · English</span><span>크롬에서 바로</span></div>
+    <div class="cta"><a class="btn" href="#try">직접 해 보기</a><a class="btn ghost" href="#start">시작하는 방법</a></div>
   </div>
-  <div class="stage"><span class="say">오늘은 어떤 단어를 찾아볼까?</span><span class="mascot " aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
+  <div class="stage"><span class="float a" aria-hidden="true">A</span><span class="float b" aria-hidden="true">가</span><span class="float c" aria-hidden="true">?</span>
+    <span class="say" aria-live="polite">안녕! 나를 눌러 봐</span><span role="button" tabindex="0" aria-label="VOQUIZ" class="mascot " data-art="bubble"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
     <g class="m-tile t1"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">A</text></g>
@@ -298,13 +451,31 @@ footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--lin
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span></div>
+</svg></span><p class="hint">캐릭터를 눌러 봐 · 아래에서 다른 친구로 바꿀 수 있어</p></div>
 </section>
 
-<h2>이런 걸 할 수 있어요</h2>
-<p class="sub">찾은 단어가 곧 내 공부 재료가 됩니다.</p>
-<div class="cards">
-  <div class="card"><span class="mascot " aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
+<section class="block two" id="try">
+  <div>
+    <span class="eyebrow">두 언어 사전</span>
+    <h2>단어 하나를 찾으면<br>이만큼 나와</h2>
+    <p class="sub">위의 단어를 바꿔 가며 눌러 봐. 가려진 칸도 열어 보고!</p>
+    <div class="legend"><span class="k">한국어 뜻</span><span class="e">영어 뜻</span><span class="m">더 쉽게 외우기</span><span class="s">속담 · 사자성어</span></div>
+    <ul>
+      <li><b>한국어 뜻과 영어 뜻</b>을 한 번에, 내 학년에 맞는 쉬운 말로</li>
+      <li><b>더 쉽게 외우기</b>: 영어 어원, 한자어 글자 풀이, 기억법</li>
+      <li><b>예문</b>으로 어떻게 쓰는지 바로 확인</li>
+      <li>관련된 <b>속담과 사자성어</b>까지 (한자 없이 한글로!)</li>
+    </ul>
+  </div>
+  <div id="try-dict"></div>
+</section>
+
+<section class="block">
+  <span class="eyebrow">할 수 있는 것</span>
+  <h2>찾고, 모으고, 풀고, 겨루고</h2>
+  <p class="sub">하나씩 눌러서 직접 해 봐.</p>
+  <div class="cards">
+    <button type="button" class="card" data-feature="dict"><span class="mascot " data-art="rabbit" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
     <g class="m-tile t1"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">♥</text></g>
@@ -359,8 +530,8 @@ footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--lin
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><div><b>사전</b><p>한국어나 영어로 찾으면 뜻, 어원, 한자어 풀이, 기억법, 예문을 두 언어로 보여 줍니다.</p></div></div>
-  <div class="card"><span class="mascot " aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
+</svg></span><div><b>두 언어 사전</b><p>한국어든 영어든, 찾으면 두 언어로 쉽게 설명해 줘.</p><span class="more">자세히 보기 →</span></div></button>
+    <button type="button" class="card" data-feature="list"><span class="mascot " data-art="cupcake" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
     <g class="m-tile t1"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">A</text></g>
@@ -415,8 +586,8 @@ footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--lin
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><div><b>단어장</b><p>찾은 단어가 날짜별로 모이고, 즐겨찾기와 복습 표시를 할 수 있습니다.</p></div></div>
-  <div class="card"><span class="mascot " aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
+</svg></span><div><b>내 단어장</b><p>찾은 단어가 날짜별로 알아서 모여. 따로 적을 필요 없어!</p><span class="more">자세히 보기 →</span></div></button>
+    <button type="button" class="card" data-feature="quiz"><span class="mascot " data-art="robot" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
     <g class="m-tile t1"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">0</text></g>
@@ -471,8 +642,8 @@ footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--lin
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><div><b>퀴즈와 연속 도전</b><p>내 단어장으로 퀴즈를 풀고, 학년별 권장 단어를 틀릴 때까지 이어서 맞힙니다.</p></div></div>
-  <div class="card"><span class="mascot " aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
+</svg></span><div><b>퀴즈와 연속 도전</b><p>내가 찾은 단어로 퀴즈! 틀린 단어는 맞힐 때까지 다시 나와.</p><span class="more">자세히 보기 →</span></div></button>
+    <button type="button" class="card" data-feature="duel"><span class="mascot " data-art="fox" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
     <g class="m-tile t1"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">A</text></g>
@@ -527,12 +698,81 @@ footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--lin
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><div><b>친구와 대결</b><p>3분 동안 같은 문제를 풀어 누가 더 많이 맞히는지 겨룹니다.</p></div></div>
-</div>
+</svg></span><div><b>친구와 3분 대결</b><p>3분 동안 누가 더 많이 맞히나. 친구 기록이 옆에서 같이 달려!</p><span class="more">자세히 보기 →</span></div></button>
+  </div>
+</section>
 
-<h2>84종의 캐릭터</h2>
-<p class="sub">단어를 찾고 퀴즈를 풀어 모은 포인트로 캐릭터와 테마를 모읍니다.</p>
-<div class="shelf"><span class="mascot" style="animation-delay:-0.0s" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
+<section class="block">
+  <span class="eyebrow">매일매일</span>
+  <h2>할수록 쌓이는 재미</h2>
+  <p class="sub">단어를 찾고 퀴즈를 풀 때마다 포인트가 모여.</p>
+  <div class="perks">
+    <div class="perk"><div class="big">+5</div><b>찾을 때마다 포인트</b><p>단어 하나에 +5점. 퀴즈를 맞히면 더 많이!</p></div>
+    <div class="perk"><div class="big">84</div><b>모으는 캐릭터</b><p>동물, 디저트, 물건까지. 포인트로 내 캐릭터를 골라.</p></div>
+    <div class="perk"><div class="big">#1</div><b>친구들과 랭킹</b><p>포인트, 처음 발견한 단어, 연속 기록, 대결 승수로 겨뤄.</p></div>
+  </div>
+</section>
+
+<section class="block">
+  <span class="eyebrow">캐릭터</span>
+  <h2>누구랑 공부할래?</h2>
+  <p class="sub">눌러서 위의 캐릭터를 바꿔 봐. 캐릭터마다 표정도 동작도 달라.</p>
+  <div class="shelf"><button type="button" class="pick" aria-pressed="true" aria-label="bubble"><span class="mascot portrait" style="animation-delay:-0.0s" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
+  <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
+  <g class="m-tiles">
+    <g class="m-tile t1"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">A</text></g>
+    <g class="m-tile t2"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">가</text></g>
+    <g class="m-tile t3"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">?</text></g>
+  </g>
+  <g class="m-legs">
+    <path class="m-leg l" d="M89 106 v24 h-8"></path>
+    <path class="m-leg r" d="M111 106 v24 h8"></path>
+  </g>
+  <g class="m-bob">
+    <path class="m-arm l" d="M72 80 Q50 72 58 52"></path>
+    <path class="m-arm r" d="M128 80 Q150 72 142 52"></path>
+    
+    <path class="m-body" d="M88 50 h24 a26 26 0 0 1 26 26 v10 a26 26 0 0 1 -26 26 h-20 l-14 12 l2 -13 a26 26 0 0 1 -18 -25 v-10 a26 26 0 0 1 26 -26 z"></path>
+    <path class="m-shine" d="M80 60 q10 -7 22 -6"></path>
+    <path class="m-sprout" d="M100 50 v-9 M100 43 q-9 -8 -13 0 q7 5 13 0 M100 43 q9 -8 13 0 q-7 5 -13 0"></path>
+    
+    <g class="m-face">
+      <ellipse class="m-cheek" cx="78" cy="93" rx="7" ry="4.5"></ellipse>
+      <ellipse class="m-cheek" cx="122" cy="93" rx="7" ry="4.5"></ellipse>
+      <g class="m-look">
+        <g class="m-eyes e e-default">
+          <circle cx="86" cy="82" r="5.5"></circle><circle cx="114" cy="82" r="5.5"></circle>
+          <circle class="m-glint" cx="88" cy="80" r="1.9"></circle><circle class="m-glint" cx="116" cy="80" r="1.9"></circle>
+        </g>
+        <g class="e e-wide">
+          <circle cx="86" cy="81" r="7.5"></circle><circle cx="114" cy="81" r="7.5"></circle>
+          <circle class="m-glint" cx="89" cy="78" r="2.6"></circle><circle class="m-glint" cx="117" cy="78" r="2.6"></circle>
+        </g>
+        <g class="e e-wink">
+          <circle cx="86" cy="82" r="5.5"></circle><circle class="m-glint" cx="88" cy="80" r="1.9"></circle>
+          <path class="line" d="M108 84 q6 -8 12 0"></path>
+        </g>
+      </g>
+      <g class="e e-happy"><path class="line" d="M80 84 q6 -8 12 0"></path><path class="line" d="M108 84 q6 -8 12 0"></path></g>
+      <g class="e e-closed"><path class="line" d="M80 82 q6 5 12 0"></path><path class="line" d="M108 82 q6 5 12 0"></path></g>
+      <g class="e e-laugh"><path class="line" d="M81 77 l9 5 l-9 5"></path><path class="line" d="M119 77 l-9 5 l9 5"></path></g>
+      <g class="e e-dizzy"><path class="line" d="M81 77 l10 10 M91 77 l-10 10"></path><path class="line" d="M109 77 l10 10 M119 77 l-10 10"></path></g>
+      <g class="e e-heart">
+        <path d="M86 88 l-7 -7 a4 4 0 0 1 7 -4 a4 4 0 0 1 7 4 z"></path><path d="M114 88 l-7 -7 a4 4 0 0 1 7 -4 a4 4 0 0 1 7 4 z"></path>
+      </g>
+      <g class="e e-star">
+        <path d="M86 74 l2.4 5 l5.6 .7 l-4.1 3.8 l1.1 5.5 l-5 -2.8 l-5 2.8 l1.1 -5.5 l-4.1 -3.8 l5.6 -.7 z"></path>
+        <path d="M114 74 l2.4 5 l5.6 .7 l-4.1 3.8 l1.1 5.5 l-5 -2.8 l-5 2.8 l1.1 -5.5 l-4.1 -3.8 l5.6 -.7 z"></path>
+      </g>
+      <path class="m-smile mo mo-smile" d="M95 90 q5 5 10 0"></path>
+      <path class="mo mo-cat line" d="M93 90 q3.5 4.5 7 0 q3.5 4.5 7 0"></path>
+      <path class="mo mo-wavy line" d="M93 92 q3.5 -4 7 0 q3.5 4 7 0"></path>
+      <ellipse class="mo mo-o" cx="100" cy="93" rx="3.6" ry="4.6"></ellipse>
+      <g class="mo mo-yawn"><ellipse cx="100" cy="94" rx="6" ry="7.5"></ellipse><ellipse class="m-tongue" cx="100" cy="98" rx="3.6" ry="2.6"></ellipse></g>
+      <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
+    </g>
+  </g>
+</svg></span></button><button type="button" class="pick" aria-pressed="false" aria-label="rabbit"><span class="mascot portrait" style="animation-delay:-0.17s" data-art="rabbit" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
     <g class="m-tile t1"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">♥</text></g>
@@ -587,7 +827,7 @@ footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--lin
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><span class="mascot" style="animation-delay:-0.17s" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
+</svg></span></button><button type="button" class="pick" aria-pressed="false" aria-label="bee"><span class="mascot portrait" style="animation-delay:-0.34s" data-art="bee" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
     <g class="m-tile t1"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">A</text></g>
@@ -642,7 +882,7 @@ footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--lin
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><span class="mascot" style="animation-delay:-0.34s" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
+</svg></span></button><button type="button" class="pick" aria-pressed="false" aria-label="sunflower"><span class="mascot portrait" style="animation-delay:-0.51s" data-art="sunflower" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
     <g class="m-tile t1"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">A</text></g>
@@ -697,7 +937,7 @@ footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--lin
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><span class="mascot" style="animation-delay:-0.51s" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
+</svg></span></button><button type="button" class="pick" aria-pressed="false" aria-label="burger"><span class="mascot portrait" style="animation-delay:-0.68s" data-art="burger" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
     <g class="m-tile t1"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">A</text></g>
@@ -752,7 +992,7 @@ footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--lin
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><span class="mascot" style="animation-delay:-0.68s" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
+</svg></span></button><button type="button" class="pick" aria-pressed="false" aria-label="penguin"><span class="mascot portrait" style="animation-delay:-0.8500000000000001s" data-art="penguin" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
     <g class="m-tile t1"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">*</text></g>
@@ -807,7 +1047,7 @@ footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--lin
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><span class="mascot" style="animation-delay:-0.8500000000000001s" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
+</svg></span></button><button type="button" class="pick" aria-pressed="false" aria-label="cat"><span class="mascot portrait" style="animation-delay:-1.02s" data-art="cat" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
     <g class="m-tile t1"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">♥</text></g>
@@ -862,7 +1102,7 @@ footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--lin
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><span class="mascot" style="animation-delay:-1.02s" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
+</svg></span></button><button type="button" class="pick" aria-pressed="false" aria-label="butterfly"><span class="mascot portrait" style="animation-delay:-1.1900000000000002s" data-art="butterfly" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
     <g class="m-tile t1"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">A</text></g>
@@ -917,93 +1157,261 @@ footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--lin
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><span class="mascot" style="animation-delay:-1.1900000000000002s" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
-  <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
-  <g class="m-tiles">
-    <g class="m-tile t1"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">A</text></g>
-    <g class="m-tile t2"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">가</text></g>
-    <g class="m-tile t3"><rect x="-11" y="-11" width="22" height="22" rx="6"></rect><text y="5">ㄱ</text></g>
-  </g>
-  <g class="m-legs">
-    <path class="m-leg l" style="stroke:#3fa55e" d="M89 106 v24 h-8"></path>
-    <path class="m-leg r" style="stroke:#3fa55e" d="M111 106 v24 h8"></path>
-  </g>
-  <g class="m-bob">
-    <path class="m-arm l" style="stroke:#3fa55e" d="M72 80 Q50 72 58 52"></path>
-    <path class="m-arm r" style="stroke:#3fa55e" d="M128 80 Q150 72 142 52"></path>
-    <path d="M134 92 q20 4 24 -12 q0 18 -22 26 z" fill="#7ed492"></path><path d="M82 52 l7 -11 l7 10 z M96 50 l7 -12 l7 11 z M110 52 l7 -10 l6 11 z" fill="#3fa55e"></path>
-    <path class="m-body" d="M88 50 h24 a26 26 0 0 1 26 26 v14 a22 22 0 0 1 -22 22 h-32 a22 22 0 0 1 -22 -22 v-14 a26 26 0 0 1 26 -26 z" style="fill:#7ed492"></path>
-    <ellipse cx="100" cy="102" rx="17" ry="8" fill="#d9f5df"></ellipse>
-    
-    
-    <g class="m-face">
-      <ellipse class="m-cheek" cx="78" cy="93" rx="7" ry="4.5"></ellipse>
-      <ellipse class="m-cheek" cx="122" cy="93" rx="7" ry="4.5"></ellipse>
-      <g class="m-look">
-        <g class="m-eyes e e-default">
-          <circle cx="86" cy="82" r="5.5"></circle><circle cx="114" cy="82" r="5.5"></circle>
-          <circle class="m-glint" cx="88" cy="80" r="1.9"></circle><circle class="m-glint" cx="116" cy="80" r="1.9"></circle>
-        </g>
-        <g class="e e-wide">
-          <circle cx="86" cy="81" r="7.5"></circle><circle cx="114" cy="81" r="7.5"></circle>
-          <circle class="m-glint" cx="89" cy="78" r="2.6"></circle><circle class="m-glint" cx="117" cy="78" r="2.6"></circle>
-        </g>
-        <g class="e e-wink">
-          <circle cx="86" cy="82" r="5.5"></circle><circle class="m-glint" cx="88" cy="80" r="1.9"></circle>
-          <path class="line" d="M108 84 q6 -8 12 0"></path>
-        </g>
-      </g>
-      <g class="e e-happy"><path class="line" d="M80 84 q6 -8 12 0"></path><path class="line" d="M108 84 q6 -8 12 0"></path></g>
-      <g class="e e-closed"><path class="line" d="M80 82 q6 5 12 0"></path><path class="line" d="M108 82 q6 5 12 0"></path></g>
-      <g class="e e-laugh"><path class="line" d="M81 77 l9 5 l-9 5"></path><path class="line" d="M119 77 l-9 5 l9 5"></path></g>
-      <g class="e e-dizzy"><path class="line" d="M81 77 l10 10 M91 77 l-10 10"></path><path class="line" d="M109 77 l10 10 M119 77 l-10 10"></path></g>
-      <g class="e e-heart">
-        <path d="M86 88 l-7 -7 a4 4 0 0 1 7 -4 a4 4 0 0 1 7 4 z"></path><path d="M114 88 l-7 -7 a4 4 0 0 1 7 -4 a4 4 0 0 1 7 4 z"></path>
-      </g>
-      <g class="e e-star">
-        <path d="M86 74 l2.4 5 l5.6 .7 l-4.1 3.8 l1.1 5.5 l-5 -2.8 l-5 2.8 l1.1 -5.5 l-4.1 -3.8 l5.6 -.7 z"></path>
-        <path d="M114 74 l2.4 5 l5.6 .7 l-4.1 3.8 l1.1 5.5 l-5 -2.8 l-5 2.8 l1.1 -5.5 l-4.1 -3.8 l5.6 -.7 z"></path>
-      </g>
-      <path class="m-smile mo mo-smile" d="M95 90 q5 5 10 0"></path>
-      <path class="mo mo-cat line" d="M93 90 q3.5 4.5 7 0 q3.5 4.5 7 0"></path>
-      <path class="mo mo-wavy line" d="M93 92 q3.5 -4 7 0 q3.5 4 7 0"></path>
-      <ellipse class="mo mo-o" cx="100" cy="93" rx="3.6" ry="4.6"></ellipse>
-      <g class="mo mo-yawn"><ellipse cx="100" cy="94" rx="6" ry="7.5"></ellipse><ellipse class="m-tongue" cx="100" cy="98" rx="3.6" ry="2.6"></ellipse></g>
-      <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
-    </g>
-  </g>
-</svg></span></div>
+</svg></span></button></div>
+</section>
 
-<h2>이용 방법</h2>
-<ol class="steps">
-  <li>크롬에 VOQUIZ를 설치하고 Google 계정으로 로그인합니다.</li>
-  <li>처음 가입할 때는 친구에게 받은 초대 코드를 입력합니다.</li>
-  <li>단어를 찾아보세요. 웹페이지에서 단어를 선택하고 우클릭해도 됩니다.</li>
-</ol>
+<section class="block" id="start">
+  <span class="eyebrow">시작하기</span>
+  <h2>세 단계면 끝!</h2>
+  <ol class="steps">
+    <li>크롬에 VOQUIZ를 설치하고 Google 계정으로 로그인해.</li>
+    <li>친구에게 받은 초대 코드를 넣어. (초대받은 친구만 쓸 수 있어!)</li>
+    <li>궁금한 단어를 찾아봐. 웹페이지에서 단어를 선택하고 우클릭해도 돼.</li>
+  </ol>
+</section>
 
-<h2>Google 계정 정보의 이용</h2>
-<p class="note">VOQUIZ는 Google 로그인으로 <b>이메일 주소와 기본 프로필(계정 식별자)</b>만 받아, 여러 컴퓨터에서 같은 단어장과 기록을 불러오는 데에만 씁니다. 연락처, 메일, 드라이브 등 다른 Google 데이터에는 접근하지 않습니다. 자세한 내용은 <a href="privacy.html">개인정보처리방침</a>을 보세요.</p>
+<section class="block grown">
+  <span class="eyebrow">부모님·선생님께</span>
+  <h2>안심하고 쓰게 하셔도 됩니다</h2>
+  <div class="facts">
+    <div><b>학년에 맞는 설명</b>G3부터 G12까지 학년 수준에 맞춰 한국어와 영어로 함께 설명합니다.</div>
+    <div><b>광고 없음</b>광고를 싣지 않고, 학생의 정보를 판매하지 않습니다.</div>
+    <div><b>초대받은 학생만</b>초대 코드로만 가입할 수 있고, 친구·대결 신청은 설정에서 끌 수 있습니다.</div>
+    <div><b>이메일은 비공개</b>랭킹과 친구 목록에는 학생이 정한 이름만 보입니다.</div>
+  </div>
+</section>
 
-<h2>문의</h2>
-<p>VOQUIZ는 개인이 운영하는 프로젝트입니다. 문의와 계정·데이터 삭제 요청은 <a href="mailto:jjungjjai@gmail.com">jjungjjai@gmail.com</a>으로 보내 주세요.</p>
+<section class="block">
+  <h2>Google 계정 정보의 이용</h2>
+  <p class="note">VOQUIZ는 Google 로그인으로 <b>이메일 주소와 기본 프로필(계정 식별자)</b>만 받아, 여러 컴퓨터에서 같은 단어장과 기록을 불러오는 데에만 씁니다. 연락처, 메일, 드라이브 등 다른 Google 데이터에는 접근하지 않습니다. 자세한 내용은 <a href="privacy.html">개인정보처리방침</a>을 보세요.</p>
+  <p>VOQUIZ는 개인이 운영하는 프로젝트입니다. 문의와 계정·데이터 삭제 요청은 <a href="mailto:jjungjjai@gmail.com">jjungjjai@gmail.com</a>으로 보내 주세요.</p>
+</section>
 <footer><a href="./">VOQUIZ 소개</a> &nbsp;·&nbsp; <a href="privacy.html">개인정보처리방침</a><br>문의: <a href="mailto:jjungjjai@gmail.com">jjungjjai@gmail.com</a></footer>
 </div>
+<dialog id="detail" aria-labelledby="detail-title"><div class="sheet" id="sheet"></div></dialog>
 <script>
-// The character on the stage changes its mood by itself every few seconds.
 (() => {
-  const el = document.querySelector(".stage .mascot");
-  if (!el) return;
-  const moods = [["jump", "happy", "laugh"], ["wiggle", "heart", "cat"], ["spin", "star", "laugh"], ["squish", "wink", "cat"], ["stretch", "star", "o"], ["flip", "happy", "laugh"]];
-  const moves = moods.map((m) => m[0]);
-  setInterval(() => {
-    const [move, eyes, mouth] = moods[Math.floor(Math.random() * moods.length)];
-    el.classList.remove(...moves);
-    void el.offsetWidth;
-    el.classList.add(move);
-    el.dataset.eyes = eyes;
-    el.dataset.mouth = mouth;
-    setTimeout(() => { el.classList.remove(...moves); el.dataset.eyes = "default"; el.dataset.mouth = "smile"; }, 1100);
-  }, 3200);
+  const ko = document.documentElement.lang === "ko";
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const el = (html) => { const t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstElementChild; };
+  const drawing = (name) => $(`[data-art="${name}"]`).innerHTML; // a character's picture, taken from the page
+
+  // ----- the character on the stage: tap it, or pick another from the shelf -----
+  const hero = $(".stage .mascot");
+  const say = $(".say");
+  const MOODS = [["jump", "happy", "laugh", "♥ ✦ ♥"], ["wiggle", "heart", "cat", "♥ ♥ ♥"], ["spin", "dizzy", "wavy", "★ ✦ ★"], ["squish", "wink", "cat", "✦ ♥"],
+    ["stretch", "star", "laugh", "✦ A 가"], ["flip", "star", "cat", "★ ✦ ★"], ["party", "heart", "laugh", "♥ ★ ✦ ♪"], ["shake", "laugh", "laugh", "✦ ♥ ✦"]];
+  const MOVES = MOODS.map((m) => m[0]);
+  const LINES = ko ? ["히히!", "야호!", "단어 찾으러 가자!", "또 눌러 줘!", "오늘도 화이팅!", "짜잔!", "랄랄라~", "반가워!", "나랑 퀴즈 풀래?", "모르는 단어 있어?"]
+    : ["Hee hee!", "Yay!", "Let's find a word!", "Tap me again!", "You can do it!", "Ta-da!", "La la la~", "Nice to meet you!"];
+  let calm = 0;
+  function react(speak) {
+    const [move, eyes, mouth, pops] = MOODS[Math.floor(Math.random() * MOODS.length)];
+    hero.classList.remove(...MOVES);
+    void hero.offsetWidth;
+    hero.classList.add(move);
+    hero.dataset.eyes = eyes;
+    hero.dataset.mouth = mouth;
+    clearTimeout(calm);
+    calm = setTimeout(() => { hero.classList.remove(...MOVES); hero.dataset.eyes = "default"; hero.dataset.mouth = "smile"; }, 1200);
+    if (!speak) return;
+    say.textContent = LINES[Math.floor(Math.random() * LINES.length)];
+    say.style.animation = "none"; void say.offsetWidth; say.style.animation = "";
+    const chars = pops.split(" ");
+    for (let i = 0; i < 6; i++) {
+      const pop = el(`<span class="pop" aria-hidden="true">${chars[i % chars.length]}</span>`);
+      const angle = Math.random() * Math.PI * 2, reach = 50 + Math.random() * 60;
+      pop.style.cssText = `--dx:${Math.cos(angle) * reach}px;--dy:${-Math.abs(Math.sin(angle)) * reach - 30}px;--turn:${Math.random() * 80 - 40}deg;animation-delay:${i * 25}ms;color:${["#e8395a", "#655f9f", "#23552b"][i % 3]}`;
+      $(".stage").append(pop);
+      setTimeout(() => pop.remove(), 1200);
+    }
+  }
+  hero.addEventListener("click", () => react(true));
+  hero.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); react(true); } });
+  setInterval(() => { if (!document.hidden && !$("#detail").open) react(false); }, 4200);
+  for (const pick of document.querySelectorAll(".pick")) {
+    pick.addEventListener("click", () => {
+      for (const other of document.querySelectorAll(".pick")) other.setAttribute("aria-pressed", String(other === pick));
+      hero.innerHTML = pick.querySelector(".mascot").innerHTML;
+      $(".stage").scrollIntoView({ block: "nearest", behavior: "smooth" });
+      react(true);
+    });
+  }
+
+  // ----- what each feature is, and something to try -----
+  const T = ko ? {
+    more: "자세히 보기 →", close: "닫기", tryIt: "직접 해 봐!",
+    reveal: "눌러서 보기", again: "다시 풀기", start: "대결 시작!", restart: "한 판 더", me: "나", rival: "하린",
+    right: ["정답! 대단해!", "완벽해!", "바로 그거야!"], wrong: "아깝다! 정답은 photosynthesis야.",
+    win: (a, b) => `이겼다! ${a} : ${b}`, lose: (a, b) => `아깝다! ${a} : ${b}`, draw: (a, b) => `비겼어! ${a} : ${b}`,
+    today: "오늘", yesterday: "어제",
+    dict: { title: "두 언어 사전", art: "rabbit", points: ["한국어로 찾아도, 영어로 찾아도 OK. 한 번에 두 언어로 알려 줘.", "내 학년(G3–G12)에 딱 맞는 쉬운 말로 설명해 줘.", "영어 단어가 어디서 왔는지, 한자어는 글자마다 무슨 뜻인지도 알려 줘서 기억에 쏙 남아.", "기억법과 예문, 속담까지! 가려진 칸은 눌러서 하나씩 열어 봐."] },
+    list: { title: "내 단어장", art: "cupcake", points: ["찾아본 단어가 날짜별로 알아서 모여. 따로 적을 필요가 없어.", "별을 누르면 즐겨찾기에 쏙.", "퀴즈에서 틀린 단어는 '복습 필요'로 표시돼서 놓치지 않아.", "아무도 찾은 적 없는 단어를 처음 찾으면 '내가 발견한 단어'로 기록돼!"] },
+    quiz: { title: "퀴즈와 연속 도전", art: "robot", points: ["내가 찾은 단어로 문제가 나와. 쓰는 문제와 고르는 문제가 섞여 있고, 한 문제에 20초야.", "틀린 단어는 3번 연속으로 맞힐 때까지 다시 나와서 결국 외우게 돼.", "연속 도전은 우리 학년 권장 단어를 틀릴 때까지 쭉! 최고 기록에 도전해 봐.", "맞히면 내 캐릭터가 같이 신나 하고, 틀리면 위로해 줘."], q: "식물이 햇빛, 물, 이산화탄소로 스스로 양분을 만드는 일." },
+    duel: { title: "친구와 3분 대결", art: "fox", points: ["3분 동안 누가 더 많이 맞히나 겨뤄. 둘 다 똑같은 문제를 풀어서 공정해.", "같은 시간에 접속하지 않아도 돼. 먼저 푼 친구의 기록이 옆에서 같이 달려!", "틀리면 3초 동안 얼음! 빠르고 정확하게.", "친구에게 도전하거나, 랜덤 상대와 붙어 볼 수도 있어."] },
+  } : {
+    more: "See more →", close: "Close", tryIt: "Try it!",
+    reveal: "Tap to see", again: "Try again", start: "Start the duel!", restart: "One more", me: "Me", rival: "Harin",
+    right: ["Correct! Awesome!", "Perfect!", "That's the one!"], wrong: "So close! It's photosynthesis.",
+    win: (a, b) => `You win! ${a} : ${b}`, lose: (a, b) => `So close! ${a} : ${b}`, draw: (a, b) => `A draw! ${a} : ${b}`,
+    today: "Today", yesterday: "Yesterday",
+    dict: { title: "Two-language dictionary", art: "rabbit", points: ["Search in Korean or in English. Either way, you get both languages at once.", "Explained in easy words that fit your grade (G3–G12).", "See where an English word comes from and what each Korean syllable means, so it sticks.", "Memory tips, examples and sayings too. Tap the covered parts to open them one by one."] },
+    list: { title: "My word list", art: "cupcake", points: ["Every word you look up is saved by day, all by itself. No writing it down.", "Tap the star to keep a favourite.", "Words you miss in a quiz are marked for review, so none slip away.", "Be the first ever to look a word up and it's recorded as your discovery!"] },
+    quiz: { title: "Quizzes and streaks", art: "robot", points: ["Questions come from the words you looked up: some to type, some to pick, 20 seconds each.", "A word you miss keeps coming back until you get it right three times in a row.", "In the streak challenge, keep going through your grade's recommended words until you miss. Beat your best!", "Your character cheers when you're right and cheers you up when you're not."], q: "The way plants make their own food from sunlight, water and carbon dioxide." },
+    duel: { title: "3-minute duels", art: "fox", points: ["See who gets more right in three minutes. You both get the very same questions.", "No need to be online together: your friend's run races right next to yours!", "Miss one and you freeze for three seconds. Be quick and careful.", "Challenge a friend, or take on a random opponent."] },
+  };
+
+  const DEMOS = {
+    dict() {
+      // Three real-looking results. Each shows what a search gives: both meanings, ways to
+      // remember the word, an example, and a saying where there is one.
+      const WORDS = [
+        { word: "photosynthesis", pair: "광합성",
+          ko: "식물이 햇빛, 물, 이산화탄소로 스스로 양분을 만드는 일.", en: "The way plants make their own food from sunlight, water and carbon dioxide.",
+          origin: ["photo(빛) + synthesis(합쳐 만들기) → 빛으로 합쳐 만든다", "photo (light) + synthesis (putting together) → made with light"],
+          hanja: ["광(빛) + 합(합하다) + 성(이루다) → 빛으로 합쳐 이룬다", "광 (light) + 합 (join) + 성 (make) → made by joining with light"],
+          tip: ["photo는 사진(photo)처럼 '빛'! 빛으로 만드는 일.", "photo means light, as in a photo. Made with light!"],
+          example: ["Plants need sunlight for photosynthesis.", "식물은 광합성을 하려면 햇빛이 필요해요."] },
+        { word: "노력", pair: "effort",
+          ko: "어떤 일을 이루려고 몸과 마음을 다해 힘쓰는 것.", en: "Working hard with your body and mind to reach a goal.",
+          origin: ["effort ← 옛 프랑스어 esforz(힘) ← 라틴어 fortis(강한)", "effort ← Old French esforz (strength) ← Latin fortis (strong)"],
+          hanja: ["노(힘쓰다) + 력(힘) → 힘을 다해 애쓰다", "노 (to labour) + 력 (strength) → to try with all your strength"],
+          tip: ["effort 안에 fort(요새)가 있어. 요새를 지키려면 힘써야지!", "There's a fort in effort: holding a fort takes hard work!"],
+          example: ["노력하면 실력이 늘어요.", "With effort, you get better."],
+          saying: [["속담", "티끌 모아 태산", "작은 것도 꾸준히 모으면 큰 것이 된다 · Little by little, a lot."], ["사자성어", "우공이산", "꾸준히 노력하면 산도 옮길 수 있다 · Steady effort can move a mountain."]] },
+        { word: "friend", pair: "친구",
+          ko: "서로 가깝게 지내며 믿고 좋아하는 사람.", en: "A person you know well, like and trust.",
+          origin: ["옛 영어 frēond(사랑하는 사람)에서 왔어", "From Old English frēond, 'one who loves'"],
+          hanja: ["친(가깝다) + 구(오래되다) → 오래 가깝게 지낸 사이", "친 (close) + 구 (old) → someone close for a long time"],
+          tip: ["friend 끝에 end: 끝(end)까지 함께하는 사이!", "friend ends with end: together to the end!"],
+          example: ["She is my best friend.", "그 애는 나의 가장 친한 친구예요."],
+          saying: [["속담", "A friend in need is a friend indeed", "어려울 때 도와주는 친구가 진짜 친구다."]] },
+      ];
+      const L = ko
+        ? { ko: "한국어 뜻", en: "영어 뜻", easy: "더 쉽게 외우기", origin: "영어 어원", hanja: "한자어 풀이", tip: "기억법", example: "예문", saying: "속담 · 사자성어" }
+        : { ko: "In Korean", en: "In English", easy: "Easier to remember", origin: "Word origin", hanja: "Korean syllables", tip: "Memory tip", example: "Example", saying: "Sayings" };
+      const box = el(`<div class="demo result"><div class="words" role="tablist"></div><div class="body"></div></div>`);
+      const show = (item) => {
+        for (const tab of $(".words", box).children) tab.setAttribute("aria-selected", String(tab.textContent === item.word));
+        const i = ko ? 0 : 1;
+        const body = $(".body", box);
+        body.replaceChildren(
+          el(`<div class="word">${item.word}<span>⇄ ${item.pair}</span></div>`),
+          el(`<div class="meaning"><div class="m ko"><small>${L.ko}</small><p>${item.ko}</p></div><div class="m en"><small>${L.en}</small><p>${item.en}</p></div></div>`),
+          el(`<div class="section easy"><h4>${L.easy}</h4></div>`),
+          el(`<div class="section"><h4>${L.example}</h4><p class="ex">${item.example[0]}<br><span>${item.example[1]}</span></p></div>`));
+        const easy = $(".easy", body);
+        for (const [label, text] of [[L.origin, item.origin[i]], [L.hanja, item.hanja[i]], [L.tip, item.tip[i]]]) {
+          const veil = el(`<button type="button" class="veil"><small>${label}</small><em>${T.reveal}</em><span>${text}</span></button>`);
+          veil.addEventListener("click", () => veil.classList.add("open"));
+          easy.append(veil);
+        }
+        if (item.saying) {
+          body.append(el(`<div class="section saying"><h4>${L.saying}</h4>${item.saying.map(([kind, line, meaning]) => `<p><em>${ko ? kind : kind === "속담" ? "Proverb" : "Four-character idiom"}</em><b>${line}</b><span>${meaning}</span></p>`).join("")}</div>`));
+        }
+      };
+      for (const item of WORDS) {
+        const tab = el(`<button type="button" role="tab" class="word-tab">${item.word}</button>`);
+        tab.addEventListener("click", () => show(item));
+        $(".words", box).append(tab);
+      }
+      show(WORDS[1]);
+      return box;
+    },
+    list() {
+      const rows = [[T.today, "photosynthesis", "광합성"], [null, "민주주의", "democracy"], [T.yesterday, "gravity", "중력"], [null, "노력", "effort"]];
+      const box = el(`<div class="demo"></div>`);
+      for (const [day, word, pair] of rows) {
+        if (day) box.append(el(`<div class="day">${day}</div>`));
+        const row = el(`<div class="row"><i>${word[0].toUpperCase()}</i><div>${word}<small>${pair}</small></div><button type="button" class="star" aria-pressed="false" aria-label="★">★</button></div>`);
+        const star = $(".star", row);
+        star.addEventListener("click", () => star.setAttribute("aria-pressed", String(star.getAttribute("aria-pressed") !== "true")));
+        box.append(row);
+      }
+      return box;
+    },
+    quiz() {
+      const box = el(`<div class="demo"><p class="q">${T.quiz.q}</p><div class="choices"></div><p class="verdict" role="status"></p></div>`);
+      const draw = () => {
+        const list = $(".choices", box);
+        list.replaceChildren();
+        $(".verdict", box).textContent = "";
+        $(".verdict", box).className = "verdict";
+        box.querySelector(".go")?.remove();
+        for (const word of ["gravity", "photosynthesis", "democracy", "transport"].sort(() => Math.random() - 0.5)) {
+          const choice = el(`<button type="button" class="choice">${word}</button>`);
+          choice.addEventListener("click", () => {
+            const right = word === "photosynthesis";
+            for (const other of list.children) {
+              other.disabled = true;
+              other.classList.add(other.textContent === "photosynthesis" ? "ok" : other === choice ? "no" : "dim");
+            }
+            const verdict = $(".verdict", box);
+            verdict.textContent = right ? T.right[Math.floor(Math.random() * T.right.length)] : T.wrong;
+            verdict.classList.add(right ? "good" : "bad");
+            const face = $("#sheet .sheet-head .mascot");
+            face.dataset.eyes = right ? "star" : "closed";
+            face.dataset.mouth = right ? "laugh" : "wavy";
+            face.classList.remove("jump", "sway"); void face.offsetWidth; face.classList.add(right ? "jump" : "sway");
+            const again = el(`<button type="button" class="go ghost">${T.again}</button>`);
+            again.addEventListener("click", draw);
+            box.append(again);
+          });
+          list.append(choice);
+        }
+      };
+      draw();
+      return box;
+    },
+    duel() {
+      const lane = (kind, name, art) => `<div class="lane ${kind}"><b>${name}</b><div class="track"><div class="runner"><span class="mascot portrait">${drawing(art)}</span><u>0</u></div></div></div>`;
+      const box = el(`<div class="demo"><div class="clock">0:10</div>${lane("them", T.rival, "rabbit")}${lane("me", T.me, "bubble")}<p class="verdict" role="status"></p><button type="button" class="go">${T.start}</button></div>`);
+      let timer = 0;
+      $(".go", box).addEventListener("click", () => {
+        clearInterval(timer);
+        const start = Date.now(), total = 10000;
+        // The friend's run was recorded earlier; yours happens now. (Here both are made up.)
+        const theirs = Array.from({ length: 7 + Math.floor(Math.random() * 4) }, () => Math.random() * total).sort((a, b) => a - b);
+        const mine = Array.from({ length: 7 + Math.floor(Math.random() * 5) }, () => Math.random() * total).sort((a, b) => a - b);
+        const max = Math.max(theirs.length, mine.length) + 1;
+        const place = (kind, n) => { const r = $(`.lane.${kind} .runner`, box); r.style.left = `${(n / max) * 100}%`; $("u", r).textContent = n; };
+        $(".verdict", box).textContent = ""; $(".verdict", box).className = "verdict";
+        $(".go", box).disabled = true; $(".go", box).style.opacity = ".4";
+        timer = setInterval(() => {
+          const t = Date.now() - start;
+          const a = mine.filter((x) => x <= t).length, b = theirs.filter((x) => x <= t).length;
+          place("me", a); place("them", b);
+          $(".clock", box).textContent = `0:${String(Math.max(0, Math.ceil((total - t) / 1000))).padStart(2, "0")}`;
+          if (t < total) return;
+          clearInterval(timer);
+          const verdict = $(".verdict", box);
+          verdict.textContent = (a > b ? T.win : a < b ? T.lose : T.draw)(a, b);
+          verdict.classList.add(a >= b ? "good" : "bad");
+          Object.assign($(".go", box), { disabled: false, textContent: T.restart }); $(".go", box).style.opacity = "";
+        }, 120);
+      });
+      box.addEventListener("close-demo", () => clearInterval(timer));
+      return box;
+    },
+  };
+
+  $("#try-dict")?.append(DEMOS.dict());
+
+  const dialog = $("#detail");
+  function open(name) {
+    const f = T[name];
+    const sheet = $("#sheet");
+    sheet.replaceChildren(
+      el(`<div class="sheet-head"><span class="mascot portrait" aria-hidden="true">${drawing(f.art)}</span><h3 id="detail-title">${f.title}</h3><button type="button" class="close" aria-label="${T.close}">✕</button></div>`),
+      el(`<ul class="points">${f.points.map((p) => `<li>${p}</li>`).join("")}</ul>`),
+      el(`<p class="try">${T.tryIt}</p>`),
+      DEMOS[name]());
+    $(".close", sheet).addEventListener("click", () => dialog.close());
+    dialog.showModal();
+  }
+  dialog.addEventListener("click", (e) => { if (e.target === dialog) dialog.close(); });
+  dialog.addEventListener("close", () => $("#sheet .demo")?.dispatchEvent(new Event("close-demo")));
+  for (const card of document.querySelectorAll("[data-feature]")) card.addEventListener("click", () => open(card.dataset.feature));
 })();
 </script>
 </body>
