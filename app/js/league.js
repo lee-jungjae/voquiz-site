@@ -19,16 +19,16 @@ function random(seed) {
 }
 
 // ----- tiers -----
-// Seven of them, higher and higher: from a sprout up to the universe. The top MOVE of a week's
+// Seven of them, stronger and stronger: from a chick up to a dragon. The top MOVE of a week's
 // board go up one tier, the bottom MOVE go down one. [emoji, Korean, English, Chinese]
 export const TIERS = [
-  { emoji: "🌱", names: ["새싹", "Sprout", "嫩芽"], bg: "#e6f4d7", mid: "#c5e4a3", ink: "#23552b", pace: 1 },
-  { emoji: "🌳", names: ["나무", "Tree", "大树"], bg: "#dcefe4", mid: "#a9d8bd", ink: "#17513a", pace: 1.15 },
-  { emoji: "⛰️", names: ["산", "Mountain", "高山"], bg: "#efe5da", mid: "#dcc3a6", ink: "#54361a", pace: 1.3 },
-  { emoji: "☁️", names: ["구름", "Cloud", "云朵"], bg: "#e3effa", mid: "#b9d6f2", ink: "#1c4770", pace: 1.5 },
-  { emoji: "🌙", names: ["달", "Moon", "月亮"], bg: "#fbf1c9", mid: "#f1d97c", ink: "#5a4300", pace: 1.7 },
-  { emoji: "⭐", names: ["별", "Star", "星星"], bg: "#fde3d3", mid: "#f6b893", ink: "#6b2d0c", pace: 1.9 },
-  { emoji: "🌌", names: ["우주", "Universe", "宇宙"], bg: "#e9e1fa", mid: "#c5b2f0", ink: "#3a2370", pace: 2.1 },
+  { emoji: "🐣", names: ["병아리", "Chick", "小鸡"], bg: "#fdf4c7", mid: "#f7de7a", ink: "#5c4500", pace: 1 },
+  { emoji: "🐰", names: ["토끼", "Rabbit", "兔子"], bg: "#fde6ee", mid: "#f6b9cf", ink: "#7a2346", pace: 1.15 },
+  { emoji: "🦊", names: ["여우", "Fox", "狐狸"], bg: "#fde5d2", mid: "#f6b98c", ink: "#6e2f08", pace: 1.3 },
+  { emoji: "🐺", names: ["늑대", "Wolf", "狼"], bg: "#e6ebf2", mid: "#bcc8d8", ink: "#27364a", pace: 1.5 },
+  { emoji: "🦁", names: ["사자", "Lion", "狮子"], bg: "#f9ecc4", mid: "#ecc866", ink: "#5a3c00", pace: 1.7 },
+  { emoji: "🦖", names: ["공룡", "Dinosaur", "恐龙"], bg: "#def3dc", mid: "#a5dba0", ink: "#1c5222", pace: 1.9 },
+  { emoji: "🐉", names: ["용", "Dragon", "龙"], bg: "#e9e1fa", mid: "#c5b2f0", ink: "#3a2370", pace: 2.1 },
 ];
 export const MOVE = 3;
 export const CHARACTERS_PER_LEAGUE = 8;

@@ -1623,7 +1623,7 @@ function rollWeek() {
   state.user.weekly = { ...w, settle: { week: w.week, earned: w.earned || 0 }, week: weekKey(), earned: 0 };
 }
 // Works out where the student finished last week (among the students of the tier and the
-// characters) and moves them up or down a tier. A week without a single point changes nothing.
+// characters) and moves them up or down a tier. A week without a single point is a step down.
 async function settleLeague() {
   if (!state.user || state.settling) return;
   rollWeek();
@@ -1632,7 +1632,7 @@ async function settleLeague() {
   state.settling = true;
   try {
     const tier = myTier();
-    let result = "none", rank = 0;
+    let result = tier > 0 ? "rest" : "none", rank = 0;
     if (done.earned > 0) {
       const lastWeek = weekKey(new Date(weekStart().getTime() - 3 * 86400000));
       let others = [];
@@ -1649,7 +1649,7 @@ async function settleLeague() {
       rank = rows.find((row) => row.me).rank;
       result = outcome(rows, tier);
     }
-    const next = tier + (result === "up" ? 1 : result === "down" ? -1 : 0);
+    const next = tier + (result === "up" ? 1 : result === "down" || result === "rest" ? -1 : 0);
     const { settle, ...weekly } = state.user.weekly;
     state.user.weekly = { ...weekly, tier: next };
     await api.saveProfile({ weekly: state.user.weekly }).catch(console.error);
@@ -1662,6 +1662,10 @@ async function settleLeague() {
     } else if (result === "down") {
       sheet({ art: TIERS[next].emoji, title: t("{name}로 내려왔어요", { name: tierName(next) }),
         text: t("지난주 {old}에서 {r}등이었어요. 괜찮아요, 이번 주에 다시 올라가 봐요!", { old: tierName(tier), r: rank }),
+        actions: [{ label: t("다시 도전!"), kind: "main", run: () => true }] });
+    } else if (result === "rest") {
+      sheet({ art: TIERS[next].emoji, title: t("{name}로 내려왔어요", { name: tierName(next) }),
+        text: t("지난주에 리그를 쉬어서 한 등급 내려왔어요. 이번 주에 다시 올라가 봐요!"),
         actions: [{ label: t("다시 도전!"), kind: "main", run: () => true }] });
     } else if (result === "stay") {
       sheet({ art: TIERS[next].emoji, title: t("{name} 유지", { name: tierName(next) }),
@@ -1757,9 +1761,10 @@ function leagueInfoView() {
       h("ul", { class: "info-list" },
         rule("🏁", t("같은 등급끼리, 매주 새로"), t("같은 등급의 친구들과 겨뤄요. 월요일마다 0점에서 다시 시작해요.")),
         rule("⬆️", t("{n}등 안에 들면 승급", { n: MOVE }), t("일요일 밤에 {n}등 안에 있으면 다음 주에 한 등급 올라가고, 승급 보너스 +{p}포인트를 받아요.", { n: MOVE, p: PROMOTION_BONUS })),
-        rule("⬇️", t("아래 {n}명은 강등", { n: MOVE }), t("순위표의 마지막 {n}명은 한 등급 내려가요. 새싹 리그에서는 내려가지 않아요.", { n: MOVE })),
+        rule("⬇️", t("아래 {n}명은 강등", { n: MOVE }), t("순위표의 마지막 {n}명은 한 등급 내려가요. {name}에서는 내려가지 않아요.", { n: MOVE, name: tierName(0) })),
         rule("⭐", t("이번 주에 모은 포인트로"), t("이번 주에 받은 포인트만 세요. 포인트샵에서 써도 리그 점수는 줄지 않아요.")),
-        rule("🚪", t("첫 포인트를 받으면 참가"), t("그 주에 포인트를 한 번이라도 받으면 리그에 들어가요. 쉬는 주에는 순위에 나오지 않고, 등급은 그대로예요.")),
+        rule("🚪", t("첫 포인트를 받으면 참가"), t("그 주에 포인트를 한 번이라도 받으면 리그에 들어가요.")),
+        rule("💤", t("쉬면 한 등급 강등"), t("한 주 동안 포인트를 한 번도 받지 않으면 다음 주에 한 등급 내려가요. 단어 하나만 찾아도 참가예요!")),
         rule("🧸", t("캐릭터도 함께 뛰어요"), t("‘캐릭터’ 표시가 있는 친구는 VOQUIZ 캐릭터예요. 매주 다른 캐릭터가 나오고, 등급이 높을수록 더 빨라요.")))),
     h("section", { class: "block" },
       h("h3", null, t("포인트는 이렇게 모아요")),
