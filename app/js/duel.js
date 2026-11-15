@@ -8,6 +8,7 @@ import { WORD_LISTS } from "./wordlists.js";
 import { WORD_DEFS } from "./worddefs.js";
 
 export const DUEL_LENGTHS = [60, 100, 180]; // seconds; the challenger chooses
+export const DUEL_DAILY = 10; // challenges a student may send in a day
 const FREEZE_MS = 3000; // a wrong answer costs three seconds
 const FEE = 10; // points to take part
 const WIN = 25;
@@ -72,7 +73,20 @@ export function initDuel(c) {
   // What a finished duel pays: a win, a draw, or a little for taking part.
   const reward = (mine, theirs) => (mine > theirs ? WIN : mine === theirs ? DRAW : Math.min(5, Math.floor(mine / 5)));
   const incoming = () => (state.duels || []).filter((d) => d.role === "opponent" && d.status === "open");
-  const seconds = () => (DUEL_LENGTHS.includes(state.duelSeconds) ? state.duelSeconds : 180);
+  const seconds = () => (DUEL_LENGTHS.includes(state.duelSeconds) ? state.duelSeconds : 60);
+  // Challenges sent in the last 24 hours, and how many are left (the database counts the same way).
+  const sentToday = () => (state.duels || []).filter((d) => d.role === "challenger" && Date.now() - new Date(d.created_at).getTime() < 24 * 60 * 60 * 1000).length;
+  const sendsLeft = () => Math.max(0, DUEL_DAILY - sentToday());
+  const stopwatch = (size = 20) => {
+    const el = document.createElement("span");
+    el.className = "stopwatch";
+    el.innerHTML = `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 2M9.5 2.5h5M12 2.5V6M18.5 6.5l1.5-1.5"/></svg>`;
+    return el;
+  };
+  const sendsLine = () => h("p", { class: `duel-left${sendsLeft() ? "" : " none"}` },
+    h("span", null, t("오늘 보낼 수 있는 도전")),
+    h("span", { class: "pips", "aria-hidden": "true" }, Array.from({ length: DUEL_DAILY }, (_, i) => h("i", { class: i < sendsLeft() ? "on" : "" }))),
+    h("b", null, `${sendsLeft()} / ${DUEL_DAILY}`));
   const lengthLabel = (s) => (s === 60 ? t("1분") : s === 180 ? t("3분") : t("{n}초", { n: s }));
   const clockText = (ms) => {
     const s = Math.max(0, Math.ceil(ms / 1000));
@@ -81,7 +95,7 @@ export function initDuel(c) {
   const ERRORS = () => ({
     duel_off: t("이 친구는 대결을 받지 않아요."),
     duel_pending: t("이 친구에게 보낸 도전이 아직 남아 있어요."),
-    duel_limit: t("오늘은 도전을 다 보냈어요. (하루 5번)"),
+    duel_limit: t("오늘은 도전을 다 보냈어요. (하루 {n}번)", { n: DUEL_DAILY }),
     duel_closed: t("이미 끝났거나 기한이 지난 대결이에요."),
     duel_nobody: t("상대를 찾지 못했어요."),
     duel_not_friends: t("대결은 친구끼리만 할 수 있어요."),
@@ -183,7 +197,7 @@ export function initDuel(c) {
               h("span", { class: "who" }, who(d.other), h("small", null, t("{n}개를 넘으면 승리", { n: d.their_score }))),
               h("button", { class: "mini buy", onclick: () => start(d) }, t("받기")))))
         : c.guideSteps([
-            t("상대와 시간(1분 · 100초 · 3분)을 고르고 문제를 풀어 기록을 세워요."),
+            t("상대와 시간을 고르고 문제를 풀어 기록을 세워요."),
             t("상대가 같은 문제로 내 기록에 도전해요. 틀리면 3초 동안 멈춰요."),
             t("더 많이 맞힌 쪽이 이겨요. 도전은 7일 동안 기다려요."),
           ]),
@@ -203,7 +217,10 @@ export function initDuel(c) {
           h("span", { class: "who" }, who(d.other), h("small", null, lengthLabel(d.seconds || 180))),
           h("b", { class: "tally" }, `${d.my_score} : ${d.their_score}`),
           h("span", { class: "chev", "aria-hidden": "true" }, "›")))),
-      h("p", { class: "act" }, h("button", { class: "btn wide", onclick: openPicker }, t("상대 고르기"))),
+      sendsLine(),
+      h("p", { class: "act" }, h("button", { class: "btn wide", disabled: sendsLeft() === 0, onclick: openPicker },
+        sendsLeft() ? t("상대 고르기") : t("오늘 도전은 다 보냈어요"))),
+      sendsLeft() === 0 && h("p", { class: "small muted center" }, t("받은 도전은 횟수와 상관없이 받을 수 있어요.")),
     ];
   }
 
@@ -263,10 +280,7 @@ export function initDuel(c) {
         h("button", { class: "back", "aria-label": t("뒤로"), title: t("뒤로"), onclick: close }, "←"),
         h("h2", { class: "page-title" }, t("상대 고르기"))),
       d.notice && h("div", { class: "notice" }, d.notice),
-      h("section", { class: "duel-list" },
-        h("h3", null, t("대결 시간")),
-        h("div", { class: "chips lengths", role: "group", "aria-label": t("대결 시간") }, DUEL_LENGTHS.map((s) =>
-          h("button", { class: "chip", "aria-pressed": String(seconds() === s), onclick: () => { state.duelSeconds = s; c.render(); } }, lengthLabel(s))))),
+      sendsLine(),
       h("section", { class: "duel-list" },
         h("h3", null, t("랜덤 대결")),
         h("button", { class: "random", onclick: random },
@@ -291,6 +305,23 @@ export function initDuel(c) {
     ];
   }
 
+  // The step between choosing an opponent and playing: the length of the duel, one tap each.
+  function timeView() {
+    const { target } = state.duel;
+    const notes = { 60: t("빠르게 한판"), 100: t("적당하게"), 180: t("길게 겨루기") };
+    return [
+      h("div", { class: "page-head" },
+        h("button", { class: "back", "aria-label": t("뒤로"), title: t("뒤로"), onclick: openPicker }, "←"),
+        h("h2", { class: "page-title" }, t("대결 시간 고르기"))),
+      h("div", { class: "time-hero" }, stopwatch(54), h("b", null, t("몇 분 동안 겨룰까요?")),
+        h("span", null, t("{name}도 같은 시간 동안 풀어요.", { name: who(target.other) }))),
+      h("div", { class: "time-options", role: "group", "aria-label": t("대결 시간") }, DUEL_LENGTHS.map((s) =>
+        h("button", { class: "time-option", "aria-pressed": String(seconds() === s), onclick: () => { state.duelSeconds = s; c.render(); } },
+          stopwatch(22), h("b", null, lengthLabel(s)), h("small", null, notes[s])))),
+      h("p", { class: "act" }, h("button", { class: "btn wide", onclick: () => start({ ...target, timed: true }) }, t("{time} 대결 시작", { time: lengthLabel(seconds()) }))),
+    ];
+  }
+
   // ---------- playing ----------
 
   // target: a duel I was sent (I answer it), or { other } (I challenge them).
@@ -299,9 +330,16 @@ export function initDuel(c) {
     if (!answering) {
       const mine = (state.duels || []).filter((d) => d.role === "challenger");
       const problem = mine.some((d) => d.status === "open" && d.other.id === target.other.id) ? "duel_pending"
-        : mine.filter((d) => Date.now() - new Date(d.created_at).getTime() < 24 * 60 * 60 * 1000).length >= 5 ? "duel_limit" : null;
+        : sendsLeft() === 0 ? "duel_limit" : null;
       if (problem) {
         if (state.duel?.mode === "pick") state.duel.notice = ERRORS()[problem];
+        else c.toastText(ERRORS()[problem]);
+        return c.render();
+      }
+      // A step of its own: how long the duel lasts.
+      if (!target.timed) {
+        state.duel = { mode: "time", target };
+        Object.assign(state, { tab: "quiz", quizMode: "duel", notice: null, entry: null });
         return c.render();
       }
     }
@@ -444,7 +482,7 @@ export function initDuel(c) {
   function stop() {
     const d = state.duel;
     if (d?.mode === "play") (d.answering ? finish : cancel)();
-    else if (d?.mode === "intro") state.duel = null;
+    else if (d?.mode === "intro" || d?.mode === "time") state.duel = null;
   }
 
   // ----- looking at a finished duel again -----
@@ -522,6 +560,7 @@ export function initDuel(c) {
         h("div", { class: "side me" }, face(c.myShop().character, "cheer"), h("b", null, c.displayName())),
         h("div", { class: "vs" }, "VS"),
         h("div", { class: "side them" }, face(d.their ? d.their.character : "bubble", "cheer", !d.their), h("b", null, who(d.other)))),
+      h("p", { class: "duel-time" }, stopwatch(22), h("b", null, lengthLabel(d.seconds))),
       h("p", { class: "duel-goal" }, d.answering ? t("{n}개를 넘으면 승리!", { n: d.their.score }) : t("{time} 동안 기록을 세워 도전장을 보내요!", { time: lengthLabel(d.seconds) })),
       d.befriend && h("p", { class: "duel-friend" }, d.answering ? t("이 대결을 받으면 {name}와(과) 친구가 돼요.", { name: who(d.other) }) : t("대결을 받으면 자동으로 친구가 돼요.")),
       h("p", { class: "small muted center" }, t("G{g} 권장 단어 · {time} · 틀리면 3초 멈춤", { g: d.grade, time: lengthLabel(d.seconds) })));
@@ -604,6 +643,7 @@ export function initDuel(c) {
   function view() {
     const d = state.duel;
     if (d.mode === "pick") return pickView();
+    if (d.mode === "time") return timeView();
     if (d.mode === "detail") return detailView();
     if (d.mode === "intro") return introView();
     if (d.mode === "play") return playView();

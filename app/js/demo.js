@@ -445,7 +445,7 @@ export async function redeemCoupon(code) {
 // For a page that shows the app as a try-out (the public home page): a student who is already
 // signed in, with a few words looked up over two days, so every screen has something on it.
 export function seed(grade = 5) {
-  if (!getUser()) write(USER_KEY, { id: "demo", email: "demo@example.com", grade, points: 120, nickname: "" });
+  if (!getUser()) write(USER_KEY, { id: "demo", email: "demo@example.com", grade, points: 120, nickname: "", welcome: "bubble" });
   if (read(WORDS_KEY, []).length) return;
   const day = 24 * 60 * 60 * 1000;
   const words = ["gravity", "transport", "democracy", "friend", "노력", "photosynthesis"].map((term, i) => {

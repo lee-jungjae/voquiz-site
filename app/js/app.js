@@ -34,6 +34,7 @@ function h(tag, props, ...kids) {
 
 // Static line icons (fixed markup, no user data).
 const ICONS = {
+  folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
   words: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20"/>',
   quiz: '<circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5.5"/>',
@@ -1332,12 +1333,52 @@ function dayLabel(day) {
   return new Date(day + "T12:00:00").toLocaleDateString(locale(), { month: "long", day: "numeric", weekday: "short" });
 }
 
+// ----- groups of favourites (Plus) -----
+// A favourite may sit in one group. A group is just its name, kept on the word, so it exists as
+// long as a favourite carries it.
+const canGroup = () => !plansOn() || isPlus();
+const folders = () => [...new Set(state.words.filter((w) => w.favorite && w.folder).map((w) => w.folder))].sort((a, b) => a.localeCompare(b));
+async function setFolder(word, folder) {
+  const before = word.folder;
+  word.folder = folder;
+  render();
+  try {
+    await api.updateWord(word.term_norm, { folder });
+  } catch (err) {
+    console.error(err);
+    word.folder = before;
+    state.notice = { text: err?.status === 400 || err?.status === 403
+      ? t("그룹을 쓰려면 Supabase SQL Editor에서 0014_groups_gift_duel.sql을 한 번 실행해야 해요.")
+      : t("문제가 생겼어요. 잠시 후 다시 시도해 주세요.") };
+    render();
+  }
+}
+function folderSheet(word) {
+  document.getElementById("sheet")?.remove();
+  const close = () => el.remove();
+  const choose = (name) => { close(); if ((word.folder || null) !== name) setFolder(word, name); };
+  const input = h("input", { type: "text", maxLength: 12, autocomplete: "off", placeholder: t("새 그룹 이름"), "aria-label": t("새 그룹 이름") });
+  const el = h("div", { id: "sheet", class: "sheet-wrap", onclick: (e) => { if (e.target === el) close(); } },
+    h("div", { class: "sheet folder-sheet", role: "dialog", "aria-modal": "true", "aria-label": t("그룹 정하기") },
+      h("h2", null, t("그룹 정하기")),
+      h("p", null, word.headword),
+      folders().length > 0 && h("div", { class: "chips" }, folders().map((name) =>
+        h("button", { class: "chip", "aria-pressed": String(word.folder === name), onclick: () => choose(name) }, name))),
+      h("form", { class: "row", onsubmit: (e) => { e.preventDefault(); const name = input.value.trim(); if (name) choose(name); } },
+        input, h("button", { class: "btn" }, t("만들기"))),
+      word.folder && h("button", { class: "link", onclick: () => choose(null) }, t("그룹에서 빼기")),
+      h("button", { class: "link", onclick: close }, t("닫기"))));
+  document.body.append(el);
+}
+
 function wordRow(w) {
+  const grouping = state.filter === "favorites" && canGroup() && w.favorite;
   return h("div", { class: "item" },
     h("div", { class: "avatar", "aria-hidden": "true" }, [...w.headword][0].toUpperCase()),
     h("button", { class: "open", onclick: () => { Object.assign(state, { entry: w, tab: "search", query: "", notice: null }); render(); } },
-      h("div", { class: "word" }, w.headword, w.discovered && h("span", { class: "badge found" }, t("첫 발견")), w.needs_review && h("span", { class: "badge" }, t("복습"))),
+      h("div", { class: "word" }, w.headword, w.discovered && h("span", { class: "badge found" }, t("첫 발견")), w.needs_review && h("span", { class: "badge" }, t("복습")), grouping && w.folder && h("span", { class: "badge folder" }, w.folder)),
       h("div", { class: "sub" }, w.content.counterpart)),
+    grouping && state.confirmDelete !== w.term_norm && h("button", { class: `folder-btn${w.folder ? " on" : ""}`, "aria-label": t("그룹 정하기"), title: t("그룹 정하기"), onclick: () => folderSheet(w) }, icon("folder")),
     state.confirmDelete !== w.term_norm && star(w),
     // Deleting asks once more, right in the row, with a way back next to it.
     state.confirmDelete === w.term_norm
@@ -1369,8 +1410,20 @@ function wordsView() {
   const filters = [["all", t("전체")], ["favorites", t("★ 즐겨찾기")], ["review", t("복습 필요")], ["found", t("✦ 내가 발견")]];
   // "recent" is every word, newest first, whichever language it was searched in.
   const inLang = (lang) => (lang === "recent" ? state.words : state.words.filter((w) => (w.content.language === "ko" ? "ko" : "en") === lang));
+  // Favourites can be narrowed to one group (Plus).
+  const grouped = state.filter === "favorites" && canGroup();
+  const group = grouped && folders().includes(state.folder) ? state.folder : null;
   const shown = inLang(state.wordLang).filter((w) =>
-    state.filter === "favorites" ? w.favorite : state.filter === "review" ? w.needs_review : state.filter === "found" ? w.discovered : true);
+    state.filter === "favorites" ? w.favorite && (!group || w.folder === group) : state.filter === "review" ? w.needs_review : state.filter === "found" ? w.discovered : true);
+  const groupRow = state.filter !== "favorites" ? null
+    : !canGroup()
+      ? h("button", { class: "group-plus", onclick: () => { state.plusOpen = true; openSettings(); } },
+          h("em", { class: "plus-badge" }, "PLUS"), h("span", null, t("즐겨찾기를 그룹으로 나눌 수 있어요")), h("span", { class: "chev", "aria-hidden": "true" }, "›"))
+      : folders().length
+        ? h("div", { class: "chips group-chips", role: "group", "aria-label": t("그룹") },
+            [[null, t("모든 그룹")], ...folders().map((name) => [name, name])].map(([id, label]) =>
+              h("button", { class: "chip", "aria-pressed": String(group === id), onclick: () => { state.folder = id; render(); } }, id && icon("folder"), label)))
+        : inLang(state.wordLang).some((w) => w.favorite) && h("p", { class: "small muted group-hint" }, icon("folder"), t("폴더 버튼을 눌러 즐겨찾기를 그룹으로 나눠 보세요."));
 
   // Words arrive newest first, so the days (or weeks) come out newest first too.
   const byWeek = state.groupBy === "week";
@@ -1404,6 +1457,7 @@ function wordsView() {
       // the same words, gathered by day or by week
       h("div", { class: "scope small", role: "group", "aria-label": t("묶어 보기") }, [["day", t("날짜")], ["week", t("주")]].map(([id, label]) =>
         h("button", { "aria-pressed": String((state.groupBy || "day") === id), onclick: () => { state.groupBy = id; render(); } }, label)))),
+    groupRow,
     noticeBox(),
     shown.length === 0
       ? h("div", { class: "empty" },
@@ -1429,13 +1483,15 @@ function weekLabel(key) {
 // Words come from the recommended list of the student's grade, one after another, until a miss.
 // Getting every word of a grade right moves the run up to the next grade's list.
 
-const CHALLENGE_FEE = 10; // points a run uses; a student with fewer pays what they have
-const CHALLENGE_POINT = 1; // per right answer picked from the choices
-const CHALLENGE_TYPED = 2; // per right answer typed
+const CHALLENGE_TRIES = 3; // runs a day; a run costs no points
+const CHALLENGE_POINT = 1; // per right answer
 const LEVEL_BONUS = 20; // per grade list cleared
 const shuffle = (list) => [...list].sort(() => Math.random() - 0.5);
 const gradeList = (grade) => WORD_LISTS[grade] || [];
 const bestStreak = () => state.user.challenge?.best || 0;
+// Runs left today. The profile keeps the day and how many runs were started on it.
+const triesUsed = () => (state.user.challenge?.day === dayOf(new Date()) ? state.user.challenge.tries || 0 : 0);
+const triesLeft = () => Math.max(0, CHALLENGE_TRIES - triesUsed());
 
 // ----- the start screens of the two games: the character explains, three steps, the numbers -----
 function guideHero(title, text) {
@@ -1457,23 +1513,25 @@ function challengeCard() {
       h("div", { class: "record-number" }, h("b", null, String(bestStreak())), h("span", null, t("연속"))),
       h("p", null, bestStreak() > 0 ? t("{n}연속을 넘으면 새 기록!", { n: bestStreak() }) : t("첫 기록을 세워 봐요!"))),
     guideSteps([
-      t("G{g} 권장 단어 {n}개가 고르기와 쓰기로 섞여 나와요.", { g: grade, n: gradeList(grade).length }),
+      t("G{g} 권장 단어 {n}개에서 문제가 나와요. 알맞은 답을 골라요.", { g: grade, n: gradeList(grade).length }),
       t("맞힐 때마다 바로 포인트를 받고, 한 번 틀리면 끝나요."),
       t("한 학년을 다 맞히면 다음 학년으로 올라가요."),
     ]),
     h("div", { class: "guide-stats" },
-      guideStat(t("쓰는 포인트"), [coin(), `-${Math.min(CHALLENGE_FEE, state.user.points || 0)}`], "use"),
-      guideStat(t("맞힐 때마다"), [coin(), `+${CHALLENGE_POINT}~${CHALLENGE_TYPED}`], "gain"),
+      guideStat(t("오늘 남은 도전"), `${triesLeft()} / ${CHALLENGE_TRIES}`, triesLeft() ? "" : "use"),
+      guideStat(t("맞힐 때마다"), [coin(), `+${CHALLENGE_POINT}`], "gain"),
       guideStat(t("학년 통과"), [coin(), `+${LEVEL_BONUS}`], "gain")),
-    h("p", { class: "act" }, h("button", { class: "btn wide", onclick: startChallenge }, t("도전 시작"))),
+    h("p", { class: "act" }, h("button", { class: "btn wide", disabled: triesLeft() === 0, onclick: startChallenge },
+      triesLeft() ? t("도전 시작") : t("오늘 도전은 끝! 내일 또 만나요"))),
   ];
 }
 
 function startChallenge() {
+  if (triesLeft() === 0) return;
   const grade = Math.min(12, Math.max(3, state.user.grade));
-  const fee = Math.min(CHALLENGE_FEE, state.user.points || 0);
-  award(-fee, t("연속 도전에 사용"));
-  state.challenge = { grade, fee, queue: shuffle(gradeList(grade)), streak: 0, levels: 0, earned: 0, phase: "ask" };
+  state.user.challenge = { best: bestStreak(), day: dayOf(new Date()), tries: triesUsed() + 1 };
+  api.saveProfile({ challenge: state.user.challenge }).catch(console.error); // at once, so that closing the panel does not give the run back
+  state.challenge = { grade, queue: shuffle(gradeList(grade)), streak: 0, levels: 0, earned: 0, phase: "ask" };
   nextChallengeWord();
   render();
 }
@@ -1505,32 +1563,26 @@ function nextChallengeWord() {
     en: (pair) => pair[0], ko: (pair) => pair[1],
     den: (pair) => WORD_DEFS[pair[0]][0], dko: (pair) => WORD_DEFS[pair[0]][1],
   };
-  const kinds = [ // [shown, asked for, typed?, how often]
-    ["en", "ko", false, 2], ["ko", "en", false, 2], ["ko", "en", true, 2],
-    ...(hasDefs ? [
-      ["dko", "ko", false, 2], ["dko", "ko", true, 1], ["den", "en", false, 2], ["den", "en", true, 2],
-      ["ko", "dko", false, 2], ["en", "den", false, 2], ["dko", "en", false, 2], ["den", "ko", false, 2],
-    ] : []),
+  // Every question is answered by picking one of four.
+  const kinds = [ // [shown, asked for]
+    ["en", "ko"], ["ko", "en"],
+    ...(hasDefs ? [["dko", "ko"], ["den", "en"], ["ko", "dko"], ["en", "den"], ["dko", "en"], ["den", "ko"]] : []),
   ];
-  let roll = Math.random() * kinds.reduce((sum, kind) => sum + kind[3], 0);
-  const [shown, asked, typed] = kinds.find((kind) => (roll -= kind[3]) < 0) || kinds[0];
+  const [shown, asked] = kinds[Math.floor(Math.random() * kinds.length)];
   Object.assign(c, {
     phase: "ask",
     picked: null,
     question: {
-      kind: typed ? "type" : "choice",
       shown, asked,
       prompt: side[shown]([english, korean]),
       answer: side[asked]([english, korean]),
-      options: typed ? null : shuffle([[english, korean], ...others]).map(side[asked]),
-      hint: typed ? (asked === "en" ? t("영어 단어로 써 보세요.") : t("한국어 단어로 써 보세요."))
-        : asked.startsWith("d") ? t("알맞은 뜻을 골라 보세요.") : t("알맞은 단어를 골라 보세요."),
+      options: shuffle([[english, korean], ...others]).map(side[asked]),
+      hint: asked.startsWith("d") ? t("알맞은 뜻을 골라 보세요.") : t("알맞은 단어를 골라 보세요."),
     },
   });
-  if (typed) state.focus = "answer";
   // The same time limit as the quiz. Running out of time ends the run like a wrong answer.
   clearTimeout(challengeTimer);
-  c.limit = limitFor(typed);
+  c.limit = limitFor(false);
   c.deadline = Date.now() + c.limit;
   c.timedOut = false;
   const question = c.question;
@@ -1548,13 +1600,8 @@ function pickChallenge(option) {
   if (c.phase !== "ask") return;
   clearTimeout(challengeTimer);
   c.picked = option;
-  // Typed Korean is judged kindly: 수출 is as right as 수출하다.
-  const plain = (s) => s.trim().toLowerCase().replace(/\s+/g, "");
-  const stem = (s) => plain(s).replace(/(하다|되다|적인|스러운|하는|한|적|의|다)$/, "");
-  const same = (a, b) => plain(a) === plain(b) || (c.question.kind === "type" && c.question.asked === "ko" && stem(a).length > 0 && stem(a) === stem(b));
-  if (same(option, c.question.answer)) {
-    // Every right answer pays at once; typing the word pays more than picking it.
-    const points = c.question.kind === "type" ? CHALLENGE_TYPED : CHALLENGE_POINT;
+  if (option === c.question.answer) {
+    const points = CHALLENGE_POINT; // every right answer pays at once
     c.streak += 1;
     c.earned += points;
     c.phase = "right";
@@ -1579,7 +1626,7 @@ function finishChallenge(clearedAll) {
   c.clearedAll = clearedAll;
   c.record = c.streak > bestStreak();
   if (c.record) {
-    state.user.challenge = { best: c.streak };
+    state.user.challenge = { ...state.user.challenge, best: c.streak };
     celebrate(0, t("새 최고 기록!"), String(c.streak));
     saveSoon(); // the points were paid answer by answer; this saves the record and updates the rankings
   }
@@ -1591,17 +1638,17 @@ function challengeView() {
   if (c.phase === "over") {
     return [
       h("div", { class: "card center" },
-        h("div", { class: "score-art", "aria-hidden": "true" }, reaction(myShop().character, c.record || c.clearedAll || c.earned > c.fee ? "cheer" : "comfort")),
+        h("div", { class: "score-art", "aria-hidden": "true" }, reaction(myShop().character, c.record || c.clearedAll || c.streak >= 10 ? "cheer" : "comfort")),
         h("div", { class: "muted" }, c.clearedAll ? t("모든 학년의 권장 단어를 다 맞혔어요!") : t("연속으로 맞힌 단어")),
         h("div", { class: "score" }, String(c.streak)),
         c.record && h("p", { class: "earned" }, t("새 최고 기록!")),
         !c.clearedAll && c.question && h("p", { class: "small muted", style: "margin-top:8px" }, `${c.question.prompt} = ${c.question.answer}`),
         h("div", { class: "settle" },
           h("div", { class: "best-line" }, h("span", null, t("내 최고 기록")), h("b", null, t("{n}연속", { n: bestStreak() }))),
-          h("div", null, h("span", null, t("사용")), h("b", null, `-${c.fee}`)),
-          h("div", null, h("span", null, t("획득")), h("b", null, `+${c.earned}`)),
-          h("div", { class: `net ${c.earned > c.fee ? "up" : c.earned < c.fee ? "down" : ""}` }, h("span", null, t("결과")), h("b", null, `${c.earned - c.fee > 0 ? "+" : ""}${c.earned - c.fee}`)))),
-      h("p", { class: "act" }, h("button", { class: "btn wide", onclick: startChallenge }, t("다시 도전"))),
+          h("div", { class: c.earned ? "net up" : "net" }, h("span", null, t("획득")), h("b", null, `+${c.earned}`)),
+          h("div", null, h("span", null, t("오늘 남은 도전")), h("b", null, `${triesLeft()} / ${CHALLENGE_TRIES}`)))),
+      h("p", { class: "act" }, h("button", { class: "btn wide", disabled: triesLeft() === 0, onclick: startChallenge },
+        triesLeft() ? t("다시 도전") : t("오늘 도전은 끝! 내일 또 만나요"))),
       h("p", { class: "center act-note" },
         h("button", { class: "link", onclick: () => { state.challenge = null; render(); } }, t("닫기"))),
     ];
@@ -1610,20 +1657,6 @@ function challengeView() {
   const answered = total - c.queue.length - (c.phase === "ask" ? 1 : 0);
   const mark = (option) =>
     c.phase === "ask" ? "" : option === c.question.answer ? " ok" : option === c.picked ? " no" : " dim";
-  const typedAnswer = () => {
-    const input = h("input", {
-      type: "text", id: "answer", maxLength: 40, autocomplete: "off", autocapitalize: "off", spellcheck: false,
-      placeholder: t("단어를 써 보세요"), "aria-label": t("정답 입력"), disabled: c.phase !== "ask", value: c.phase === "ask" ? "" : c.picked || "",
-    });
-    return [
-      h("form", { class: `search answer act${c.phase === "right" ? " ok" : c.phase === "wrong" ? " no" : ""}`,
-        onsubmit: (e) => { e.preventDefault(); if (input.value.trim()) pickChallenge(input.value.trim()); } },
-        input, h("button", { class: "btn", disabled: c.phase !== "ask" }, t("확인"))),
-      c.phase === "wrong"
-        ? h("p", { class: "ch-correct act-note" }, t("정답은"), " ", h("b", null, c.question.answer))
-        : h("p", { class: "small muted center act-note" }, c.question.hint),
-    ];
-  };
   return [
     h("div", { class: "ch-top" },
       h("div", { class: `ch-streak${c.phase === "right" ? " bump" : ""}` }, h("b", null, String(c.streak)), h("span", null, t("연속"))),
@@ -1637,11 +1670,11 @@ function challengeView() {
       h("i", { style: `animation-duration:${c.limit}ms;animation-delay:-${Math.max(0, c.limit - (c.deadline - Date.now()))}ms` })),
     c.timedOut && h("p", { class: "center act-note timeout" }, t("시간이 다 됐어요!")),
     h("div", { class: `ch-prompt${c.question.shown.startsWith("d") ? " long" : ""}` }, c.question.prompt),
-    c.question.kind === "type" ? typedAnswer() : h("div", { class: `choices act${c.question.asked.startsWith("d") ? " wide defs" : c.question.options.some((o) => o.length > 9) ? " wide" : ""}` },
+    h("div", { class: `choices act${c.question.asked.startsWith("d") ? " wide defs" : c.question.options.some((o) => o.length > 9) ? " wide" : ""}` },
       c.question.options.map((option, i) =>
         h("button", { class: `choice${mark(option)}`, disabled: c.phase !== "ask", onclick: () => pickChallenge(option) },
           h("span", { class: "num" }, String(i + 1)), option))),
-    c.question.kind !== "type" && h("p", { class: "small muted center act-note" }, c.question.hint),
+    h("p", { class: "small muted center act-note" }, c.question.hint),
     h("p", { class: "center act-note" },
       h("button", { class: "link", onclick: () => finishChallenge(false) }, t("그만하기"))),
   ];
@@ -2428,6 +2461,35 @@ function settingsView() {
   ];
 }
 
+// ----- a welcome present: one of the cheapest characters, chosen once and kept -----
+const GIFT_CHOICES = 6;
+const giftChoices = () => ALL_CHARACTERS.filter((c) => c.cost > 0 && !myShop().owned.includes(`character:${c.id}`)).slice(0, GIFT_CHOICES);
+const presentWaiting = () => !state.user.welcome && giftChoices().length > 0;
+
+function giftPicker() {
+  const picked = giftChoices().find((c) => c.id === state.giftPick);
+  return h("div", { class: "step gift" },
+    h("h1", null, t("선물이 도착했어요!")),
+    h("p", null, t("함께할 캐릭터를 하나 골라요. 선물이라 포인트는 들지 않아요.")),
+    h("div", { class: "gift-grid" }, giftChoices().map((item) =>
+      h("button", { class: "gift-card", "aria-pressed": String(picked === item), onclick: () => { state.giftPick = item.id; render(); } },
+        portrait(item.id), h("b", null, t(item.name)), h("small", null, t(item.vibe))))),
+    h("button", { class: "btn wide", disabled: !picked, onclick: takePresent }, picked ? t("{name} 받기", { name: t(picked.name) }) : t("캐릭터를 골라 주세요")));
+}
+
+function takePresent() {
+  const item = giftChoices().find((c) => c.id === state.giftPick);
+  if (!item) return;
+  const shop = myShop();
+  state.user.shop = { ...shop, owned: [...shop.owned, `character:${item.id}`], character: item.id };
+  state.user.welcome = item.id;
+  state.giftPick = null;
+  api.saveProfile({ shop: state.user.shop, welcome: item.id }).catch(console.error);
+  publishRank();
+  render();
+  celebrate(0, t(item.name), "✓");
+}
+
 function gradePicker() {
   return h("div", { class: "step" },
     h("h1", null, t("몇 학년인가요?")),
@@ -2589,6 +2651,7 @@ function render() {
   else if (state.member === undefined) app.replaceChildren(h("div", { class: "step splash" }, h("div", { class: "big-logo art", "aria-hidden": "true" }, logoIcon(76)), h("p", { class: "muted" }, t("확인하는 중…"))));
   else if (state.member === false) app.replaceChildren(...[banner, inviteGate()].filter(Boolean));
   else if (!state.user.grade) app.replaceChildren(...[banner, gradePicker()].filter(Boolean));
+  else if (presentWaiting()) app.replaceChildren(...[banner, giftPicker()].filter(Boolean));
   else {
     const tabs = [["search", t("사전")], ["words", t("단어장")], ["quiz", t("퀴즈")], ["rank", t("랭킹")]];
     const view = { search: searchView, words: wordsView, quiz: quizView, rank: rankView, settings: settingsView, shop: shopView, friends: () => friends().view() }[state.tab]();

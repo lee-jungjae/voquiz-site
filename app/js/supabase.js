@@ -58,7 +58,7 @@ async function accessToken() {
 
 const authed = async (path, options = {}) => request(path, { ...options, token: await accessToken() });
 
-const toUser = (u) => ({ id: u.id, email: u.email, grade: u.user_metadata?.grade ?? null, points: u.user_metadata?.points ?? 0, search: u.user_metadata?.search ?? null, nickname: u.user_metadata?.nickname ?? "", shop: u.user_metadata?.shop ?? null, challenge: u.user_metadata?.challenge ?? null, nameChanges: u.user_metadata?.nameChanges ?? 0, noDuels: u.user_metadata?.noDuels ?? false, gift: u.user_metadata?.gift ?? null, weekly: u.user_metadata?.weekly ?? null, motto: u.user_metadata?.motto ?? "", duelFrom: u.user_metadata?.duelFrom ?? (u.user_metadata?.noDuels ? "none" : "all") });
+const toUser = (u) => ({ id: u.id, email: u.email, grade: u.user_metadata?.grade ?? null, points: u.user_metadata?.points ?? 0, search: u.user_metadata?.search ?? null, nickname: u.user_metadata?.nickname ?? "", shop: u.user_metadata?.shop ?? null, challenge: u.user_metadata?.challenge ?? null, nameChanges: u.user_metadata?.nameChanges ?? 0, noDuels: u.user_metadata?.noDuels ?? false, gift: u.user_metadata?.gift ?? null, weekly: u.user_metadata?.weekly ?? null, motto: u.user_metadata?.motto ?? "", welcome: u.user_metadata?.welcome ?? "", duelFrom: u.user_metadata?.duelFrom ?? (u.user_metadata?.noDuels ? "none" : "all") });
 
 export function getUser() {
   return session ? toUser(session.user) : null;
@@ -198,10 +198,11 @@ export async function listWords() {
     authed(`/rest/v1/user_words?select=${columns},entry:word_entries(content)&order=last_searched_at.desc&limit=2000`);
   let rows;
   try {
-    rows = await query(`${COLUMNS},discovered`);
+    rows = await query(`${COLUMNS},discovered,folder`);
   } catch (err) {
     if (err.status !== 400) throw err;
-    rows = await query(COLUMNS); // database not migrated to 0002_discovered.sql yet
+    // database not migrated to 0014 (folder) or 0002 (discovered) yet
+    rows = await query(`${COLUMNS},discovered`).catch((again) => { if (again.status !== 400) throw again; return query(COLUMNS); });
   }
   return rows.map(({ entry, ...row }) => ({ ...row, content: entry.content }));
 }
