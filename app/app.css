@@ -1467,3 +1467,6 @@ html:lang(zh) * { word-break: normal !important; }
 .sense-line { font-size: 13.5px; line-height: 1.5; }
 .sense-line.second { color: var(--muted); }
 main.still .sense-more { animation: none; }
+.hero-tip { margin-top: 14px; }
+.hero-tip p { margin: 0; }
+.sense-more .kin { margin: 0; }

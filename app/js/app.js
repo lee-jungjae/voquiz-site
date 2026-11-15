@@ -986,25 +986,30 @@ function block(word, name, heading, content) {
       !open && h("button", { class: "veil", onclick: () => reveal(word, name) }, h("span", null, h("i", { "aria-hidden": "true" }, "✦"), t("눌러서 보기")))));
 }
 
-const WHOLE_WORD = ["easy", "story", "kin", "say"]; // order of the sections under a word with several meanings
+function kinRows(c, synonyms, antonyms) {
+  if (!(synonyms?.length > 0 || antonyms?.length > 0)) return null;
+  return h("div", { class: "kin" },
+    [[t("비슷한 말"), synonyms, "syn"], [t("반대말"), antonyms, "ant"]].map(([label, list, kind]) =>
+      list?.length > 0 && h("div", { class: `kin-row ${kind}` },
+        h("span", { class: "kin-label" }, label),
+        h("div", { class: "kin-words" }, list.map((w) =>
+          h("button", { class: "kin-word", title: t("이 단어 찾기"), onclick: () => search(c.language === "ko" ? w.ko : w.en) },
+            h("b", null, w.en), h("span", null, w.ko)))))));
+}
+// Do the meanings carry their own similar and opposite words? (Entries written before that do not.)
+const kinBySense = (c) => manySenses(c) && c.senses.some((sense) => Array.isArray(sense?.synonyms) || Array.isArray(sense?.antonyms));
+const WHOLE_WORD = ["story", "kin", "say"]; // order of the sections under a word with several meanings
 function entryBlocks(word) {
   const c = word.content;
   const sections = [
-    ["kin", title(t("비슷한 말 · 반대말"), "SYNONYMS · ANTONYMS"),
-      (c.synonyms?.length > 0 || c.antonyms?.length > 0) && h("div", { class: "kin" },
-        [[t("비슷한 말"), c.synonyms, "syn"], [t("반대말"), c.antonyms, "ant"]].map(([label, list, kind]) =>
-          list?.length > 0 && h("div", { class: `kin-row ${kind}` },
-            h("span", { class: "kin-label" }, label),
-            h("div", { class: "kin-words" }, list.map((w) =>
-              h("button", { class: "kin-word", title: t("이 단어 찾기"), onclick: () => search(c.language === "ko" ? w.ko : w.en) },
-                h("b", null, w.en), h("span", null, w.ko)))))))],
-    // Breaking the word into parts and the memory tip belong together: both are ways to remember it.
-    ["easy", title(t("쉽게 기억하기"), "REMEMBER IT"),
-      (buildBlock(c) || c.memory_tip_ko || c.memory_tip_en) && [
+    ["kin", title(t("비슷한 말 · 반대말"), "SYNONYMS · ANTONYMS"), !kinBySense(c) && kinRows(c, c.synonyms, c.antonyms)],
+    // The word split into its parts and the story of where it comes from are one thing: both say
+    // what the word is made of. (How to remember a meaning is shown with that meaning.)
+    ["story", title(t("어디서 온 말일까?"), "ORIGIN"),
+      (buildBlock(c) || c.origin_ko || c.origin_en) && [
         buildBlock(c),
-        (c.memory_tip_ko || c.memory_tip_en) && h("div", { class: "tip-box" }, h("b", { class: "tip-title" }, t("이렇게 기억해요")), inBoth(c.memory_tip_ko, c.memory_tip_en)),
+        (c.origin_ko || c.origin_en) && h("div", { class: "tip-box" }, inBoth(c.origin_ko, c.origin_en)),
       ]],
-    ["story", title(t("어디서 온 말일까?"), "ORIGIN"), (c.origin_ko || c.origin_en) && inBoth(c.origin_ko, c.origin_en)],
     ["ex", title(t("예문"), "EXAMPLES"),
       c.examples?.length > 0 && h("ol", null, c.examples.map((e, i) => h("li", null,
         h("span", { class: "num" }, String(i + 1)),
@@ -1034,9 +1039,16 @@ function hero(c, word) {
     h("h2", null, c.headword),
     !manySenses(c) && h("div", { class: "cp" }, h("small", null, "⇄"), c.counterpart),
     h("div", { class: "meta" }, [c.pronunciation, !manySenses(c) && c.part_of_speech].filter(Boolean).join("  ·  ")),
-    manySenses(c) ? sensesList(c, word?.term_norm || c.headword) : h("div", { class: "def" }, koFirst()
-      ? [h("p", null, c.definition_ko), h("p", null, c.definition_en)]
-      : [h("p", null, c.definition_en), h("p", null, c.definition_ko)]));
+    manySenses(c) ? sensesList(c, word?.term_norm || c.headword) : [
+      h("div", { class: "def" }, koFirst()
+        ? [h("p", null, c.definition_ko), h("p", null, c.definition_en)]
+        : [h("p", null, c.definition_en), h("p", null, c.definition_ko)]),
+      // One meaning: its memory tip sits right under it, the same way as in a list of meanings.
+      (c.memory_tip_ko || c.memory_tip_en) && h("div", { class: "sense-tip hero-tip" },
+        h("span", { class: "sense-label" }, "💡 ", t("이렇게 기억해요")),
+        (koFirst() ? [c.memory_tip_ko, c.memory_tip_en] : [c.memory_tip_en, c.memory_tip_ko]).filter(Boolean)
+          .map((text, n) => h("p", { class: n ? "sense-line second" : "sense-line" }, text))),
+    ]);
 }
 // A word with several parts of speech or meanings: each one with its own label, its equivalent in
 // the other language, its meaning in both languages and an example. (Older entries have one.)
@@ -1075,7 +1087,8 @@ function sensesList(c, key) {
             pair(sense.example_ko, sense.example_en).map((text, n) => h("p", { class: n ? "sense-line second" : "sense-line" }, text))),
           (sense.tip_ko || sense.tip_en) && h("div", { class: "sense-tip" },
             h("span", { class: "sense-label" }, "💡 ", t("이렇게 기억해요")),
-            pair(sense.tip_ko, sense.tip_en).map((text, n) => h("p", { class: n ? "sense-line second" : "sense-line" }, text)))));
+            pair(sense.tip_ko, sense.tip_en).map((text, n) => h("p", { class: n ? "sense-line second" : "sense-line" }, text))),
+          kinRows(c, sense.synonyms, sense.antonyms)));
     })));
 }
 
@@ -1123,8 +1136,7 @@ function loadingView() {
 const LIVE_STEPS = () => [
   ["definition_ko", t("뜻")],
   ["senses", t("다른 품사와 뜻")],
-  ["hanja_word", t("단어 쪼개 보기")],
-  ["origin_ko", t("어디서 온 말일까?")],
+  ["hanja_word", t("어디서 온 말일까?")],
   ["memory_tip_ko", t("이렇게 기억해요")],
   ["examples", t("예문")],
   ["related", t("속담·사자성어")],
