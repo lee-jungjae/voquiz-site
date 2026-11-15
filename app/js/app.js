@@ -1411,6 +1411,9 @@ function wordRow(w) {
       h("div", { class: "word" }, w.headword, w.discovered && h("span", { class: "badge found" }, t("첫 발견")), w.needs_review && h("span", { class: "badge" }, t("복습")), isLearned(w) && h("span", { class: "badge learned" }, t("다 익힘")), grouping && w.folder && h("span", { class: "badge folder" }, w.folder)),
       h("div", { class: "sub" }, w.content.counterpart, state.filter === "learned" && isLearned(w) && h("small", { class: "learned-on" }, t("{d}에 익힘", { d: new Date(w.mastered_at).toLocaleDateString(locale(), { month: "short", day: "numeric" }) })))),
     grouping && state.confirmDelete !== w.term_norm && h("button", { class: `folder-btn${w.folder ? " on" : ""}`, "aria-label": t("그룹 정하기"), title: t("그룹 정하기"), onclick: () => folderSheet(w) }, icon("folder")),
+    // A learned word that has rested long enough can go back into the quizzes, one at a time.
+    state.filter === "learned" && canRetest(w) && state.confirmDelete !== w.term_norm &&
+      h("button", { class: "mini retest", onclick: () => retest([w]) }, t("다시 퀴즈")),
     state.confirmDelete !== w.term_norm && star(w),
     // Deleting asks once more, right in the row, with a way back next to it.
     state.confirmDelete === w.term_norm
@@ -1451,8 +1454,9 @@ function wordsView() {
   const old = state.filter === "learned" ? shown.filter((w) => canRetest(w)) : [];
   const learnedRow = state.filter !== "learned" ? null : h("div", { class: "learned-box" },
     h("p", { class: "small muted" }, t("{n}번 연속(쓰기 1번 포함) 맞힌 단어예요. 퀴즈에는 나오지 않아요.", { n: MASTER_STREAK })),
-    old.length > 0 && h("button", { class: "btn ghost wide", onclick: () => retest(old) },
-      t("익힌 지 한 달 넘은 단어 {n}개 다시 퀴즈에 넣기", { n: old.length })));
+    h("p", { class: "small muted" }, t("익힌 지 {d}일이 지나면 다시 퀴즈에 넣을 수 있어요.", { d: RETEST_DAYS })),
+    old.length > 1 && h("button", { class: "btn ghost wide", onclick: () => retest(old) },
+      t("{d}일 지난 단어 {n}개 모두 다시 넣기", { d: RETEST_DAYS, n: old.length })));
   const groupRow = state.filter !== "favorites" ? null
     : !canGroup()
       ? h("button", { class: "group-plus", onclick: () => { state.plusOpen = true; openSettings(); } },

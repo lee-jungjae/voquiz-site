@@ -237,6 +237,13 @@ export const findPlayer = (email) => rpc("find_player", { p_email: email });
 // A database that has not had 0008_duel_options_and_leaving.sql yet only knows three-minute duels.
 export async function createDuel({ opponent, grade, seed, score, marks, character, befriend = false, seconds = 180 }) {
   const body = { p_opponent: opponent, p_grade: grade, p_seed: seed, p_score: score, p_marks: marks, p_character: character, p_befriend: befriend };
+  // p_rule "charge": three challenges held, one back every hour (0016_duel_charges.sql). A database
+  // without it does not know the argument (404) and is asked the older way.
+  try {
+    return await rpc("create_duel", { ...body, p_seconds: seconds, p_rule: "charge" });
+  } catch (err) {
+    if (err.status !== 404) throw err;
+  }
   try {
     return await rpc("create_duel", { ...body, p_seconds: seconds });
   } catch (err) {

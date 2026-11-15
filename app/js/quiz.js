@@ -5,7 +5,7 @@
 //   (mastered_at): it leaves the review pile and is not asked again.
 // - A learned word can be put back into the quizzes once RETEST_DAYS have passed.
 export const MASTER_STREAK = 3;
-export const RETEST_DAYS = 30;
+export const RETEST_DAYS = 3;
 const DAY = 24 * 60 * 60 * 1000;
 export const isLearned = (word) => Boolean(word.mastered_at);
 export const canRetest = (word, now = Date.now()) => isLearned(word) && now - new Date(word.mastered_at).getTime() >= RETEST_DAYS * DAY;

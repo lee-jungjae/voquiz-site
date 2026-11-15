@@ -8,7 +8,30 @@ import { WORD_LISTS } from "./wordlists.js";
 import { WORD_DEFS } from "./worddefs.js";
 
 export const DUEL_LENGTHS = [60, 100, 180]; // seconds; the challenger chooses
-export const DUEL_DAILY = 10; // challenges a student may send in a day
+export const DUEL_CHARGES = 3; // challenges a student can hold
+export const DUEL_REFILL_MS = 60 * 60 * 1000; // one comes back every hour
+
+// How many challenges are left, worked out from the times the earlier ones were sent: every
+// challenge uses a charge, and while fewer than DUEL_CHARGES are held one returns each hour.
+// (create_duel in 0016_duel_charges.sql counts the same way.)  -> { left, nextAt }
+export function duelCharges(sentTimes, now = Date.now()) {
+  let left = DUEL_CHARGES;
+  let since = 0; // when the hour that is running began
+  const refill = (at) => {
+    if (left >= DUEL_CHARGES) return;
+    const back = Math.floor((at - since) / DUEL_REFILL_MS);
+    left = Math.min(DUEL_CHARGES, left + back);
+    since += back * DUEL_REFILL_MS;
+  };
+  for (const at of [...sentTimes].sort((a, b) => a - b)) {
+    if (at > now) continue;
+    refill(at);
+    if (left >= DUEL_CHARGES) since = at;
+    left = Math.max(0, left - 1);
+  }
+  refill(now);
+  return { left, nextAt: left < DUEL_CHARGES ? since + DUEL_REFILL_MS : 0 };
+}
 const FREEZE_MS = 3000; // a wrong answer costs three seconds
 const FEE = 10; // points to take part
 const WIN = 25;
@@ -75,8 +98,18 @@ export function initDuel(c) {
   const incoming = () => (state.duels || []).filter((d) => d.role === "opponent" && d.status === "open");
   const seconds = () => (DUEL_LENGTHS.includes(state.duelSeconds) ? state.duelSeconds : 60);
   // Challenges sent in the last 24 hours, and how many are left (the database counts the same way).
-  const sentToday = () => (state.duels || []).filter((d) => d.role === "challenger" && Date.now() - new Date(d.created_at).getTime() < 24 * 60 * 60 * 1000).length;
-  const sendsLeft = () => Math.max(0, DUEL_DAILY - sentToday());
+  const charges = () => duelCharges((state.duels || []).filter((d) => d.role === "challenger").map((d) => new Date(d.created_at).getTime())
+    .filter((at) => Date.now() - at < 24 * 60 * 60 * 1000));
+  const sendsLeft = () => charges().left;
+  // The screen is drawn again when the next charge arrives.
+  let chargeTimer = 0;
+  const waitText = () => {
+    const { nextAt } = charges();
+    if (!nextAt) return null;
+    clearTimeout(chargeTimer);
+    chargeTimer = setTimeout(() => { if (state.tab === "quiz" && state.quizMode === "duel" && (!state.duel || state.duel.mode === "pick")) c.render(); }, Math.max(1000, nextAt - Date.now() + 500));
+    return t("{n}분 뒤 1개 충전", { n: Math.max(1, Math.ceil((nextAt - Date.now()) / 60000)) });
+  };
   const stopwatch = (size = 20) => {
     const el = document.createElement("span");
     el.className = "stopwatch";
@@ -84,9 +117,9 @@ export function initDuel(c) {
     return el;
   };
   const sendsLine = () => h("p", { class: `duel-left${sendsLeft() ? "" : " none"}` },
-    h("span", null, t("오늘 보낼 수 있는 도전")),
-    h("span", { class: "pips", "aria-hidden": "true" }, Array.from({ length: DUEL_DAILY }, (_, i) => h("i", { class: i < sendsLeft() ? "on" : "" }))),
-    h("b", null, `${sendsLeft()} / ${DUEL_DAILY}`));
+    h("span", null, t("보낼 수 있는 도전"), h("small", null, waitText() || t("1시간마다 1개씩 충전돼요"))),
+    h("span", { class: "pips", "aria-hidden": "true" }, Array.from({ length: DUEL_CHARGES }, (_, i) => h("i", { class: i < sendsLeft() ? "on" : "" }))),
+    h("b", null, `${sendsLeft()} / ${DUEL_CHARGES}`));
   const lengthLabel = (s) => (s === 60 ? t("1분") : s === 180 ? t("3분") : t("{n}초", { n: s }));
   const clockText = (ms) => {
     const s = Math.max(0, Math.ceil(ms / 1000));
@@ -95,7 +128,7 @@ export function initDuel(c) {
   const ERRORS = () => ({
     duel_off: t("이 친구는 대결을 받지 않아요."),
     duel_pending: t("이 친구에게 보낸 도전이 아직 남아 있어요."),
-    duel_limit: t("오늘은 도전을 다 보냈어요. (하루 {n}번)", { n: DUEL_DAILY }),
+    duel_limit: t("도전 신청을 다 썼어요. 1시간마다 1개씩 충전돼요."),
     duel_closed: t("이미 끝났거나 기한이 지난 대결이에요."),
     duel_nobody: t("상대를 찾지 못했어요."),
     duel_not_friends: t("대결은 친구끼리만 할 수 있어요."),
@@ -221,7 +254,7 @@ export function initDuel(c) {
           h("span", { class: "chev", "aria-hidden": "true" }, "›")))),
       sendsLine(),
       h("p", { class: "act" }, h("button", { class: "btn wide", disabled: sendsLeft() === 0, onclick: openPicker },
-        sendsLeft() ? t("상대 고르기") : t("오늘 도전은 다 보냈어요"))),
+        sendsLeft() ? t("상대 고르기") : t("충전을 기다리는 중"))),
       sendsLeft() === 0 && h("p", { class: "small muted center" }, t("받은 도전은 횟수와 상관없이 받을 수 있어요.")),
     ];
   }
