@@ -60,6 +60,7 @@ const state = {
   wordLang: "recent", // which part of the word list is showing: recent (both languages) | en | ko
   scope: { type: "days", days: 7 },
   quiz: null, // { cards, index, phase: "ask" | "result", typed, correct, results }
+  openSense: {}, // word -> Set of the meanings that are open
   hidden: {}, // term_norm -> Set of section names picked to start covered
   revealed: {}, // term_norm -> Set of uncovered section names
   greeting: Math.random(), // picks which hello the home screen shows
@@ -985,6 +986,7 @@ function block(word, name, heading, content) {
       !open && h("button", { class: "veil", onclick: () => reveal(word, name) }, h("span", null, h("i", { "aria-hidden": "true" }, "✦"), t("눌러서 보기")))));
 }
 
+const WHOLE_WORD = ["easy", "story", "kin", "say"]; // order of the sections under a word with several meanings
 function entryBlocks(word) {
   const c = word.content;
   const sections = [
@@ -1015,7 +1017,8 @@ function entryBlocks(word) {
         h("span", { class: "tag from" }, sayingSource(r)),
         h("p", { class: "saying" }, r.text),
         both(r.meaning_ko, r.meaning_en))))],
-  ].filter(([, , content]) => content);
+  ].filter(([name, , content]) => content && !(manySenses(c) && name === "ex"))
+    .sort((a, b) => (manySenses(c) ? WHOLE_WORD.indexOf(a[0]) - WHOLE_WORD.indexOf(b[0]) : 0));
 
   // A random one to three sections start covered (picked once per word), so there is always
   // something to uncover without hiding the whole entry.
@@ -1029,26 +1032,51 @@ function hero(c, word) {
     word && star(word),
     word?.discovered && h("div", { class: "found-line" }, h("i", { "aria-hidden": "true" }, "✦"), t("내가 처음 발견한 단어")),
     h("h2", null, c.headword),
-    h("div", { class: "cp" }, h("small", null, "⇄"), c.counterpart),
+    !manySenses(c) && h("div", { class: "cp" }, h("small", null, "⇄"), c.counterpart),
     h("div", { class: "meta" }, [c.pronunciation, !manySenses(c) && c.part_of_speech].filter(Boolean).join("  ·  ")),
-    manySenses(c) ? sensesList(c) : h("div", { class: "def" }, koFirst()
+    manySenses(c) ? sensesList(c, word?.term_norm || c.headword) : h("div", { class: "def" }, koFirst()
       ? [h("p", null, c.definition_ko), h("p", null, c.definition_en)]
       : [h("p", null, c.definition_en), h("p", null, c.definition_ko)]));
 }
 // A word with several parts of speech or meanings: each one with its own label, its equivalent in
 // the other language, its meaning in both languages and an example. (Older entries have one.)
 const manySenses = (c) => Array.isArray(c.senses) && c.senses.filter((sense) => sense?.definition_ko || sense?.definition_en).length > 1;
-function sensesList(c) {
+// The meanings as a list that opens: each row shows the part of speech, the word in the other
+// language and the meaning at a glance; opening a row adds the other language, an example and a
+// way to remember that meaning. The first one starts open.
+const posIn = (label) => { const parts = String(label || "").split("·").map((part) => part.trim()); return (koFirst() ? parts[1] : parts[0]) || parts[0] || ""; };
+function sensesList(c, key) {
   const senses = c.senses.filter((sense) => sense?.definition_ko || sense?.definition_en);
-  const pair = (ko, en, tag) => (koFirst() ? [ko, en] : [en, ko]).filter(Boolean).map((text, i) => h("p", { class: i ? `${tag} second` : tag }, text));
-  return h("ol", { class: "senses" }, senses.map((sense, i) => h("li", null,
-    h("div", { class: "sense-head" },
-      h("span", { class: "sense-no", "aria-hidden": "true" }, String(i + 1)),
-      sense.part_of_speech && h("span", { class: "sense-pos" }, sense.part_of_speech),
-      sense.counterpart && h("b", null, sense.counterpart)),
-    pair(sense.definition_ko, sense.definition_en, "sense-def"),
-    (sense.example_ko || sense.example_en) && h("div", { class: "sense-ex" }, pair(sense.example_ko, sense.example_en, "sense-line")),
-    (sense.tip_ko || sense.tip_en) && h("div", { class: "sense-tip" }, h("span", { class: "sense-tip-label" }, "💡 ", t("이렇게 기억해요")), pair(sense.tip_ko, sense.tip_en, "sense-line")))));
+  const open = (state.openSense[key] ??= new Set([0]));
+  const pair = (ko, en) => (koFirst() ? [ko, en] : [en, ko]).filter(Boolean);
+  // "동사 2 · 명사 1": what kinds of word this is, at a glance.
+  const kinds = new Map();
+  for (const sense of senses) kinds.set(posIn(sense.part_of_speech), (kinds.get(posIn(sense.part_of_speech)) || 0) + 1);
+  return h("div", { class: "senses-box" },
+    h("div", { class: "senses-sum" },
+      h("b", null, t("뜻 {n}개", { n: senses.length })),
+      [...kinds].filter(([kind]) => kind).map(([kind, n]) => h("span", { class: "sense-pos" }, n > 1 ? `${kind} ${n}` : kind)),
+      h("button", { class: "link senses-all", onclick: () => { state.openSense[key] = open.size === senses.length ? new Set() : new Set(senses.keys()); render(); } },
+        open.size === senses.length ? t("모두 접기") : t("모두 펼치기"))),
+    h("ol", { class: "senses" }, senses.map((sense, i) => {
+      const [first, second] = pair(sense.definition_ko, sense.definition_en);
+      const shown = open.has(i);
+      return h("li", { class: shown ? "open" : "" },
+        h("button", { class: "sense-row", "aria-expanded": String(shown), onclick: () => { shown ? open.delete(i) : open.add(i); render(); } },
+          h("span", { class: "sense-no", "aria-hidden": "true" }, String(i + 1)),
+          h("span", { class: "sense-main" },
+            h("span", { class: "sense-head" }, sense.part_of_speech && h("span", { class: "sense-pos" }, posIn(sense.part_of_speech)), sense.counterpart && h("b", null, sense.counterpart)),
+            h("span", { class: "sense-def" }, first)),
+          h("i", { class: "sense-chev", "aria-hidden": "true" }, "⌄")),
+        shown && h("div", { class: "sense-more" },
+          second && h("p", { class: "sense-def second" }, second),
+          (sense.example_ko || sense.example_en) && h("div", { class: "sense-ex" },
+            h("span", { class: "sense-label" }, t("예문")),
+            pair(sense.example_ko, sense.example_en).map((text, n) => h("p", { class: n ? "sense-line second" : "sense-line" }, text))),
+          (sense.tip_ko || sense.tip_en) && h("div", { class: "sense-tip" },
+            h("span", { class: "sense-label" }, "💡 ", t("이렇게 기억해요")),
+            pair(sense.tip_ko, sense.tip_en).map((text, n) => h("p", { class: n ? "sense-line second" : "sense-line" }, text)))));
+    })));
 }
 
 function entryCard(word) {

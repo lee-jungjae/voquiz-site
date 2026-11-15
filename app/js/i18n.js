@@ -560,6 +560,9 @@ const T = {
   "지금은 초대받은 학생만 가입할 수 있어요. 초대 코드는 따로 신청받거나 판매하지 않아요.": ["For now only invited students can join. Invite codes can't be requested or bought.", "目前只有受邀的学生可以加入。邀请码不接受申请，也不出售。"],
   "VOQUIZ가 어떤 서비스인지 보기": ["See what VOQUIZ is", "了解VOQUIZ是什么"],
   "다른 품사와 뜻": ["Other parts of speech and meanings", "其他词性和意思"],
+  "뜻 {n}개": ["{n} meanings", "{n}个意思"],
+  "모두 펼치기": ["Open all", "全部展开"],
+  "모두 접기": ["Close all", "全部收起"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],
   "테마 상점 열기": ["Open the theme shop", "打开主题商店"],
 
