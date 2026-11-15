@@ -211,8 +211,7 @@ function plusSection() {
     state.plusOpen
       ? [h("form", { class: "row", style: "margin-top:12px", onsubmit: (e) => { e.preventDefault(); redeemCoupon(document.getElementById("coupon").value.trim()); } },
            h("input", { type: "text", id: "coupon", maxLength: 40, autocomplete: "off", autocapitalize: "characters", spellcheck: false, placeholder: t("쿠폰 코드"), "aria-label": t("쿠폰 코드"), style: "flex:1" }),
-           h("button", { class: "btn", disabled: state.busy }, t("적용"))),
-         h("p", { class: "small muted hint" }, t("쿠폰 하나는 한 달 사용권이에요. 플러스를 쓰는 중에 넣으면 한 달이 더해져요."))]
+           h("button", { class: "btn", disabled: state.busy }, t("적용")))]
       : h("p", { style: "margin-top:12px" },
           h("button", { class: `btn wide${isPlus() ? " ghost" : ""}`, onclick: () => { state.plusOpen = true; state.notice = null; state.focus = "coupon"; render(); } },
             isPlus() ? t("쿠폰으로 한 달 더하기") : t("플러스 전환하기"))));

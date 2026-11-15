@@ -360,7 +360,6 @@ const T = {
   "{date}까지 플러스를 사용해요.": ["You have Plus until {date}.", "Plus 可使用到 {date}。"],
   "쿠폰 코드": ["Coupon code", "优惠码"],
   "적용": ["Apply", "使用"],
-  "쿠폰 하나는 한 달 사용권이에요. 플러스를 쓰는 중에 넣으면 한 달이 더해져요.": ["One coupon is a one-month pass. Enter another while on Plus to add a month.", "一张优惠券可使用一个月。使用 Plus 期间再输入会延长一个月。"],
   "쿠폰으로 한 달 더하기": ["Add a month with a coupon", "用优惠券延长一个月"],
   "플러스 전환하기": ["Switch to Plus", "升级到 Plus"],
   "오늘은 여기까지! 내일 또 만나요": ["That's all for today! See you tomorrow", "今天就到这里！明天见"],
