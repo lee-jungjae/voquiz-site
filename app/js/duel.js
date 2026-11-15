@@ -124,7 +124,7 @@ export function initDuel(c) {
     return el;
   };
   const sendsLine = () => h("p", { class: `duel-left${sendsLeft() ? "" : " none"}` },
-    h("span", null, t("보낼 수 있는 도전"), waitClock() || h("small", null, t("1시간마다 1개씩 충전돼요"))),
+    h("span", null, t("보낼 수 있는 도전"), waitClock()),
     h("span", { class: "pips", "aria-hidden": "true" }, Array.from({ length: DUEL_CHARGES }, (_, i) => h("i", { class: i < sendsLeft() ? "on" : "" }))),
     h("b", null, `${sendsLeft()} / ${DUEL_CHARGES}`));
   const lengthLabel = (s) => (s === 60 ? t("1분") : s === 180 ? t("3분") : t("{n}초", { n: s }));
