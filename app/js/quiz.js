@@ -69,12 +69,25 @@ function shuffled(list) {
 // Turns each quiz word into a question: "type" (write the word) or "choice" (pick it from four).
 // Choices need three other words from the student's list; with fewer, every question is typed.
 // Kinds alternate, starting with a typed question, so a quiz of two or more is always a mix.
+// A word with several meanings is asked about one of them, picked at random each time, so that
+// over a few quizzes every meaning comes up (`sense` is null for a word with one meaning).
 export function makeQuestions(cards, pool) {
   return cards.map((word, i) => {
+    const senses = (word.content?.senses || []).filter((one) => one?.definition_ko || one?.definition_en);
+    const sense = senses.length > 1 ? senses[Math.floor(Math.random() * senses.length)] : null;
     const others = pool.filter((w) => w.term_norm !== word.term_norm);
-    if (others.length < 3 || i % 2 === 0) return { word, kind: "type" };
-    return { word, kind: "choice", options: shuffled([word, ...shuffled(others).slice(0, 3)]) };
+    if (others.length < 3 || i % 2 === 0) return { word, kind: "type", sense };
+    return { word, kind: "choice", sense, options: shuffled([word, ...shuffled(others).slice(0, 3)]) };
   });
+}
+
+// The entry as this question sees it: the meaning being asked stands in for the first one.
+export function askedContent(word, question) {
+  const sense = question?.sense;
+  if (!sense) return word.content;
+  return { ...word.content, part_of_speech: sense.part_of_speech, counterpart: sense.counterpart || word.content.counterpart,
+    definition_ko: sense.definition_ko, definition_en: sense.definition_en,
+    memory_tip_ko: sense.tip_ko || word.content.memory_tip_ko, memory_tip_en: sense.tip_en || word.content.memory_tip_en };
 }
 
 // Letter-by-letter comparison of a wrong typed answer with the correct word, so the student sees

@@ -14,7 +14,7 @@ import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js";
 import { SIGNATURES } from "./signatures.js";
 import { WORD_LISTS } from "./wordlists.js";
 import { WORD_DEFS } from "./worddefs.js";
-import { buildQuizSet, makeQuestions, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK } from "./quiz.js";
+import { buildQuizSet, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK } from "./quiz.js";
 
 const app = document.getElementById("app");
 
@@ -520,7 +520,7 @@ function submitAnswer(typed, picked) {
   const quiz = state.quiz;
   clearTimeout(questionTimer);
   const word = quiz.cards[quiz.index];
-  const correct = picked ? picked === word : isCorrect(typed, word.content);
+  const correct = picked ? picked === word : isCorrect(typed, askedContent(word, quiz.questions[quiz.index]));
   // Typing the word is harder than picking it, so it earns more. A lucky bonus drops now and then.
   const lucky = correct && Math.random() < 0.25;
   let earned = 0;
@@ -2059,7 +2059,7 @@ function quizAsk() {
   const quiz = state.quiz;
   const word = quiz.cards[quiz.index];
   const question = quiz.questions[quiz.index];
-  const c = word.content;
+  const c = askedContent(word, question); // the meaning this question asks about
   const main = quizMain();
   const [first, second] = main === "ko" ? [c.definition_ko, c.definition_en] : [c.definition_en, c.definition_ko];
   const input = h("input", {
@@ -2072,6 +2072,7 @@ function quizAsk() {
       h("i", { style: `animation-duration:${quiz.limit}ms;animation-delay:-${Math.max(0, quiz.limit - (quiz.deadline - Date.now()))}ms` })),
     h("div", { class: `question${(first || "").length > (main === "ko" ? 55 : 95) ? " long" : ""}` },
       h("div", { class: "q-label" }, t("이 뜻을 가진 단어는?"),
+        question.sense?.part_of_speech && h("span", { class: "sense-pos" }, posIn(question.sense.part_of_speech)),
         word.needs_review && h("span", { class: "badge" },
           `${t("복습")} ${"●".repeat(Math.min(word.streak, MASTER_STREAK))}${"○".repeat(Math.max(0, MASTER_STREAK - word.streak))}`)),
       h("p", { class: "q-ko" }, mask(first, c)),
@@ -2079,7 +2080,7 @@ function quizAsk() {
     question.kind === "choice"
       ? [h("div", { class: `choices act${question.options.some((o) => wordIn(o.content, main).length > 13) ? " wide" : ""}` }, question.options.map((option, i) =>
           h("button", { class: "choice", onclick: () => submitAnswer(option.headword, option) },
-            h("span", { class: "num" }, String(i + 1)), wordIn(option.content, main)))),
+            h("span", { class: "num" }, String(i + 1)), wordIn(option === word ? c : option.content, main)))),
          h("p", { class: "small muted center act-note" }, t("알맞은 단어를 골라 보세요."))]
       : [h("form", { class: "search answer act", onsubmit: (e) => { e.preventDefault(); if (input.value.trim()) submitAnswer(input.value); } },
           input, h("button", { class: "btn" }, t("확인"))),
@@ -2107,7 +2108,7 @@ function spellingView(diff) {
 function quizResult() {
   const quiz = state.quiz;
   const word = quiz.cards[quiz.index];
-  const c = word.content;
+  const c = askedContent(word, quiz.questions[quiz.index]);
   const spelling = !quiz.correct && quiz.questions[quiz.index].kind === "type" ? spellingDiff(quiz.typed, c) : null;
   const last = quiz.index + 1 >= quiz.cards.length;
   const mastered = quiz.correct && !word.needs_review && word.streak === MASTER_STREAK;
