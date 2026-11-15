@@ -138,10 +138,15 @@ const SAMPLES = {
     related: [],
   },
   transport: {
-    valid: true, suggestion: "", headword: "transport", language: "en", counterpart: "운송하다, 수송",
-    pronunciation: "/trænˈspɔːrt/", part_of_speech: "verb, noun · 동사, 명사",
-    definition_ko: "사람이나 물건을 한 곳에서 다른 곳으로 옮기는 것.",
+    valid: true, suggestion: "", headword: "transport", language: "en", counterpart: "운송하다",
+    pronunciation: "/trænˈspɔːrt/", part_of_speech: "verb · 동사",
+    definition_ko: "사람이나 물건을 한 곳에서 다른 곳으로 옮기다.",
     definition_en: "To carry people or things from one place to another.",
+    senses: [
+      { part_of_speech: "verb · 동사", counterpart: "운송하다", definition_ko: "사람이나 물건을 한 곳에서 다른 곳으로 옮기다.", definition_en: "To carry people or things from one place to another.", example_ko: "이 트럭은 과일을 시장으로 운송해요.", example_en: "This truck transports fruit to the market." },
+      { part_of_speech: "noun · 명사", counterpart: "교통수단", definition_ko: "버스, 기차처럼 사람이나 물건을 실어 나르는 탈것이나 방법.", definition_en: "A way of travelling or carrying things, such as a bus or a train.", example_ko: "우리 도시는 대중교통이 편리해요.", example_en: "Public transport is easy to use in our city." },
+      { part_of_speech: "verb · 동사", counterpart: "다른 세계로 데려가다", definition_ko: "책이나 음악이 마치 다른 곳에 간 것처럼 느끼게 하다.", definition_en: "To make you feel as if you are in another place or time.", example_ko: "그 책은 나를 옛날 왕국으로 데려갔어요.", example_en: "The book transported me to an ancient kingdom." },
+    ],
     hanja_word: "運送",
     hanja: [
       { char: "運", hun_eum: "옮길 운", meaning_en: "to move, carry" },

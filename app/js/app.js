@@ -1030,10 +1030,24 @@ function hero(c, word) {
     word?.discovered && h("div", { class: "found-line" }, h("i", { "aria-hidden": "true" }, "✦"), t("내가 처음 발견한 단어")),
     h("h2", null, c.headword),
     h("div", { class: "cp" }, h("small", null, "⇄"), c.counterpart),
-    h("div", { class: "meta" }, [c.pronunciation, c.part_of_speech].filter(Boolean).join("  ·  ")),
-    h("div", { class: "def" }, koFirst()
+    h("div", { class: "meta" }, [c.pronunciation, !manySenses(c) && c.part_of_speech].filter(Boolean).join("  ·  ")),
+    manySenses(c) ? sensesList(c) : h("div", { class: "def" }, koFirst()
       ? [h("p", null, c.definition_ko), h("p", null, c.definition_en)]
       : [h("p", null, c.definition_en), h("p", null, c.definition_ko)]));
+}
+// A word with several parts of speech or meanings: each one with its own label, its equivalent in
+// the other language, its meaning in both languages and an example. (Older entries have one.)
+const manySenses = (c) => Array.isArray(c.senses) && c.senses.filter((sense) => sense?.definition_ko || sense?.definition_en).length > 1;
+function sensesList(c) {
+  const senses = c.senses.filter((sense) => sense?.definition_ko || sense?.definition_en);
+  const pair = (ko, en, tag) => (koFirst() ? [ko, en] : [en, ko]).filter(Boolean).map((text, i) => h("p", { class: i ? `${tag} second` : tag }, text));
+  return h("ol", { class: "senses" }, senses.map((sense, i) => h("li", null,
+    h("div", { class: "sense-head" },
+      h("span", { class: "sense-no", "aria-hidden": "true" }, String(i + 1)),
+      sense.part_of_speech && h("span", { class: "sense-pos" }, sense.part_of_speech),
+      sense.counterpart && h("b", null, sense.counterpart)),
+    pair(sense.definition_ko, sense.definition_en, "sense-def"),
+    (sense.example_ko || sense.example_en) && h("div", { class: "sense-ex" }, pair(sense.example_ko, sense.example_en, "sense-line")))));
 }
 
 function entryCard(word) {
@@ -1079,6 +1093,7 @@ function loadingView() {
 // ticks off each part of the entry as it is finished.
 const LIVE_STEPS = () => [
   ["definition_ko", t("뜻")],
+  ["senses", t("다른 품사와 뜻")],
   ["hanja_word", t("단어 쪼개 보기")],
   ["origin_ko", t("어디서 온 말일까?")],
   ["memory_tip_ko", t("이렇게 기억해요")],
