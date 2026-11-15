@@ -1,9 +1,16 @@
 // Quiz rules (no UI, no network).
 // - A quiz covers the words in the chosen range PLUS every word still marked "needs review".
 // - A wrong answer marks the word "needs review" and resets its streak.
-// - A word leaves the review pile only after MASTER_STREAK correct answers in a row.
+// - MASTER_STREAK correct answers in a row, at least one of them typed, make a word "learned"
+//   (mastered_at): it leaves the review pile and is not asked again.
+// - A learned word can be put back into the quizzes once RETEST_DAYS have passed.
 export const MASTER_STREAK = 3;
+export const RETEST_DAYS = 30;
 const DAY = 24 * 60 * 60 * 1000;
+export const isLearned = (word) => Boolean(word.mastered_at);
+export const canRetest = (word, now = Date.now()) => isLearned(word) && now - new Date(word.mastered_at).getTime() >= RETEST_DAYS * DAY;
+// What to save to put a learned word back into the quizzes.
+export const retestPatch = () => ({ mastered_at: null, streak: 0, typed_ok: false });
 
 // scope: {type:'days', days} | {type:'range', from:'YYYY-MM-DD', to:'YYYY-MM-DD'} | {type:'favorites'} | {type:'all'}
 //        | {type:'review'} = only the words answered wrong and not yet cleared
@@ -27,7 +34,7 @@ export function inScope(word, scope, now = Date.now()) {
 }
 
 export function buildQuizSet(words, scope, now = Date.now()) {
-  const picked = words.filter((w) => w.needs_review || inScope(w, scope, now));
+  const picked = words.filter((w) => !isLearned(w) && (w.needs_review || inScope(w, scope, now)));
   for (let i = picked.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [picked[i], picked[j]] = [picked[j], picked[i]];
@@ -36,13 +43,17 @@ export function buildQuizSet(words, scope, now = Date.now()) {
 }
 
 // Returns the fields to save after one answer.
-export function applyAnswer(word, correct, now = new Date()) {
+export function applyAnswer(word, correct, typed = false, now = new Date()) {
   const last_reviewed_at = now.toISOString();
-  if (!correct) return { streak: 0, needs_review: true, last_reviewed_at };
+  if (!correct) return { streak: 0, needs_review: true, typed_ok: false, mastered_at: null, last_reviewed_at };
   const streak = word.streak + 1;
+  const typed_ok = Boolean(word.typed_ok || typed);
+  const learned = streak >= MASTER_STREAK && typed_ok;
   return {
     streak,
-    needs_review: word.needs_review && streak < MASTER_STREAK,
+    typed_ok,
+    needs_review: word.needs_review && !learned,
+    mastered_at: learned ? last_reviewed_at : null,
     last_reviewed_at,
   };
 }
@@ -76,7 +87,9 @@ export function makeQuestions(cards, pool) {
     const senses = (word.content?.senses || []).filter((one) => one?.definition_ko || one?.definition_en);
     const sense = senses.length > 1 ? senses[Math.floor(Math.random() * senses.length)] : null;
     const others = pool.filter((w) => w.term_norm !== word.term_norm);
-    if (others.length < 3 || i % 2 === 0) return { word, kind: "type", sense };
+    // One answer away from being learned but never typed yet: this one has to be typed.
+    const mustType = !word.typed_ok && word.streak >= MASTER_STREAK - 1;
+    if (others.length < 3 || i % 2 === 0 || mustType) return { word, kind: "type", sense };
     return { word, kind: "choice", sense, options: shuffled([word, ...shuffled(others).slice(0, 3)]) };
   });
 }

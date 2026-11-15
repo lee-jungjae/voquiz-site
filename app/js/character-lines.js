@@ -83,5 +83,8 @@ export const CHARACTER_LINES = {
   butterfly: ["꽃밭 소식을 제일 먼저 전해요", "First with news from the flowers", "最先带来花丛里的消息"],
   burger: ["층층이 쌓인 맛있는 지식", "Tasty knowledge, layer by layer", "一层一层叠起来的美味知识"],
   gummy: ["말랑말랑, 씹을수록 쫀득", "Squishy, and chewier every bite", "软软的，越嚼越Q弹"],
+  orangutan: ["우끼끼! 단어 나무를 타고 다녀요", "Ook ook! Swinging through the word trees", "呜呜！在单词树上荡来荡去"],
+  banana: ["미끄러지듯 술술 외워져요", "Words slide right in", "单词滑溜溜地记住啦"],
+  santa: ["호호호! 착한 단어 친구에게 선물을", "Ho ho ho! Presents for good word friends", "呵呵呵！给乖乖学单词的你送礼物"],
   milk: ["마시면 단어 키가 쑥쑥", "Drink up and your words grow tall", "喝了单词量蹭蹭长"],
 };

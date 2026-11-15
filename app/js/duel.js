@@ -141,6 +141,8 @@ export function initDuel(c) {
       const won = reward(d.my_score, d.their_score);
       const label = d.my_score > d.their_score ? t("대결 승리") : d.my_score === d.their_score ? t("대결 무승부") : t("대결 참가");
       if (won) c.award(won, `${label} · ${who(d.other)}`, !quiet && d.my_score > d.their_score);
+      // The lion's special power: a little more for every win while it is the character in use.
+      if (d.my_score > d.their_score && c.winBonus()) c.award(c.winBonus(), t("사자왕 보너스"));
       if (!quiet) (state.duelNews ||= []).unshift(d.id);
     }
   }
@@ -362,6 +364,7 @@ export function initDuel(c) {
     const d = state.duel;
     d.fee = Math.min(FEE, state.user.points || 0);
     c.award(-d.fee, t("대결에 사용"));
+    c.sfx.go();
     Object.assign(d, { mode: "play", startedAt: Date.now(), endsAt: Date.now() + d.ms });
     clearInterval(ticker);
     ticker = setInterval(tick, 200);
@@ -415,11 +418,13 @@ export function initDuel(c) {
     if (!d || d.mode !== "play" || d.frozenUntil > Date.now()) return;
     const q = d.questions[d.index % d.questions.length];
     if (option === q.answer) {
+      c.sfx.right(c.myShop().character);
       d.score += 1;
       d.marks.push(Math.round((Date.now() - d.startedAt) / 1000));
       d.index += 1;
     } else {
       // Wrong: the right answer is shown and everything stops for three seconds.
+      c.sfx.wrong();
       d.picked = option;
       d.frozenUntil = Date.now() + FREEZE_MS;
       setTimeout(() => {
@@ -435,6 +440,7 @@ export function initDuel(c) {
     const d = state.duel;
     if (!d || d.mode !== "play") return;
     clearInterval(ticker);
+    c.sfx.time();
     d.mode = "saving";
     c.render();
     const character = c.myShop().character;
@@ -445,6 +451,7 @@ export function initDuel(c) {
         if (row) Object.assign(row, { my_score: d.score, my_character: character, my_marks: d.marks, status: "done" });
         d.won = reward(d.score, d.their.score);
         d.mode = "result";
+        if (d.score > d.their.score) c.sfx.grand(character); else if (d.score < d.their.score) c.sfx.aww();
         c.render();
         await settle(true);
         if (d.befriend) {

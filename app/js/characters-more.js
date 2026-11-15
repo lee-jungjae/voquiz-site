@@ -238,4 +238,29 @@ export const MORE_CHARACTERS = [
     back: earsRound("#ff8fa3", "#ffc2cd"),
     deco: ellipse(100, 100, 15, 8, "#ffc2cd") + shine,
   }),
+  // Drawn like a bonobo: dark fur, a pale face, round ears at the sides, hair parted in the middle.
+  c("orangutan", "오랑우탄", "동물", "엽기", 450, B.round, "#4a3b40", "#2f2529", {
+    stroke: "#2f2529",
+    back: dots([[62, 80, 12], [138, 80, 12]], "#4a3b40") + dots([[62, 80, 6.5], [138, 80, 6.5]], "#e0a591"),
+    deco: ellipse(87, 79, 14, 13, "#edc6ab") + ellipse(113, 79, 14, 13, "#edc6ab") + ellipse(100, 95, 21, 14, "#f3d3bb"),
+    topper: shape("M100 53 q-12 -9 -27 3 q13 -3 27 3 z M100 53 q12 -9 27 3 q-13 -3 -27 3 z", "#2f2529"),
+  }),
+  // A banana: half peeled, the peel hanging down at both sides.
+  c("banana", "바나나", "식물·과일", "엽기", 200, B.tall, "#fff2a8", "#e0b800", {
+    stroke: "#ecd27a",
+    back: shape("M72 74 q-22 4 -26 34 q16 -4 28 -18 z M128 74 q22 4 26 34 q-16 -4 -28 -18 z", "#ffd92e"),
+    deco: shape("M70 86 q30 12 60 0 v14 a12 12 0 0 1 -12 12 h-36 a12 12 0 0 1 -12 -12 z", "#ffd92e") + shine,
+    topper: shape("M96 46 q4 -6 8 0 l-1 4 h-6 z", "#8a5a2b"),
+  }),
+  // Santa: a red hat with a pompom and a big white beard. Owning him brings presents in December (see app.js).
+  c("santa", "산타", "특별", "귀여움", 2000, B.round, "#ffd9b8", "#d62f2f", {
+    special: true, stroke: "#f0bf98",
+    deco:
+      '<path d="M65 84 q-4 34 35 34 q39 0 35 -34 q-8 9 -17.5 5 q-8 7 -17.5 1 q-9.5 6 -17.5 -1 q-9.5 4 -17.5 -5 z" fill="#fff" stroke="#d9deea" stroke-width="2.5" stroke-linejoin="round"/>' +
+      dots([[80, 90, 5], [120, 90, 5]], "#ffb3a6"),
+    topper:
+      shape("M70 58 q8 -30 36 -30 q24 0 38 22 q-8 2 -12 -4 q0 8 -2 12 z", "#e23b3b") +
+      '<rect x="64" y="52" width="72" height="13" rx="6.5" fill="#fff" stroke="#e6e9f2" stroke-width="2"/>' +
+      '<circle cx="146" cy="50" r="8" fill="#fff" stroke="#e6e9f2" stroke-width="2"/>',
+  }),
 ];

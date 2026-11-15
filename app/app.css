@@ -1516,3 +1516,13 @@ main.still .sense-more { animation: none; }
 .folder-sheet .chips { justify-content: center; }
 .folder-sheet .row { display: flex; gap: 8px; }
 .folder-sheet .row input { flex: 1; min-width: 0; }
+
+/* ----- learned words, special powers, cards that make a sound ----- */
+.badge.learned { color: var(--accent); background: var(--accent-soft); }
+.badge.plain { color: var(--muted); background: var(--surface); }
+.learned-on { display: block; font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+.learned-box { display: grid; gap: 8px; margin-top: 10px; }
+.learned-box p { margin: 0; }
+.swatch.sounds { cursor: pointer; }
+.swatch.sounds:active { transform: scale(.97); }
+.swatch .perk { margin: 4px 0 6px; padding: 5px 6px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); font-size: 11px; line-height: 1.35; word-break: keep-all; }

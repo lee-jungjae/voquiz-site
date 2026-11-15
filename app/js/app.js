@@ -12,9 +12,10 @@ import { initFriends } from "./friends.js";
 import { MOTTOS } from "./mottos.js";
 import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js";
 import { SIGNATURES } from "./signatures.js";
+import { sfx, soundOn, setSound } from "./sound.js";
 import { WORD_LISTS } from "./wordlists.js";
 import { WORD_DEFS } from "./worddefs.js";
-import { buildQuizSet, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK } from "./quiz.js";
+import { buildQuizSet, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js";
 
 const app = document.getElementById("app");
 
@@ -154,6 +155,20 @@ function takeDailyGift() {
   api.saveProfile({ gift: state.user.gift }).catch(console.error);
   award(PLUS_GIFT, t("오늘의 플러스 선물"), true);
   return t("선물이야! 내일 또 줄게");
+}
+
+// Santa's presents: whoever owns Santa gets 200 points a day from 1 to 24 December and 1000 on
+// the 25th. Like the Plus present, the character on the home screen holds it until it is tapped.
+const SANTA_DAILY = 200;
+const SANTA_BIG = 1000;
+const santaDay = (now = new Date()) => (now.getMonth() === 11 && now.getDate() <= 25 ? now.getDate() : 0);
+const santaWaiting = () => santaDay() > 0 && myShop().owned.includes("character:santa") && state.user.santa?.day !== dayOf(new Date());
+function takeSantaGift() {
+  const big = santaDay() === 25;
+  state.user.santa = { day: dayOf(new Date()) };
+  api.saveProfile({ santa: state.user.santa }).catch(console.error);
+  award(big ? SANTA_BIG : SANTA_DAILY, big ? t("메리 크리스마스!") : t("산타의 선물"), true);
+  return big ? t("메리 크리스마스! 내년 12월에 또 만나") : t("산타의 선물이야! 내일 또 올게");
 }
 
 async function redeemCoupon(code) {
@@ -532,12 +547,13 @@ function submitAnswer(typed, picked) {
   Object.assign(quiz, { phase: "result", typed: typed.trim(), correct, perfect, earned: (quiz.earned || 0) + earned });
   quiz.results.push({ word, correct });
   state.focus = "next";
+  if (correct) sfx.right(myShop().character); else sfx.wrong();
   award(earned, perfect ? t("전부 정답!") : lucky ? t("럭키 보너스!") : null, perfect || lucky);
   // A right answer moves on by itself; a wrong one waits, so there is time to read the correction.
   // (Set before the redraw below, so the button shows its countdown.)
   if (correct) startAutoNext();
   else state.quiz.auto = false;
-  patchWord(word, applyAnswer(word, correct));
+  patchWord(word, applyAnswer(word, correct, !picked));
 }
 
 // After a right answer the quiz moves on by itself. Tapping the result card stops the countdown;
@@ -580,6 +596,7 @@ function award(points, label, big) {
   // What is earned (never what is spent) also counts for this week's league.
   state.user.weekly = { ...(state.user.weekly || {}), week: weekKey(), earned: weekEarned() + points };
   (big ? celebrate : toast)(points, label || t("단어포인트"));
+  if (!big) sfx[points > 0 ? "coin" : "spend"]();
   countUp(points);
   saveSoon();
 }
@@ -753,6 +770,7 @@ function celebrate(points, label, text = `+${points}`) {
       h("div", { class: "coin" }, h("b", null, text), h("span", null, label))),
     state.user && reaction(myShop().character, "cheer"));
   document.body.append(el);
+  if (state.user) sfx.cheer(myShop().character);
   setTimeout(() => el.remove(), 2000);
 }
 
@@ -1268,9 +1286,9 @@ function searchHome() {
       : [h("p", { class: "small" }, t("한국어나 영어 단어를 찾아보세요.")),
          h("p", { class: "small" }, t("웹페이지에서 단어를 선택해 우클릭해도 돼요."))],
     mascot({
-      character: myShop().character, t, onTap: () => mascotGift() || mascotSuggests(),
+      character: myShop().character, t, onTap: () => { sfx.chirp(myShop().character); return mascotGift() || mascotSuggests(); },
       signature: isPlus() ? { pops: SIGNATURES[myShop().character] || ["✦", "♥", "★"], line: CHARACTER_LINES[myShop().character]?.[["ko", "en", "zh"].indexOf(getLang())] || "" } : null,
-      gift: giftWaiting(), onGift: takeDailyGift,
+      gift: giftWaiting() || santaWaiting(), onGift: () => (giftWaiting() ? takeDailyGift() : takeSantaGift()),
       resting: limitReached() ? t("오늘은 여기까지! 내일 또 만나요") : null,
       greet: quotaLine(), onGreet: () => { state.quotaSaid = quotaKey(); }, // marked as said only once it has spoken
     }),
@@ -1333,6 +1351,16 @@ function dayLabel(day) {
   return new Date(day + "T12:00:00").toLocaleDateString(locale(), { month: "long", day: "numeric", weekday: "short" });
 }
 
+// Learned words go back into the quizzes: they start again from no right answers.
+function retest(words) {
+  for (const word of words) {
+    Object.assign(word, retestPatch());
+    api.updateWord(word.term_norm, retestPatch()).catch(console.error);
+  }
+  toastText(t("{n}개를 다시 퀴즈에 넣었어요.", { n: words.length }));
+  render();
+}
+
 // ----- groups of favourites (Plus) -----
 // A favourite may sit in one group. A group is just its name, kept on the word, so it exists as
 // long as a favourite carries it.
@@ -1376,8 +1404,8 @@ function wordRow(w) {
   return h("div", { class: "item" },
     h("div", { class: "avatar", "aria-hidden": "true" }, [...w.headword][0].toUpperCase()),
     h("button", { class: "open", onclick: () => { Object.assign(state, { entry: w, tab: "search", query: "", notice: null }); render(); } },
-      h("div", { class: "word" }, w.headword, w.discovered && h("span", { class: "badge found" }, t("첫 발견")), w.needs_review && h("span", { class: "badge" }, t("복습")), grouping && w.folder && h("span", { class: "badge folder" }, w.folder)),
-      h("div", { class: "sub" }, w.content.counterpart)),
+      h("div", { class: "word" }, w.headword, w.discovered && h("span", { class: "badge found" }, t("첫 발견")), w.needs_review && h("span", { class: "badge" }, t("복습")), isLearned(w) && h("span", { class: "badge learned" }, t("다 익힘")), grouping && w.folder && h("span", { class: "badge folder" }, w.folder)),
+      h("div", { class: "sub" }, w.content.counterpart, state.filter === "learned" && isLearned(w) && h("small", { class: "learned-on" }, t("{d}에 익힘", { d: new Date(w.mastered_at).toLocaleDateString(locale(), { month: "short", day: "numeric" }) })))),
     grouping && state.confirmDelete !== w.term_norm && h("button", { class: `folder-btn${w.folder ? " on" : ""}`, "aria-label": t("그룹 정하기"), title: t("그룹 정하기"), onclick: () => folderSheet(w) }, icon("folder")),
     state.confirmDelete !== w.term_norm && star(w),
     // Deleting asks once more, right in the row, with a way back next to it.
@@ -1407,14 +1435,20 @@ function filterChips(filters) {
 
 function wordsView() {
   const langs = [["recent", t("최근")], ["en", t("영어")], ["ko", t("한국어")]];
-  const filters = [["all", t("전체")], ["favorites", t("★ 즐겨찾기")], ["review", t("복습 필요")], ["found", t("✦ 내가 발견")]];
+  const filters = [["all", t("전체")], ["favorites", t("★ 즐겨찾기")], ["review", t("복습 필요")], ["learned", t("✓ 다 익힘")], ["found", t("✦ 내가 발견")]];
   // "recent" is every word, newest first, whichever language it was searched in.
   const inLang = (lang) => (lang === "recent" ? state.words : state.words.filter((w) => (w.content.language === "ko" ? "ko" : "en") === lang));
   // Favourites can be narrowed to one group (Plus).
   const grouped = state.filter === "favorites" && canGroup();
   const group = grouped && folders().includes(state.folder) ? state.folder : null;
   const shown = inLang(state.wordLang).filter((w) =>
-    state.filter === "favorites" ? w.favorite && (!group || w.folder === group) : state.filter === "review" ? w.needs_review : state.filter === "found" ? w.discovered : true);
+    state.filter === "favorites" ? w.favorite && (!group || w.folder === group) : state.filter === "review" ? w.needs_review : state.filter === "learned" ? isLearned(w) : state.filter === "found" ? w.discovered : true);
+  // Learned words: those learned a month or more ago can go back into the quizzes.
+  const old = state.filter === "learned" ? shown.filter((w) => canRetest(w)) : [];
+  const learnedRow = state.filter !== "learned" ? null : h("div", { class: "learned-box" },
+    h("p", { class: "small muted" }, t("{n}번 연속(쓰기 1번 포함) 맞힌 단어예요. 퀴즈에는 나오지 않아요.", { n: MASTER_STREAK })),
+    old.length > 0 && h("button", { class: "btn ghost wide", onclick: () => retest(old) },
+      t("익힌 지 한 달 넘은 단어 {n}개 다시 퀴즈에 넣기", { n: old.length })));
   const groupRow = state.filter !== "favorites" ? null
     : !canGroup()
       ? h("button", { class: "group-plus", onclick: () => { state.plusOpen = true; openSettings(); } },
@@ -1458,6 +1492,7 @@ function wordsView() {
       h("div", { class: "scope small", role: "group", "aria-label": t("묶어 보기") }, [["day", t("날짜")], ["week", t("주")]].map(([id, label]) =>
         h("button", { "aria-pressed": String((state.groupBy || "day") === id), onclick: () => { state.groupBy = id; render(); } }, label)))),
     groupRow,
+    learnedRow,
     noticeBox(),
     shown.length === 0
       ? h("div", { class: "empty" },
@@ -1589,8 +1624,9 @@ function nextChallengeWord() {
   challengeTimer = setTimeout(() => {
     if (state.challenge !== c || c.phase !== "ask" || c.question !== question) return;
     Object.assign(c, { timedOut: true, picked: "", phase: "wrong" });
+    sfx.time();
     render();
-    setTimeout(() => { if (state.challenge === c && c.phase === "wrong") finishChallenge(false); }, 1700);
+    setTimeout(() => { if (state.challenge === c && c.phase === "wrong") missChallenge(); }, 1700);
   }, c.limit);
 }
 let challengeTimer = 0;
@@ -1605,6 +1641,7 @@ function pickChallenge(option) {
     c.streak += 1;
     c.earned += points;
     c.phase = "right";
+    sfx.right(myShop().character);
     award(points, t("{n}연속", { n: c.streak }));
     setTimeout(() => {
       if (state.challenge !== c || c.phase !== "right") return;
@@ -1612,9 +1649,21 @@ function pickChallenge(option) {
       render();
     }, 500);
   } else {
+    sfx.wrong();
     c.phase = "wrong"; // show the right answer for a moment before the result
-    setTimeout(() => { if (state.challenge === c && c.phase === "wrong") finishChallenge(false); }, 1700);
+    setTimeout(() => { if (state.challenge === c && c.phase === "wrong") missChallenge(); }, 1700);
   }
+  render();
+}
+
+// A miss ends the run, except once per run for whoever is using the skeleton (its special power).
+function missChallenge() {
+  const c = state.challenge;
+  if (!using("skull") || c.revived) return finishChallenge(false);
+  c.revived = true;
+  sfx.chirp("skull");
+  toastText(t("본즈가 한 번 살려 줬어요! 계속 가요."));
+  nextChallengeWord();
   render();
 }
 
@@ -1766,7 +1815,9 @@ async function settleLeague() {
         text: t("지난주 {old}에서 {r}등을 했어요. 정말 멋져요! 승급 보너스 +{p}포인트를 받았어요.", { old: tierName(tier), r: rank, p: PROMOTION_BONUS }),
         actions: [{ label: t("야호!"), kind: "main", run: () => true }] });
       award(PROMOTION_BONUS, t("승급 보너스"));
+      sfx.grand(myShop().character);
     } else if (result === "down") {
+      sfx.aww();
       sheet({ art: TIERS[next].emoji, title: t("{name}로 내려왔어요", { name: tierName(next) }),
         text: t("지난주 {old}에서 {r}등이었어요. 괜찮아요, 이번 주에 다시 올라가 봐요!", { old: tierName(tier), r: rank }),
         actions: [{ label: t("다시 도전!"), kind: "main", run: () => true }] });
@@ -2044,7 +2095,7 @@ function quizSetup() {
     guideSteps([
       t("뜻을 보고 단어를 쓰거나 골라요."),
       t("고르는 문제는 {a}초, 쓰는 문제는 {b}초예요.", { a: QUESTION_MS / 1000, b: TYPED_MS / 1000 }),
-      t("틀린 단어는 {n}번 연속으로 맞힐 때까지 다시 나와요.", { n: MASTER_STREAK }),
+      t("{n}번 연속(쓰기 1번 포함) 맞히면 다 익힌 단어가 되어 퀴즈에서 빠져요.", { n: MASTER_STREAK }),
     ]),
     h("div", { class: "guide-form" },
       h("div", { class: "field" }, h("label", { htmlFor: "scope" }, t("시험 범위")), select),
@@ -2106,8 +2157,9 @@ function quizAsk() {
     h("div", { class: `question${(first || "").length > (main === "ko" ? 55 : 95) ? " long" : ""}` },
       h("div", { class: "q-label" }, t("이 뜻을 가진 단어는?"),
         question.sense?.part_of_speech && h("span", { class: "sense-pos" }, posIn(question.sense.part_of_speech)),
-        word.needs_review && h("span", { class: "badge" },
-          `${t("복습")} ${"●".repeat(Math.min(word.streak, MASTER_STREAK))}${"○".repeat(Math.max(0, MASTER_STREAK - word.streak))}`)),
+        // How far this word is from being learned: right answers in a row, and whether one was typed.
+        h("span", { class: `badge${word.needs_review ? "" : " plain"}`, title: t("{n}번 연속(쓰기 1번 포함) 맞히면 다 익힌 단어가 되어 퀴즈에서 빠져요.", { n: MASTER_STREAK }) },
+          `${word.needs_review ? `${t("복습")} ` : ""}${"●".repeat(Math.min(word.streak, MASTER_STREAK))}${"○".repeat(Math.max(0, MASTER_STREAK - word.streak))}${word.typed_ok ? " ✎" : ""}`)),
       h("p", { class: "q-ko" }, mask(first, c)),
       h("p", { class: "q-en" }, mask(second, c))),
     question.kind === "choice"
@@ -2144,7 +2196,8 @@ function quizResult() {
   const c = askedContent(word, quiz.questions[quiz.index]);
   const spelling = !quiz.correct && quiz.questions[quiz.index].kind === "type" ? spellingDiff(quiz.typed, c) : null;
   const last = quiz.index + 1 >= quiz.cards.length;
-  const mastered = quiz.correct && !word.needs_review && word.streak === MASTER_STREAK;
+  const mastered = quiz.correct && isLearned(word);
+  const needsTyping = quiz.correct && !mastered && word.streak >= MASTER_STREAK && !word.typed_ok;
   return [
     quizProgress(),
     h("div", { class: `feedback ${quiz.correct ? "good" : "bad"}`, role: "status", onclick: stopAutoNext },
@@ -2155,7 +2208,8 @@ function quizResult() {
       h("div", { class: "art", "aria-hidden": "true" }, reaction(myShop().character, quiz.correct ? "cheer" : "comfort")),
       h("div", { class: "fb-title" }, quiz.correct ? pick(CHEERS()) : quiz.timedOut ? t("시간이 다 됐어요!") : pick(COMFORTS())),
       quiz.correct && word.streak > 1 && h("div", { class: "fb-sub" }, t("🔥 {n}번 연속 정답", { n: word.streak })),
-      mastered && h("div", { class: "fb-sub" }, t("복습 완료! 이제 이 단어는 졸업이에요.")),
+      mastered && h("div", { class: "fb-sub" }, t("다 익혔어요! 이제 이 단어는 퀴즈에서 빠져요.")),
+      needsTyping && h("div", { class: "fb-sub" }, t("한 번만 직접 써서 맞히면 다 익힌 단어가 돼요.")),
       !quiz.correct && quiz.typed && (spelling ? spellingView(spelling) : h("div", { class: "fb-sub" }, t("내가 쓴 답: "), h("s", null, quiz.typed))),
       h("div", { class: "fb-answer" }, wordIn(c, quizMain()), h("small", null, "⇄"), wordIn(c, quizMain() === "ko" ? "en" : "ko")),
       !quiz.correct && (c.memory_tip_ko || c.memory_tip_en) && h("div", { class: "fb-tip" }, "💡 ", quizMain() === "ko" ? c.memory_tip_ko || c.memory_tip_en : c.memory_tip_en || c.memory_tip_ko)),
@@ -2206,7 +2260,8 @@ let duelModule = null;
 function duel() {
   return (duelModule ||= initDuel({
     h, t, state, api, render, award, fail, reaction, portrait, myShop, displayName, nameOf,
-    guideHero, guideSteps, guideStat, coin, toastText, locale,
+    guideHero, guideSteps, guideStat, coin, toastText, locale, sfx,
+    winBonus: () => (using("lion") ? LION_BONUS : 0),
     askFriend: (email) => friends().ask(email),
     refreshFriends: (force) => friends().refresh(force),
     openFriends: () => { state.duel = null; friends().open(); },
@@ -2293,6 +2348,16 @@ function buy(kind, item) {
   saveShop({ ...shop, owned: [...shop.owned, `${kind}:${item.id}`], [kind]: item.id });
 }
 
+// What the special characters can do. The lion's and the skeleton's powers work while that
+// character is the one in use; Santa's presents come to whoever owns him.
+const PERKS = {
+  lion: "쓰는 동안: 대결에서 이기면 +10포인트 더",
+  skull: "쓰는 동안: 연속 도전에서 한 번 틀려도 이어 가요",
+  santa: "갖고 있으면: 12월 1~24일 매일 +200, 25일엔 +1000",
+};
+const using = (id) => myShop().character === id;
+const LION_BONUS = 10;
+
 // One shelf of the shop: theme colours or backgrounds.
 function shelf(kind, heading, items) {
   const shop = myShop();
@@ -2306,14 +2371,15 @@ function shelf(kind, heading, items) {
       const action = active
         ? h("span", { class: "tagline" }, t("사용 중"))
         : owned
-          ? h("button", { class: "mini", onclick: () => saveShop({ ...shop, [kind]: item.id }) }, t("적용하기"))
+          ? h("button", { class: "mini", onclick: () => { if (kind === "character") sfx.chirp(item.id); saveShop({ ...shop, [kind]: item.id }); } }, t("적용하기"))
           : state.confirmBuy === key
             ? h("button", { class: "mini buy", onclick: () => buy(kind, item) }, t("살까요?"))
             : h("button", {
                 class: "mini price", disabled: points < item.cost, title: points < item.cost ? t("포인트 부족") : null,
                 onclick: () => { state.confirmBuy = key; render(); },
               }, h("i", { "aria-hidden": "true" }, "P"), String(item.cost));
-      return h("div", { class: `swatch${active ? " active" : ""}${item.special ? " special" : ""}` },
+      return h("div", { class: `swatch${active ? " active" : ""}${item.special ? " special" : ""}${kind === "character" ? " sounds" : ""}`,
+        onclick: kind === "character" ? (e) => { if (!e.target.closest("button")) sfx.chirp(item.id); } : null },
         item.special && h("span", { class: "ribbon" }, t("스페셜")),
         kind === "character" && portrait(item.id),
         kind !== "character" && h("div", {
@@ -2322,6 +2388,7 @@ function shelf(kind, heading, items) {
         }),
         h("div", { class: "swatch-name" }, t(item.name), kind === "character" && h("small", null, t(item.vibe))),
         kind === "character" && h("p", { class: "swatch-line" }, CHARACTER_LINES[item.id]?.[["ko", "en", "zh"].indexOf(getLang())] || ""),
+        kind === "character" && PERKS[item.id] && h("p", { class: "perk" }, h("b", null, "✦"), " ", t(PERKS[item.id])),
         action);
     })),
   ];
@@ -2426,6 +2493,12 @@ function settingsView() {
           h("button", { class: "chip", "aria-pressed": String(getLang() === id), onclick: () => { setLang(id); render(); } }, label))),
         h("label", { class: "grade-pick" }, t("학년"), grade))),
     plansOn() && plusSection(),
+    h("section", { class: "block" },
+      h("h3", null, t("소리")),
+      h("div", { class: "setting" },
+        h("div", { class: "setting-text" }, h("b", null, t("효과음")), h("small", null, t("정답, 축하, 캐릭터 소리가 나요. 캐릭터마다 소리가 달라요."))),
+        h("button", { class: "switch", role: "switch", "aria-checked": String(soundOn()), "aria-label": t("효과음"),
+          onclick: () => { setSound(!soundOn()); if (soundOn()) sfx.chirp(myShop().character); render(); } }, h("i", null)))),
     // Duels: a switch for whether classmates may challenge me. Challenging others stays possible.
     h("section", { class: "block" },
       h("h3", null, t("대결")),
@@ -2472,7 +2545,7 @@ function giftPicker() {
     h("h1", null, t("선물이 도착했어요!")),
     h("p", null, t("함께할 캐릭터를 하나 골라요. 선물이라 포인트는 들지 않아요.")),
     h("div", { class: "gift-grid" }, giftChoices().map((item) =>
-      h("button", { class: "gift-card", "aria-pressed": String(picked === item), onclick: () => { state.giftPick = item.id; render(); } },
+      h("button", { class: "gift-card", "aria-pressed": String(picked === item), onclick: () => { state.giftPick = item.id; sfx.chirp(item.id); render(); } },
         portrait(item.id), h("b", null, t(item.name)), h("small", null, t(item.vibe))))),
     h("button", { class: "btn wide", disabled: !picked, onclick: takePresent }, picked ? t("{name} 받기", { name: t(picked.name) }) : t("캐릭터를 골라 주세요")));
 }

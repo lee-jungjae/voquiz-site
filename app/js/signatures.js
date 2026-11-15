@@ -18,4 +18,5 @@ export const SIGNATURES = {
   pencil: S("✏️ 📝 ✨"), eraser: S("🧽 ✨ 💨"), backpack: S("🎒 📚 ✏️"), clock: S("⏰ ⏳ ✨"), balloon: S("🎈 ☁️ ✨"),
   soccer: S("⚽ 🥅 🏆"), basketball: S("🏀 🏆 ⚡"), headphones: S("🎧 🎵 🎶"), tv: S("📺 🎬 ✨"), sock: S("🧦 🧦 ✨"),
   dice: S("🎲 🍀 ✨"), milk: S("🥛 🐄 ✨"), butterfly: S("🦋 🌸 ✨"), burger: S("🍔 🍟 🥤"), gummy: S("🧸 🍬 💗"),
+  orangutan: S("🦧 🌴 🍌"), banana: S("🍌 🐒 ✨"), santa: S("🎅 🎁 ❄️"),
 };

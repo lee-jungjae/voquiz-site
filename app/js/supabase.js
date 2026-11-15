@@ -58,7 +58,7 @@ async function accessToken() {
 
 const authed = async (path, options = {}) => request(path, { ...options, token: await accessToken() });
 
-const toUser = (u) => ({ id: u.id, email: u.email, grade: u.user_metadata?.grade ?? null, points: u.user_metadata?.points ?? 0, search: u.user_metadata?.search ?? null, nickname: u.user_metadata?.nickname ?? "", shop: u.user_metadata?.shop ?? null, challenge: u.user_metadata?.challenge ?? null, nameChanges: u.user_metadata?.nameChanges ?? 0, noDuels: u.user_metadata?.noDuels ?? false, gift: u.user_metadata?.gift ?? null, weekly: u.user_metadata?.weekly ?? null, motto: u.user_metadata?.motto ?? "", welcome: u.user_metadata?.welcome ?? "", duelFrom: u.user_metadata?.duelFrom ?? (u.user_metadata?.noDuels ? "none" : "all") });
+const toUser = (u) => ({ id: u.id, email: u.email, grade: u.user_metadata?.grade ?? null, points: u.user_metadata?.points ?? 0, search: u.user_metadata?.search ?? null, nickname: u.user_metadata?.nickname ?? "", shop: u.user_metadata?.shop ?? null, challenge: u.user_metadata?.challenge ?? null, nameChanges: u.user_metadata?.nameChanges ?? 0, noDuels: u.user_metadata?.noDuels ?? false, gift: u.user_metadata?.gift ?? null, weekly: u.user_metadata?.weekly ?? null, motto: u.user_metadata?.motto ?? "", welcome: u.user_metadata?.welcome ?? "", santa: u.user_metadata?.santa ?? null, duelFrom: u.user_metadata?.duelFrom ?? (u.user_metadata?.noDuels ? "none" : "all") });
 
 export function getUser() {
   return session ? toUser(session.user) : null;
@@ -197,12 +197,15 @@ export async function listWords() {
   const query = (columns) =>
     authed(`/rest/v1/user_words?select=${columns},entry:word_entries(content)&order=last_searched_at.desc&limit=2000`);
   let rows;
-  try {
-    rows = await query(`${COLUMNS},discovered,folder`);
-  } catch (err) {
-    if (err.status !== 400) throw err;
-    // database not migrated to 0014 (folder) or 0002 (discovered) yet
-    rows = await query(`${COLUMNS},discovered`).catch((again) => { if (again.status !== 400) throw again; return query(COLUMNS); });
+  // Newer columns first; a database that has not been migrated that far answers 400.
+  const tries = [`${COLUMNS},discovered,folder,typed_ok,mastered_at`, `${COLUMNS},discovered,folder`, `${COLUMNS},discovered`, COLUMNS];
+  for (const [i, columns] of tries.entries()) {
+    try {
+      rows = await query(columns);
+      break;
+    } catch (err) {
+      if (err.status !== 400 || i === tries.length - 1) throw err;
+    }
   }
   return rows.map(({ entry, ...row }) => ({ ...row, content: entry.content }));
 }
@@ -211,7 +214,14 @@ const rowFilter = (termNorm) =>
   `/rest/v1/user_words?user_id=eq.${session.user.id}&term_norm=eq.${encodeURIComponent(termNorm)}`;
 
 export async function updateWord(termNorm, patch) {
-  await authed(rowFilter(termNorm), { method: "PATCH", body: patch });
+  try {
+    await authed(rowFilter(termNorm), { method: "PATCH", body: patch });
+  } catch (err) {
+    // Before 0015_learned_words.sql the two columns do not exist: save the rest.
+    if (err.status !== 400 || !("typed_ok" in patch || "mastered_at" in patch)) throw err;
+    const { typed_ok, mastered_at, ...rest } = patch;
+    if (Object.keys(rest).length) await authed(rowFilter(termNorm), { method: "PATCH", body: rest });
+  }
 }
 
 export async function deleteWord(termNorm) {
