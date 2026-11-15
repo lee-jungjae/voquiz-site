@@ -115,8 +115,8 @@ export function initDuel(c) {
       if (!charges().nextAt || waitLeft() === 0) { clearInterval(chargeTicker); return c.render(); }
       for (const el of clocks) el.querySelector(".time").textContent = waitLabel(waitLeft());
     }, 1000);
-    // a stopwatch, the time left, and what arrives when it runs out
-    return h("small", { class: "charge-clock", role: "timer", "aria-label": t("다음 충전까지") }, stopwatch(14), h("span", { class: "time" }, waitLabel(waitLeft())), h("em", null, "+1"));
+    // what arrives, and the time until it does
+    return h("small", { class: "charge-clock", role: "timer", "aria-label": t("다음 충전까지") }, h("em", null, "+1"), t("충전까지 남은 시간"), " : ", h("span", { class: "time" }, waitLabel(waitLeft())));
   }
   const stopwatch = (size = 20) => {
     const el = document.createElement("span");

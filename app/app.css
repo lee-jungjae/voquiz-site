@@ -1539,3 +1539,6 @@ main.still .sense-more { animation: none; }
 .duel-left .charge-clock em { font-style: normal; font-weight: 800; font-size: 11px; padding: 0 6px; border-radius: 999px; background: var(--accent); color: #fff; }
 
 .duel-left .charge-clock span { display: inline-flex; flex: none; gap: 0; color: inherit; }
+
+.duel-left .charge-clock { color: var(--text); font-weight: 500; font-size: 13px; flex-wrap: wrap; }
+.duel-left .charge-clock .time { font-weight: 800; font-size: 15px; color: var(--accent); font-variant-numeric: tabular-nums; }
