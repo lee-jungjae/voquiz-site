@@ -105,7 +105,7 @@ export function initDuel(c) {
   // and the screen is drawn again when the charge arrives.
   let chargeTicker = 0;
   const waitLeft = () => Math.max(0, Math.ceil((charges().nextAt - Date.now()) / 1000));
-  const waitLabel = (s) => t("{time} 뒤 1개 충전", { time: `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}` });
+  const waitLabel = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
   function waitClock() {
     if (!charges().nextAt) return null;
     clearInterval(chargeTicker);
@@ -113,9 +113,10 @@ export function initDuel(c) {
       const clocks = document.querySelectorAll(".charge-clock");
       if (!clocks.length) return clearInterval(chargeTicker);
       if (!charges().nextAt || waitLeft() === 0) { clearInterval(chargeTicker); return c.render(); }
-      for (const el of clocks) el.textContent = waitLabel(waitLeft());
+      for (const el of clocks) el.querySelector(".time").textContent = waitLabel(waitLeft());
     }, 1000);
-    return h("small", { class: "charge-clock", role: "timer" }, waitLabel(waitLeft()));
+    // a stopwatch, the time left, and what arrives when it runs out
+    return h("small", { class: "charge-clock", role: "timer", "aria-label": t("다음 충전까지") }, stopwatch(14), h("span", { class: "time" }, waitLabel(waitLeft())), h("em", null, "+1"));
   }
   const stopwatch = (size = 20) => {
     const el = document.createElement("span");
