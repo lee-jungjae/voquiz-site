@@ -548,12 +548,16 @@ function submitAnswer(typed, picked) {
   quiz.results.push({ word, correct });
   state.focus = "next";
   if (correct) sfx.right(myShop().character); else sfx.wrong();
-  award(earned, perfect ? t("전부 정답!") : lucky ? t("럭키 보너스!") : null, perfect || lucky);
+  // A word that has just been learned gets the celebration to itself (the points still arrive).
+  const patch = applyAnswer(word, correct, !picked);
+  const learned = Boolean(patch.mastered_at);
+  award(earned, perfect ? t("전부 정답!") : lucky ? t("럭키 보너스!") : null, (perfect || lucky) && !learned);
+  if (learned) celebrate(0, word.headword, t("다 익힘"));
   // A right answer moves on by itself; a wrong one waits, so there is time to read the correction.
   // (Set before the redraw below, so the button shows its countdown.)
   if (correct) startAutoNext();
   else state.quiz.auto = false;
-  patchWord(word, applyAnswer(word, correct, !picked));
+  patchWord(word, patch);
 }
 
 // After a right answer the quiz moves on by itself. Tapping the result card stops the countdown;
