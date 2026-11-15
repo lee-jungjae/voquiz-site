@@ -620,7 +620,7 @@ const T = {
   "다시 퀴즈": ["Quiz again", "再测"],
   "보낼 수 있는 도전": ["Challenges you can send", "可发出的挑战"],
   "1시간마다 1개씩 충전돼요": ["One comes back every hour", "每小时恢复1次"],
-  "{n}분 뒤 1개 충전": ["One more in {n} min", "{n}分钟后恢复1次"],
+  "{time} 뒤 1개 충전": ["One more in {time}", "{time}后恢复1次"],
   "도전 신청을 다 썼어요. 1시간마다 1개씩 충전돼요.": ["No challenges left. One comes back every hour.", "挑战次数用完了。每小时恢复1次。"],
   "충전을 기다리는 중": ["Waiting for a recharge", "等待恢复中"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],

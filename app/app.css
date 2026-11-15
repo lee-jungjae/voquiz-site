@@ -1532,3 +1532,5 @@ main.still .sense-more { animation: none; }
 .duel-left span:first-child small { font-size: 11.5px; color: var(--muted); }
 .duel-left .pips i { width: 10px; height: 16px; border-radius: 4px; }
 .item .mini.retest { width: auto; flex: none; padding: 5px 10px; font-size: 12px; white-space: nowrap; }
+
+.duel-left .charge-clock { font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 600; }

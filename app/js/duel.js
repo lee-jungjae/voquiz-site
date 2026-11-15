@@ -101,15 +101,22 @@ export function initDuel(c) {
   const charges = () => duelCharges((state.duels || []).filter((d) => d.role === "challenger").map((d) => new Date(d.created_at).getTime())
     .filter((at) => Date.now() - at < 24 * 60 * 60 * 1000));
   const sendsLeft = () => charges().left;
-  // The screen is drawn again when the next charge arrives.
-  let chargeTimer = 0;
-  const waitText = () => {
-    const { nextAt } = charges();
-    if (!nextAt) return null;
-    clearTimeout(chargeTimer);
-    chargeTimer = setTimeout(() => { if (state.tab === "quiz" && state.quizMode === "duel" && (!state.duel || state.duel.mode === "pick")) c.render(); }, Math.max(1000, nextAt - Date.now() + 500));
-    return t("{n}분 뒤 1개 충전", { n: Math.max(1, Math.ceil((nextAt - Date.now()) / 60000)) });
-  };
+  // Until the next charge: a clock that counts down every second. It changes only its own text,
+  // and the screen is drawn again when the charge arrives.
+  let chargeTicker = 0;
+  const waitLeft = () => Math.max(0, Math.ceil((charges().nextAt - Date.now()) / 1000));
+  const waitLabel = (s) => t("{time} 뒤 1개 충전", { time: `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}` });
+  function waitClock() {
+    if (!charges().nextAt) return null;
+    clearInterval(chargeTicker);
+    chargeTicker = setInterval(() => {
+      const clocks = document.querySelectorAll(".charge-clock");
+      if (!clocks.length) return clearInterval(chargeTicker);
+      if (!charges().nextAt || waitLeft() === 0) { clearInterval(chargeTicker); return c.render(); }
+      for (const el of clocks) el.textContent = waitLabel(waitLeft());
+    }, 1000);
+    return h("small", { class: "charge-clock", role: "timer" }, waitLabel(waitLeft()));
+  }
   const stopwatch = (size = 20) => {
     const el = document.createElement("span");
     el.className = "stopwatch";
@@ -117,7 +124,7 @@ export function initDuel(c) {
     return el;
   };
   const sendsLine = () => h("p", { class: `duel-left${sendsLeft() ? "" : " none"}` },
-    h("span", null, t("보낼 수 있는 도전"), h("small", null, waitText() || t("1시간마다 1개씩 충전돼요"))),
+    h("span", null, t("보낼 수 있는 도전"), waitClock() || h("small", null, t("1시간마다 1개씩 충전돼요"))),
     h("span", { class: "pips", "aria-hidden": "true" }, Array.from({ length: DUEL_CHARGES }, (_, i) => h("i", { class: i < sendsLeft() ? "on" : "" }))),
     h("b", null, `${sendsLeft()} / ${DUEL_CHARGES}`));
   const lengthLabel = (s) => (s === 60 ? t("1분") : s === 180 ? t("3분") : t("{n}초", { n: s }));
