@@ -2728,7 +2728,22 @@ function updateGate() {
     h("p", { class: "small muted" }, t("지금 버전 {v}", { v: APP_VERSION })));
 }
 
+// The first time the home screen shows in a new week, the goal for the week is asked for once.
+// It waits for anything else on screen (a quiz, another pop-up, a celebration) to be over.
+let goalAsk = 0;
+function askWeekGoal() {
+  if (!state.user?.grade || !state.member || state.update === "force" || presentWaiting() || weekLocked()) return;
+  if (state.tab !== "search" || state.entry || state.busy || state.quiz || state.challenge || state.duel) return;
+  if (document.getElementById("sheet") || document.querySelector(".celebrate")) return;
+  const key = `wb_goal_asked_${state.user.id}`;
+  if (localStorage.getItem(key) === weekKey()) return;
+  localStorage.setItem(key, weekKey());
+  weeklyGoalSheet();
+}
+
 function render() {
+  clearTimeout(goalAsk);
+  goalAsk = setTimeout(askWeekGoal, 700);
   applyShop(state.user?.shop);
   const keepFocus = state.focus || document.activeElement?.id;
   state.focus = null;
