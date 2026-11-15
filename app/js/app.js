@@ -2403,14 +2403,31 @@ function shelf(kind, heading, items) {
 // Every character on one shelf, cheapest first, so the whole collection is in view.
 const ALL_CHARACTERS = [...CHARACTERS].sort((a, b) => a.cost - b.cost);
 
+// What kind of thing a character is, for the filter of the shop. The first characters were
+// grouped by grade, so their kind is listed here; the later ones carry it as their group.
+const FIRST_KINDS = {
+  rabbit: "동물", dino: "동물", octopus: "동물", cat: "동물", penguin: "동물",
+  mushroom: "식물·과일", cactus: "식물·과일",
+  pudding: "디저트", donut: "디저트", icecream: "디저트", macaron: "디저트", coffee: "디저트",
+  rocket: "물건", robot: "물건", bulb: "물건", book: "물건",
+};
+const SHOP_KINDS = ["동물", "식물·과일", "디저트", "물건", "기타"];
+const kindOf = (c) => FIRST_KINDS[c.id] || (SHOP_KINDS.includes(c.group) ? c.group : "기타");
+
 function shopSection() {
+  const kind = state.shopKind || "all";
+  const shown = ALL_CHARACTERS.filter((c) => kind === "all" || (kind === "special" ? c.special : kindOf(c) === kind));
+  const kinds = [["all", t("전체")], ...SHOP_KINDS.map((k) => [k, t(k)]), ["special", t("스페셜")]];
   const tabs = [["character", t("캐릭터"), CHARACTERS.length], ["theme", t("색상"), THEMES.length], ["bg", t("배경"), BACKGROUNDS.length]];
   const tab = state.shopTab || "character";
   return h("section", { class: "shop" },
     h("div", { class: "segment three", role: "tablist" }, tabs.map(([id, label, count]) =>
       h("button", { role: "tab", "aria-selected": String(tab === id), onclick: () => { Object.assign(state, { shopTab: id, confirmBuy: null }); render(); } },
         label, h("small", null, String(count))))),
-    tab === "character" && shelf("character", null, ALL_CHARACTERS),
+    tab === "character" && h("div", { class: "chips one-line shop-kinds", role: "group", "aria-label": t("캐릭터 종류") }, kinds.map(([id, label]) =>
+      h("button", { class: "chip", "aria-pressed": String(kind === id), onclick: () => { Object.assign(state, { shopKind: id, confirmBuy: null }); render(); } },
+        label, h("small", null, String(ALL_CHARACTERS.filter((c) => id === "all" || (id === "special" ? c.special : kindOf(c) === id)).length))))),
+    tab === "character" && shelf("character", null, shown),
     tab === "theme" && shelf("theme", null, THEMES),
     tab === "bg" && shelf("bg", null, BACKGROUNDS));
 }

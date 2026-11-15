@@ -1544,3 +1544,14 @@ main.still .sense-more { animation: none; }
 .duel-left .charge-clock .time { font-weight: 800; font-size: 15px; color: var(--accent); font-variant-numeric: tabular-nums; }
 
 .duel-left .charge-clock em { background: none; padding: 0; color: var(--accent); font-size: 13px; }
+
+/* ----- shop: kinds of characters ----- */
+.shop-kinds { margin: 12px 0 4px; overflow-x: auto; scrollbar-width: none; }
+.shop-kinds::-webkit-scrollbar { display: none; }
+.shop-kinds .chip { flex: none; display: inline-flex; align-items: center; gap: 5px; }
+.shop-kinds .chip small { font-size: 11px; opacity: .65; }
+
+/* tabs: room between the names, so long (English) names do not run together */
+.segment button { padding-left: 6px; padding-right: 6px; white-space: nowrap; }
+html:lang(en) .segment button { font-size: 14px; }
+html:lang(en) .segment.four button { font-size: 12.5px; }

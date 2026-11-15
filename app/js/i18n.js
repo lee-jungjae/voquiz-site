@@ -624,6 +624,8 @@ const T = {
   "충전까지 남은 시간": ["charge in", "恢复剩余时间"],
   "도전 신청을 다 썼어요. 1시간마다 1개씩 충전돼요.": ["No challenges left. One comes back every hour.", "挑战次数用完了。每小时恢复1次。"],
   "충전을 기다리는 중": ["Waiting for a recharge", "等待恢复中"],
+  "기타": ["Others", "其他"],
+  "캐릭터 종류": ["Kinds of characters", "角色种类"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],
   "테마 상점 열기": ["Open the theme shop", "打开主题商店"],
 
@@ -737,8 +739,8 @@ const T = {
   "아직 순위가 없어요. 첫 순위에 올라 보세요!": ["No rankings yet. Be the first on the board!", "还没有排名，快来当第一名吧！"],
   "이름을 정하지 않으면 임시 이름으로 보여요. 설정에서 바꿀 수 있어요.": ["Without a name you appear under a temporary one. You can change it in Settings.", "没有设置名字时会显示临时名字，可以在设置里修改。"],
 
-  "연속 도전": ["Streak challenge", "连续挑战"],
-  "단어장 퀴즈": ["My words quiz", "单词本测验"],
+  "연속 도전": ["Streak", "连续挑战"],
+  "단어장 퀴즈": ["Word quiz", "单词本测验"],
   "G{g} 권장 단어를 틀릴 때까지 이어서 맞혀요. 한 학년을 다 맞히면 다음 학년으로 올라가요.": [
     "Keep answering G{g} recommended words until you miss one. Clear a whole grade and you move up to the next.",
     "从 G{g} 推荐单词开始连续作答，直到答错为止。答完一个年级就升到下一个年级。",
