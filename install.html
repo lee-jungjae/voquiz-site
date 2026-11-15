@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>VOQUIZ 설치하기</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128' aria-hidden='true'> <rect width='128' height='128' rx='28' fill='%23655f9f'/> <path d='M64 30 v-10 M64 22 q-11 -9 -16 0 q9 6 16 0 M64 22 q11 -9 16 0 q-9 6 -16 0' fill='%23bbd86b' stroke='%2323552b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/> <path d='M50 30 h28 a30 30 0 0 1 30 30 v10 a30 30 0 0 1 -30 30 h-22 l-17 15 l3 -17 a30 30 0 0 1 -22 -28 v-10 a30 30 0 0 1 30 -30 z' fill='%23d6d2f0'/> <ellipse cx='39' cy='79' rx='8' ry='5' fill='%23ff8fab' opacity='.75'/><ellipse cx='89' cy='79' rx='8' ry='5' fill='%23ff8fab' opacity='.75'/> <circle cx='48' cy='66' r='7' fill='%232e2a47'/><circle cx='80' cy='66' r='7' fill='%232e2a47'/> <circle cx='50.5' cy='63.5' r='2.4' fill='%23fff'/><circle cx='82.5' cy='63.5' r='2.4' fill='%23fff'/> <path d='M57 77 q7 7 14 0' fill='none' stroke='%232e2a47' stroke-width='3.4' stroke-linecap='round'/> </svg>">
+<style>
+  :root { --accent: #655f9f; --ink: #2b2840; --muted: #6f6b85; --line: #e7e5ef; --surface: #f6f5fb; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.6 -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; color: var(--ink); background: #fff; word-break: keep-all; }
+  main { max-width: 640px; margin: 0 auto; padding: 40px 20px 64px; }
+  .lang { text-align: right; font-size: 14px; }
+  .lang button { font: inherit; border: 0; background: none; color: var(--muted); cursor: pointer; padding: 2px 6px; }
+  .lang button[aria-pressed="true"] { color: var(--accent); font-weight: 700; }
+  h1 { font-size: 30px; letter-spacing: -.02em; margin: 14px 0 8px; }
+  h1 span { color: var(--accent); }
+  p.lead { color: var(--muted); margin: 0 0 24px; }
+  a.get { display: block; text-align: center; text-decoration: none; background: var(--accent); color: #fff; font-weight: 700; font-size: 17px; border-radius: 16px; padding: 16px; }
+  a.get small { display: block; font-weight: 500; font-size: 13px; opacity: .85; }
+  h2 { font-size: 18px; margin: 34px 0 10px; }
+  ol { margin: 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: 10px; }
+  ol li { counter-increment: step; display: flex; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--surface); }
+  ol li::before { content: counter(step); flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; font-size: 13px; display: grid; place-items: center; margin-top: 1px; }
+  code { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; font-size: 14px; }
+  .note { margin-top: 22px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; font-size: 14.5px; color: var(--muted); }
+  .note b { color: var(--ink); }
+  .note ul { margin: 6px 0 0; padding-left: 18px; }
+  [data-l] { display: none; }
+  html[lang="ko"] [data-l="ko"], html[lang="en"] [data-l="en"] { display: revert; }
+  html[lang="ko"] ol[data-l="ko"], html[lang="en"] ol[data-l="en"] { display: grid; }
+  html[lang="ko"] a[data-l="ko"], html[lang="en"] a[data-l="en"] { display: block; }
+</style>
+</head>
+<body>
+<main>
+  <div class="lang"><button id="ko" aria-pressed="true">한국어</button>·<button id="en" aria-pressed="false">English</button></div>
+
+  <h1><span>VOQUIZ</span> <span data-l="ko" style="color:inherit">설치하기</span><span data-l="en" style="color:inherit">Install</span></h1>
+  <p class="lead" data-l="ko">크롬 웹 스토어 심사를 기다리는 동안 쓸 수 있는 설치 파일이에요. 크롬(컴퓨터)에서만 돼요.</p>
+  <p class="lead" data-l="en">An install file to use while the Chrome Web Store review is pending. It works in Chrome on a computer.</p>
+
+  <a class="get" href="download/voquiz.zip" download data-l="ko">설치 파일 받기<small>voquiz.zip · 버전 0.1.3</small></a>
+  <a class="get" href="download/voquiz.zip" download data-l="en">Download the install file<small>voquiz.zip · version 0.1.3</small></a>
+
+  <h2 data-l="ko">설치 방법</h2>
+  <ol data-l="ko">
+    <li><div>받은 <b>voquiz.zip</b>의 압축을 풀어요. 나온 <b>voquiz</b> 폴더를 지워지지 않을 곳(예: 문서 폴더)에 두세요. 설치한 뒤에 폴더를 옮기거나 지우면 VOQUIZ가 사라져요.</div></li>
+    <li><div>크롬 주소창에 <code>chrome://extensions</code>를 입력해 열어요.</div></li>
+    <li><div>오른쪽 위의 <b>개발자 모드</b>를 켜요.</div></li>
+    <li><div>왼쪽 위의 <b>압축해제된 확장 프로그램을 로드합니다</b>를 누르고 <b>voquiz</b> 폴더를 골라요.</div></li>
+    <li><div>주소창 오른쪽의 퍼즐 모양 아이콘을 누르고 VOQUIZ 옆의 핀을 눌러 고정해요.</div></li>
+    <li><div>VOQUIZ 아이콘을 누르면 옆에 창이 열려요. Google 계정으로 로그인해요.</div></li>
+    <li><div>처음 쓰는 계정은 <b>초대 코드</b>를 넣어야 해요. 초대해 준 사람에게 코드를 받으세요.</div></li>
+  </ol>
+  <div class="note" data-l="ko">
+    <b>알아 두세요</b>
+    <ul>
+      <li>새 버전이 나오면 앱에 "새 버전이 나왔어요"가 떠요. 이 페이지에서 파일을 다시 받아 폴더 내용을 바꾼 뒤, <code>chrome://extensions</code>에서 VOQUIZ의 새로 고침(동그란 화살표)을 누르세요.</li>
+      <li>크롬을 켤 때 "개발자 모드 확장 프로그램" 안내가 뜰 수 있어요. 닫으면 돼요.</li>
+      <li>스토어에 올라간 뒤 스토어에서 다시 설치해도, 같은 Google 계정이면 단어장과 포인트가 그대로예요.</li>
+    </ul>
+  </div>
+
+  <h2 data-l="en">How to install</h2>
+  <ol data-l="en">
+    <li><div>Unzip <b>voquiz.zip</b>. Keep the <b>voquiz</b> folder somewhere it won't be deleted (your Documents folder, for example). If you move or delete it later, VOQUIZ disappears.</div></li>
+    <li><div>Type <code>chrome://extensions</code> in Chrome's address bar and open it.</div></li>
+    <li><div>Turn on <b>Developer mode</b> at the top right.</div></li>
+    <li><div>Click <b>Load unpacked</b> at the top left and choose the <b>voquiz</b> folder.</div></li>
+    <li><div>Click the puzzle icon to the right of the address bar, then the pin next to VOQUIZ.</div></li>
+    <li><div>Click the VOQUIZ icon to open the side panel, and sign in with a Google account.</div></li>
+    <li><div>A new account needs an <b>invite code</b>. Ask the person who invited you for one.</div></li>
+  </ol>
+  <div class="note" data-l="en">
+    <b>Good to know</b>
+    <ul>
+      <li>When a new version is out, the app says "A new version is ready". Download the file from this page again, replace what is in the folder, then click the reload arrow on VOQUIZ in <code>chrome://extensions</code>.</li>
+      <li>Chrome may show a "developer mode extensions" notice when it starts. You can close it.</li>
+      <li>Once VOQUIZ is in the store you can install it from there: with the same Google account your words and points stay.</li>
+    </ul>
+  </div>
+</main>
+<script>
+  const set = (lang) => {
+    document.documentElement.lang = lang;
+    document.getElementById("ko").setAttribute("aria-pressed", String(lang === "ko"));
+    document.getElementById("en").setAttribute("aria-pressed", String(lang === "en"));
+  };
+  document.getElementById("ko").onclick = () => set("ko");
+  document.getElementById("en").onclick = () => set("en");
+  if (!(navigator.language || "").startsWith("ko")) set("en");
+</script>
+</body>
+</html>
