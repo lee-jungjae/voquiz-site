@@ -1047,7 +1047,8 @@ function sensesList(c) {
       sense.part_of_speech && h("span", { class: "sense-pos" }, sense.part_of_speech),
       sense.counterpart && h("b", null, sense.counterpart)),
     pair(sense.definition_ko, sense.definition_en, "sense-def"),
-    (sense.example_ko || sense.example_en) && h("div", { class: "sense-ex" }, pair(sense.example_ko, sense.example_en, "sense-line")))));
+    (sense.example_ko || sense.example_en) && h("div", { class: "sense-ex" }, pair(sense.example_ko, sense.example_en, "sense-line")),
+    (sense.tip_ko || sense.tip_en) && h("div", { class: "sense-tip" }, h("span", { class: "sense-tip-label" }, "💡 ", t("이렇게 기억해요")), pair(sense.tip_ko, sense.tip_en, "sense-line")))));
 }
 
 function entryCard(word) {
