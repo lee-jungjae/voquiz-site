@@ -2201,7 +2201,6 @@ function quizResult() {
   const spelling = !quiz.correct && quiz.questions[quiz.index].kind === "type" ? spellingDiff(quiz.typed, c) : null;
   const last = quiz.index + 1 >= quiz.cards.length;
   const mastered = quiz.correct && isLearned(word);
-  const needsTyping = quiz.correct && !mastered && word.streak >= MASTER_STREAK && !word.typed_ok;
   return [
     quizProgress(),
     h("div", { class: `feedback ${quiz.correct ? "good" : "bad"}`, role: "status", onclick: stopAutoNext },
@@ -2213,7 +2212,6 @@ function quizResult() {
       h("div", { class: "fb-title" }, quiz.correct ? pick(CHEERS()) : quiz.timedOut ? t("시간이 다 됐어요!") : pick(COMFORTS())),
       quiz.correct && word.streak > 1 && h("div", { class: "fb-sub" }, t("🔥 {n}번 연속 정답", { n: word.streak })),
       mastered && h("div", { class: "fb-sub" }, t("다 익혔어요! 이제 이 단어는 퀴즈에서 빠져요.")),
-      needsTyping && h("div", { class: "fb-sub" }, t("한 번만 직접 써서 맞히면 다 익힌 단어가 돼요.")),
       !quiz.correct && quiz.typed && (spelling ? spellingView(spelling) : h("div", { class: "fb-sub" }, t("내가 쓴 답: "), h("s", null, quiz.typed))),
       h("div", { class: "fb-answer" }, wordIn(c, quizMain()), h("small", null, "⇄"), wordIn(c, quizMain() === "ko" ? "en" : "ko")),
       !quiz.correct && (c.memory_tip_ko || c.memory_tip_en) && h("div", { class: "fb-tip" }, "💡 ", quizMain() === "ko" ? c.memory_tip_ko || c.memory_tip_en : c.memory_tip_en || c.memory_tip_ko)),

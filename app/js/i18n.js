@@ -604,7 +604,6 @@ const T = {
   "메리 크리스마스! 내년 12월에 또 만나": ["Merry Christmas! See you next December", "圣诞快乐！明年12月再见"],
   "{n}번 연속(쓰기 1번 포함) 맞히면 다 익힌 단어가 되어 퀴즈에서 빠져요.": ["Get a word right {n} times in a row (once by typing) and it is learned: it leaves the quizzes.", "连续答对{n}次（其中1次是拼写）就算学会了，不再出现在测验里。"],
   "다 익혔어요! 이제 이 단어는 퀴즈에서 빠져요.": ["Learned! This word leaves the quizzes now.", "学会啦！这个单词不再出现在测验里。"],
-  "한 번만 직접 써서 맞히면 다 익힌 단어가 돼요.": ["Type it right once more and it's learned.", "再拼写答对一次就算学会了。"],
   "다 익힘": ["Learned", "已学会"],
   "✓ 다 익힘": ["✓ Learned", "✓ 已学会"],
   "{d}에 익힘": ["Learned {d}", "{d}学会"],
