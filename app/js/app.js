@@ -1994,7 +1994,7 @@ function medal(rank) {
 
 function rankView() {
   if (state.leagueInfo) return leagueInfoView();
-  const boards = [["points", t("주간 리그")], ["found", t("첫 발견")], ["streak", t("연속 도전")], ["duel", t("대결")]];
+  const boards = [["points", t("주간 리그")], ["found", getLang() === "en" ? "Discoveries" : t("첫 발견")], ["streak", t("연속 도전")], ["duel", t("대결")]]; // the badge on a word says "Discovered"; the board is the plural
   const kind = state.rankKind || "points";
   const league = kind === "points" && state.rankings ? leagueRows() : null;
   const rows = league || state.rankings?.[kind] || [];

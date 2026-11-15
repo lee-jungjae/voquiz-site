@@ -443,7 +443,7 @@ const T = {
   "이번 주 {c} / {n}개": ["This week: {c} / {n}", "本周 {c} / {n}个"],
   "목표를 채우면 +{p}포인트!": ["Reach the goal for +{p} points!", "达成目标 +{p}积分！"],
   "힘낼게요!": ["I'll keep going!", "我会加油！"],
-  "주간 리그": ["Weekly league", "每周联赛"],
+  "주간 리그": ["League", "每周联赛"],
   "이번 주 리그": ["This week's league", "本周联赛"],
   "오늘 끝나요": ["ends today", "今天结束"],
   "{n}일 남음": ["{n} days left", "还剩{n}天"],
@@ -727,7 +727,7 @@ const T = {
 
   "처음 발견한 단어!": ["First discovery!", "首次发现！"],
   "내가 처음 발견한 단어": ["You were the first to find this word", "你是第一个发现这个单词的人"],
-  "첫 발견": ["First find", "首发"],
+  "첫 발견": ["Discovered", "首发"],
   "✦ 내가 발견": ["✦ My discoveries", "✦ 我发现的"],
 
   "랭킹": ["Ranking", "排行榜"],
