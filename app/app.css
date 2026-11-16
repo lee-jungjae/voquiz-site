@@ -1555,3 +1555,14 @@ main.still .sense-more { animation: none; }
 .segment button { padding-left: 6px; padding-right: 6px; white-space: nowrap; }
 html:lang(en) .segment button { font-size: 14px; }
 html:lang(en) .segment.four button { font-size: 12.5px; }
+
+/* ----- word list: filters across the whole width, grouping below; one-symbol tags ----- */
+.filter-row { margin-bottom: 6px; }
+.filter-row .chip-scroll { margin-right: -20px; }
+.filter-row .chip-scroll .chips.one-line { padding-right: 20px; }
+.filter-row .chip-more.right { right: 14px; }
+.group-by { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.group-by .tag-key { font-size: 11px; color: var(--muted); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.badge.sym { padding: 0; width: 18px; height: 18px; display: inline-grid; place-items: center; border-radius: 50%; font-size: 11px; line-height: 1; margin-left: 6px; vertical-align: 2px; }
+.badge.sym.review { color: #b4530a; background: #fdebd3; }
+.badge.sym.learned { color: var(--accent); background: var(--accent-soft); }

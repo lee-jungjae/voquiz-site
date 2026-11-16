@@ -204,8 +204,7 @@ export function initFriends(c) {
           c.render();
         } },
           h("input", { type: "email", id: "friend-email", autocomplete: "off", value: ui.email, placeholder: t("친구의 이메일"), "aria-label": t("친구의 이메일"), style: "flex:1" }),
-          h("button", { class: "btn" }, t("신청"))),
-        h("p", { class: "small muted hint" }, t("친구가 VOQUIZ에 로그인할 때 쓰는 이메일을 넣으세요. 친구가 수락하면 친구가 돼요."))),
+          h("button", { class: "btn" }, t("신청")))),
 
       h("section", { class: "duel-list" },
         h("h3", null, t("내 친구"), h("small", { class: "plain" }, String(friends.length))),

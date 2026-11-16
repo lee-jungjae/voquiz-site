@@ -557,6 +557,7 @@ function submitAnswer(typed, picked) {
   if (correct) startAutoNext();
   else state.quiz.auto = false;
   patchWord(word, patch);
+  if (learned) checkWeekly();
 }
 
 // After a right answer the quiz moves on by itself. Tapping the result card stops the countdown;
@@ -663,7 +664,8 @@ function weekStart(when = new Date()) {
 }
 const weekKey = (when) => dayOf(weekStart(when));
 const weekGoal = () => (WEEK_GOALS.includes(state.user.weekly?.goal) ? state.user.weekly.goal : WEEK_DEFAULT);
-const weekCount = () => state.words.filter((w) => new Date(w.last_searched_at) >= weekStart()).length;
+// The week's goal counts the words LEARNED since Monday (three right answers in a row, one typed).
+const weekCount = () => state.words.filter((w) => w.mastered_at && new Date(w.mastered_at) >= weekStart()).length;
 // Points earned since Monday: what the weekly league ranks.
 const weekEarned = () => (state.user?.weekly?.week === weekKey() ? state.user.weekly.earned || 0 : 0);
 const weekBonus = (goal) => goal; // one point for every word of the goal
@@ -687,14 +689,14 @@ function weeklyGoalSheet() {
     if (left <= 0) {
       return sheet({
         art: "🎉", title: t("이번 주 목표 달성!"),
-        text: `${t("이번 주에 단어를 {c}개나 찾았어요. 목표 {n}개를 해냈어요, 정말 멋져요! 보너스 +{p}포인트도 받았어요.", { c: count, n: goal, p })} ${next}`,
+        text: `${t("이번 주에 단어를 {c}개나 익혔어요. 목표 {n}개를 해냈어요, 정말 멋져요! 보너스 +{p}포인트도 받았어요.", { c: count, n: goal, p })} ${next}`,
         actions: [{ label: t("야호!"), kind: "main", run: () => true }],
       });
     }
-    const cheer = count === 0 ? t("첫 단어부터 시작해 봐요. {n}개까지 함께 가요!", { n: goal })
-      : left <= 3 ? t("거의 다 왔어요! {l}개만 더 찾으면 목표 달성이에요.", { l: left })
-      : count * 2 >= goal ? t("벌써 절반을 넘었어요! {l}개만 더 찾으면 돼요.", { l: left })
-      : t("잘하고 있어요! 벌써 {c}개 찾았어요. {l}개 더 찾아봐요.", { c: count, l: left });
+    const cheer = count === 0 ? t("퀴즈로 첫 단어부터 익혀 봐요. {n}개까지 함께 가요!", { n: goal })
+      : left <= 3 ? t("거의 다 왔어요! {l}개만 더 익히면 목표 달성이에요.", { l: left })
+      : count * 2 >= goal ? t("벌써 절반을 넘었어요! {l}개만 더 익히면 돼요.", { l: left })
+      : t("잘하고 있어요! 벌써 {c}개 익혔어요. {l}개 더 익혀 봐요.", { c: count, l: left });
     return sheet({
       art: "💪", title: t("이번 주 {c} / {n}개", { c: count, n: goal }),
       text: `${cheer} ${t("목표를 채우면 +{p}포인트!", { p })}`,
@@ -704,7 +706,7 @@ function weeklyGoalSheet() {
   let chosen = weekGoal();
   sheet({
     art: "🎯", title: t("이번 주 목표"),
-    text: t("일주일(월~일) 동안 찾을 단어 수를 정해요. 목표를 채우면 목표만큼 보너스 포인트를 받아요. 한 번 정하면 이번 주에는 바꿀 수 없어요."),
+    text: t("일주일(월~일) 동안 다 익힐 단어 수를 정해요. 퀴즈에서 3번 연속(쓰기 1번 포함) 맞히면 익힌 단어예요. 목표를 채우면 목표만큼 보너스 포인트를 받아요. 한 번 정하면 이번 주에는 바꿀 수 없어요."),
     actions: [
       { label: t("이 목표로 정하기"), kind: "main", run: () => {
         saveWeekly({ goal: chosen, set: weekKey() });
@@ -738,7 +740,7 @@ function dailyGoal() {
       h("span", { class: "goal-text" }, h("small", null, t("오늘 포인트"), isPlus() && h("em", { class: "plus-badge" }, "PLUS")), h("b", null, `${got} / ${SEARCH_DAILY_MAX}`))),
     h("button", { class: `goal${count >= goal ? " done" : ""}`, title: weekLocked() ? t("이번 주 목표") : t("이번 주 목표 정하기"), onclick: weeklyGoalSheet },
       ring(count / goal),
-      h("span", { class: "goal-text" }, h("small", null, t("이번 주 단어")), h("b", null, `${count} / ${goal}`)),
+      h("span", { class: "goal-text" }, h("small", null, t("이번 주 익힌 단어")), h("b", null, `${count} / ${goal}`)),
       !weekLocked() && h("span", { class: "goal-set" }, t("정하기"))));
 }
 
@@ -1266,7 +1268,7 @@ function quotaLine() {
   if (state.quotaSaid === quotaKey()) return null;
   // Sometimes it is about the week instead of the day.
   const toGo = weekGoal() - weekCount();
-  const week = toGo > 0 ? t("이번 주 목표까지 {n}개 남았어!", { n: toGo }) : null;
+  const week = toGo > 0 ? t("이번 주 목표까지 {n}개 더 익히면 돼!", { n: toGo }) : null;
   if (!plansOn() || isPlus() || limitReached()) return week;
   if (week && Math.random() < 0.4) return week;
   const left = searchesLeft();
@@ -1402,12 +1404,15 @@ function folderSheet(word) {
   document.body.append(el);
 }
 
+// The marks beside a word are one symbol each, the same in every language; the name is the tooltip.
+const tag = (kind, symbol, name) => h("span", { class: `badge sym ${kind}`, title: name, "aria-label": name, role: "img" }, symbol);
+
 function wordRow(w) {
   const grouping = state.filter === "favorites" && canGroup() && w.favorite;
   return h("div", { class: "item" },
     h("div", { class: "avatar", "aria-hidden": "true" }, [...w.headword][0].toUpperCase()),
     h("button", { class: "open", onclick: () => { Object.assign(state, { entry: w, tab: "search", query: "", notice: null }); render(); } },
-      h("div", { class: "word" }, w.headword, w.discovered && h("span", { class: "badge found" }, t("첫 발견")), w.needs_review && h("span", { class: "badge" }, t("복습")), isLearned(w) && h("span", { class: "badge learned" }, t("다 익힘")), grouping && w.folder && h("span", { class: "badge folder" }, w.folder)),
+      h("div", { class: "word" }, w.headword, w.discovered && tag("found", "✦", t("첫 발견")), w.needs_review && tag("review", "↻", t("복습")), isLearned(w) && tag("learned", "✓", t("다 익힘")), grouping && w.folder && h("span", { class: "badge folder" }, w.folder)),
       h("div", { class: "sub" }, w.content.counterpart, state.filter === "learned" && isLearned(w) && h("small", { class: "learned-on" }, t("{d}에 익힘", { d: new Date(w.mastered_at).toLocaleDateString(locale(), { month: "short", day: "numeric" }) })))),
     grouping && state.confirmDelete !== w.term_norm && h("button", { class: `folder-btn${w.folder ? " on" : ""}`, "aria-label": t("그룹 정하기"), title: t("그룹 정하기"), onclick: () => folderSheet(w) }, icon("folder")),
     // A learned word that has rested long enough can go back into the quizzes, one at a time.
@@ -1483,9 +1488,8 @@ function wordsView() {
     return h("section", { class: `day week${open ? " open" : ""}` },
       h("button", { class: "week-head", "aria-expanded": String(open), onclick: () => { state.openWeeks[open ? "delete" : "add"](key); render(); } },
         h("span", { class: "week-name" }, weekLabel(key)),
-        h("small", null, current && whole ? t("{n}개 / 목표 {g}", { n: words.length, g: weekGoal() }) : t("{n}개", { n: words.length })),
+        h("small", null, t("{n}개", { n: words.length })),
         h("span", { class: "chev", "aria-hidden": "true" }, open ? "▾" : "▸")),
-      current && whole && h("div", { class: "week-bar" }, h("i", { style: `width:${Math.min(100, (words.length / weekGoal()) * 100)}%` })),
       open && h("div", { class: "list" }, words.map(wordRow)));
   };
 
@@ -1493,9 +1497,10 @@ function wordsView() {
     h("div", { class: "segment three", role: "tablist" }, langs.map(([id, label]) =>
       h("button", { role: "tab", "aria-selected": String(state.wordLang === id), onclick: () => { state.wordLang = id; render(); } },
         label, h("small", null, String(inLang(id).length))))),
-    h("div", { class: "filter-row" },
-      filterChips(filters),
-      // the same words, gathered by day or by week
+    h("div", { class: "filter-row" }, filterChips(filters)),
+    // the same words, gathered by day or by week: on a line of its own, so the filters have the whole width
+    h("div", { class: "group-by" },
+      h("span", { class: "tag-key" }, "✦ ", t("첫 발견"), " · ↻ ", t("복습"), " · ✓ ", t("다 익힘")),
       h("div", { class: "scope small", role: "group", "aria-label": t("묶어 보기") }, [["day", t("날짜")], ["week", t("주")]].map(([id, label]) =>
         h("button", { "aria-pressed": String((state.groupBy || "day") === id), onclick: () => { state.groupBy = id; render(); } }, label)))),
     groupRow,
@@ -2785,6 +2790,7 @@ function render() {
           // A duel being played ends with the score so far; other duel screens just close.
           if (state.duel) { if (state.duel.mode === "play" || state.duel.mode === "saving") duel().stop(); else state.duel = null; }
           if (id === "rank") return openRankings();
+          if (id === "search" && state.tab === "search") return goHome(); // pressed again: from a result back to the start
           Object.assign(state, { tab: id, notice: null, nameSaved: false, confirmBuy: null });
           render();
         },
