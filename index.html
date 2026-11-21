@@ -506,6 +506,21 @@ section.block > h2, .two h2 { line-height: 1.3; }
   .three li { padding: 14px 12px 12px 52px; } .three li::before { top: 14px; }
   section.block h2 { font-size: 25px; } .float { display: none; }
 }
+/* ----- under the story film: the headline it leads to, then who made it, then how ----- */
+.film { position: relative; }
+.film::after { content: ""; position: absolute; left: 50%; bottom: -8px; width: 22px; height: 22px; border-radius: 5px; background: inherit; transform: translateX(-50%) rotate(45deg); }
+.hero.flow { display: block; padding: 34px 0 6px; }
+.headline { text-align: center; }
+.headline .tags { justify-content: center; margin: 0 0 14px; }
+.headline .cta { justify-content: center; margin-top: 24px; }
+.maker { display: grid; grid-template-columns: 1.2fr .8fr; gap: 34px; align-items: center; margin-top: 36px; }
+.maker .letter { margin: 0; }
+.hero.flow .bridge { margin: 36px 0 20px; text-align: center; }
+@media (max-width: 700px) {
+  .hero.flow { padding: 28px 0 0; }
+  .maker { grid-template-columns: minmax(0, 1fr); gap: 0; margin-top: 30px; }
+  .hero.flow .bridge { margin: 24px 0 10px; }
+}
 /* film:start */
 /* ---------- the story film at the top: characters act out why VOQUIZ exists ---------- */
 /* Words on the left, a small stage on the right. The stage is drawn at 480 x 300 and scaled to fit
@@ -690,24 +705,19 @@ section.block > h2, .two h2 { line-height: 1.3; }
   <div class="film-controls"><div class="film-dots" id="film-dots"></div><button type="button" class="film-pause" id="film-pause"></button></div>
 </section>
 <!-- film:end -->
-<section class="hero">
-  <div>
+<section class="hero flow">
+  <div class="headline">
     <div class="tags"><span class="fill">G3–G12</span><span>한국어 · English</span><span>크롬에서 바로</span></div>
     <h1>모르는 단어?<br><em>두 언어로</em> 쉽게 알려 줄게!</h1>
+    <div class="cta"><a class="btn" href="#try">직접 해 보기</a><a class="btn ghost" href="#start">설치하기</a></div>
+  </div>
+  <div class="maker">
     <div class="letter" role="note" aria-label="만든 사람의 인사">
       <span class="tape" aria-hidden="true"></span>
       <p>안녕, 난 국제학교에 다니는 G4 학생이야. 한국어와 영어 단어를 <b>쉽게 찾고</b>, <b>쉽게 외우고</b>, <b>재미있게 테스트</b>하려고 아빠와 함께 만들었어.<br>도움이 되었으면 좋겠어 <span class="heart" aria-label="하트">♥</span></p>
       <span class="from">VOQUIZ를 만든 G4 학생과 아빠</span>
     </div>
-    <p class="bridge">그래서 VOQUIZ는 이렇게 만들었어</p>
-    <ol class="three">
-      <li><b>쉽게 찾고</b><span>한국어로 찾아도, 영어로 찾아도 OK</span></li>
-      <li><b>쉽게 외우고</b><span>내 학년에 맞는 쉬운 설명, 어원과 한자 풀이</span></li>
-      <li><b>재미있게 테스트</b><span>찾은 단어로 퀴즈 풀고, 친구랑 대결도</span></li>
-    </ol>
-    <div class="cta"><a class="btn" href="#try">직접 해 보기</a><a class="btn ghost" href="#start">설치하기</a></div>
-  </div>
-  <div class="stage"><span class="float a" aria-hidden="true">A</span><span class="float b" aria-hidden="true">가</span><span class="float c" aria-hidden="true">?</span>
+    <div class="stage"><span class="float a" aria-hidden="true">A</span><span class="float b" aria-hidden="true">가</span><span class="float c" aria-hidden="true">?</span>
     <span class="say" aria-live="polite">안녕! 나를 눌러 봐</span><span role="button" tabindex="0" aria-label="VOQUIZ" class="mascot " data-art="bubble"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
@@ -764,6 +774,13 @@ section.block > h2, .two h2 { line-height: 1.3; }
     </g>
   </g>
 </svg></span><p class="hint">캐릭터를 눌러 봐, 소리도 나! · 아래에서 다른 친구로 바꿀 수 있어</p></div>
+  </div>
+  <p class="bridge">그래서 VOQUIZ는 이렇게 만들었어</p>
+  <ol class="three">
+    <li><b>쉽게 찾고</b><span>한국어로 찾아도, 영어로 찾아도 OK</span></li>
+    <li><b>쉽게 외우고</b><span>내 학년에 맞는 쉬운 설명, 어원과 한자 풀이</span></li>
+    <li><b>재미있게 테스트</b><span>찾은 단어로 퀴즈 풀고, 친구랑 대결도</span></li>
+  </ol>
 </section>
 
 <section class="block two" id="try">
@@ -1523,7 +1540,8 @@ section.block > h2, .two h2 { line-height: 1.3; }
   // ----- the character on the stage: tap it, or pick another from the shelf -----
   // A tap is answered the way the app answers it (see mascot.js there): a mood, which is a move, a
   // face, a few things that fly out of the spot that was tapped and sometimes a line; the
-  // character's own sound; a party on every fifth tap in a row; and now and then its own trick.
+  // character's own sound; and a party on every fifth tap in a row. (A character's own trick is for
+  // VOQUIZ Plus in the app, so it is not shown here.)
   const hero = $(".stage .mascot");
   const say = $(".say");
   let who = "bubble"; // the character on the stage
@@ -1545,22 +1563,10 @@ section.block > h2, .two h2 { line-height: 1.3; }
   const TIRED = { move: "sway", eyes: "dizzy", mouth: "wavy", pops: ["~", "~"], time: 1500, say: ko ? ["잠깐 쉬자~", "휴, 숨 좀 돌리자~"] : ["Let's take a break~", "Phew, let me catch my breath~"] };
   const ALONE = [MOODS.joy, MOODS.love, MOODS.proud, MOODS.giggle, MOODS.sing, MOODS.wink, MOODS.cheer, MOODS.curious]; // what it does by itself between taps
   const MOVES = ["jump", "spin", "wiggle", "squish", "stretch", "flip", "party", "shrink", "pop", "sway", "shake", "tilt", "bounce", "hop"];
-  // A character's own trick: two moves in a row and a face, always the same for one character.
-  const TRICKS = [["flip", "jump"], ["spin", "stretch"], ["party", "wiggle"], ["jump", "spin"], ["stretch", "flip"], ["squish", "party"], ["bounce", "flip"], ["wiggle", "jump"], ["tilt", "spin"], ["shake", "stretch"]];
-  const TRICK_EYES = ["star", "heart", "happy", "wink", "laugh"], TRICK_MOUTHS = ["laugh", "cat", "o"];
-  function trickOf(id) {
-    let n = 0;
-    for (const ch of id) n = (n * 31 + ch.charCodeAt(0)) >>> 0;
-    const [first, second] = TRICKS[n % TRICKS.length];
-    const face = { eyes: TRICK_EYES[(n >>> 4) % TRICK_EYES.length], mouth: TRICK_MOUTHS[(n >>> 8) % TRICK_MOUTHS.length], blush: true };
-    return [{ move: first, ...face, time: 700 }, { move: second, ...face, time: 900 }];
-  }
   const any = (list) => list[Math.floor(Math.random() * list.length)];
-  // The app's own sounds, what flies out in a trick, and each character's one-line story: taken from
-  // the try-out copy of the app on this site, so they are always the app's.
-  let app = null;
-  (window.requestIdleCallback || setTimeout)(() => Promise.all([import("./app/js/sound.js"), import("./app/js/signatures.js"), import("./app/js/character-lines.js")])
-    .then(([sound, tricks, lines]) => { app = { chirp: sound.sfx.chirp, pops: tricks.SIGNATURES, lines: lines.CHARACTER_LINES }; }).catch(() => {}));
+  // The character's own sound is the app's: it comes from the try-out copy of the app on this site.
+  let chirp = null;
+  (window.requestIdleCallback || setTimeout)(() => import("./app/js/sound.js").then((sound) => { chirp = sound.sfx.chirp; }).catch(() => {}));
 
   let calm = 0, combo = 0, lastTap = 0, lastMood = "";
   function show({ move, eyes, mouth, blush, time = 1000 }) {
@@ -1590,7 +1596,7 @@ section.block > h2, .two h2 { line-height: 1.3; }
     const now = Date.now();
     combo = now - lastTap < 1200 ? combo + 1 : 1;
     lastTap = now;
-    app?.chirp(who);
+    chirp?.(who);
     if (combo >= 15) { // tapped a lot in a row: it needs a breather, and the count starts over
       combo = 0;
       show(TIRED); burst(TIRED.pops, 4, x, y);
@@ -1599,13 +1605,6 @@ section.block > h2, .two h2 { line-height: 1.3; }
     if (combo % 5 === 0) {
       show(PARTY); burst(PARTY.pops, 16, x, y);
       return speak(`${combo} ♥`);
-    }
-    if (app && (combo % 3 === 0 || Math.random() < 0.25)) { // its own trick
-      const [first, second] = trickOf(who);
-      show(first);
-      setTimeout(() => show(second), 640);
-      burst(app.pops[who] || ["✦", "♥", "★"], 10, x, y);
-      return speak(app.lines[who]?.[ko ? 0 : 1] || "");
     }
     lastMood = any(Object.keys(MOODS).filter((name) => name !== lastMood)); // never the same mood twice running
     const mood = MOODS[lastMood];
@@ -1862,7 +1861,7 @@ section.block > h2, .two h2 { line-height: 1.3; }
         steps: [[250, "s1"], [250, ["a", "star", "laugh", "jump"]], [900, "s2"], [1300, "s3"], [1650, "s4"], [2000, "s5"], [2350, "s6"], [2900, "s7"], [2900, ["a", "heart", "laugh", "party"]], [4000, ["a", "star", "laugh", "jump"]]] },
     ] },
   ];
-  const END = { ms: 3800, cap: L("모르는 단어? 두 언어로 쉽게, VOQUIZ!", "Stuck on a word? Two languages, made easy: VOQUIZ!"),
+  const END = { ms: 3800, cap: L("이제 VOQUIZ랑 같이 해 볼까?", "Ready to try it with VOQUIZ?"),
     html: () => `<div class="f-prop p1 f-logo" style="left:130px;top:22px;width:220px">${wordmark}</div>${actor("bubble", "a", "left:125px;bottom:14px")}
       <i class="f-spark k1" style="left:96px;top:120px">✦</i><i class="f-spark k1 f-late" style="left:366px;top:104px">✦</i><i class="f-spark k1 f-later" style="left:330px;top:210px">✦</i>`,
     steps: [[200, "s1"], [500, ["a", "star", "laugh", "party"]], [2000, ["a", "wink", "cat", "squish"]]] };
