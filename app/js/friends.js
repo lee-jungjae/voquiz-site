@@ -235,6 +235,5 @@ export function initFriends(c) {
     ];
   }
 
-  return { refresh
-, badge, banner, open, view, ask };
+  return { refresh, badge, banner, open, view, ask, inviteText, unusedInvites: unused, loadInvites };
 }

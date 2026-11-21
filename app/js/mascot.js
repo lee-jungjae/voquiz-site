@@ -77,6 +77,9 @@ function draw(character) {
 </svg>`;
 }
 
+// A character's drawing as markup, for scenes that move it themselves (the story film).
+export const art = (id) => draw(characterById(id));
+
 // A character on the shop shelf. It is not tappable, but it is alive: every few seconds it acts
 // out one of its moods, each character at its own moment.
 export function portrait(id) {
@@ -174,7 +177,7 @@ function trickOf(id) {
   let n = 0;
   for (const ch of id) n = (n * 31 + ch.charCodeAt(0)) >>> 0;
   const [first, second] = TRICKS[n % TRICKS.length];
-  const face = { eyes: TRICK_EYES[(n >> 4) % TRICK_EYES.length], mouth: TRICK_MOUTHS[(n >> 8) % TRICK_MOUTHS.length], blush: true };
+  const face = { eyes: TRICK_EYES[(n >>> 4) % TRICK_EYES.length], mouth: TRICK_MOUTHS[(n >>> 8) % TRICK_MOUTHS.length], blush: true };
   return [{ move: first, ...face, time: 700 }, { move: second, ...face, time: 900 }];
 }
 

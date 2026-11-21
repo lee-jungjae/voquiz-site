@@ -1,11 +1,12 @@
 import { api, DEMO } from "./api.js";
-import { STORE_URL, DOWNLOAD_URL } from "./config.js";
-import { t, getLang, setLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js";
+import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js";
 import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js";
 import { cleanEntry } from "./clean.js";
 import { mascot, portrait, reaction, giftArt } from "./mascot.js";
 import { CHARACTERS } from "./characters.js";
 import { logoIcon, wordmark } from "./logo.js";
+import { film } from "./film.js";
 import { CHARACTER_LINES } from "./character-lines.js";
 import { initDuel } from "./duel.js";
 import { initFriends } from "./friends.js";
@@ -354,6 +355,7 @@ async function signIn() {
   render();
   await checkMember();
   if (state.member && state.user?.grade) loadWords();
+  else render(); // a member this computer already knows, with no grade yet: checkMember drew nothing
 }
 
 // Deletes the account and everything that belongs to it, after the student has typed the word.
@@ -941,7 +943,7 @@ function notePrompt(kind, patch) {
 }
 
 // A card that slides up from the bottom, over whatever screen is showing.
-function sheet({ art, title, text, actions }) {
+function sheet({ art, title, text, body, actions }) { // body: anything to show between the text and the buttons
   document.getElementById("sheet")?.remove();
   const close = () => el.remove();
   const el = h("div", { id: "sheet", class: "sheet-wrap", onclick: (e) => { if (e.target === el) close(); } },
@@ -949,14 +951,14 @@ function sheet({ art, title, text, actions }) {
       h("div", { class: "sheet-art", "aria-hidden": "true" }, art),
       h("h2", null, title),
       h("p", null, text),
+      body,
       actions.map(({ label, kind, run }) =>
         h("button", { class: kind === "main" ? "btn wide" : "link", onclick: () => { if (run() !== false) close(); } }, label))));
   document.body.append(el);
   el.querySelector("button")?.focus();
 }
 
-async function copyInvite() {
-  const message = `${t("단어가 쉬워지는 VOQUIZ, 같이 써 보자!")} ${storeUrl}`;
+async function copyInvite(message, withCode) {
   try {
     await navigator.clipboard.writeText(message);
   } catch {
@@ -966,9 +968,9 @@ async function copyInvite() {
   // A one-time thank-you for inviting a friend.
   if (!promptLog().share.rewarded) {
     notePrompt("share", { rewarded: true });
-    award(SHARE_REWARD, t("초대 링크 복사 완료!"), true);
+    award(SHARE_REWARD, withCode ? t("초대 메시지 복사 완료!") : t("초대 링크 복사 완료!"), true);
   } else {
-    toastText(t("초대 링크를 복사했어요. 친구에게 붙여 넣어 보내세요!"));
+    toastText(withCode ? t("초대 메시지를 복사했어요. 친구에게 붙여 넣어 보내세요!") : t("초대 링크를 복사했어요. 친구에게 붙여 넣어 보내세요!"));
   }
 }
 
@@ -980,15 +982,27 @@ function toastText(text) {
   setTimeout(() => el.remove(), 2600);
 }
 
-function sharePrompt() {
+// What gets shared is an invitation, not just a link: VOQUIZ is invite-only, so a friend needs a code.
+// The sheet shows one of my unused invite codes and the very message that will be copied (the same
+// one as on the friends page). With no code left, it falls back to the link alone.
+async function sharePrompt() {
   if (!storeUrl) return;
   notePrompt("share", { last: Date.now() });
+  if (state.user && !state.invites) await friends().loadInvites();
+  const code = friends().unusedInvites()[0]?.code;
+  const message = code ? friends().inviteText(code) : `${t("단어가 쉬워지는 VOQUIZ, 같이 써 보자!")} ${storeUrl}`;
   sheet({
     art: "💌",
     title: t("친구랑 같이 하면 더 재미있어요"),
-    text: t("초대 링크를 보내면 친구도 바로 설치할 수 있어요. 처음 복사하면 {n} 단어포인트를 드려요!", { n: SHARE_REWARD }),
+    text: code
+      ? t("초대 코드와 설치 링크를 함께 보내요. 친구는 설치한 뒤 이 코드로 가입해요. 처음 복사하면 {n} 단어포인트를 드려요!", { n: SHARE_REWARD })
+      : `${t("초대장을 모두 썼어요.")} ${t("초대 링크를 보내면 친구도 바로 설치할 수 있어요. 처음 복사하면 {n} 단어포인트를 드려요!", { n: SHARE_REWARD })}`,
+    body: code && [
+      h("div", { class: "ticket-code" }, h("small", null, t("초대 코드"), " · ", t("남은 초대장 {n}장", { n: friends().unusedInvites().length })), h("b", null, code)),
+      h("div", { class: "share-preview" }, h("small", null, t("이렇게 보내져요")), h("p", null, message)),
+    ],
     actions: [
-      { label: t("초대 링크 복사하기"), kind: "main", run: () => { copyInvite(); } },
+      { label: code ? t("초대 메시지 복사하기") : t("초대 링크 복사하기"), kind: "main", run: () => { copyInvite(message, Boolean(code)); } },
       { label: t("나중에"), run: () => {} },
       { label: t("다시 보지 않기"), run: () => notePrompt("share", { never: true }) },
     ],
@@ -2521,12 +2535,17 @@ function quizView() {
 const GRADES = Array.from({ length: 10 }, (_, i) => i + 3);
 
 // First run only: pick the screen language. Later it is changed in Settings.
+// English is marked to begin with. Tapping another shows the screen, and the story film above it,
+// in that language; "선택" settles it.
 function languageStep() {
-  return h("div", { class: "step" },
-    h("div", { class: "big-logo art", "aria-hidden": "true" }, logoIcon(76)),
-    h("h1", null, "언어 · Language · 语言"),
-    h("div", { class: "langs" },
-      LANGS.map(([id, label]) => h("button", { onclick: () => { setLang(id); render(); } }, label))));
+  const picked = state.langPick;
+  return h("div", { class: "step with-film" },
+    film(),
+    h("div", { class: "after-film" },
+      h("h1", null, "언어 · Language · 语言"),
+      h("div", { class: "langs", role: "radiogroup" },
+        LANGS.map(([id, label]) => h("button", { role: "radio", "aria-checked": String(id === picked), onclick: () => { state.langPick = id; tryLang(id); render(); } }, label))),
+      h("button", { class: "btn", onclick: () => { setLang(picked); render(); } }, t("선택"))));
 }
 
 // The VOQUIZ title is the way home: the search screen with the greeting.
@@ -2789,6 +2808,7 @@ function duelSwitch(kind, title, text) {
 }
 
 function settingsView() {
+  if (storeUrl && state.invites === undefined) friends().loadInvites(); // for the count on the share button
   const cost = nameCost();
   const short = (state.user.points || 0) < cost;
   // Name, language and grade, kept compact.
@@ -2846,11 +2866,14 @@ function settingsView() {
       h("p", { class: "small muted", style: "margin-top:10px" },
         duelFrom() === "none" ? t("지금은 아무에게도 대결 신청을 받지 않아요.") : duelFrom() === "friends" ? t("지금은 친구에게만 대결 신청을 받아요.") : t("지금은 누구에게나 대결 신청을 받아요."),
         " ", t("꺼 두어도 내가 도전하는 것과, 이미 받은 도전에 답하는 것은 할 수 있어요."))),
-    storeUrl && h("section", { class: "block" },
+    (storeUrl || HOME_URL) && h("section", { class: "block" },
       h("h3", null, t("VOQUIZ 알리기")),
-      h("div", { class: "row" },
-        h("button", { class: "btn ghost", style: "flex:1", onclick: sharePrompt }, t("친구에게 공유")),
-        h("button", { class: "btn ghost", style: "flex:1", onclick: ratePrompt }, t("평가하기")))),
+      // one under another, each as wide as the panel: the labels differ a lot in length between languages
+      h("div", { class: "btn-stack" },
+        storeUrl && h("button", { class: "btn ghost", onclick: sharePrompt }, t("친구에게 공유"),
+          state.invites && h("span", { class: "btn-note" }, t("남은 초대장 {n}장", { n: friends().unusedInvites().length }))),
+        storeUrl && h("button", { class: "btn ghost", onclick: ratePrompt }, t("평가하기")),
+        HOME_URL && h("button", { class: "btn ghost", onclick: () => window.open(HOME_URL + (getLang() === "ko" ? "" : "en.html"), "_blank", "noopener") }, t("VOQUIZ 홈페이지 열기")))),
     h("section", { class: "block" },
       h("h3", null, t("계정")),
       h("p", { class: "muted" }, state.user.email),
@@ -2912,12 +2935,13 @@ function gradePicker() {
 }
 
 function loginView() {
-  return h("div", { class: "step splash" },
-    h("div", { class: "big-logo art", "aria-hidden": "true" }, logoIcon(76)),
-    h("h1", { class: "brand" }, wordmark(46)),
-    h("p", null, t("한국어와 영어, 두 언어로 단어를 쉽게 익혀요.")),
-    h("button", { class: "btn", disabled: state.busy, onclick: signIn }, DEMO ? t("데모로 시작하기") : t("Google 계정으로 로그인")),
-    noticeBox());
+  return h("div", { class: "step splash with-film" },
+    film(),
+    h("div", { class: "after-film" },
+      h("h1", { class: "brand" }, wordmark(46)),
+      h("p", null, t("한국어와 영어, 두 언어로 단어를 쉽게 익혀요.")),
+      h("button", { class: "btn", disabled: state.busy, onclick: signIn }, DEMO ? t("데모로 시작하기") : t("Google 계정으로 로그인")),
+      noticeBox()));
 }
 
 let lastScreen = null;
@@ -2925,7 +2949,7 @@ let lastScreen = null;
 // Explanations (the text of a sheet, a hint under a field, a rule, a step of a guide) get one
 // sentence per line. What a character says, toasts, banners, buttons and titles are left as written.
 const PARAGRAPHS = ".sheet p, .league-join p, .info-list p, .hint, .guide-steps li, main p.small, main section > p, .gate p";
-const NOT_PARAGRAPHS = ".mascot, .guide-say, .hello, button, a, .chip, .league, .lang-box, .entry";
+const NOT_PARAGRAPHS = ".mascot, .guide-say, .hello, button, a, .chip, .league, .lang-box, .entry, .share-preview";
 function tidyParagraphs(root) {
   for (const el of root.querySelectorAll?.(PARAGRAPHS) || []) {
     if (el.closest(NOT_PARAGRAPHS)) continue;
@@ -3087,6 +3111,7 @@ function render() {
   if (!sameScreen) state.greeting = Math.random();
   const banner = DEMO && h("div", { class: "banner" }, t("데모 모드 · 이 브라우저에만 저장돼요"));
 
+  if (!hasChosenLang() && !state.langPick) { state.langPick = "en"; tryLang("en"); } // the first-run step starts on English
   if (!hasChosenLang()) app.replaceChildren(languageStep());
   else if (state.update === "force") app.replaceChildren(updateGate());
   else if (!state.user) app.replaceChildren(...[urgentBand(), loginView()].filter(Boolean));

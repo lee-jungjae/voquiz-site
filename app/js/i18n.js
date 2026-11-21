@@ -23,6 +23,11 @@ export function setLang(next) {
   localStorage.setItem(KEY, next);
   document.documentElement.lang = next;
 }
+// Shows the screen in a language without settling on it (the first-run step, before "선택").
+export function tryLang(next) {
+  lang = next;
+  document.documentElement.lang = next;
+}
 
 export function t(key, vars) {
   let text = lang === "ko" ? key : T[key]?.[lang === "en" ? 0 : 1] ?? key;
@@ -713,6 +718,46 @@ const T = {
   "오늘 검색 포인트를 다 받았어요!": ["You've collected all of today's search points!", "今天的搜索积分已全部拿到！"],
   "취소": ["Cancel", "取消"],
   "다운로드 페이지를 열었어요. 새 파일을 받아 폴더를 바꾼 뒤 확장 프로그램을 새로 고쳐 주세요.": ["The download page is open. Get the new file, replace the folder, then reload the extension.", "已打开下载页面。请下载新文件并替换文件夹，然后重新加载扩展程序。"],
+  // the story film (js/film.js) and the first screens
+  "선택": ["Select", "选择"],
+  "VOQUIZ 홈페이지 열기": ["Open the VOQUIZ homepage", "打开VOQUIZ主页"],
+  "VOQUIZ를 소개하는 짧은 애니메이션": ["A short animation about VOQUIZ", "介绍VOQUIZ的小动画"],
+  "재생": ["Play", "播放"],
+  "일시 정지": ["Pause", "暂停"],
+  "이럴 때 있지?": ["Sound familiar?", "有过这种时候吧？"],
+  "VOQUIZ라면!": ["With VOQUIZ!", "有了VOQUIZ！"],
+  "두 언어로": ["Two languages", "两种语言"],
+  "바로 옆에서": ["Right beside the page", "就在旁边"],
+  "퀴즈와 대결": ["Quizzes and duels", "测验和对决"],
+  "모으는 재미": ["Collect and compete", "收集的乐趣"],
+  "영어로 찾았더니 영어 뜻만… 한국어로는 뭐라고 하지?": ["Looked it up in English and got English only… what is it in Korean?", "用英语查，只有英语解释……用韩语怎么说呢？"],
+  "VOQUIZ는 한 번 찾으면 한국어와 영어, 두 언어로 알려 줘!": ["One search in VOQUIZ explains it in both Korean and English!", "VOQUIZ查一次，就用韩语和英语两种语言告诉你！"],
+  "어제 찾아본 단어인데… 뭐였더라?": ["I looked that word up yesterday… what was it again?", "昨天查过的单词……是什么来着？"],
+  "찾은 단어는 단어장에 알아서 쏙! 언제든 다시 볼 수 있어.": ["Every word you look up saves itself in your word list.", "查过的单词会自动存进单词本！随时都能再看。"],
+  "모르는 단어마다 새 창 열고, 검색하고, 돌아오고…": ["A new tab for every word: open, search, come back…", "每遇到一个生词，就要开新窗口、搜索、再回来……"],
+  "보던 페이지 바로 옆에서! 단어를 고르고 우클릭하면 끝.": ["Right beside the page you're reading: select a word and right-click.", "就在正在看的网页旁边！选中单词，点右键就行。"],
+  "혼자서는 테스트하기 어려워. 누가 문제 좀 내 줘!": ["Testing yourself alone is hard. Who will quiz me?", "一个人很难给自己测验。谁来考考我！"],
+  "내가 찾은 단어로 퀴즈가 뚝딱! 친구와 대결도 할 수 있어.": ["Quizzes made from your own words, and duels with friends!", "用我查过的单词马上出题！还能和朋友对决。"],
+  "단어 찾기? 귀찮아… 내일 할래.": ["Looking up words? Too much bother… maybe tomorrow.", "查单词？好麻烦……明天再说吧。"],
+  "찾을수록 포인트가 쌓여! 캐릭터도 모으고 리그에서 겨뤄.": ["Every word earns points: collect characters and climb the league!", "查得越多，积分越多！收集角色，在联赛里比一比。"],
+  "이제 VOQUIZ랑 같이 해 볼까?": ["Ready to try it with VOQUIZ?", "现在和VOQUIZ一起试试吧？"],
+  "한국어로는… 뭐지?": ["…and in Korean?", "用韩语……怎么说？"],
+  "어제 찾아본 단어": ["A word I looked up yesterday", "昨天查过的单词"],
+  "뭐였더라…?": ["what was it…?", "是什么来着……？"],
+  "새 탭": ["New tab", "新标签页"],
+  "검색: ecosystem": ["Search: ecosystem", "搜索：ecosystem"],
+  "번역기": ["Translator", "翻译器"],
+  "앗, 답이 보여!": ["Oops, I saw the answer!", "哎呀，看到答案了！"],
+  "누가 문제 좀 내 줘…": ["Somebody quiz me…", "谁来考考我……"],
+  "‘회복력 있는’은 영어로?": ["Which word means 회복력 있는?", "“회복력 있는”用英语怎么说？"],
+  "귀찮아… 내일 할래": ["Maybe tomorrow…", "好麻烦……明天再说"],
+  "모으는 캐릭터 {n}종": ["{n} characters to collect", "可以收集的角色 {n}种"],
+  "주간 리그 1위!": ["1st in the league!", "每周联赛第1名！"],
+  "정답!": ["Correct!", "答对了！"],
+  "초대 코드와 설치 링크를 함께 보내요. 친구는 설치한 뒤 이 코드로 가입해요. 처음 복사하면 {n} 단어포인트를 드려요!": ["Send the invite code and the install link together. Your friend installs VOQUIZ, then joins with this code. Your first copy earns {n} word points!", "把邀请码和安装链接一起发给朋友。朋友安装后，用这个邀请码加入。第一次复制可以获得{n}个单词积分！"],
+  "이렇게 보내져요": ["This is what gets sent", "发送的内容是这样的"],
+  "초대 메시지 복사하기": ["Copy the invitation", "复制邀请信息"],
+  "초대 메시지 복사 완료!": ["Invitation copied!", "邀请信息已复制！"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],
   "테마 상점 열기": ["Open the theme shop", "打开主题商店"],
 
