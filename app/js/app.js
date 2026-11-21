@@ -2858,7 +2858,6 @@ function settingsView() {
   const grade = h("select", { id: "grade-select", "aria-label": t("학년"), onchange: (e) => chooseGrade(Number(e.target.value)) },
     BANDS.map((band) => h("optgroup", { label: `${band.label} · ${t(band.name)}` }, band.grades.map((g) => h("option", { value: String(g) }, `G${g}`)))));
   grade.value = String(state.user.grade);
-  const myBand = bandOf(state.user.grade);
   return [
     h("div", { class: "page-head" },
       h("button", { class: "back", "aria-label": t("뒤로"), title: t("뒤로"), onclick: openSettings }, "←"),
@@ -2894,8 +2893,7 @@ function settingsView() {
       h("div", { class: "pref-row" },
         h("div", { class: "chips", role: "group", "aria-label": t("언어") }, LANGS.map(([id, label]) =>
           h("button", { class: "chip", "aria-pressed": String(getLang() === id), onclick: () => { setLang(id); render(); } }, label))),
-        h("label", { class: "grade-pick" }, t("학년"), grade)),
-      h("p", { class: "small muted hint" }, t("설명 수준: {band} · {name}", { band: myBand.label, name: t(myBand.name) }), h("br"), t("학년 구간이 바뀌면 설명도 달라져요."))),
+        h("label", { class: "grade-pick" }, t("학년"), grade))),
     plansOn() && plusSection(),
     h("section", { class: "block" },
       h("h3", null, t("소리")),

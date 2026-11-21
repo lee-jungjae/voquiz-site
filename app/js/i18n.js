@@ -768,8 +768,6 @@ const T = {
   "설명을 준비하는 중…": ["Getting it ready…", "正在准备解释…"],
   "이 수준의 설명을 가져오지 못했어요. 잠시 뒤에 다시 눌러 주세요.": ["Couldn't get that explanation. Please try again in a moment.", "没能取得这个难度的解释，请稍后再试。"],
   "학년 구간에 따라 설명이 달라져요. 나중에 바꿀 수 있어요.": ["Explanations change with your grade group. You can change it later.", "解释会随年级段而不同。以后可以更改。"],
-  "설명 수준: {band} · {name}": ["Explanation level: {band} · {name}", "解释难度：{band} · {name}"],
-  "학년 구간이 바뀌면 설명도 달라져요.": ["A different grade group means different explanations.", "年级段不同，解释也会不同。"],
   "내 수준에 맞게": ["At your level", "适合我的难度"],
   "설명이 너무 어려워… 무슨 말인지 모르겠어.": ["This explanation is too hard… I don't get it.", "解释太难了……看不懂。"],
   "더 쉽게, 더 자세히! 설명을 내 수준에 맞게 바꿔 볼 수 있어.": ["Easier or more detailed: switch the explanation to your level!", "更简单，或更详细！可以把解释换成适合自己的难度。"],
