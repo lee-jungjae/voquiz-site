@@ -613,7 +613,7 @@ section.block > h2, .two h2 { line-height: 1.3; }
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><p class="hint">Tap the character · pick another friend below</p></div>
+</svg></span><p class="hint">Tap the character: it makes a sound! · pick another friend below</p></div>
 </section>
 
 <section class="block two" id="try">
@@ -1371,44 +1371,112 @@ section.block > h2, .two h2 { line-height: 1.3; }
   const drawing = (name) => $(`[data-art="${name}"]`).innerHTML; // a character's picture, taken from the page
 
   // ----- the character on the stage: tap it, or pick another from the shelf -----
+  // A tap is answered the way the app answers it (see mascot.js there): a mood, which is a move, a
+  // face, a few things that fly out of the spot that was tapped and sometimes a line; the
+  // character's own sound; a party on every fifth tap in a row; and now and then its own trick.
   const hero = $(".stage .mascot");
   const say = $(".say");
-  const MOODS = [["jump", "happy", "laugh", "♥ ✦ ♥"], ["wiggle", "heart", "cat", "♥ ♥ ♥"], ["spin", "dizzy", "wavy", "★ ✦ ★"], ["squish", "wink", "cat", "✦ ♥"],
-    ["stretch", "star", "laugh", "✦ A 가"], ["flip", "star", "cat", "★ ✦ ★"], ["party", "heart", "laugh", "♥ ★ ✦ ♪"], ["shake", "laugh", "laugh", "✦ ♥ ✦"]];
-  const MOVES = MOODS.map((m) => m[0]);
-  const LINES = ko ? ["히히!", "야호!", "단어 찾으러 가자!", "또 눌러 줘!", "오늘도 화이팅!", "짜잔!", "랄랄라~", "반가워!", "나랑 퀴즈 풀래?", "모르는 단어 있어?"]
-    : ["Hee hee!", "Yay!", "Let's find a word!", "Tap me again!", "You can do it!", "Ta-da!", "La la la~", "Nice to meet you!"];
-  let calm = 0;
-  function react(speak) {
-    const [move, eyes, mouth, pops] = MOODS[Math.floor(Math.random() * MOODS.length)];
+  let who = "bubble"; // the character on the stage
+  const MOODS = {
+    joy: { move: "jump", eyes: "happy", mouth: "laugh", pops: ["♥", "✦", "♥"], say: ko ? ["히히!", "야호!", "좋아 좋아!"] : ["Hehe!", "Yahoo!", "Yes, yes!"] },
+    love: { move: "wiggle", eyes: "heart", mouth: "cat", pops: ["♥", "♥", "♥"], blush: true, say: ko ? ["좋아해!", "반가워!"] : ["I like you!", "Hi there!"] },
+    dizzy: { move: "spin", eyes: "dizzy", mouth: "wavy", pops: ["★", "✦", "★"], say: ko ? ["어지러워~", "빙글빙글~"] : ["I'm dizzy~", "Round and round~"] },
+    shy: { move: "shrink", eyes: "closed", mouth: "wavy", pops: ["♥"], blush: true, say: ko ? ["부끄러워…", "에헤헤"] : ["I'm shy…", "Ehehe"] },
+    surprised: { move: "pop", eyes: "wide", mouth: "o", pops: ["!", "!", "?"], say: ko ? ["깜짝이야!", "앗!"] : ["You startled me!", "Oh!"] },
+    sleepy: { move: "sway", eyes: "closed", mouth: "yawn", pops: ["z", "Z", "z"], time: 1700, say: ko ? ["하암…", "졸려…"] : ["Yaaawn…", "So sleepy…"] },
+    proud: { move: "flip", eyes: "star", mouth: "cat", pops: ["★", "✦", "★"], say: ko ? ["짜잔!", "멋지지?"] : ["Ta-da!", "Cool, right?"] },
+    giggle: { move: "shake", eyes: "laugh", mouth: "laugh", pops: ["✦", "♥", "✦"], say: ko ? ["간지러워!", "하하하!"] : ["That tickles!", "Hahaha!"] },
+    curious: { move: "tilt", eyes: "wide", mouth: "o", pops: ["?", "?"], say: ko ? ["뭐야 뭐야?", "단어 찾으러 가자!"] : ["What's that?", "Let's find a word!"] },
+    sing: { move: "bounce", eyes: "happy", mouth: "o", pops: ["♪", "♫", "♪"], say: ko ? ["랄랄라~", "룰루~"] : ["La la la~", "Doo-bee-doo~"] },
+    wink: { move: "squish", eyes: "wink", mouth: "cat", pops: ["✦", "♥"], say: ko ? ["찡긋!", "또 눌러 줘!"] : ["Wink!", "Tap me again!"] },
+    cheer: { move: "stretch", eyes: "star", mouth: "laugh", pops: ["✦", "A", "가"], say: ko ? ["오늘도 화이팅!", "한 번 더!", "오늘 기분 최고!"] : ["You've got this!", "One more!", "Best day ever!"] },
+  };
+  const PARTY = { move: "party", eyes: "heart", mouth: "laugh", pops: ["♥", "★", "✦", "♪", "A", "가"], blush: true, time: 1300 };
+  const TIRED = { move: "sway", eyes: "dizzy", mouth: "wavy", pops: ["~", "~"], time: 1500, say: ko ? ["잠깐 쉬자~", "휴, 숨 좀 돌리자~"] : ["Let's take a break~", "Phew, let me catch my breath~"] };
+  const ALONE = [MOODS.joy, MOODS.love, MOODS.proud, MOODS.giggle, MOODS.sing, MOODS.wink, MOODS.cheer, MOODS.curious]; // what it does by itself between taps
+  const MOVES = ["jump", "spin", "wiggle", "squish", "stretch", "flip", "party", "shrink", "pop", "sway", "shake", "tilt", "bounce", "hop"];
+  // A character's own trick: two moves in a row and a face, always the same for one character.
+  const TRICKS = [["flip", "jump"], ["spin", "stretch"], ["party", "wiggle"], ["jump", "spin"], ["stretch", "flip"], ["squish", "party"], ["bounce", "flip"], ["wiggle", "jump"], ["tilt", "spin"], ["shake", "stretch"]];
+  const TRICK_EYES = ["star", "heart", "happy", "wink", "laugh"], TRICK_MOUTHS = ["laugh", "cat", "o"];
+  function trickOf(id) {
+    let n = 0;
+    for (const ch of id) n = (n * 31 + ch.charCodeAt(0)) >>> 0;
+    const [first, second] = TRICKS[n % TRICKS.length];
+    const face = { eyes: TRICK_EYES[(n >>> 4) % TRICK_EYES.length], mouth: TRICK_MOUTHS[(n >>> 8) % TRICK_MOUTHS.length], blush: true };
+    return [{ move: first, ...face, time: 700 }, { move: second, ...face, time: 900 }];
+  }
+  const any = (list) => list[Math.floor(Math.random() * list.length)];
+  // The app's own sounds, what flies out in a trick, and each character's one-line story: taken from
+  // the try-out copy of the app on this site, so they are always the app's.
+  let app = null;
+  (window.requestIdleCallback || setTimeout)(() => Promise.all([import("./app/js/sound.js"), import("./app/js/signatures.js"), import("./app/js/character-lines.js")])
+    .then(([sound, tricks, lines]) => { app = { chirp: sound.sfx.chirp, pops: tricks.SIGNATURES, lines: lines.CHARACTER_LINES }; }).catch(() => {}));
+
+  let calm = 0, combo = 0, lastTap = 0, lastMood = "";
+  function show({ move, eyes, mouth, blush, time = 1000 }) {
     hero.classList.remove(...MOVES);
-    void hero.offsetWidth;
-    hero.classList.add(move);
-    hero.dataset.eyes = eyes;
-    hero.dataset.mouth = mouth;
+    void hero.offsetWidth; // lets the same move play again
+    if (move) hero.classList.add(move);
+    Object.assign(hero.dataset, { eyes: eyes || "default", mouth: mouth || "smile", blush: blush ? "1" : "" });
     clearTimeout(calm);
-    calm = setTimeout(() => { hero.classList.remove(...MOVES); hero.dataset.eyes = "default"; hero.dataset.mouth = "smile"; }, 1200);
-    if (!speak) return;
-    say.textContent = LINES[Math.floor(Math.random() * LINES.length)];
-    say.style.animation = "none"; void say.offsetWidth; say.style.animation = "";
-    const chars = pops.split(" ");
-    for (let i = 0; i < 6; i++) {
+    calm = setTimeout(() => { hero.classList.remove(...MOVES); Object.assign(hero.dataset, { eyes: "default", mouth: "smile", blush: "" }); }, time);
+  }
+  function burst(chars, count, x, y) {
+    for (let i = 0; i < count; i++) {
       const pop = el(`<span class="pop" aria-hidden="true">${chars[i % chars.length]}</span>`);
       const angle = Math.random() * Math.PI * 2, reach = 50 + Math.random() * 60;
-      pop.style.cssText = `--dx:${Math.cos(angle) * reach}px;--dy:${-Math.abs(Math.sin(angle)) * reach - 30}px;--turn:${Math.random() * 80 - 40}deg;animation-delay:${i * 25}ms;color:${["#e8395a", "#655f9f", "#23552b"][i % 3]}`;
+      pop.style.cssText = `left:${x}px;top:${y}px;--dx:${Math.cos(angle) * reach}px;--dy:${-Math.abs(Math.sin(angle)) * reach - 30}px;--turn:${Math.random() * 80 - 40}deg;animation-delay:${i * 18}ms;color:${["#e8395a", "#655f9f", "#23552b", "#e6a700"][i % 4]}`;
       $(".stage").append(pop);
       setTimeout(() => pop.remove(), 1200);
     }
   }
-  hero.addEventListener("click", () => react(true));
-  hero.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); react(true); } });
-  setInterval(() => { if (!document.hidden && !$("#detail").open) react(false); }, 4200);
+  function speak(text) {
+    if (!text) return; // sometimes the feeling alone says it
+    say.textContent = text;
+    say.style.animation = "none"; void say.offsetWidth; say.style.animation = "";
+  }
+  // A tap at (x, y) on the stage.
+  function tap(x, y) {
+    const now = Date.now();
+    combo = now - lastTap < 1200 ? combo + 1 : 1;
+    lastTap = now;
+    app?.chirp(who);
+    if (combo >= 15) { // tapped a lot in a row: it needs a breather, and the count starts over
+      combo = 0;
+      show(TIRED); burst(TIRED.pops, 4, x, y);
+      return speak(any(TIRED.say));
+    }
+    if (combo % 5 === 0) {
+      show(PARTY); burst(PARTY.pops, 16, x, y);
+      return speak(`${combo} ♥`);
+    }
+    if (app && (combo % 3 === 0 || Math.random() < 0.25)) { // its own trick
+      const [first, second] = trickOf(who);
+      show(first);
+      setTimeout(() => show(second), 640);
+      burst(app.pops[who] || ["✦", "♥", "★"], 10, x, y);
+      return speak(app.lines[who]?.[ko ? 0 : 1] || "");
+    }
+    lastMood = any(Object.keys(MOODS).filter((name) => name !== lastMood)); // never the same mood twice running
+    const mood = MOODS[lastMood];
+    show(mood);
+    burst(mood.pops, 3 + Math.floor(Math.random() * 3), x, y);
+    speak(Math.random() < 0.65 ? any(mood.say) : "");
+  }
+  const middle = () => [$(".stage").clientWidth / 2, $(".stage").clientHeight * 0.52];
+  hero.addEventListener("click", (e) => {
+    const box = $(".stage").getBoundingClientRect();
+    if (e.clientX || e.clientY) tap(e.clientX - box.left, e.clientY - box.top); else tap(...middle());
+  });
+  hero.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tap(...middle()); } });
+  setInterval(() => { if (!document.hidden && !$("#detail").open && Date.now() - lastTap > 3000) show(any(ALONE)); }, 4200);
   for (const pick of document.querySelectorAll(".pick")) {
     pick.addEventListener("click", () => {
       for (const other of document.querySelectorAll(".pick")) other.setAttribute("aria-pressed", String(other === pick));
+      who = pick.getAttribute("aria-label");
       hero.innerHTML = pick.querySelector(".mascot").innerHTML;
       $(".stage").scrollIntoView({ block: "nearest", behavior: "smooth" });
-      react(true);
+      tap(...middle());
     });
   }
 
@@ -1518,11 +1586,12 @@ section.block > h2, .two h2 { line-height: 1.3; }
         card.addEventListener("click", () => {
           if (known) {
             // onto the stage
+            who = c.id;
             hero.innerHTML = c.svg;
             for (const pick of document.querySelectorAll(".pick")) pick.setAttribute("aria-pressed", String(pick.getAttribute("aria-label") === c.id));
             $("#all").close();
             $(".stage").scrollIntoView({ block: "center", behavior: "smooth" });
-            react(true);
+            tap(...middle());
           } else {
             // a shadow only whispers its name
             card.classList.remove("peek"); void card.offsetWidth; card.classList.add("peek");
