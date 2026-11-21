@@ -19,6 +19,9 @@ const pointer = '<svg viewBox="0 0 24 24"><path d="M5 3 l13 9 l-6 1.2 l-2.5 6 z"
 // a few one-word labels that mean something else elsewhere in the app, so they are kept here
 const word = (ko, en, zh) => ({ ko, en, zh })[getLang()] || ko;
 
+// the same meaning, as it is written for the oldest and for the youngest (explanations are Korean or English only)
+const HARD = () => word("질량을 가진 모든 물체 사이에 작용하는 인력으로, 거리의 제곱에 반비례한다.", "The attractive force between all masses, inversely proportional to the square of the distance.", "The attractive force between all masses, inversely proportional to the square of the distance.");
+const EASY = () => word("물건을 땅으로 끌어당기는 힘이에요.", "The force that pulls things down to the ground.", "The force that pulls things down to the ground.");
 // name: what its dot is called · scenes: the problem, then the answer (cap: the line under the chip)
 const STORIES = [
   { name: "두 언어로", scenes: [
@@ -38,6 +41,25 @@ const STORIES = [
         </div>
         <i class="f-spark k3" style="left:158px;top:14px">✦</i><i class="f-spark k3 f-late" style="left:448px;top:176px">✦</i>`,
       steps: [[250, "s1"], [900, "s2"], [1500, "s3"], [1700, ["a", "star", "laugh", "jump"]], [3000, ["a", "heart", "cat", "wiggle"]]] },
+  ] },
+  { name: "내 수준에 맞게", scenes: [
+    { ms: 4300, cap: "설명이 너무 어려워… 무슨 말인지 모르겠어.",
+      html: () => `${actor("cupcake", "a", "left:-20px;bottom:6px")}
+        <div class="f-prop p1 f-card f-dict" style="left:186px;top:36px;width:272px"><small>${t("사전")}</small><b class="f-hw">gravity</b><p>${HARD()}</p></div>
+        <div class="f-prop p2 f-say" style="left:36px;top:100px">${t("너무 어려워…")}</div>
+        <i class="f-q q2" style="left:150px;top:160px">?</i><i class="f-q q2 f-late" style="left:14px;top:150px">?</i>`,
+      steps: [[300, "s1"], [1300, ["a", "wide", "o", "pop"]], [2100, "s2"], [2100, ["a", "dizzy", "wavy", "shake"]], [3300, ["a", "closed", "wavy", "sway"]]] },
+    { ms: 4800, cap: "더 쉽게, 더 자세히! 설명을 내 수준에 맞게 바꿔 볼 수 있어.",
+      html: () => `${actor("cupcake", "a", "left:-20px;bottom:6px")}
+        <div class="f-prop p1 f-card" style="left:178px;top:20px;width:286px">
+          <span class="f-vq-top">${ICON_SVG}VOQUIZ</span>
+          <div class="f-vq-head"><b class="f-hw">gravity</b><em>중력</em></div>
+          <div class="f-swap"><p class="f-old">${HARD()}</p><p class="f-new">${EASY()}</p></div>
+          <div class="f-levels"><span class="f-lv f-easy">‹ ${t("더 쉽게")}</span><span class="f-lvnow"><b class="f-old">G9–12</b><b class="f-new">G3–5</b></span><span class="f-lv">${t("더 자세히")} ›</span></div>
+        </div>
+        <div class="f-prop p2 h3 f-tap" style="left:204px;top:184px">${pointer}</div>
+        <i class="f-spark k3" style="left:158px;top:10px">✦</i><i class="f-spark k3 f-late" style="left:452px;top:150px">✦</i>`,
+      steps: [[250, "s1"], [1300, "s2"], [2100, "s3"], [2300, ["a", "star", "laugh", "jump"]], [3500, ["a", "heart", "cat", "wiggle"]]] },
   ] },
   { name: "단어장", scenes: [
     { ms: 4300, cap: "어제 찾아본 단어인데… 뭐였더라?",

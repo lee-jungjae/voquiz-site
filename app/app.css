@@ -1778,6 +1778,21 @@ button.points .dot { position: absolute; top: -4px; right: -4px; min-width: 16px
 .f-line i { flex: none; margin-top: 1px; font-style: normal; font-size: 10.5px; font-weight: 900; border-radius: 6px; padding: 2px 6px; background: var(--accent); color: #fff; }
 .f-line i.en { background: var(--good); color: var(--lime); }
 
+/* at your level: the hard explanation gives way to the easy one */
+.f-swap { position: relative; height: 66px; margin-top: 8px; }
+.f-swap p { position: absolute; inset: 0; margin: 0; font-size: 14px; line-height: 1.5; color: #3b3852; transition: opacity .4s, transform .5s cubic-bezier(.3, 1.5, .5, 1); }
+.f-swap .f-new { font-size: 17px; font-weight: 700; color: var(--good); }
+.f-new { opacity: 0; transform: translateY(8px); }
+.s3 .f-old { opacity: 0; transform: translateY(-8px); }
+.s3 .f-new { opacity: 1; transform: none; }
+.f-levels { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 8px; }
+.f-lv { border: 1.5px solid var(--line); border-radius: 999px; padding: 4px 11px; font-size: 12.5px; font-weight: 800; white-space: nowrap; transition: background .3s, border-color .3s, color .3s, transform .3s; }
+.s2 .f-easy { background: var(--accent); border-color: var(--accent); color: #fff; transform: scale(.94); }
+.s3 .f-easy { transform: none; }
+.f-lvnow { position: relative; width: 62px; height: 20px; text-align: center; font-size: 13px; line-height: 20px; color: var(--accent); }
+.f-lvnow b { position: absolute; inset: 0; transition: opacity .4s; }
+.f-tap svg { display: block; width: 22px; height: 22px; }
+
 /* 2: looked it up yesterday, gone today */
 .f-cloud { border-radius: 26px; text-align: center; }
 .f-cloud-word { position: relative; height: 34px; margin-top: 3px; }
@@ -1861,3 +1876,20 @@ button.points .dot { position: absolute; top: -4px; right: -4px; min-width: 16px
 .share-preview small { display: block; margin-bottom: 4px; font-size: 11px; font-weight: 700; color: var(--muted); }
 .sheet .share-preview p { margin: 0; font-size: 13px; line-height: 1.6; color: var(--text); white-space: pre-line; overflow-wrap: anywhere; }
 .btn-note { margin-left: 8px; font-size: 12px; font-weight: 700; color: var(--accent-dark); background: var(--accent-soft); border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+/* another level of explanation: a step easier, a step fuller (js/levels.js) */
+.level-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 12px 0 4px; padding: 5px; border-radius: 999px; background: var(--surface); }
+.level-step { display: inline-flex; align-items: center; gap: 4px; padding: 7px 12px; border-radius: 999px; background: var(--bg); font-size: 13px; font-weight: 700; color: var(--accent-dark); box-shadow: var(--shadow); white-space: nowrap; }
+.level-step i { font-style: normal; font-size: 15px; line-height: 1; }
+.level-step:disabled { opacity: .35; box-shadow: none; cursor: default; }
+.level-now { display: grid; min-width: 0; text-align: center; line-height: 1.25; }
+.level-now b { font-size: 13px; color: var(--accent); }
+.level-now small { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.level-bar.busy .level-now small { animation: level-wait 1s ease-in-out infinite; }
+@keyframes level-wait { 50% { opacity: .35; } }
+/* choosing a grade: the three groups, each with its own level of explanation */
+.grade-bands { display: grid; gap: 10px; margin-top: 8px; text-align: left; }
+.grade-band { border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px 12px; }
+.band-name { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; margin-bottom: 8px; }
+.band-name b { font-size: 15px; color: var(--accent); }
+.band-name span { font-size: 13px; color: var(--muted); }
+.grade-band .grades { margin-top: 0; grid-template-columns: repeat(4, 1fr); }

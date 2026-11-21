@@ -7,6 +7,7 @@ import { mascot, portrait, reaction, giftArt } from "./mascot.js";
 import { CHARACTERS } from "./characters.js";
 import { logoIcon, wordmark } from "./logo.js";
 import { film } from "./film.js";
+import { BANDS, bandOf } from "./levels.js";
 import { CHARACTER_LINES } from "./character-lines.js";
 import { initDuel } from "./duel.js";
 import { initFriends } from "./friends.js";
@@ -397,6 +398,7 @@ async function chooseGrade(grade) {
   try {
     const first = !state.user.grade;
     state.user = await api.setGrade(grade);
+    state.level = null;
     if (first && typedName.trim()) await saveName(typedName);
     if (first) return loadWords();
   } catch (err) {
@@ -486,6 +488,7 @@ function greeting() {
 async function search(term) {
   term = term.trim();
   if (!term || state.busy) return;
+  state.level = null; // a new search shows the student's own level again
   if (limitReached()) {
     const again = state.words.find((w) => dayOf(w.last_searched_at) === dayOf(new Date()) && [w.headword, w.term_norm, w.content?.counterpart].some((x) => (x || "").toLowerCase() === term.toLowerCase()));
     Object.assign(state, { tab: "search", query: term, entry: again || null, notice: again ? null : { text: ERRORS().search_limit } });
@@ -1246,10 +1249,50 @@ function sensesList(c, key) {
     })));
 }
 
+// ----- another level of explanation ("더 쉽게 / 더 자세히") -----
+// The same word as it is explained to another group of grades. It is only looked at: the word list,
+// the quizzes and the daily search count stay with the student's own grade.
+const levelCache = new Map(); // "term|band" -> content
+const levelOf = (word) => (state.level?.term === word.term_norm ? state.level : null);
+const shownBand = (word) => BANDS.find((band) => band.id === levelOf(word)?.band) || bandOf(state.user.grade);
+const shownContent = (word) => levelOf(word)?.content || word.content;
+async function showLevel(word, band) {
+  if (band === bandOf(state.user.grade)) { state.level = null; return render(); }
+  const key = `${word.term_norm}|${band.id}`;
+  const settle = (content) => ({ term: word.term_norm, band: band.id, content });
+  if (levelCache.has(key)) { state.level = settle(levelCache.get(key)); return render(); }
+  const before = levelOf(word);
+  const mine = () => state.level?.term === word.term_norm && state.level.band === band.id; // still the one asked for?
+  state.level = { ...settle(before?.content || null), busy: true };
+  render();
+  try {
+    const result = await api.lookupLevel(word.term_norm, band.id);
+    if (!result.valid) throw new Error("level_unavailable");
+    levelCache.set(key, cleanEntry(result.content));
+    if (mine()) state.level = settle(levelCache.get(key));
+  } catch (err) {
+    console.error(err);
+    if (mine()) state.level = before?.content ? before : null;
+    toastText(t("이 수준의 설명을 가져오지 못했어요. 잠시 뒤에 다시 눌러 주세요."));
+  }
+  render();
+}
+function levelBar(word) {
+  const own = bandOf(state.user.grade), at = shownBand(word), i = BANDS.indexOf(at), busy = Boolean(levelOf(word)?.busy);
+  return h("div", { class: `level-bar${busy ? " busy" : ""}` },
+    h("button", { class: "level-step", disabled: busy || i === 0, onclick: () => showLevel(word, BANDS[i - 1]) }, h("i", { "aria-hidden": "true" }, "‹"), t("더 쉽게")),
+    h("div", { class: "level-now", role: "status" },
+      h("b", null, at.label),
+      h("small", null, busy ? t("설명을 준비하는 중…") : at === own ? t("내 학년 설명") : t(at.name))),
+    h("button", { class: "level-step", disabled: busy || i === BANDS.length - 1, onclick: () => showLevel(word, BANDS[i + 1]) }, t("더 자세히"), h("i", { "aria-hidden": "true" }, "›")));
+}
+
 function entryCard(word) {
+  const content = shownContent(word);
   return h("article", { class: "entry" },
-    hero(word.content, word),
-    entryBlocks(word),
+    hero(content, word),
+    levelBar(word),
+    entryBlocks(content === word.content ? word : { ...word, content }),
     h("div", { class: "card-foot" },
       h("button", { class: "link", onclick: () => removeWord(word) }, t("단어장에서 삭제"))));
 }
@@ -2813,8 +2856,9 @@ function settingsView() {
   const short = (state.user.points || 0) < cost;
   // Name, language and grade, kept compact.
   const grade = h("select", { id: "grade-select", "aria-label": t("학년"), onchange: (e) => chooseGrade(Number(e.target.value)) },
-    GRADES.map((g) => h("option", { value: String(g) }, `G${g}`)));
+    BANDS.map((band) => h("optgroup", { label: `${band.label} · ${t(band.name)}` }, band.grades.map((g) => h("option", { value: String(g) }, `G${g}`)))));
   grade.value = String(state.user.grade);
+  const myBand = bandOf(state.user.grade);
   return [
     h("div", { class: "page-head" },
       h("button", { class: "back", "aria-label": t("뒤로"), title: t("뒤로"), onclick: openSettings }, "←"),
@@ -2850,7 +2894,8 @@ function settingsView() {
       h("div", { class: "pref-row" },
         h("div", { class: "chips", role: "group", "aria-label": t("언어") }, LANGS.map(([id, label]) =>
           h("button", { class: "chip", "aria-pressed": String(getLang() === id), onclick: () => { setLang(id); render(); } }, label))),
-        h("label", { class: "grade-pick" }, t("학년"), grade))),
+        h("label", { class: "grade-pick" }, t("학년"), grade)),
+      h("p", { class: "small muted hint" }, t("설명 수준: {band} · {name}", { band: myBand.label, name: t(myBand.name) }), h("br"), t("학년 구간이 바뀌면 설명도 달라져요."))),
     plansOn() && plusSection(),
     h("section", { class: "block" },
       h("h3", null, t("소리")),
@@ -2929,9 +2974,12 @@ function gradePicker() {
   return h("div", { class: "step" },
     h("h1", null, t("몇 학년인가요?")),
     h("input", { type: "text", id: "first-name", maxLength: 20, autocomplete: "off", placeholder: t("이름 (안 써도 돼요)"), "aria-label": t("이름") }),
-    h("p", null, t("학년에 맞는 수준으로 설명해 드려요. 나중에 바꿀 수 있어요.")),
-    h("div", { class: "grades" },
-      GRADES.map((g) => h("button", { onclick: () => chooseGrade(g) }, `G${g}`))));
+    h("p", null, t("학년 구간에 따라 설명이 달라져요. 나중에 바꿀 수 있어요.")),
+    // The grades in their three groups: each group gets its own level of explanation.
+    h("div", { class: "grade-bands" }, BANDS.map((band) =>
+      h("div", { class: "grade-band" },
+        h("div", { class: "band-name" }, h("b", null, band.label), h("span", null, t(band.name))),
+        h("div", { class: "grades" }, band.grades.map((g) => h("button", { onclick: () => chooseGrade(g) }, `G${g}`)))))));
 }
 
 function loginView() {

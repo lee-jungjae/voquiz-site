@@ -270,6 +270,52 @@ export async function lookup(term, onPartial) {
   return { valid: true, content, word, discovered: isNew && word.discovered };
 }
 
+// Another group's explanation of a word (only to look at). The demo has no server to write one, so
+// the sample words carry a simpler and a fuller meaning here; any other word stays as it is.
+const LEVELS = {
+  gravity: {
+    g3_5: ["물건을 땅으로 끌어당기는 힘이에요.", "The force that pulls things down to the ground."],
+    g6_8: ["질량이 있는 물체가 서로 끌어당기는 힘. 물건이 아래로 떨어지는 것도 이 힘 때문이에요.", "The force by which objects with mass pull on each other. It is why things fall toward the Earth."],
+    g9_12: ["질량을 가진 모든 물체 사이에 작용하는 인력으로, 두 질량의 곱에 비례하고 거리의 제곱에 반비례한다.", "The attractive force between all masses, proportional to the product of the masses and inversely proportional to the square of the distance between them."],
+  },
+  photosynthesis: {
+    g3_5: ["식물이 햇빛으로 스스로 밥을 만드는 일이에요.", "How plants make their own food from sunlight."],
+    g6_8: ["식물이 빛 에너지를 써서 물과 이산화탄소로 양분(포도당)을 만들고 산소를 내보내는 과정.", "The process in which plants use light energy to turn water and carbon dioxide into food (glucose), giving off oxygen."],
+    g9_12: ["엽록체에서 빛 에너지를 화학 에너지로 바꾸어, 이산화탄소와 물로부터 포도당을 합성하고 산소를 방출하는 과정.", "The process in chloroplasts that converts light energy into chemical energy, synthesizing glucose from carbon dioxide and water and releasing oxygen."],
+  },
+  friend: {
+    g3_5: ["같이 놀고 서로 좋아하는 사람이에요.", "Someone you like and enjoy playing with."],
+    g6_8: ["서로 믿고 마음이 통해 가깝게 지내는 사람.", "A person you know well, trust and like spending time with."],
+    g9_12: ["혈연이나 이해관계가 아니라 신뢰와 애정으로 맺어진 가까운 사람.", "A person bound to another by mutual trust and affection rather than by family ties or interest."],
+  },
+  democracy: {
+    g3_5: ["모두가 함께 의견을 내고 투표로 정하는 방법이에요.", "A way of deciding things together, where everyone gets a vote."],
+    g6_8: ["국민이 투표로 대표를 뽑아 나라의 일을 결정하는 정치 제도.", "A system of government in which the people choose their leaders by voting."],
+    g9_12: ["주권이 국민에게 있고, 국민이 직접 또는 선출한 대표를 통해 권력을 행사하는 정치 체제.", "A political system in which sovereignty rests with the people, who exercise power directly or through elected representatives."],
+  },
+  노력: {
+    g3_5: ["무엇을 잘하려고 힘을 쓰는 것이에요.", "Trying hard to do something well."],
+    g6_8: ["목표를 이루려고 몸과 마음을 다해 애쓰는 것.", "Working hard with your body and mind to reach a goal."],
+    g9_12: ["목적을 달성하기 위해 정신적·육체적 힘을 지속적으로 기울이는 일.", "The sustained use of mental and physical energy to achieve a purpose."],
+  },
+  transport: {
+    g3_5: ["사람이나 물건을 다른 곳으로 옮기는 것이에요.", "Moving people or things from one place to another."],
+    g6_8: ["사람이나 물건을 탈것으로 한 곳에서 다른 곳으로 실어 나르는 일.", "Carrying people or goods from one place to another in a vehicle."],
+    g9_12: ["사람이나 화물을 한 지점에서 다른 지점으로 이동시키는 일, 또는 그 수단과 체계.", "The movement of people or goods from one point to another, or the means and system by which this is done."],
+  },
+};
+export async function lookupLevel(term, band) {
+  const termNorm = term.normalize("NFC").trim().toLowerCase().replace(/\s+/g, " ");
+  const word = read(WORDS_KEY, []).find((w) => w.term_norm === termNorm);
+  const base = word?.content ?? SAMPLES[termNorm] ?? placeholder(termNorm);
+  await new Promise((done) => setTimeout(done, 700));
+  const level = LEVELS[termNorm]?.[band];
+  if (!level) return { valid: true, content: base, word: null, view: band };
+  const [definition_ko, definition_en] = level;
+  const senses = Array.isArray(base.senses) && base.senses.length ? [{ ...base.senses[0], definition_ko, definition_en }, ...base.senses.slice(1)] : base.senses;
+  return { valid: true, content: { ...base, definition_ko, definition_en, senses }, word: null, view: band };
+}
+
 export async function listWords() {
   return read(WORDS_KEY, []).sort((a, b) => b.last_searched_at.localeCompare(a.last_searched_at));
 }

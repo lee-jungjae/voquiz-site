@@ -149,17 +149,18 @@ export async function refreshUser() {
 // -> { valid, content, word }   (word is null when the term is not a real word)
 // A cached word comes back as plain JSON. A new word comes back as a stream of JSON lines while Claude
 // writes it; `onPartial` is called with the entry as far as it has been written.
-export async function lookup(term, onPartial) {
+export async function lookup(term, onPartial, view) { // view: another group's explanation (see lookupLevel)
   const res = await fetch(`${SUPABASE_URL}/functions/v1/lookup`, {
     method: "POST",
     headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${await accessToken()}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ term, grade: getUser().grade }),
+    body: JSON.stringify({ term, grade: getUser().grade, ...(view ? { view } : {}) }),
   });
   const toResult = (data) => ({
     valid: data.valid,
     content: data.content,
     word: data.word && { ...data.word, content: data.content },
     discovered: data.valid && !data.cached && data.word?.discovered === true,
+    view: data.view || null,
   });
 
   if (!(res.headers.get("Content-Type") || "").includes("ndjson")) {
@@ -189,6 +190,15 @@ export async function lookup(term, onPartial) {
     }
     if (done) throw new ApiError("ai_error", 502); // the stream ended without a result
   }
+}
+
+// The same word as it is explained to another group of grades (band: "g3_5" | "g6_8" | "g9_12"),
+// for a word already in the student's list. Only to look at: the server adds nothing to the word
+// list and counts it neither as a search nor as a discovery.
+export async function lookupLevel(term, band, onPartial) {
+  const result = await lookup(term, onPartial, band);
+  if (result.view !== band) throw new ApiError("level_unavailable", 501); // a server from before this existed
+  return result;
 }
 
 const COLUMNS = "term_norm,headword,favorite,search_count,first_searched_at,last_searched_at,needs_review,streak,last_reviewed_at";
