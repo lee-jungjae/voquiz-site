@@ -218,6 +218,15 @@ const SOUNDS = {
   orangutan: () => { times(2, 0.15, (at) => note(380, at, 0.11, { wave: "triangle", gain: 0.12, to: 300, filter: ["bandpass", 800, 2] })); note(520, 0.34, 0.24, { wave: "triangle", gain: 0.12, to: 760, filter: ["bandpass", 1400, 2] }); }, // ooh ooh, aah
   banana: () => { note(1100, 0, 0.26, { to: 380, gain: 0.1 }); boing(520, 0.26, 0.26, { depth: 0.16 }); }, // a slip, then a bounce
   santa: () => { times(3, 0.2, (at, i) => note(200 - i * 14, at, 0.15, { wave: "triangle", gain: 0.15, to: 160 - i * 14, filter: ["lowpass", 700] })); times(4, 0.11, (at) => bell(3136, 0.62 + at, 0.12, 0.035)); }, // ho ho ho, and sleigh bells
+  // earned characters
+  shark: () => { note(98, 0, 0.22, { wave: "triangle", gain: 0.16, filter: ["lowpass", 500] }); note(104, 0.26, 0.22, { wave: "triangle", gain: 0.16, filter: ["lowpass", 500] }); noise(0.5, 0.3, { from: 500, to: 3200, q: 2, gain: 0.07, attack: 0.05 }); }, // dun... dun... splash
+  dragon: () => { note(200, 0, 0.28, { wave: "sawtooth", gain: 0.055, via: [[330, 0.4], [240, 1]], trem: 26, filter: ["lowpass", 1400] }); noise(0.24, 0.4, { from: 1200, to: 4200, q: 1.5, gain: 0.07, attack: 0.06 }); }, // a small roar and a puff of flame
+  bookworm: () => { noise(0, 0.11, { from: 2800, to: 1000, gain: 0.06 }); crunch(0.16, 3400, 0.06); crunch(0.26, 3800, 0.05); pop(1400, 0.38, 0.08); }, // a page, a nibble
+  compass: () => { [0, 0.07, 0.13, 0.18].forEach((at, i) => click(at, 2000 + i * 260, 0.05)); bell(1976, 0.26, 0.4, 0.07); }, // the needle spins and settles
+  popcorn: () => { [0, 0.07, 0.12, 0.2, 0.24, 0.33].forEach((at, i) => pop(700 + ((i * 370) % 900), at, 0.09)); pop(520, 0.44, 0.15); }, // pop pop pop... POP
+  unicorn: () => { [1047, 1319, 1568, 2093, 2637, 3136].forEach((f, i) => bell(f, i * 0.06, 0.34, 0.05)); note(2093, 0.4, 0.3, { to: 3136, gain: 0.04 }); }, // a sparkling run upward
+  cherries: () => times(2, 0.2, (at, i) => { pop(880 + i * 110, at, 0.1); pop(1108 + i * 139, at + 0.02, 0.07); }), // two together, twice
+  giftbox: () => { noise(0, 0.14, { from: 3000, to: 1200, gain: 0.06 }); boing(520, 0.14, 0.24); [1568, 2093, 2637].forEach((f, i) => bell(f, 0.36 + i * 0.05, 0.3, 0.05)); }, // rustle, boing, ta-da
   gummy: () => { boing(520, 0, 0.2, { depth: 0.16 }); boing(650, 0.18, 0.22, { depth: 0.16 }); },
 };
 // A character added later sounds like a little spring until it gets a sound of its own.
@@ -234,6 +243,13 @@ export const sfx = {
   // A right answer: a quick, springy "bo-ing" at the character's own pitch.
   right(id) {
     const f = pitchOf(id);
+    pop(f * 0.8, 0, 0.09);
+    boing(f, 0.05, 0.2, { gain: 0.11 });
+  },
+  // The streak challenge: every right answer of a stage rings one step higher than the last,
+  // so the last one of the stage lands on the octave. k = which answer of the stage (1..step).
+  climb(k, step) {
+    const f = 392 * 2 ** (Math.min(k, step) / step);
     pop(f * 0.8, 0, 0.09);
     boing(f, 0.05, 0.2, { gain: 0.11 });
   },

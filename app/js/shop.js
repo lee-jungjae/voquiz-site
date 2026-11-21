@@ -23,7 +23,15 @@ export const BACKGROUNDS = [
   { id: "aurora", name: "오로라", cost: 700 },
   { id: "stars", name: "별이 빛나는 밤", cost: 1500, special: true }, // moving
   { id: "rainbow", name: "무지개 물결", cost: 2000, special: true }, // moving
+  // Not for sale: given for reaching the week's goal three weeks in a row (app.js, earnSunrise).
+  // While it is the background in use, every word looked up pays a little more.
+  { id: "sunrise", name: "황금 햇살", cost: 0, special: true, earn: "weekly3", added: 19 }, // moving
 ];
+
+// Items carry `added`: the catalogue revision they arrived in. The shop marks an item NEW until
+// the student has opened its tab once since then. Raise this when adding items, and give them
+// the new number.
+export const CATALOG_REV = 19;
 
 export const DEFAULT_SHOP = { owned: [], theme: "purple", bg: "plain", character: "bubble" };
 

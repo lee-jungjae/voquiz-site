@@ -181,6 +181,14 @@ function trickOf(id) {
 // A wrapped present, held up until it is taken.
 const GIFT = `<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="6" y="16" width="28" height="20" rx="4" fill="#ff8fab"/><rect x="4" y="11" width="32" height="8" rx="3" fill="#ffb3c7"/><rect x="17" y="11" width="6" height="25" fill="#ffd166"/><path d="M20 11 q-9 -10 -12 -4 q-1 4 12 4 z M20 11 q9 -10 12 -4 q1 4 -12 4 z" fill="#ffd166" stroke="#e6a700" stroke-width="1.4" stroke-linejoin="round"/></svg>`;
 
+// The wrapped present on its own (the boxes of the daily present).
+export function giftArt() {
+  const el = document.createElement("span");
+  el.className = "gift-art";
+  el.innerHTML = GIFT;
+  return el;
+}
+
 // character: which one to show.  t(key): translates a line of speech.
 // onTap({ combo }): may return a line to say instead.
 // signature: { pops, line } = the character's own trick is on (VOQUIZ Plus).

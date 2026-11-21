@@ -419,7 +419,10 @@ export async function useInvite(code) {
 // Invite only: the demo student is a member unless wb_demo_member says otherwise (to try the gate).
 // For trying the update notice: localStorage wb_demo_version = {"latest":"9.0.0","minimum":"0.1.0"}
 export async function appVersion() { return read("wb_demo_version", null); }
+// For trying server settings: localStorage wb_demo_config = {"streak":{"step":5}}
+export async function appConfig() { return read("wb_demo_config", {}); }
 // For trying notices: localStorage wb_demo_notices = [{"id":1,"kind":"news","title":{"ko":"..."},"body":{"ko":"..."},"action":"shop"}]
+// ("below":"0.1.19" on a notice shows it only to versions under that one; try with ?v=0.1.18 in the address.)
 export async function notices() { return read("wb_demo_notices", []); }
 export async function isMember() { return read("wb_demo_member", true); }
 export async function setDuelFrom() {}

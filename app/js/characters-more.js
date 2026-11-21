@@ -263,4 +263,71 @@ export const MORE_CHARACTERS = [
       '<rect x="64" y="52" width="72" height="13" rx="6.5" fill="#fff" stroke="#e6e9f2" stroke-width="2"/>' +
       '<circle cx="146" cy="50" r="8" fill="#fff" stroke="#e6e9f2" stroke-width="2"/>',
   }),
+  // ===================== earned, not bought =====================
+  // Each is given for a fair amount of one part of the app (earn: what is counted, and how much;
+  // see QUESTS in app.js), so that every part gets used. They cost nothing and cannot be bought.
+  // A shark for duels: a fin on top, a pale belly, a row of little teeth.
+  c("shark", "샤샤", "동물", "쿨함", 0, B.egg, "#7fb2d9", "#4f86b3", {
+    added: 19, earn: { by: "duelWins", goal: 10 },
+    back: shape("M128 96 q26 -8 30 -26 q-2 22 4 34 q-18 -10 -34 -2 z", "#6aa3cf"),
+    deco: ellipse(100, 100, 24, 11, "#f1f9ff") + shape("M84 99 l4 6 l4 -6 l4 6 l4 -6 l4 6 l4 -6 l4 6 l4 -6 z", "#ffffff"),
+    topper: shape("M90 50 q12 -30 26 -24 q-6 12 -2 24 z", "#5f95c2"),
+  }),
+  // A baby dragon for the streak challenge: small wings, two horns, a puff of flame.
+  c("dragon", "화르", "동물", "멋짐", 0, B.blob, "#ff8a5c", "#d95f36", {
+    added: 19, earn: { by: "streak", goal: 30 },
+    back:
+      shape("M64 80 q-30 -24 -34 8 q10 -8 14 2 q8 -8 20 4 z", "#ffb38f") +
+      shape("M136 80 q30 -24 34 8 q-10 -8 -14 2 q-8 -8 -20 4 z", "#ffb38f"),
+    deco: ellipse(100, 100, 17, 9, "#ffe2c2"),
+    topper:
+      shape("M82 52 l-4 -14 l12 8 z M118 52 l4 -14 l-12 8 z", "#ffd166") +
+      shape("M142 64 q10 -10 6 -20 q10 8 8 20 q-4 8 -14 0 z", "#ffb020") + shape("M146 62 q4 -5 3 -10 q5 5 4 11 q-3 3 -7 -1 z", "#fff1a8"),
+  }),
+  // A bookworm for learned words: round glasses, a segmented tail, two feelers.
+  c("bookworm", "꼬물이", "동물", "귀여움", 0, B.round, "#a6d96a", "#6fa83a", {
+    added: 19, earn: { by: "learned", goal: 50 },
+    back: dots([[138, 100, 15]], "#98cf5c") + dots([[156, 108, 11]], "#8bc54f") + dots([[170, 114, 8]], "#7fba45"),
+    deco:
+      '<g fill="rgba(255,255,255,.35)" stroke="#5b4a3a" stroke-width="2.6"><circle cx="86" cy="82" r="11"/><circle cx="114" cy="82" r="11"/></g>' +
+      line("M97 82 h6", "#5b4a3a", 2.6),
+    topper: line("M92 50 q-6 -12 -12 -12 M108 50 q6 -12 12 -12", "#6fa83a", 2.6) + dots([[80, 38, 3.2], [120, 38, 3.2]], "#ffd166"),
+  }),
+  // A compass for first discoveries: a golden rim with marks, a ring on top, a red needle.
+  c("compass", "나침이", "물건", "쿨함", 0, B.round, "#fdf3d7", "#c9a14a", {
+    added: 19, earn: { by: "found", goal: 10 },
+    stroke: "#c9a14a",
+    deco: ring(8, 27, 1.7, "#c9a14a") + shape("M100 97 l5 7 l-5 12 l-5 -12 z", "#e5484d"),
+    topper: '<circle cx="100" cy="43" r="6.5" fill="none" stroke="#c9a14a" stroke-width="3.5"/>',
+  }),
+  // Popcorn for words looked up: a striped tub with popped corn spilling over.
+  c("popcorn", "팡팡", "디저트", "엽기", 0, B.cup, "#ffffff", "#e23b3b", {
+    added: 19, earn: { by: "words", goal: 200 },
+    stroke: "#f0b4b4",
+    deco: shape("M78 57 h9 l-2 54 h-5 z M97 57 h9 l-1 54 h-7 z M115 57 h9 l-4 54 h-5 z", "#ff8d8d"),
+    topper: dots([[76, 54, 11], [96, 46, 13], [116, 50, 12], [130, 58, 9], [86, 60, 9], [108, 60, 10]], "#fff1b8") + dots([[92, 44, 4], [118, 48, 3.5], [78, 52, 3]], "#ffd98a"),
+  }),
+  // A unicorn for the league: a golden horn, a mane in rainbow colours.
+  c("unicorn", "유니", "동물", "멋짐", 0, B.round, "#ffffff", "#c9b8ee", {
+    added: 19, earn: { by: "league", goal: 5 },
+    stroke: "#e3def5",
+    back: earsPointy("#ffffff", "#ffd3e6") + dots([[64, 64, 10]], "#ff9ecb") + dots([[60, 80, 10]], "#ffd166") + dots([[64, 96, 9]], "#8fd3ff"),
+    deco: dots([[80, 92, 5], [120, 92, 5]], "#ffd3e6"),
+    topper: shape("M100 20 l8 32 h-16 z", "#ffd166") + line("M95 40 l10 -4 M94 48 l12 -5", "#f0b040", 2),
+  }),
+  // Twin cherries for friends: two on one stem.
+  c("cherries", "체리 짝꿍", "식물·과일", "귀여움", 0, B.round, "#e5484d", "#b0282d", {
+    added: 19, earn: { by: "friends", goal: 5 },
+    back: '<circle cx="142" cy="94" r="21" fill="#f0656a"/>' + dots([[148, 88, 3], [156, 88, 3]], "#7a1c20") + line("M146 97 q5 4 10 0", "#7a1c20", 2),
+    deco: shine,
+    topper: line("M100 52 q6 -24 22 -24 M142 74 q-2 -30 -18 -46", "#5b8a3c", 3) + leaf(118, 30, "#7ccf6b"),
+  }),
+  // A present for taking the daily present a week running: a lid, a ribbon and a bow.
+  c("giftbox", "깜짝이", "물건", "귀여움", 0, B.box, "#ff8fab", "#d9577a", {
+    added: 19, earn: { by: "giftDays", goal: 7 },
+    deco: shape("M93 60 h14 v52 h-14 z", "#ffd166"),
+    topper:
+      '<rect x="58" y="46" width="84" height="15" rx="6" fill="#ffb3c7"/>' + shape("M93 46 h14 v15 h-14 z", "#ffd166") +
+      ellipse(86, 38, 12, 8, "#ffd166") + ellipse(114, 38, 12, 8, "#ffd166") + dots([[100, 40, 5]], "#f0b040"),
+  }),
 ];

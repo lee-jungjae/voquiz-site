@@ -9,11 +9,15 @@ export const RETEST_DAYS = 3;
 const DAY = 24 * 60 * 60 * 1000;
 export const isLearned = (word) => Boolean(word.mastered_at);
 export const canRetest = (word, now = Date.now()) => isLearned(word) && now - new Date(word.mastered_at).getTime() >= RETEST_DAYS * DAY;
+// Learned, and neither learned nor asked again in the last RETEST_DAYS: ready for a check-up quiz.
+export const isRested = (word, now = Date.now()) => isLearned(word) &&
+  now - Math.max(new Date(word.mastered_at).getTime(), new Date(word.last_reviewed_at || 0).getTime()) >= RETEST_DAYS * DAY;
 // What to save to put a learned word back into the quizzes.
 export const retestPatch = () => ({ mastered_at: null, streak: 0, typed_ok: false });
 
 // scope: {type:'days', days} | {type:'range', from:'YYYY-MM-DD', to:'YYYY-MM-DD'} | {type:'favorites'} | {type:'all'}
 //        | {type:'review'} = only the words answered wrong and not yet cleared
+//        | {type:'learned'} = a check-up: only learned words that have rested (see isRested)
 export function inScope(word, scope, now = Date.now()) {
   const t = new Date(word.last_searched_at).getTime();
   switch (scope.type) {
@@ -33,13 +37,20 @@ export function inScope(word, scope, now = Date.now()) {
   }
 }
 
-export function buildQuizSet(words, scope, now = Date.now()) {
-  const picked = words.filter((w) => !isLearned(w) && (w.needs_review || inScope(w, scope, now)));
+// Every word the range covers. Learned words are left out, except in the check-up of learned words.
+export function quizPool(words, scope, now = Date.now()) {
+  if (scope.type === "learned") return words.filter((w) => isRested(w, now));
+  return words.filter((w) => !isLearned(w) && (w.needs_review || inScope(w, scope, now)));
+}
+
+// The words of one quiz: the range in random order, cut down to `max` when it holds more.
+export function buildQuizSet(words, scope, now = Date.now(), max = Infinity) {
+  const picked = quizPool(words, scope, now);
   for (let i = picked.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [picked[i], picked[j]] = [picked[j], picked[i]];
   }
-  return picked;
+  return picked.slice(0, Math.max(1, max));
 }
 
 // Returns the fields to save after one answer.
@@ -53,7 +64,7 @@ export function applyAnswer(word, correct, typed = false, now = new Date()) {
     streak,
     typed_ok,
     needs_review: word.needs_review && !learned,
-    mastered_at: learned ? last_reviewed_at : null,
+    mastered_at: learned ? word.mastered_at || last_reviewed_at : null, // a learned word asked again keeps the day it was learned
     last_reviewed_at,
   };
 }
@@ -99,8 +110,7 @@ export function askedContent(word, question) {
   const sense = question?.sense;
   if (!sense) return word.content;
   return { ...word.content, part_of_speech: sense.part_of_speech, counterpart: sense.counterpart || word.content.counterpart,
-    definition_ko: sense.definition_ko, definition_en: sense.definition_en,
-    memory_tip_ko: sense.tip_ko || word.content.memory_tip_ko, memory_tip_en: sense.tip_en || word.content.memory_tip_en };
+    definition_ko: sense.definition_ko, definition_en: sense.definition_en };
 }
 
 // Letter-by-letter comparison of a wrong typed answer with the correct word, so the student sees

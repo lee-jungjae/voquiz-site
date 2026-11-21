@@ -86,5 +86,13 @@ export const CHARACTER_LINES = {
   orangutan: ["우끼끼! 단어 나무를 타고 다녀요", "Ook ook! Swinging through the word trees", "呜呜！在单词树上荡来荡去"],
   banana: ["미끄러지듯 술술 외워져요", "Words slide right in", "单词滑溜溜地记住啦"],
   santa: ["호호호! 착한 단어 친구에게 선물을", "Ho ho ho! Presents for good word friends", "呵呵呵！给乖乖学单词的你送礼物"],
+  shark: ["대결이라면 물러서지 않아", "Never backs away from a duel", "对决从不退缩"],
+  dragon: ["틀리지 않는 한 불꽃은 계속돼", "The flame burns on while I'm right", "只要不答错，火焰就不灭"],
+  bookworm: ["익힌 단어를 야금야금 모아요", "Nibbling up every word I learn", "一口一口啃掉学会的单词"],
+  compass: ["아무도 못 찾은 단어를 가리켜요", "Points to words nobody has found", "指向没人找到过的单词"],
+  popcorn: ["단어를 찾을 때마다 팡! 팡!", "Pop! Pop! with every word I find", "每查一个单词就砰！砰！"],
+  unicorn: ["무지개 리그에서 날아왔어요", "Flew in from the Rainbow League", "从彩虹联赛飞来的"],
+  cherries: ["친구랑 붙어 있어야 더 달콤해", "Sweeter side by side with a friend", "和朋友在一起才更甜"],
+  giftbox: ["매일 열어 봐야 직성이 풀려", "Has to be opened every single day", "每天都想打开看看"],
   milk: ["마시면 단어 키가 쑥쑥", "Drink up and your words grow tall", "喝了单词量蹭蹭长"],
 };

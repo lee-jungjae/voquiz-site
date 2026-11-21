@@ -18,5 +18,6 @@ export const SIGNATURES = {
   pencil: S("✏️ 📝 ✨"), eraser: S("🧽 ✨ 💨"), backpack: S("🎒 📚 ✏️"), clock: S("⏰ ⏳ ✨"), balloon: S("🎈 ☁️ ✨"),
   soccer: S("⚽ 🥅 🏆"), basketball: S("🏀 🏆 ⚡"), headphones: S("🎧 🎵 🎶"), tv: S("📺 🎬 ✨"), sock: S("🧦 🧦 ✨"),
   dice: S("🎲 🍀 ✨"), milk: S("🥛 🐄 ✨"), butterfly: S("🦋 🌸 ✨"), burger: S("🍔 🍟 🥤"), gummy: S("🧸 🍬 💗"),
+  shark: S("🦈 🌊 ⚔️"), dragon: S("🐲 🔥 ✨"), bookworm: S("🐛 📚 👓"), compass: S("🧭 ✦ 🗺️"), popcorn: S("🍿 ✨ 💥"), unicorn: S("🦄 🌈 ✨"), cherries: S("🍒 💗 🍒"), giftbox: S("🎁 🎀 ✨"),
   orangutan: S("🦧 🌴 🍌"), banana: S("🍌 🐒 ✨"), santa: S("🎅 🎁 ❄️"),
 };

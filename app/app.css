@@ -1566,3 +1566,149 @@ html:lang(en) .segment.four button { font-size: 12.5px; }
 .badge.sym { padding: 0; width: 18px; height: 18px; display: inline-grid; place-items: center; border-radius: 50%; font-size: 11px; line-height: 1; margin-left: 6px; vertical-align: 2px; }
 .badge.sym.review { color: #b4530a; background: #fdebd3; }
 .badge.sym.learned { color: var(--accent); background: var(--accent-soft); }
+
+/* ===== streak challenge: stages ===== */
+[data-stage="sprout"] { --stage: #4aa85f; }
+[data-stage="spark"] { --stage: #e09a06; }
+[data-stage="flame"] { --stage: #ee6a2c; }
+[data-stage="bolt"] { --stage: #8b5cf6; }
+[data-stage="storm"] { --stage: #2b7bd3; }
+[data-stage="space"] { --stage: #5257c4; }
+[data-stage="legend"] { --stage: #c48800; }
+/* The whole play area takes the colour of the stage, stronger at the top. */
+body[data-stage] main { position: relative; transition: background .8s;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--stage) 30%, var(--bg)) 0%, color-mix(in srgb, var(--stage) 11%, var(--bg)) 48%, var(--bg) 100%); }
+body[data-stage] main > * { position: relative; z-index: 1; }
+body[data-stage] main > .stage-fx { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.stage-fx i { position: absolute; bottom: -44px; font-style: normal; line-height: 1; opacity: .26; animation: drift-up linear infinite; will-change: transform; }
+@keyframes drift-up {
+  from { transform: translate(0, 0) rotate(-10deg); }
+  50% { transform: translate(16px, -55vh) rotate(10deg); }
+  to { transform: translate(0, -112vh) rotate(-10deg); }
+}
+body[data-stage] .ch-streak { color: var(--stage); }
+body[data-stage] .ch-streak b { text-shadow: 0 0 20px color-mix(in srgb, var(--stage) 50%, transparent); }
+body[data-stage] .ch-best { background: color-mix(in srgb, var(--bg) 82%, transparent); }
+body[data-stage] .choice { background: color-mix(in srgb, var(--bg) 92%, transparent); }
+.ch-stage { display: grid; justify-items: end; line-height: 1.15; text-align: right; }
+.ch-stage i { font-style: normal; font-size: 22px; line-height: 1; }
+.ch-stage b { font-size: 15px; font-weight: 800; color: var(--stage, var(--accent)); }
+.ch-stage small { font-size: 11px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+/* One lamp for every right answer of the stage. */
+.stage-lamps { display: flex; gap: 4px; margin: 12px 0 2px; }
+.stage-lamps i { flex: 1; height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--stage, var(--accent)) 18%, var(--surface)); transition: background .3s, box-shadow .3s; }
+.stage-lamps i.on { background: var(--stage, var(--accent)); box-shadow: 0 0 8px color-mix(in srgb, var(--stage, var(--accent)) 60%, transparent); }
+.stage-lamps i.next { animation: lamp-blink 1s ease-in-out infinite; }
+@keyframes lamp-blink { 50% { background: color-mix(in srgb, var(--stage, var(--accent)) 48%, var(--surface)); } }
+/* A new stage: its sign and name, for a moment. */
+main:has(> .stage-up) { display: flex; flex-direction: column; }
+.stage-up { margin: auto 0; display: grid; justify-items: center; gap: 6px; padding: 30px 16px 26px; border-radius: 28px; text-align: center; color: #fff;
+  background: linear-gradient(140deg, var(--stage), color-mix(in srgb, var(--stage) 62%, #000)); box-shadow: 0 18px 44px color-mix(in srgb, var(--stage) 45%, transparent);
+  animation: stage-in .55s cubic-bezier(.2, 1.5, .4, 1) both; }
+.stage-up-icon { font-size: 68px; line-height: 1; animation: cheer .8s .15s both; }
+.stage-up small { font-size: 13px; font-weight: 800; letter-spacing: .1em; opacity: .85; }
+.stage-up b { font-size: 36px; font-weight: 900; letter-spacing: -.02em; line-height: 1.1; }
+.stage-up p { margin: 0; font-size: 14px; font-weight: 700; color: #fff; }
+.stage-up .stage-up-bonus { margin-top: 6px; padding: 5px 14px; border-radius: 999px; background: rgba(255, 255, 255, .22); font-size: 15px; }
+@keyframes stage-in { from { opacity: 0; transform: scale(.72); } }
+/* The stages ahead, on the start card. */
+.stage-ladder { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 12px; }
+.stage-rung { display: grid; justify-items: center; gap: 1px; padding: 7px 0 6px; border-radius: 10px; min-width: 0; background: color-mix(in srgb, var(--stage) 15%, var(--bg)); }
+.stage-rung i { font-style: normal; font-size: 17px; line-height: 1.15; }
+.stage-rung b { font-size: 10px; font-weight: 700; white-space: nowrap; }
+.stage-rung small { font-size: 10.5px; font-weight: 800; color: var(--stage); }
+
+/* ===== the daily present: three boxes ===== */
+.gift-sheet { gap: 8px; }
+.gift-boxes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 8px 0 10px; }
+.gift-box { position: relative; display: grid; place-items: center; aspect-ratio: 1; border-radius: 20px; border: 2px solid var(--border); background: var(--surface); transition: transform .2s, border-color .2s, opacity .3s;
+  animation: gift-wait 1.6s ease-in-out infinite; animation-delay: calc(var(--i) * .22s); }
+.gift-box:not(:disabled):hover, .gift-box:not(:disabled):focus-visible { border-color: var(--accent); transform: translateY(-3px); }
+.gift-art { width: 62%; display: block; filter: hue-rotate(var(--hue)); transition: transform .35s, opacity .35s; }
+.gift-art svg { display: block; width: 100%; }
+.gift-prize { position: absolute; inset: 0; display: grid; place-items: center; font-size: 22px; font-weight: 900; font-variant-numeric: tabular-nums; opacity: 0; transform: scale(.4); transition: opacity .3s .15s, transform .45s .15s cubic-bezier(.2, 1.6, .4, 1); }
+.gift-sheet .gift-box:disabled { animation: none; cursor: default; }
+.gift-box.mine, .gift-box.other { }
+.opened .gift-box .gift-art { transform: translateY(-46%) scale(.5); opacity: 0; }
+.opened .gift-box .gift-prize { opacity: 1; transform: none; }
+.opened .gift-box.mine { border-color: var(--accent); background: var(--accent-soft); transform: scale(1.06); }
+.opened .gift-box.mine .gift-prize { color: var(--accent); font-size: 26px; }
+.opened .gift-box.other { opacity: .5; }
+.opened .gift-box.other .gift-prize { transition-delay: .7s; color: var(--muted); }
+.opened .gift-box.other .gift-art { transition-delay: .55s; }
+@keyframes gift-wait { 0%, 100% { transform: none; } 50% { transform: translateY(-5px) rotate(-2deg); } }
+
+/* ===== word list: every meaning in the row; grouping switch like the tabs ===== */
+.item .sub.many { white-space: normal; line-height: 1.5; max-height: 3em; overflow: hidden; }
+.item .sub .mean { display: inline-block; margin-right: 9px; white-space: nowrap; }
+.item .sub .mean i { display: inline-grid; place-items: center; width: 15px; height: 15px; margin-right: 3px; border-radius: 50%; background: var(--surface); color: var(--muted); font-style: normal; font-size: 9.5px; font-weight: 800; vertical-align: 1px; }
+.by-toggle { display: inline-flex; gap: 2px; flex: none; }
+.by-toggle button { padding: 4px 8px 3px; font-size: 12.5px; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; transition: color .15s; }
+.by-toggle button:hover { color: var(--text); }
+.by-toggle button[aria-pressed="true"] { color: var(--text); border-bottom-color: var(--text); }
+.quiz-cut { margin: 10px 2px 0; }
+.sense-origin { margin-top: 10px; display: grid; gap: 6px; }
+.sense-origin .tile.syl small:empty { display: none; }
+
+/* ===== weekly league result: a medal in the sheet, paper falling ===== */
+.sheet-medal { display: inline-flex; align-items: center; gap: 10px; }
+.sheet-medal .place.medal { width: 58px; height: 58px; flex: none; }
+.sheet-medal .place.medal svg { width: 100%; height: 100%; }
+.confetti.rain { position: fixed; inset: 0; z-index: 60; overflow: hidden; }
+.confetti.rain i { animation-name: fall-far; }
+@keyframes fall-far { 0% { opacity: 1; transform: translateY(0) rotate(0); } 100% { opacity: 0; transform: translateY(105vh) rotate(720deg); } }
+
+.streak-note { display: flex; justify-content: center; gap: 16px; margin: 12px 0 0; font-size: 12.5px; color: var(--muted); }
+.streak-note b { color: var(--text); font-variant-numeric: tabular-nums; }
+
+.goal-text small:has(.plus-badge) { font-size: 10px; letter-spacing: -.02em; }
+
+/* ===== the background that is earned: a golden sun whose rays turn slowly ===== */
+@property --ray { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+[data-bg="sunrise"] {
+  background:
+    radial-gradient(circle at 50% -6%, rgba(255, 221, 120, .85) 0, rgba(255, 196, 84, .36) 22%, transparent 52%),
+    repeating-conic-gradient(from var(--ray) at 50% -6%, rgba(255, 200, 80, .14) 0 7deg, transparent 7deg 18deg),
+    linear-gradient(180deg, color-mix(in srgb, #ffd35c 26%, var(--bg)) 0%, var(--bg) 62%);
+  animation: sun-turn 70s linear infinite;
+}
+@keyframes sun-turn { to { --ray: 360deg; } }
+.tagline.earn { color: var(--muted); font-weight: 700; white-space: nowrap; }
+
+/* ===== characters that are earned ===== */
+.swatch.quest { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
+.ribbon.quest { background: var(--accent); color: #fff; }
+.swatch.shadow .mascot { filter: brightness(0) opacity(.2); }
+.swatch.shadow .swatch-name { color: var(--muted); letter-spacing: .12em; }
+.swatch .quest-text { color: var(--text); font-weight: 600; }
+.quest-bar { height: 6px; margin: 2px 6px 8px; border-radius: 3px; background: var(--surface); overflow: hidden; }
+.quest-bar i { display: block; height: 100%; border-radius: 3px; background: var(--accent); min-width: 0; }
+.swatch.ready { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
+.swatch.ready .quest-bar i { background: var(--good); }
+.mini.claim { animation: claim-pulse 1.4s ease-in-out infinite; }
+@keyframes claim-pulse { 50% { transform: scale(1.06); } }
+button.points { position: relative; }
+button.points .dot { position: absolute; top: -4px; right: -4px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: #e5484d; color: #fff; font-size: 10px; font-weight: 800; font-style: normal; display: grid; place-items: center; }
+
+/* ===== shop cards: the button sits at the bottom of every card, names may wrap ===== */
+.swatch { display: flex; flex-direction: column; }
+.swatch > :last-child { margin-top: auto; }
+.swatch-name { white-space: normal; overflow: visible; line-height: 1.25; overflow-wrap: anywhere; }
+.swatch .perk { overflow-wrap: anywhere; }
+.tagline.earn { white-space: normal; }
+.swatch .preview { flex: none; }
+/* NEW: on a card, on a tab, on the points pill */
+.new-mark { position: absolute; top: 5px; right: 5px; z-index: 2; padding: 1px 5px; border-radius: 6px; background: #e5484d; color: #fff; font-size: 9px; font-weight: 800; letter-spacing: .04em; }
+.new-dot { display: inline-grid; place-items: center; min-width: 15px; height: 15px; margin-left: 4px; padding: 0 3px; border-radius: 8px; background: #e5484d; color: #fff; font-size: 9px; font-weight: 800; font-style: normal; vertical-align: 2px; }
+
+/* ===== today's search points, word by word ===== */
+.points-sheet { text-align: left; }
+.points-sheet h2 { text-align: center; }
+.points-sheet > p { text-align: center; }
+.points-total { color: var(--good); font-variant-numeric: tabular-nums; }
+.points-log { list-style: none; margin: 2px 0 4px; padding: 0; max-height: 38vh; overflow-y: auto; border-top: 1px solid var(--line); }
+.points-log li { display: flex; align-items: center; gap: 8px; padding: 8px 2px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.points-word { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.points-log b { color: var(--good); font-variant-numeric: tabular-nums; }
+.points-log em { font-style: normal; font-size: 12px; font-weight: 700; color: #b77a00; background: #fff3cf; border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
+.points-none { color: var(--muted); padding: 10px 0; }

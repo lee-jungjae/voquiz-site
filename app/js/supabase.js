@@ -258,9 +258,16 @@ export const claimDuel = (id) => rpc("claim_duel", { p_id: id });
 // The newest version of the app and the oldest still allowed: { latest, minimum }. Asked without
 // signing in (needs 0011_app_version.sql).
 export const appVersion = () => request("/rest/v1/rpc/app_version", { method: "POST", body: {}, token: SUPABASE_ANON_KEY });
+// Numbers the server may override (tuning.js): {} when nothing is set. (needs 0018_tuning_and_point_cap.sql)
+export const appConfig = () => request("/rest/v1/rpc/app_config", { method: "POST", body: {}, token: SUPABASE_ANON_KEY });
 // Notices to show now: [{ id, kind: "urgent" | "news", title: { ko, en, zh }, body: {...}, action }]
 // (needs 0012_notices.sql)
-export const notices = () => request("/rest/v1/rpc/active_notices", { method: "POST", body: {}, token: SUPABASE_ANON_KEY });
+// The app says which version it is, so that a notice meant for older versions ("update to ...") is
+// not sent to this one. A database without 0019_notice_versions.sql does not know the argument (404).
+export const notices = (version) => {
+  const ask = (body) => request("/rest/v1/rpc/active_notices", { method: "POST", body, token: SUPABASE_ANON_KEY });
+  return version ? ask({ p_version: version }).catch((err) => (err.status === 404 ? ask({}) : Promise.reject(err))) : ask({});
+};
 // Last week's final points of the other students of a tier: [{ nickname, tag, character, score }]
 export const leagueLastWeek = (tier) => rpc("league_last_week", { p_tier: tier });
 export const duelRankings = (friends = false) =>
