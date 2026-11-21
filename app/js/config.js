@@ -3,3 +3,4 @@ export const SUPABASE_URL = "";
 export const SUPABASE_ANON_KEY = "";
 export const STORE_URL = "";
 export const DOWNLOAD_URL = "";
+export const HOME_URL = "";
