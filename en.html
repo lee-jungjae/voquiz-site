@@ -802,10 +802,11 @@ section.block > h2, .two h2 { line-height: 1.3; }
   <div>
     <span class="eyebrow">Two-language dictionary</span>
     <h2>One search,<br>from meaning to word origin</h2>
-    <p class="sub">That's the real VOQUIZ on the right. Switch words, and tap the covered parts to open them!</p>
+    <p class="sub">That's the real VOQUIZ on the right. Switch words, try “More detail”, and tap the covered parts to open them!</p>
     <div class="legend"><span class="k">In Korean</span><span class="e">In English</span><span class="m">Word origin</span><span class="s">Sayings</span></div>
     <ul>
       <li><b>The meaning in Korean and in English</b>, together, in words that fit your grade</li>
+      <li><b>Easier / More detail</b>: see the same word explained at three levels (G3–5 · G6–8 · G9–12)</li>
       <li>A word with several meanings shows <b>each meaning</b> with its own example</li>
       <li><b>Where the word comes from</b>: its origin, and what each Korean syllable means</li>
       <li><b>Proverbs and four-character idioms</b> too, when one really fits</li>
@@ -1529,7 +1530,7 @@ section.block > h2, .two h2 { line-height: 1.3; }
   <span class="eyebrow">For parents and teachers</span>
   <h2>Made to be safe for students</h2>
   <div class="facts">
-    <div><b>Explanations at grade level</b>From grade 3 to grade 12, each word is explained at the right level in Korean and English together.</div>
+    <div><b>Explanations at grade level</b>From grade 3 to grade 12, each word is explained at the right level in Korean and English together. There are three levels (G3–5, G6–8, G9–12), and a student can switch to an easier or a more detailed one.</div>
     <div><b>No advertising</b>There are no ads, and students' information is never sold.</div>
     <div><b>Invited students only</b>Joining needs an invite code, and friend requests and duels can be turned off in Settings.</div>
     <div><b>Email stays private</b>Rankings and friend lists show only the name a student chooses.</div>
@@ -1651,7 +1652,7 @@ section.block > h2, .two h2 { line-height: 1.3; }
     right: ["정답! 대단해!", "완벽해!", "바로 그거야!"], wrong: "아깝다! 정답은 photosynthesis야.",
     win: (a, b) => `이겼다! ${a} : ${b}`, lose: (a, b) => `아깝다! ${a} : ${b}`, draw: (a, b) => `비겼어! ${a} : ${b}`,
     today: "오늘", yesterday: "어제",
-    dict: { title: "두 언어 사전", art: "rabbit", points: ["한국어로 찾아도, 영어로 찾아도 OK. 한 번에 두 언어로 알려 줘.", "내 학년(G3–G12)에 딱 맞는 쉬운 말로 설명해 줘.", "영어 단어가 어디서 왔는지, 한자어는 글자마다 무슨 뜻인지도 알려 줘서 기억에 쏙 남아.", "뜻이 여러 개면 뜻마다 예문과 함께 따로 보여 줘. 가려진 칸은 눌러서 하나씩 열어 봐."] },
+    dict: { title: "두 언어 사전", art: "rabbit", points: ["한국어로 찾아도, 영어로 찾아도 OK. 한 번에 두 언어로 알려 줘.", "내 학년에 딱 맞는 말로 설명해 줘. 설명은 G3–5, G6–8, G9–12 세 수준이 있고, '더 쉽게 / 더 자세히'로 바꿔 볼 수 있어.", "영어 단어가 어디서 왔는지, 한자어는 글자마다 무슨 뜻인지도 알려 줘서 기억에 쏙 남아.", "뜻이 여러 개면 뜻마다 예문과 함께 따로 보여 줘. 가려진 칸은 눌러서 하나씩 열어 봐."] },
     list: { title: "내 단어장", art: "cupcake", points: ["찾아본 단어가 날짜별, 주별로 알아서 모여. 따로 적을 필요가 없어.", "별을 누르면 즐겨찾기에 쏙.", "틀린 단어는 ↻, 다 익힌 단어는 ✓ 표시가 붙어서 한눈에 보여.", "아무도 찾은 적 없는 단어를 처음 찾으면 ✦ 첫 발견으로 기록돼!"] },
     quiz: { title: "퀴즈와 연속 도전", art: "robot", points: ["내가 찾은 단어로 한 번에 15문제까지 나와. 고르는 문제는 10초, 쓰는 문제는 20초야.", "세 번 연속(한 번은 직접 써서) 맞히면 다 익힌 단어! 축하를 받고 퀴즈에서 졸업해.", "연속 도전은 우리 학년 권장 단어를 틀릴 때까지 쭉! 10문제마다 단계가 올라가고, 하루에 세 번 도전할 수 있어.", "맞히면 내 캐릭터가 같이 신나 하고, 틀리면 위로해 줘."], q: "식물이 햇빛, 물, 이산화탄소로 스스로 양분을 만드는 일." },
     duel: { title: "친구와 대결", art: "fox", points: ["1분, 100초, 3분 중에 시간을 고르고 누가 더 많이 맞히나 겨뤄. 둘 다 똑같은 문제를 풀어서 공정해.", "같은 시간에 접속하지 않아도 돼. 먼저 푼 친구의 기록이 옆에서 같이 달려!", "틀리면 3초 동안 얼음! 빠르고 정확하게.", "친구나 랜덤 상대에게 도전해 봐. 도전권은 3개이고, 쓰면 한 시간에 하나씩 다시 채워져."] },
@@ -1661,7 +1662,7 @@ section.block > h2, .two h2 { line-height: 1.3; }
     right: ["Correct! Awesome!", "Perfect!", "That's the one!"], wrong: "So close! It's photosynthesis.",
     win: (a, b) => `You win! ${a} : ${b}`, lose: (a, b) => `So close! ${a} : ${b}`, draw: (a, b) => `A draw! ${a} : ${b}`,
     today: "Today", yesterday: "Yesterday",
-    dict: { title: "Two-language dictionary", art: "rabbit", points: ["Search in Korean or in English. Either way, you get both languages at once.", "Explained in easy words that fit your grade (G3–G12).", "See where an English word comes from and what each Korean syllable means, so it sticks.", "A word with several meanings shows each one with its own example. Tap the covered parts to open them one by one."] },
+    dict: { title: "Two-language dictionary", art: "rabbit", points: ["Search in Korean or in English. Either way, you get both languages at once.", "Explained in words that fit your grade. There are three levels (G3–5, G6–8, G9–12), and 'Easier / More detail' switches between them.", "See where an English word comes from and what each Korean syllable means, so it sticks.", "A word with several meanings shows each one with its own example. Tap the covered parts to open them one by one."] },
     list: { title: "My word list", art: "cupcake", points: ["Every word you look up is saved by day and by week, all by itself. No writing it down.", "Tap the star to keep a favourite.", "Missed words get a ↻ and learned words a ✓, so you see where you stand at a glance.", "Be the first ever to look a word up and it's recorded as your ✦ discovery!"] },
     quiz: { title: "Quizzes and streaks", art: "robot", points: ["Up to 15 questions from the words you looked up: 10 seconds to pick an answer, 20 to type one.", "Get a word right three times in a row (once by typing it) and it's learned: a little party, and it leaves the quiz.", "In Streak, keep going through your grade's recommended words until you miss. Every 10 answers you reach a new stage, and you get three runs a day.", "Your character cheers when you're right and cheers you up when you're not."], q: "The way plants make their own food from sunlight, water and carbon dioxide." },
     duel: { title: "Duels with friends", art: "fox", points: ["Pick 1 minute, 100 seconds or 3 minutes and see who gets more right. You both get the very same questions.", "No need to be online together: your friend's run races right next to yours!", "Miss one and you freeze for three seconds. Be quick and careful.", "Challenge a friend or a random opponent. You have three challenges, and a used one comes back after an hour."] },
