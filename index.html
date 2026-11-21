@@ -451,6 +451,12 @@ button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(10
 .grown .facts div { font-size: 15px; line-height: 1.6; word-break: keep-all; }
 .grown .facts b { display: block; }
 .steps li { font-size: 17px; }
+.install { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-top: 22px; }
+.install .where { font-size: 14px; color: var(--muted); }
+.alt { margin: 14px 0 0; font-size: 14.5px; color: var(--muted); }
+.alt a { font-weight: 700; white-space: nowrap; }
+.face-card.quest { border-color: #a9d59a; }
+.face-card.quest u { color: var(--good); background: var(--lime); }
 /* ----- reviewed at full width ----- */
 h2, .hero h1 { font-weight: 800; }
 p, li { word-break: keep-all; }
@@ -546,10 +552,10 @@ section.block > h2, .two h2 { line-height: 1.3; }
     <p class="bridge">그래서 VOQUIZ는 이렇게 만들었어</p>
     <ol class="three">
       <li><b>쉽게 찾고</b><span>한국어로 찾아도, 영어로 찾아도 OK</span></li>
-      <li><b>쉽게 외우고</b><span>내 학년에 맞는 쉬운 설명과 기억법</span></li>
+      <li><b>쉽게 외우고</b><span>내 학년에 맞는 쉬운 설명, 어원과 한자 풀이</span></li>
       <li><b>재미있게 테스트</b><span>찾은 단어로 퀴즈 풀고, 친구랑 대결도</span></li>
     </ol>
-    <div class="cta"><a class="btn" href="#try">직접 해 보기</a><a class="btn ghost" href="#start">시작하는 방법</a></div>
+    <div class="cta"><a class="btn" href="#try">직접 해 보기</a><a class="btn ghost" href="#start">설치하기</a></div>
   </div>
   <div class="stage"><span class="float a" aria-hidden="true">A</span><span class="float b" aria-hidden="true">가</span><span class="float c" aria-hidden="true">?</span>
     <span class="say" aria-live="polite">안녕! 나를 눌러 봐</span><span role="button" tabindex="0" aria-label="VOQUIZ" class="mascot " data-art="bubble"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
@@ -613,14 +619,14 @@ section.block > h2, .two h2 { line-height: 1.3; }
 <section class="block two" id="try">
   <div>
     <span class="eyebrow">두 언어 사전</span>
-    <h2>한 번만 찾으면<br>뜻부터 속담까지 한눈에!</h2>
+    <h2>한 번만 찾으면<br>뜻부터 어원까지 한눈에!</h2>
     <p class="sub">옆은 진짜 VOQUIZ 화면이야. 단어를 바꿔 보고, 가려진 칸도 눌러서 열어 봐!</p>
-    <div class="legend"><span class="k">한국어 뜻</span><span class="e">영어 뜻</span><span class="m">더 쉽게 외우기</span><span class="s">속담 · 사자성어</span></div>
+    <div class="legend"><span class="k">한국어 뜻</span><span class="e">영어 뜻</span><span class="m">어원 · 한자 풀이</span><span class="s">속담 · 사자성어</span></div>
     <ul>
       <li><b>한국어 뜻과 영어 뜻</b>을 한 번에, 내 학년에 맞는 쉬운 말로</li>
-      <li><b>더 쉽게 외우기</b>: 영어 어원, 한자어 글자 풀이, 기억법</li>
-      <li><b>예문</b>으로 어떻게 쓰는지 바로 확인</li>
-      <li>관련된 <b>속담과 사자성어</b>까지 (한자 없이 한글로!)</li>
+      <li>뜻이 여러 개인 단어는 <b>뜻마다 따로</b>, 예문도 하나씩</li>
+      <li><b>말이 어디서 왔는지</b>: 영어 어원, 한자어 글자 풀이</li>
+      <li>딱 맞는 <b>속담과 사자성어</b>가 있으면 함께 (한자 없이 한글로!)</li>
     </ul>
   </div>
   <div id="try-dict"></div>
@@ -798,7 +804,7 @@ section.block > h2, .two h2 { line-height: 1.3; }
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><div><b>퀴즈와 연속 도전</b><p>내가 찾은 단어로 퀴즈! 틀린 단어는 맞힐 때까지 다시 나와.</p><span class="more">자세히 보고 해 보기 →</span></div></button>
+</svg></span><div><b>퀴즈와 연속 도전</b><p>내가 찾은 단어로 퀴즈! 세 번 연속 맞히면 다 익힌 단어가 돼.</p><span class="more">자세히 보고 해 보기 →</span></div></button>
     <button type="button" class="card" data-feature="duel"><span class="mascot " data-art="fox" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
   <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"></ellipse>
   <g class="m-tiles">
@@ -854,7 +860,7 @@ section.block > h2, .two h2 { line-height: 1.3; }
       <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"></path><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"></path></g>
     </g>
   </g>
-</svg></span><div><b>친구와 3분 대결</b><p>3분 동안 누가 더 많이 맞히나. 친구 기록이 옆에서 같이 달려!</p><span class="more">자세히 보고 해 보기 →</span></div></button>
+</svg></span><div><b>친구와 대결</b><p>시간을 고르고 누가 더 많이 맞히나. 친구 기록이 옆에서 같이 달려!</p><span class="more">자세히 보고 해 보기 →</span></div></button>
   </div>
 </section>
 
@@ -864,8 +870,11 @@ section.block > h2, .two h2 { line-height: 1.3; }
   <p class="sub">단어를 찾고 퀴즈를 풀면서 포인트를 모으고, 다양한 캐릭터를 수집해 봐.</p>
   <div class="perks">
     <div class="perk"><div class="big">+5</div><b>찾을 때마다 포인트</b><p>단어 하나에 +5점. 퀴즈를 맞히면 더 많이!</p></div>
-    <div class="perk"><div class="big">84</div><b>모으는 캐릭터</b><p>동물, 디저트, 물건까지. 포인트로 내 캐릭터를 골라.</p></div>
-    <div class="perk"><div class="big">#1</div><b>친구들과 랭킹</b><p>포인트, 처음 발견한 단어, 연속 기록, 대결 승수로 겨뤄.</p></div>
+    <div class="perk"><div class="big">95</div><b>모으는 캐릭터</b><p>동물, 디저트, 물건까지. 포인트로 고르거나 도전 과제를 해내고 선물로 받아.</p></div>
+    <div class="perk"><div class="big">#1</div><b>주간 리그와 랭킹</b><p>매주 리그에서 겨뤄. 승급하거나 메달을 따면 선물 포인트도!</p></div>
+    <div class="perk"><div class="big">1000</div><b>매일 선물 뽑기</b><p>상자 셋 중 하나를 골라 봐. 10점부터 1000점까지!</p></div>
+    <div class="perk"><div class="big">7</div><b>연속 도전 단계</b><p>10문제마다 단계가 올라가. 새싹에서 전설까지, 화면도 점수도 달라져!</p></div>
+    <div class="perk"><div class="big">♪</div><b>캐릭터마다 다른 소리</b><p>뽀잉, 꽥꽥, 삐빅! 캐릭터마다 자기 소리가 있어.</p></div>
   </div>
 </section>
 
@@ -1324,9 +1333,14 @@ section.block > h2, .two h2 { line-height: 1.3; }
   <h2>세 단계면 끝!</h2>
   <ol class="steps">
     <li>크롬에 VOQUIZ를 설치하고 Google 계정으로 로그인해.</li>
-    <li>친구에게 받은 초대 코드를 넣어. (초대받은 친구만 쓸 수 있어!)</li>
+    <li>친구에게 받은 초대 코드를 넣고, 가입 선물로 캐릭터 하나를 골라. (초대받은 친구만 쓸 수 있어!)</li>
     <li>궁금한 단어를 찾아봐. 웹페이지에서 단어를 선택하고 우클릭해도 돼.</li>
   </ol>
+  <div class="install">
+    <a class="btn" href="https://chromewebstore.google.com/detail/ofbdlindljeoffhooafjjefebcdpkedi" target="_blank" rel="noopener">크롬 확장 프로그램 설치하기</a>
+    <span class="where">Chrome 웹 스토어에서 설치해. 컴퓨터의 크롬에서 쓸 수 있어.</span>
+  </div>
+  <p class="alt">스토어를 쓸 수 없어? (예: 스토어가 막힌 학교 계정) <a href="install.html#ko">파일로 직접 설치하는 방법 →</a></p>
 </section>
 
 <section class="block grown">
@@ -1405,20 +1419,20 @@ section.block > h2, .two h2 { line-height: 1.3; }
     right: ["정답! 대단해!", "완벽해!", "바로 그거야!"], wrong: "아깝다! 정답은 photosynthesis야.",
     win: (a, b) => `이겼다! ${a} : ${b}`, lose: (a, b) => `아깝다! ${a} : ${b}`, draw: (a, b) => `비겼어! ${a} : ${b}`,
     today: "오늘", yesterday: "어제",
-    dict: { title: "두 언어 사전", art: "rabbit", points: ["한국어로 찾아도, 영어로 찾아도 OK. 한 번에 두 언어로 알려 줘.", "내 학년(G3–G12)에 딱 맞는 쉬운 말로 설명해 줘.", "영어 단어가 어디서 왔는지, 한자어는 글자마다 무슨 뜻인지도 알려 줘서 기억에 쏙 남아.", "기억법과 예문, 속담까지! 가려진 칸은 눌러서 하나씩 열어 봐."] },
-    list: { title: "내 단어장", art: "cupcake", points: ["찾아본 단어가 날짜별로 알아서 모여. 따로 적을 필요가 없어.", "별을 누르면 즐겨찾기에 쏙.", "퀴즈에서 틀린 단어는 '복습 필요'로 표시돼서 놓치지 않아.", "아무도 찾은 적 없는 단어를 처음 찾으면 '내가 발견한 단어'로 기록돼!"] },
-    quiz: { title: "퀴즈와 연속 도전", art: "robot", points: ["내가 찾은 단어로 문제가 나와. 쓰는 문제와 고르는 문제가 섞여 있고, 한 문제에 20초야.", "틀린 단어는 3번 연속으로 맞힐 때까지 다시 나와서 결국 외우게 돼.", "연속 도전은 우리 학년 권장 단어를 틀릴 때까지 쭉! 최고 기록에 도전해 봐.", "맞히면 내 캐릭터가 같이 신나 하고, 틀리면 위로해 줘."], q: "식물이 햇빛, 물, 이산화탄소로 스스로 양분을 만드는 일." },
-    duel: { title: "친구와 3분 대결", art: "fox", points: ["3분 동안 누가 더 많이 맞히나 겨뤄. 둘 다 똑같은 문제를 풀어서 공정해.", "같은 시간에 접속하지 않아도 돼. 먼저 푼 친구의 기록이 옆에서 같이 달려!", "틀리면 3초 동안 얼음! 빠르고 정확하게.", "친구에게 도전하거나, 랜덤 상대와 붙어 볼 수도 있어."] },
+    dict: { title: "두 언어 사전", art: "rabbit", points: ["한국어로 찾아도, 영어로 찾아도 OK. 한 번에 두 언어로 알려 줘.", "내 학년(G3–G12)에 딱 맞는 쉬운 말로 설명해 줘.", "영어 단어가 어디서 왔는지, 한자어는 글자마다 무슨 뜻인지도 알려 줘서 기억에 쏙 남아.", "뜻이 여러 개면 뜻마다 예문과 함께 따로 보여 줘. 가려진 칸은 눌러서 하나씩 열어 봐."] },
+    list: { title: "내 단어장", art: "cupcake", points: ["찾아본 단어가 날짜별, 주별로 알아서 모여. 따로 적을 필요가 없어.", "별을 누르면 즐겨찾기에 쏙.", "틀린 단어는 ↻, 다 익힌 단어는 ✓ 표시가 붙어서 한눈에 보여.", "아무도 찾은 적 없는 단어를 처음 찾으면 ✦ 첫 발견으로 기록돼!"] },
+    quiz: { title: "퀴즈와 연속 도전", art: "robot", points: ["내가 찾은 단어로 한 번에 15문제까지 나와. 고르는 문제는 10초, 쓰는 문제는 20초야.", "세 번 연속(한 번은 직접 써서) 맞히면 다 익힌 단어! 축하를 받고 퀴즈에서 졸업해.", "연속 도전은 우리 학년 권장 단어를 틀릴 때까지 쭉! 10문제마다 단계가 올라가고, 하루에 세 번 도전할 수 있어.", "맞히면 내 캐릭터가 같이 신나 하고, 틀리면 위로해 줘."], q: "식물이 햇빛, 물, 이산화탄소로 스스로 양분을 만드는 일." },
+    duel: { title: "친구와 대결", art: "fox", points: ["1분, 100초, 3분 중에 시간을 고르고 누가 더 많이 맞히나 겨뤄. 둘 다 똑같은 문제를 풀어서 공정해.", "같은 시간에 접속하지 않아도 돼. 먼저 푼 친구의 기록이 옆에서 같이 달려!", "틀리면 3초 동안 얼음! 빠르고 정확하게.", "친구나 랜덤 상대에게 도전해 봐. 도전권은 3개이고, 쓰면 한 시간에 하나씩 다시 채워져."] },
   } : {
     more: "See more and try it →", close: "Close", guide: "About", tryIt: "Try it yourself",
     reveal: "Tap to see", again: "Try again", start: "Start the duel!", restart: "One more", me: "Me", rival: "Harin",
     right: ["Correct! Awesome!", "Perfect!", "That's the one!"], wrong: "So close! It's photosynthesis.",
     win: (a, b) => `You win! ${a} : ${b}`, lose: (a, b) => `So close! ${a} : ${b}`, draw: (a, b) => `A draw! ${a} : ${b}`,
     today: "Today", yesterday: "Yesterday",
-    dict: { title: "Two-language dictionary", art: "rabbit", points: ["Search in Korean or in English. Either way, you get both languages at once.", "Explained in easy words that fit your grade (G3–G12).", "See where an English word comes from and what each Korean syllable means, so it sticks.", "Memory tips, examples and sayings too. Tap the covered parts to open them one by one."] },
-    list: { title: "My word list", art: "cupcake", points: ["Every word you look up is saved by day, all by itself. No writing it down.", "Tap the star to keep a favourite.", "Words you miss in a quiz are marked for review, so none slip away.", "Be the first ever to look a word up and it's recorded as your discovery!"] },
-    quiz: { title: "Quizzes and streaks", art: "robot", points: ["Questions come from the words you looked up: some to type, some to pick, 20 seconds each.", "A word you miss keeps coming back until you get it right three times in a row.", "In the streak challenge, keep going through your grade's recommended words until you miss. Beat your best!", "Your character cheers when you're right and cheers you up when you're not."], q: "The way plants make their own food from sunlight, water and carbon dioxide." },
-    duel: { title: "3-minute duels", art: "fox", points: ["See who gets more right in three minutes. You both get the very same questions.", "No need to be online together: your friend's run races right next to yours!", "Miss one and you freeze for three seconds. Be quick and careful.", "Challenge a friend, or take on a random opponent."] },
+    dict: { title: "Two-language dictionary", art: "rabbit", points: ["Search in Korean or in English. Either way, you get both languages at once.", "Explained in easy words that fit your grade (G3–G12).", "See where an English word comes from and what each Korean syllable means, so it sticks.", "A word with several meanings shows each one with its own example. Tap the covered parts to open them one by one."] },
+    list: { title: "My word list", art: "cupcake", points: ["Every word you look up is saved by day and by week, all by itself. No writing it down.", "Tap the star to keep a favourite.", "Missed words get a ↻ and learned words a ✓, so you see where you stand at a glance.", "Be the first ever to look a word up and it's recorded as your ✦ discovery!"] },
+    quiz: { title: "Quizzes and streaks", art: "robot", points: ["Up to 15 questions from the words you looked up: 10 seconds to pick an answer, 20 to type one.", "Get a word right three times in a row (once by typing it) and it's learned: a little party, and it leaves the quiz.", "In Streak, keep going through your grade's recommended words until you miss. Every 10 answers you reach a new stage, and you get three runs a day.", "Your character cheers when you're right and cheers you up when you're not."], q: "The way plants make their own food from sunlight, water and carbon dioxide." },
+    duel: { title: "Duels with friends", art: "fox", points: ["Pick 1 minute, 100 seconds or 3 minutes and see who gets more right. You both get the very same questions.", "No need to be online together: your friend's run races right next to yours!", "Miss one and you freeze for three seconds. Be quick and careful.", "Challenge a friend or a random opponent. You have three challenges, and a used one comes back after an hour."] },
   };
 
   // The real VOQUIZ app, running in try-out mode inside a frame (nothing is sent to a server;
@@ -1446,7 +1460,7 @@ section.block > h2, .two h2 { line-height: 1.3; }
   const WHERE = {
     dict: () => live(`q=${encodeURIComponent("photosynthesis")}`, [["photosynthesis", `q=${encodeURIComponent("photosynthesis")}`], ["friend", "q=friend"], ["노력", `q=${encodeURIComponent("노력")}`]]),
     list: () => live("tab=words"),
-    quiz: () => live("tab=quiz&mode=review", [[ko ? "단어장 퀴즈" : "Word-list quiz", "tab=quiz&mode=review"], [ko ? "연속 도전" : "Streak challenge", "tab=quiz&mode=streak"]]),
+    quiz: () => live("tab=quiz&mode=review", [[ko ? "단어장 퀴즈" : "Word quiz", "tab=quiz&mode=review"], [ko ? "연속 도전" : "Streak", "tab=quiz&mode=streak"]]),
     duel: () => live("tab=quiz&mode=duel"),
   };
   $("#try-dict")?.append(live(`q=${encodeURIComponent("노력")}`, [["노력", `q=${encodeURIComponent("노력")}`], ["photosynthesis", "q=photosynthesis"], ["friend", "q=friend"]]));
@@ -1472,8 +1486,8 @@ section.block > h2, .two h2 { line-height: 1.3; }
 
   // ----- every character: the ones on the shelf in colour, the rest as shadows to look forward to -----
   const A = ko
-    ? { title: "VOQUIZ의 친구들", sub: "색이 보이는 친구는 지금 만날 수 있어. 그림자 친구는 포인트를 모아서 만나 봐! 눌러 보면 이름을 살짝 알려 줄게.", met: (n, all) => `${n} / ${all} 공개`, secret: "???", special: "스페셜", all: (n) => `${n}종 모두 보기`, pick: "이 친구로 바꾸기" }
-    : { title: "The VOQUIZ characters", sub: "The ones in colour you can meet right now. The shadows are waiting: collect points to meet them! Tap one and it will whisper its name.", met: (n, all) => `${n} / ${all} revealed`, secret: "???", special: "Special", all: (n) => `See all ${n}`, pick: "Use this one" };
+    ? { title: "VOQUIZ의 친구들", sub: "색이 보이는 친구는 지금 만날 수 있어. 그림자 친구는 포인트를 모으거나 도전 과제를 해내면 만날 수 있어! 눌러 보면 이름을 살짝 알려 줄게.", quest: "도전 과제", prize: "해내면 선물!", met: (n, all) => `${n} / ${all} 공개`, secret: "???", special: "스페셜", all: (n) => `${n}종 모두 보기`, pick: "이 친구로 바꾸기" }
+    : { title: "The VOQUIZ characters", sub: "The ones in colour you can meet right now. The shadows are waiting: collect points or finish a quest to meet them! Tap one and it will whisper its name.", quest: "Quest", prize: "A prize to earn!", met: (n, all) => `${n} / ${all} revealed`, secret: "???", special: "Special", all: (n) => `See all ${n}`, pick: "Use this one" };
   const KNOWN = [...document.querySelectorAll(".pick")].map((pick) => pick.getAttribute("aria-label"));
   fetch("chars.json").then((r) => r.json()).then((chars) => {
     const name = (c) => (ko ? c.ko : c.en);
@@ -1500,7 +1514,7 @@ section.block > h2, .two h2 { line-height: 1.3; }
         el(`<div class="all-grid"></div>`));
       for (const c of order) {
         const known = KNOWN.includes(c.id);
-        const card = el(`<button type="button" class="face-card${known ? "" : " secret"}${c.special ? " special" : ""}">${c.special ? `<u>${A.special}</u>` : ""}${art(c, known)}<b>${known ? name(c) : A.secret}</b><small>${known ? A.pick : (c.cost ? `● ${c.cost}` : "")}</small></button>`);
+        const card = el(`<button type="button" class="face-card${known ? "" : " secret"}${c.special ? " special" : ""}${c.quest ? " quest" : ""}">${c.special ? `<u>${A.special}</u>` : c.quest ? `<u>${A.quest}</u>` : ""}${art(c, known)}<b>${known ? name(c) : A.secret}</b><small>${known ? A.pick : c.quest ? A.prize : (c.cost ? `● ${c.cost}` : "")}</small></button>`);
         card.addEventListener("click", () => {
           if (known) {
             // onto the stage

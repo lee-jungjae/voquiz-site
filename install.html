@@ -7,90 +7,867 @@
 <title>VOQUIZ 설치하기</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128' aria-hidden='true'> <rect width='128' height='128' rx='28' fill='%23655f9f'/> <path d='M64 30 v-10 M64 22 q-11 -9 -16 0 q9 6 16 0 M64 22 q11 -9 16 0 q-9 6 -16 0' fill='%23bbd86b' stroke='%2323552b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/> <path d='M50 30 h28 a30 30 0 0 1 30 30 v10 a30 30 0 0 1 -30 30 h-22 l-17 15 l3 -17 a30 30 0 0 1 -22 -28 v-10 a30 30 0 0 1 30 -30 z' fill='%23d6d2f0'/> <ellipse cx='39' cy='79' rx='8' ry='5' fill='%23ff8fab' opacity='.75'/><ellipse cx='89' cy='79' rx='8' ry='5' fill='%23ff8fab' opacity='.75'/> <circle cx='48' cy='66' r='7' fill='%232e2a47'/><circle cx='80' cy='66' r='7' fill='%232e2a47'/> <circle cx='50.5' cy='63.5' r='2.4' fill='%23fff'/><circle cx='82.5' cy='63.5' r='2.4' fill='%23fff'/> <path d='M57 77 q7 7 14 0' fill='none' stroke='%232e2a47' stroke-width='3.4' stroke-linecap='round'/> </svg>">
 <style>
-  :root { --accent: #655f9f; --ink: #2b2840; --muted: #6f6b85; --line: #e7e5ef; --surface: #f6f5fb; }
-  * { box-sizing: border-box; }
-  body { margin: 0; font: 16px/1.6 -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; color: var(--ink); background: #fff; word-break: keep-all; }
-  main { max-width: 640px; margin: 0 auto; padding: 40px 20px 64px; }
-  .lang { text-align: right; font-size: 14px; }
-  .lang button { font: inherit; border: 0; background: none; color: var(--muted); cursor: pointer; padding: 2px 6px; }
-  .lang button[aria-pressed="true"] { color: var(--accent); font-weight: 700; }
-  h1 { font-size: 30px; letter-spacing: -.02em; margin: 14px 0 8px; }
-  h1 span { color: var(--accent); }
-  p.lead { color: var(--muted); margin: 0 0 24px; }
-  a.get { display: block; text-align: center; text-decoration: none; background: var(--accent); color: #fff; font-weight: 700; font-size: 17px; border-radius: 16px; padding: 16px; }
-  a.get small { display: block; font-weight: 500; font-size: 13px; opacity: .85; }
-  h2 { font-size: 18px; margin: 34px 0 10px; }
-  ol { margin: 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: 10px; }
-  ol li { counter-increment: step; display: flex; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--surface); }
-  ol li::before { content: counter(step); flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; font-size: 13px; display: grid; place-items: center; margin-top: 1px; }
-  code { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; font-size: 14px; }
-  .note { margin-top: 22px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; font-size: 14.5px; color: var(--muted); }
-  .note b { color: var(--ink); }
-  .note ul { margin: 6px 0 0; padding-left: 18px; }
-  [data-l] { display: none; }
-  html[lang="ko"] [data-l="ko"], html[lang="en"] [data-l="en"] { display: revert; }
-  html[lang="ko"] ol[data-l="ko"], html[lang="en"] ol[data-l="en"] { display: grid; }
-  html[lang="ko"] a[data-l="ko"], html[lang="en"] a[data-l="en"] { display: block; }
+:root { --accent: #655f9f; --accent-dark: #574f82; --lime: #bbd86b; --good: #23552b; --text: #222; --bg: #fff; --surface: #f6f5fb; --line: #e9e7f1; --muted: #6f6b85; --m-ink: #2e2a47; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; font: 16px/1.7 -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", "Segoe UI", sans-serif; color: var(--text); background: var(--bg); }
+a { color: var(--accent); }
+.wrap { max-width: 920px; margin: 0 auto; padding: 0 22px; }
+header.top { display: flex; align-items: center; gap: 10px; padding: 18px 0; }
+.brand { display: inline-flex; align-items: center; gap: 8px; color: var(--accent); text-decoration: none; }
+.brand .icon svg { display: block; width: 38px; height: 38px; }
+.brand .word svg { display: block; height: 34px; width: auto; }
+.lang { margin-left: auto; display: inline-flex; padding: 3px; border-radius: 999px; background: var(--surface); }
+.lang a { text-decoration: none; padding: 5px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.lang a.on { background: var(--bg); color: var(--text); box-shadow: 0 1px 4px rgba(0, 0, 0, .12); }
+
+.hero { display: grid; grid-template-columns: 1.15fr .85fr; gap: 24px; align-items: center; padding: 34px 0 30px; }
+.hero h1 { font-size: 40px; line-height: 1.22; letter-spacing: -.03em; margin: 0 0 14px; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.lead { font-size: 17px; color: var(--muted); margin: 0; max-width: 34em; word-break: keep-all; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.tags span { border: 1px solid var(--line); border-radius: 999px; padding: 5px 13px; font-size: 13px; font-weight: 600; }
+.tags span.fill { background: var(--accent); border-color: var(--accent); color: #fff; }
+.stage { position: relative; border-radius: 28px; background: var(--surface); padding: 46px 10px 18px; text-align: center; }
+.stage .mascot { display: block; width: 210px; max-width: 80%; margin: 0 auto; cursor: default; }
+.say { position: absolute; left: 50%; top: 16px; transform: translateX(-50%); white-space: nowrap; background: var(--text); color: #fff; border-radius: 999px; padding: 6px 15px; font-size: 14px; font-weight: 700; animation: say-in .6s cubic-bezier(.3, 1.5, .5, 1) .4s both; }
+.say::after { content: ""; position: absolute; left: 50%; bottom: -4px; width: 10px; height: 10px; background: inherit; transform: translateX(-50%) rotate(45deg); border-radius: 2px; }
+@keyframes say-in { from { opacity: 0; transform: translate(-50%, 8px) scale(.8); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
+
+h2 { font-size: 24px; letter-spacing: -.02em; margin: 46px 0 6px; }
+h2 + .sub { color: var(--muted); margin: 0 0 16px; }
+.cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.card { display: flex; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: 20px; padding: 14px 18px 14px 8px; transition: transform .2s, box-shadow .2s; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(101, 95, 159, .14); }
+.card .mascot { flex: none; width: 96px; margin: 0; cursor: default; }
+.card b { display: block; font-size: 17px; margin-bottom: 2px; }
+.card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--muted); word-break: keep-all; }
+.shelf { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; border-radius: 24px; background: var(--surface); padding: 18px 12px 10px; }
+.shelf .mascot { width: 100%; margin: 0; cursor: default; }
+.steps { list-style: none; counter-reset: step; margin: 0; padding: 0; display: grid; gap: 10px; }
+.steps li { counter-increment: step; display: flex; gap: 12px; align-items: flex-start; word-break: keep-all; }
+.steps li::before { content: counter(step); flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 13px; font-weight: 800; display: grid; place-items: center; margin-top: 2px; }
+.note { border: 1.5px dashed var(--accent); border-radius: 20px; padding: 16px 18px; font-size: 15px; background: color-mix(in srgb, var(--accent) 5%, transparent); word-break: keep-all; }
+footer { margin-top: 56px; padding: 22px 0 46px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+
+/* the privacy policy */
+.doc { max-width: 760px; padding-bottom: 20px; }
+.doc h1 { font-size: 30px; letter-spacing: -.02em; margin: 26px 0 8px; }
+.doc h2 { font-size: 19px; margin: 34px 0 8px; }
+.doc p, .doc li { color: #3b3852; }
+.doc ul { padding-left: 20px; margin: 6px 0; }
+.doc table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 8px 0; }
+.doc th, .doc td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: 9px 8px; }
+.doc th { color: var(--muted); font-weight: 600; white-space: nowrap; }
+.doc .lead { font-size: 15px; }
+
+@media (max-width: 700px) {
+  .hero { grid-template-columns: 1fr; padding-top: 18px; }
+  .hero h1 { font-size: 31px; }
+  .cards { grid-template-columns: 1fr; }
+  .shelf { grid-template-columns: repeat(4, 1fr); }
+  .brand .word svg { height: 28px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+.mascot { display: block; width: 170px; margin: 14px auto 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.mascot svg { display: block; width: 100%; height: auto; overflow: visible; }
+.mascot .m-body { fill: var(--accent); }
+.mascot .m-arm, .mascot .m-leg { fill: none; stroke: var(--accent-dark); stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
+.mascot .m-eyes circle { fill: #fff; }
+.mascot .m-smile { fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; }
+.mascot .m-cheek { fill: #fff; opacity: .25; }
+.mascot .m-shadow { fill: var(--text); opacity: .1; transform-box: fill-box; transform-origin: center; animation: m-shadow 1.2s ease-in-out infinite; }
+.mascot .m-tile rect { fill: var(--lime); }
+.mascot .m-tile.t2 rect { fill: #fff; stroke: var(--accent); stroke-width: 2; }
+.mascot .m-tile.t3 rect { fill: var(--good); }
+.mascot .m-tile text { font: 800 13px/1 -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; text-anchor: middle; fill: #23552b; }
+.mascot .m-tile.t2 text { fill: var(--accent); }
+.mascot .m-tile.t3 text { fill: #fff; }
+.mascot .m-bob { animation: m-bob 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center bottom; }
+.mascot .m-eyes { transform-box: fill-box; transform-origin: center; animation: m-blink 4s infinite; }
+.mascot .m-arm { transform-box: fill-box; }
+.mascot .m-arm.l { transform-origin: 100% 100%; animation: m-toss 1.2s ease-in-out infinite; }
+.mascot .m-arm.r { transform-origin: 0% 100%; animation: m-toss-r 1.2s ease-in-out infinite; animation-delay: -.6s; }
+.mascot .m-leg.l { animation: m-step 1.2s ease-in-out infinite; }
+.mascot .m-leg.r { animation: m-step 1.2s ease-in-out infinite; animation-delay: -.6s; }
+.mascot .m-tile { animation: m-juggle 2.4s linear infinite; }
+.mascot .m-tile.t2 { animation-delay: -.8s; }
+.mascot .m-tile.t3 { animation-delay: -1.6s; }
+.mascot.jump svg { animation: m-jump .6s cubic-bezier(.3, 1.6, .5, 1); }
+.mascot { width: 150px; margin-top: 8px; }
+.mascot { position: relative; user-select: none; touch-action: manipulation; }
+.mascot svg { transform-origin: 50% 92%; transition: transform .15s; }
+.mascot .m-eyes-happy, .mascot .m-laugh { display: none; }
+.mascot .m-eyes-happy path { fill: none; stroke: #fff; stroke-width: 3.2; stroke-linecap: round; }
+.mascot .m-laugh { fill: #fff; }
+.mascot.happy .m-eyes, .mascot.happy .m-smile { display: none; }
+.mascot.happy .m-eyes-happy, .mascot.happy .m-laugh { display: block; }
+.mascot.happy .m-cheek { opacity: .5; }
+.mascot.happy .m-tile { animation-duration: 1.1s; }
+.mascot.jump svg { animation: m-jump .6s cubic-bezier(.3, 1.6, .5, 1); }
+.mascot.spin svg { animation: m-spin .7s cubic-bezier(.3, .9, .3, 1); transform-origin: 50% 60%; }
+.mascot.wiggle svg { animation: m-wiggle .7s ease-in-out; }
+.mascot.squish svg { animation: m-squish .6s cubic-bezier(.3, 1.5, .5, 1); }
+.mascot.stretch svg { animation: m-stretch .6s cubic-bezier(.3, 1.5, .5, 1); }
+.mascot.flip svg { animation: m-flip .75s cubic-bezier(.4, 0, .2, 1); transform-origin: 50% 60%; }
+.mascot.party svg { animation: m-party 1.2s cubic-bezier(.3, 1, .4, 1); }
+.mascot { --m-ink: #2e2a47; }
+.mascot .m-body { fill: color-mix(in srgb, var(--accent) 62%, #fff); }
+.mascot .m-arm, .mascot .m-leg { stroke: color-mix(in srgb, var(--accent) 85%, #000); stroke-width: 4; }
+.mascot .m-shine { fill: none; stroke: #fff; stroke-width: 4; stroke-linecap: round; opacity: .45; }
+.mascot .m-sprout { fill: var(--lime); stroke: var(--good); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transform-box: fill-box; transform-origin: 50% 100%; animation: m-sway 2.4s ease-in-out infinite; }
+.mascot .m-eyes circle { fill: var(--m-ink); }
+.mascot .m-eyes .m-glint { fill: #fff; }
+.mascot .m-eyes-happy path { stroke: var(--m-ink); stroke-width: 3.4; }
+.mascot .m-smile { stroke: var(--m-ink); stroke-width: 2.6; }
+.mascot .m-cheek { fill: #ff8fab; opacity: .65; }
+.mascot.happy .m-cheek { opacity: .95; }
+.mascot .m-laugh { fill: var(--m-ink); }
+.mascot .m-laugh .m-tongue { fill: #ff8fab; }
+.mascot .m-tile.t3 rect { fill: #ffd166; }
+.mascot .m-tile.t3 text { fill: #6b4a00; }
+.mascot .m-tile.t2 rect { stroke: color-mix(in srgb, var(--accent) 62%, #fff); }
+.mascot.happy .m-sprout { animation-duration: .5s; }
+.mascot .e, .mascot .mo { display: none; }
+.mascot:not([data-eyes]) .e-default, .mascot[data-eyes="default"] .e-default,
+.mascot[data-eyes="wide"] .e-wide, .mascot[data-eyes="wink"] .e-wink, .mascot[data-eyes="happy"] .e-happy,
+.mascot[data-eyes="closed"] .e-closed, .mascot[data-eyes="laugh"] .e-laugh, .mascot[data-eyes="dizzy"] .e-dizzy,
+.mascot[data-eyes="heart"] .e-heart, .mascot[data-eyes="star"] .e-star { display: block; }
+.mascot:not([data-mouth]) .mo-smile, .mascot[data-mouth="smile"] .mo-smile, .mascot[data-mouth="cat"] .mo-cat,
+.mascot[data-mouth="wavy"] .mo-wavy, .mascot[data-mouth="o"] .mo-o, .mascot[data-mouth="yawn"] .mo-yawn,
+.mascot[data-mouth="laugh"] .mo-laugh { display: block; }
+.mascot .e circle { fill: var(--m-ink); }
+.mascot .e .m-glint { fill: #fff; }
+.mascot .line { fill: none; stroke: var(--m-ink); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+.mascot .mo-cat, .mascot .mo-wavy { stroke-width: 2.6; }
+.mascot .e-heart path { fill: #f0486b; }
+.mascot .e-star path { fill: #ffc12b; stroke: #e39a00; stroke-width: 1; stroke-linejoin: round; }
+.mascot .mo-o, .mascot .mo-yawn ellipse, .mascot .mo-laugh path { fill: var(--m-ink); }
+.mascot .mo .m-tongue { fill: #ff8fab !important; }
+.mascot .e-heart { transform-box: fill-box; transform-origin: center; animation: m-beat .5s ease-in-out infinite; }
+.mascot .e-star { transform-box: fill-box; transform-origin: center; animation: m-twinkle .6s ease-in-out infinite; }
+.mascot .e-dizzy { transform-box: fill-box; transform-origin: center; animation: m-woozy .5s linear infinite; }
+.mascot .mo-yawn { transform-box: fill-box; transform-origin: center top; animation: m-yawn 1.6s ease-in-out both; }
+.mascot .m-cheek { transform-box: fill-box; transform-origin: center; transition: transform .2s, opacity .2s; }
+.mascot[data-blush="1"] .m-cheek { opacity: 1; transform: scale(1.35); }
+.mascot .m-look { transition: transform .25s cubic-bezier(.3, 1.4, .5, 1); }
+.mascot[data-look="l"] .m-look { transform: translateX(-4px); }
+.mascot[data-look="r"] .m-look { transform: translateX(4px); }
+.mascot[data-look="u"] .m-look { transform: translateY(-3px); }
+.mascot[data-eyes]:not([data-eyes="default"]) .m-tile { animation-duration: 1.3s; }
+.mascot[data-eyes="closed"] .m-tile { animation-duration: 3.4s; }
+.mascot.shrink svg { animation: m-shrink 1s cubic-bezier(.3, 1.4, .5, 1); }
+.mascot.pop svg { animation: m-startle .6s cubic-bezier(.3, 1.8, .5, 1); }
+.mascot.sway svg { animation: m-sway-body 1.6s ease-in-out; }
+.mascot.shake svg { animation: m-shake .6s linear; }
+.mascot.tilt svg { animation: m-tilt .9s cubic-bezier(.3, 1.4, .5, 1); }
+.mascot.bounce svg { animation: m-bounce .9s cubic-bezier(.3, 1.3, .5, 1); }
+.mascot.hop svg { animation: m-hop .6s cubic-bezier(.3, 1.5, .5, 1); }
+.mascot .m-pose { display: block; transform-origin: 50% 92%; transition: transform .45s cubic-bezier(.3, 1.3, .5, 1); }
+.mascot .m-tiles, .mascot .m-legs, .mascot .m-arm { transition: opacity .3s; }
+.mascot { --accent: #655f9f; --accent-dark: #574f82; --lime: #bbd86b; --good: #23552b; }
+@keyframes m-bob { 0%, 100% { transform: translateY(0) scale(1, 1); } 50% { transform: translateY(3px) scale(1.04, .96); } }
+@keyframes m-shadow { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(1.12); } }
+@keyframes m-blink { 0%, 44%, 50%, 100% { transform: scaleY(1); } 47% { transform: scaleY(.1); } }
+@keyframes m-toss { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-12deg); } }
+@keyframes m-toss-r { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(12deg); } }
+@keyframes m-step { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes m-juggle {
+  0% { transform: translate(60px, 46px) rotate(-10deg); }
+  14% { transform: translate(72px, 20px) rotate(8deg); }
+  28% { transform: translate(90px, 6px) rotate(16deg); }
+  42% { transform: translate(110px, 6px) rotate(8deg); }
+  56% { transform: translate(128px, 20px) rotate(-6deg); }
+  70% { transform: translate(140px, 46px) rotate(-14deg); }
+  85% { transform: translate(100px, 40px) rotate(-4deg); }
+  100% { transform: translate(60px, 46px) rotate(-10deg); }
+}
+@keyframes m-jump { 0% { transform: translateY(0); } 40% { transform: translateY(-18px) rotate(-4deg); } 100% { transform: translateY(0); } }
+@keyframes m-spin { to { transform: rotate(360deg); } }
+@keyframes m-wiggle { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(-12deg); } 40% { transform: rotate(11deg); } 60% { transform: rotate(-8deg); } 80% { transform: rotate(6deg); } }
+@keyframes m-squish { 0%, 100% { transform: scale(1); } 35% { transform: scale(1.22, .72); } 65% { transform: scale(.92, 1.1); } }
+@keyframes m-stretch { 0%, 100% { transform: scale(1); } 40% { transform: scale(.8, 1.28) translateY(-8px); } 70% { transform: scale(1.06, .95); } }
+@keyframes m-flip { 0% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-26px) rotate(-180deg); } 100% { transform: translateY(0) rotate(-360deg); } }
+@keyframes m-party { 0% { transform: translateY(0) rotate(0) scale(1); } 20% { transform: translateY(-22px) rotate(-10deg) scale(1.08); } 40% { transform: translateY(0) rotate(8deg) scale(1.05, .92); } 60% { transform: translateY(-16px) rotate(-6deg) scale(1.06); } 80% { transform: translateY(0) rotate(4deg) scale(1.03, .95); } 100% { transform: translateY(0) rotate(0) scale(1); } }
+@keyframes m-pop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.3); } 20% { opacity: 1; transform: translate(calc(-50% + var(--dx) * .4), calc(-50% + var(--dy) * .5)) scale(1.25) rotate(var(--turn)); } 100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.8) rotate(var(--turn)); } }
+@keyframes m-say { 0% { opacity: 0; transform: translate(-50%, 6px) scale(.8); } 12%, 80% { opacity: 1; transform: translate(-50%, -6px) scale(1); } 100% { opacity: 0; transform: translate(-50%, -12px) scale(.95); } }
+@keyframes m-sway { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+@keyframes m-beat { 50% { transform: scale(1.25); } }
+@keyframes m-twinkle { 50% { transform: scale(1.2) rotate(12deg); } }
+@keyframes m-woozy { to { transform: rotate(360deg); } }
+@keyframes m-yawn { 0%, 100% { transform: scale(.4, .3); } 35%, 70% { transform: scale(1); } }
+@keyframes m-shrink { 0%, 100% { transform: scale(1) rotate(0); } 30%, 75% { transform: scale(.86) rotate(-7deg) translateY(4px); } }
+@keyframes m-startle { 0%, 100% { transform: scale(1); } 30% { transform: scale(1.18, 1.24) translateY(-12px); } 60% { transform: scale(.96, 1.02); } }
+@keyframes m-sway-body { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-7deg); } 50% { transform: rotate(0) translateY(2px); } 75% { transform: rotate(7deg); } }
+@keyframes m-shake { 0%, 100% { transform: translateX(0) rotate(0); } 15% { transform: translateX(-6px) rotate(-4deg); } 30% { transform: translateX(6px) rotate(4deg); } 45% { transform: translateX(-5px) rotate(-3deg); } 60% { transform: translateX(5px) rotate(3deg); } 80% { transform: translateX(-2px); } }
+@keyframes m-tilt { 0%, 100% { transform: rotate(0); } 35%, 70% { transform: rotate(14deg) translateX(4px); } }
+@keyframes m-bounce { 0%, 100% { transform: translateY(0); } 20% { transform: translateY(-12px) rotate(-4deg); } 40% { transform: translateY(0) scale(1.05, .94); } 60% { transform: translateY(-12px) rotate(4deg); } 80% { transform: translateY(0) scale(1.05, .94); } }
+@keyframes m-hop { 0%, 100% { transform: translateY(0); } 45% { transform: translateY(-9px); } 70% { transform: translateY(0) scale(1.04, .95); } }
+@keyframes m-roll-r { to { transform: rotate(720deg); } }
+@keyframes m-roll-l { to { transform: rotate(-720deg); } }
+/* ---------- interactive parts ---------- */
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+.stage .mascot { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.stage .hint { margin: 6px 0 0; font-size: 12px; font-weight: 600; color: var(--muted); }
+.stage .pop { position: absolute; left: 50%; top: 52%; font-size: 20px; pointer-events: none; animation: pop-fly .95s cubic-bezier(.2, .8, .3, 1) forwards; }
+@keyframes pop-fly { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.3); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--turn)) scale(1.1); } }
+button.card { width: 100%; text-align: left; position: relative; background: var(--bg); }
+button.card:focus-visible, .pick:focus-visible, dialog button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.card .more { display: inline-block; margin-top: 6px; font-size: 13px; font-weight: 700; color: var(--accent); }
+.card:hover .more { text-decoration: underline; }
+.card:hover .mascot svg { animation: m-jump .6s cubic-bezier(.3, 1.6, .5, 1); }
+.shelf .pick { border-radius: 16px; padding: 4px 0 0; transition: background .15s, transform .15s; }
+.shelf .pick:hover { background: var(--bg); transform: translateY(-4px); }
+.shelf .pick[aria-pressed="true"] { background: var(--bg); box-shadow: 0 0 0 2px var(--accent); }
+.shelf .pick .mascot { pointer-events: none; }
+
+dialog { width: min(560px, calc(100vw - 28px)); max-height: calc(100vh - 28px); border: 0; border-radius: 26px; padding: 0; color: var(--text); box-shadow: 0 30px 80px rgba(30, 26, 60, .35); }
+dialog::backdrop { background: rgba(30, 26, 60, .45); backdrop-filter: blur(3px); }
+dialog[open] { animation: sheet-in .3s cubic-bezier(.2, 1.2, .4, 1); }
+@keyframes sheet-in { from { opacity: 0; transform: translateY(24px) scale(.97); } to { opacity: 1; transform: none; } }
+.sheet { padding: 22px 22px 24px; }
+.sheet-head { display: flex; align-items: center; gap: 10px; }
+.sheet-head .mascot { flex: none; width: 84px; margin: -10px 0 -6px -10px; cursor: default; }
+.sheet-head h3 { flex: 1; margin: 0; font-size: 22px; letter-spacing: -.02em; }
+.sheet-head .close { flex: none; width: 36px; height: 36px; border-radius: 50%; background: var(--surface); font-size: 18px; line-height: 1; }
+.sheet ul.points { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 7px; }
+.sheet ul.points li { position: relative; padding-left: 24px; font-size: 15px; line-height: 1.55; word-break: keep-all; }
+.sheet ul.points li::before { content: "✓"; position: absolute; left: 0; top: 3px; width: 17px; height: 17px; border-radius: 50%; background: var(--lime); color: var(--good); font-size: 11px; font-weight: 900; display: grid; place-items: center; }
+.try { margin: 18px 0 8px; font-size: 13px; font-weight: 800; color: var(--accent); letter-spacing: .02em; }
+.demo { border: 1px solid var(--line); border-radius: 18px; padding: 16px; }
+.demo .word { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+.demo .word span { font-size: 15px; font-weight: 600; color: var(--muted); margin-left: 8px; }
+.demo .def { margin: 6px 0 0; font-size: 15px; line-height: 1.55; }
+.demo .def.second { color: var(--muted); font-size: 14px; }
+.veil { display: block; width: 100%; margin-top: 10px; text-align: left; border-radius: 12px; padding: 10px 12px; background: var(--surface); font-size: 14px; }
+.veil small { display: block; font-size: 11px; font-weight: 800; color: var(--accent); margin-bottom: 2px; }
+.veil span { filter: blur(6px); transition: filter .35s; user-select: none; }
+.veil em { font-style: normal; float: right; font-size: 12px; font-weight: 700; color: var(--accent); }
+.veil.open span { filter: none; user-select: auto; }
+.veil.open em { display: none; }
+.day { font-size: 12px; font-weight: 800; color: var(--muted); margin: 10px 0 2px; }
+.day:first-child { margin-top: 0; }
+.row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }
+.row i { flex: none; width: 34px; height: 34px; border-radius: 10px; background: var(--surface); font-style: normal; font-weight: 800; color: var(--accent); display: grid; place-items: center; }
+.row div { flex: 1; min-width: 0; font-weight: 700; }
+.row div small { display: block; font-weight: 500; color: var(--muted); }
+.row .star { flex: none; width: 36px; height: 36px; border-radius: 50%; font-size: 20px; color: #c9c6d8; transition: transform .2s; }
+.row .star[aria-pressed="true"] { color: #f5b301; transform: scale(1.2) rotate(72deg); }
+.q { font-size: 17px; font-weight: 700; line-height: 1.5; word-break: keep-all; }
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.choice { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; text-align: left; font-weight: 700; transition: border-color .15s, background .15s, transform .15s; }
+.choice:hover:not(:disabled) { border-color: var(--text); }
+.choice.ok { border-color: var(--good); background: #eef6dc; color: var(--good); transform: scale(1.03); }
+.choice.no { border-color: #d93a2b; background: #fdecea; color: #b93a2b; animation: shake .4s; }
+.choice.dim { opacity: .45; }
+@keyframes shake { 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
+.verdict { min-height: 1.7em; margin: 10px 0 0; font-weight: 800; text-align: center; }
+.verdict.good { color: var(--good); } .verdict.bad { color: #b93a2b; }
+.go { display: block; width: 100%; margin-top: 12px; border-radius: 999px; padding: 11px 0; background: var(--accent); color: #fff; font-weight: 800; }
+.go.ghost { background: none; color: var(--text); border: 1px solid var(--text); }
+.lane { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.lane b { flex: none; width: 44px; font-size: 12px; color: var(--muted); }
+.lane.me b { color: var(--accent); }
+.track { position: relative; flex: 1; height: 46px; margin-right: 26px; border-bottom: 2px dashed var(--line); }
+.runner { position: absolute; bottom: -4px; left: 0; width: 48px; margin-left: -24px; transition: left .35s cubic-bezier(.3, 1.3, .5, 1); }
+.runner .mascot { width: 100%; margin: 0; cursor: default; }
+.runner u { position: absolute; left: 50%; top: -4px; transform: translateX(-50%); text-decoration: none; min-width: 18px; padding: 0 5px; border-radius: 999px; background: var(--text); color: #fff; font-size: 10px; font-weight: 800; line-height: 15px; text-align: center; }
+.lane.me .runner u { background: var(--accent); }
+.clock { text-align: center; font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+@media (max-width: 700px) { .choices { grid-template-columns: 1fr; } .sheet { padding: 18px 16px 20px; } }
+
+/* ---------- a search result, with each part named ---------- */
+.demo.result { padding: 14px 16px 16px; }
+.words { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.word-tab { border: 1px solid var(--line); border-radius: 999px; padding: 4px 13px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.word-tab[aria-selected="true"] { background: var(--text); border-color: var(--text); color: #fff; }
+.demo.result .word { font-size: 26px; }
+.meaning { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.meaning .m { border-radius: 14px; padding: 10px 12px; }
+.meaning .m.ko { background: #efedf9; } .meaning .m.en { background: #eef6dc; }
+.meaning small, .section h4 { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .03em; border-radius: 999px; padding: 1px 9px; margin: 0 0 4px; }
+.meaning .ko small { background: var(--accent); color: #fff; } .meaning .en small { background: var(--good); color: var(--lime); }
+.meaning p { margin: 0; font-size: 15px; line-height: 1.5; font-weight: 600; word-break: keep-all; }
+.section { margin-top: 12px; }
+.section h4 { background: var(--surface); color: var(--accent); }
+.section.easy h4 { background: #ffd166; color: #6b4a00; }
+.section.easy .veil { margin-top: 6px; }
+.section .ex { margin: 0; font-size: 15px; font-weight: 600; line-height: 1.5; }
+.section .ex span { font-weight: 500; color: var(--muted); }
+.section.saying { border-radius: 14px; background: #fff6dd; padding: 10px 12px; }
+.section.saying h4 { background: #ffb347; color: #5b3200; }
+.section.saying p { margin: 4px 0 0; font-size: 14px; line-height: 1.5; }
+.section.saying p em { font-style: normal; font-size: 11px; font-weight: 800; color: #a05a00; margin-right: 6px; }
+.section.saying p b { font-size: 16px; }
+.section.saying p span { display: block; color: #6b5a3a; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.legend span { border-radius: 999px; padding: 6px 14px; font-size: 14px; font-weight: 800; }
+.legend .k { background: var(--accent); color: #fff; } .legend .e { background: var(--good); color: var(--lime); }
+.legend .m { background: #ffd166; color: #6b4a00; } .legend .s { background: #ffb347; color: #5b3200; }
+@media (max-width: 700px) { .meaning { grid-template-columns: 1fr; } }
+
+/* ---------- explanation on one side, the real app on the other ---------- */
+dialog { width: min(940px, calc(100vw - 28px)); }
+.sheet { position: relative; display: grid; grid-template-columns: 1fr 420px; padding: 0; }
+.sheet > .close { position: absolute; right: 14px; top: 14px; width: 36px; height: 36px; border-radius: 50%; background: #fff; box-shadow: 0 2px 8px rgba(0, 0, 0, .15); font-size: 18px; line-height: 1; z-index: 2; }
+.guide-side { padding: 26px 26px 28px; }
+.live-side { padding: 26px 22px 20px; background: #efedf9; border-radius: 0 26px 26px 0; }
+.kind { display: inline-block; font-size: 12px; font-weight: 800; letter-spacing: .05em; border-radius: 999px; padding: 3px 12px; background: var(--surface); color: var(--muted); margin-bottom: 10px; }
+.kind.try { background: var(--accent); color: #fff; }
+.guide-side .sheet-head .mascot { width: 96px; }
+.guide-side h3 { font-size: 26px; }
+.guide-side ul.points { margin-top: 16px; gap: 11px; }
+.guide-side ul.points li { font-size: 16px; }
+.live { border-radius: 20px; background: #fff; box-shadow: 0 14px 34px rgba(60, 50, 120, .2); overflow: hidden; }
+.live-bar { display: flex; align-items: center; gap: 5px; padding: 9px 12px; background: #2e2a47; color: #fff; font-size: 12px; }
+.live-bar i { width: 9px; height: 9px; border-radius: 50%; background: #ff6b6b; } .live-bar i:nth-child(2) { background: #ffd166; } .live-bar i:nth-child(3) { background: #7fd67f; }
+.live-bar b { margin-left: 6px; font-weight: 700; }
+.live-bar em { margin-left: auto; font-style: normal; font-weight: 800; font-size: 10px; letter-spacing: .06em; background: var(--lime); color: var(--good); border-radius: 999px; padding: 1px 8px; }
+.live-tabs { display: flex; gap: 6px; padding: 8px 10px; background: #f6f5fb; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.live-tabs button { flex: none; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 700; color: var(--muted); background: #fff; }
+.live-tabs button[aria-pressed="true"] { background: var(--text); border-color: var(--text); color: #fff; }
+.live-screen { position: relative; height: 620px; background: #fff; }
+.live-screen iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; opacity: 0; transition: opacity .3s; }
+.live.ready iframe { opacity: 1; }
+.live-loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 14px; font-weight: 600; }
+.live.ready .live-loading { display: none; }
+.live-note { margin: 0; padding: 9px 12px 11px; font-size: 12px; line-height: 1.5; color: var(--muted); background: #f6f5fb; border-top: 1px solid var(--line); word-break: keep-all; }
+#try-dict .live { box-shadow: 0 18px 44px rgba(101, 95, 159, .2); border: 2px solid #ece9f8; }
+#try-dict .live-screen { height: 600px; }
+@media (max-width: 860px) {
+  .sheet { grid-template-columns: 1fr; }
+  .live-side { border-radius: 0 0 26px 26px; padding: 18px 14px 16px; }
+  .guide-side { padding: 22px 18px 18px; }
+  .live-screen { height: 560px; }
+}
+
+/* ---------- every character: a strip to scroll, and a window with all of them ---------- */
+.mascot.shade { filter: brightness(0) opacity(.14); }
+.parade { display: flex; gap: 2px; overflow-x: auto; padding: 14px 6px 8px; margin-top: 12px; scroll-snap-type: x proximity; scrollbar-width: thin; -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+.walker { position: relative; flex: none; width: 84px; border-radius: 16px; scroll-snap-align: start; transition: transform .15s; }
+.walker:hover { transform: translateY(-5px); }
+.walker .mascot { width: 100%; margin: 0; pointer-events: none; }
+.walker i, .face-card.secret .mascot + b::before { font-style: normal; }
+.walker i { position: absolute; left: 0; right: 0; top: 42%; text-align: center; font-size: 22px; font-weight: 900; color: var(--accent); opacity: .7; }
+.walker.secret:hover .mascot { animation: m-wiggle .7s ease-in-out; }
+.center { text-align: center; margin: 12px 0 0; }
+dialog#all { width: min(880px, calc(100vw - 28px)); }
+.all { padding: 24px 22px 22px; }
+.all-head { display: flex; gap: 12px; align-items: flex-start; position: sticky; top: 0; background: #fff; padding-bottom: 12px; z-index: 1; }
+.all-head h3 { margin: 0; font-size: 24px; letter-spacing: -.02em; }
+.all-head h3 em { font-style: normal; font-size: 13px; font-weight: 800; color: var(--accent); background: #efedf9; border-radius: 999px; padding: 2px 10px; vertical-align: 4px; margin-left: 6px; white-space: nowrap; }
+.all-head p { margin: 4px 0 0; font-size: 14px; color: var(--muted); line-height: 1.55; word-break: keep-all; }
+.all-head .close { flex: none; margin-left: auto; width: 36px; height: 36px; border-radius: 50%; background: var(--surface); font-size: 18px; line-height: 1; }
+.all-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; }
+.face-card { position: relative; border: 1.5px solid var(--line); border-radius: 18px; padding: 6px 6px 10px; text-align: center; background: #fff; transition: transform .15s, border-color .15s; }
+.face-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+.face-card .mascot { width: 100%; margin: 0; pointer-events: none; }
+.face-card b { display: block; font-size: 14px; }
+.face-card small { display: block; font-size: 11px; font-weight: 700; color: var(--accent); min-height: 1.4em; }
+.face-card.secret { background: #faf9fd; border-style: dashed; }
+.face-card.secret b { color: var(--muted); letter-spacing: .1em; }
+.face-card.secret small { color: #c79a00; }
+.face-card.special { border-color: #ffc23d; }
+.face-card u { position: absolute; left: 8px; top: 8px; text-decoration: none; font-size: 10px; font-weight: 900; color: #5b3d00; background: linear-gradient(135deg, #ffe08a, #ffc23d); border-radius: 999px; padding: 1px 7px; z-index: 1; }
+.face-card.peek .mascot { animation: m-wiggle .7s ease-in-out; filter: brightness(0) opacity(.3); }
+.face-card.peek b { color: var(--accent); letter-spacing: 0; animation: pop-name .3s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes pop-name { from { transform: scale(.6); } to { transform: none; } }
+/* ---------- the home page ---------- */
+body.home { background: radial-gradient(900px 420px at 88% -60px, #efeaff 0, transparent 70%), radial-gradient(700px 380px at -10% 12%, #f1f8dc 0, transparent 70%), #fff; }
+.hero { padding: 26px 0 34px; }
+.hero h1 { font-size: 46px; line-height: 1.16; }
+.hero h1 em { display: inline-block; background: linear-gradient(transparent 62%, #dcecab 62%); color: var(--accent-dark); padding: 0 4px; }
+.hero .lead { font-size: 18px; color: #4a4663; margin-top: 4px; }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 12px 22px; font-weight: 800; text-decoration: none; background: var(--accent); color: #fff; box-shadow: 0 8px 20px rgba(101, 95, 159, .3); transition: transform .15s; }
+.btn:hover { transform: translateY(-2px); }
+.btn.ghost { background: #fff; color: var(--text); box-shadow: none; border: 1.5px solid var(--text); }
+/* The character stands on the page itself, with no frame around it: one soft patch of colour behind. */
+.stage { background: none; border: 0; box-shadow: none; border-radius: 0; padding: 54px 0 0; }
+.stage::before { content: ""; position: absolute; left: 50%; top: 50%; width: 300px; height: 300px; max-width: 100%; transform: translate(-50%, -46%); border-radius: 50%; background: radial-gradient(closest-side, #ece8ff, rgba(236, 232, 255, 0)); z-index: -1; }
+.stage .mascot { width: 280px; max-width: 100%; }
+.stage .say { top: 8px; font-size: 15px; padding: 7px 17px; }
+.stage .hint { margin-top: 2px; font-size: 12px; opacity: .8; }
+.stage .float { display: none; }
+.float { position: absolute; width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; font-weight: 900; font-size: 17px; box-shadow: 0 6px 14px rgba(0, 0, 0, .1); animation: floaty 4s ease-in-out infinite; }
+.float.a { left: -14px; top: 34%; background: var(--lime); color: var(--good); transform: rotate(-10deg); }
+.float.b { right: -12px; top: 22%; background: #ffd166; color: #6b4a00; animation-delay: -1.3s; }
+.float.c { right: 8%; bottom: -14px; background: var(--accent); color: #fff; animation-delay: -2.4s; }
+@keyframes floaty { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
+section.block { margin-top: 62px; }
+.hero { grid-template-columns: 1.2fr .8fr; gap: 34px; align-items: center; }
+.hero .tags { margin: 0 0 14px; }
+.hero h1 { margin-bottom: 0; }
+.bridge { margin: 22px 0 8px; font-size: 14px; font-weight: 800; color: var(--accent); }
+.bridge::after { content: " ↓"; }
+.three { list-style: none; counter-reset: way; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.three li { counter-increment: way; position: relative; border-radius: 18px; padding: 30px 12px 12px; background: #fff; border: 2px solid #ece9f8; }
+.three li::before { content: counter(way); position: absolute; left: 12px; top: -12px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 15px; color: #fff; background: var(--accent); box-shadow: 0 4px 10px rgba(0, 0, 0, .12); }
+.three li:nth-child(2)::before { background: #ffc23d; color: #5b3d00; }
+.three li:nth-child(3)::before { background: var(--good); color: var(--lime); }
+.three b { display: block; font-size: 16px; line-height: 1.3; background: linear-gradient(transparent 60%, #ffe08a 60%); width: fit-content; }
+.three span { display: block; margin-top: 5px; font-size: 13.5px; line-height: 1.5; color: #4a4663; word-break: keep-all; }
+.cta { margin-top: 22px; }
+.letter { position: relative; margin: 26px 0 4px; padding: 20px 20px 14px; border-radius: 6px 20px 20px 20px; background: #fffbe9; box-shadow: 0 10px 24px rgba(120, 100, 40, .15); transform: rotate(-1deg); }
+/* a strip of masking tape: see-through, a little glossy, with torn ends */
+.letter .tape { position: absolute; left: 30px; top: -13px; width: 96px; height: 26px; transform: rotate(-3deg);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .45), rgba(255, 255, 255, 0) 38%, rgba(0, 0, 0, .05)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .16) 0 2px, rgba(255, 255, 255, 0) 2px 7px),
+    rgba(176, 208, 92, .62);
+  clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 12%, calc(100% - 4px) 25%, 100% 38%, calc(100% - 3px) 50%, 100% 63%, calc(100% - 4px) 76%, 100% 88%, calc(100% - 4px) 100%, 4px 100%, 0 88%, 4px 75%, 0 62%, 3px 50%, 0 37%, 4px 25%, 0 12%);
+  backdrop-filter: blur(.5px); }
+.letter p { margin: 0; font-size: 16px; line-height: 1.7; color: #3a3320; word-break: keep-all; }
+.letter p b { background: linear-gradient(transparent 60%, #ffe08a 60%); font-weight: 700; }
+.letter .heart { color: #e8395a; display: inline-block; animation: heart-beat 1.2s ease-in-out infinite; }
+.letter .from { display: block; margin-top: 10px; text-align: right; font-size: 13px; font-weight: 700; color: #8a7a4a; }
+@keyframes heart-beat { 0%, 100% { transform: scale(1); } 30% { transform: scale(1.3); } 60% { transform: scale(.95); } }
+.eyebrow { display: inline-block; font-size: 13px; font-weight: 800; letter-spacing: .04em; color: var(--accent); background: #efedf9; border-radius: 999px; padding: 3px 12px; margin-bottom: 8px; }
+section.block h2 { font-size: 30px; margin: 0 0 6px; }
+section.block h2 + .sub { font-size: 17px; margin-bottom: 20px; }
+.two { display: grid; grid-template-columns: 1fr 420px; gap: 30px; align-items: center; }
+.two ul { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 9px; }
+.two li { position: relative; padding-left: 28px; font-size: 16px; word-break: keep-all; }
+.two li::before { content: "✓"; position: absolute; left: 0; top: 4px; width: 19px; height: 19px; border-radius: 50%; background: var(--lime); color: var(--good); font-size: 12px; font-weight: 900; display: grid; place-items: center; }
+#try-dict .demo { background: #fff; box-shadow: 0 14px 34px rgba(101, 95, 159, .14); border-color: #ece9f8; border-radius: 22px; }
+.cards { gap: 16px; }
+button.card { border: 2px solid transparent; border-radius: 24px; padding: 18px 20px 18px 8px; align-items: center; }
+button.card:nth-child(1) { background: #fff0f4; } button.card:nth-child(2) { background: #fff6dd; }
+button.card:nth-child(3) { background: #e9f3ff; } button.card:nth-child(4) { background: #fff0e4; }
+button.card:hover { border-color: var(--accent); box-shadow: 0 14px 30px rgba(101, 95, 159, .16); }
+.card .mascot { width: 112px; }
+.card b { font-size: 19px; }
+.card p { font-size: 15px; color: #4a4663; }
+.perks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.perk { border-radius: 22px; background: var(--surface); padding: 18px; text-align: center; }
+.perk .big { font-size: 34px; font-weight: 900; letter-spacing: -.03em; color: var(--accent); line-height: 1.1; }
+.perk b { display: block; margin: 4px 0 2px; }
+.perk p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.55; word-break: keep-all; }
+.shelf { background: #fff; border: 2px solid #ece9f8; }
+.more-title { margin: 26px 0 0; font-size: 18px; color: var(--accent-dark); }
+.grown { border-radius: 26px; background: #f7f7fb; padding: 26px 26px 22px; }
+.grown h2 { font-size: 22px; }
+.grown .facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 26px; margin-top: 12px; }
+.grown .facts div { font-size: 15px; line-height: 1.6; word-break: keep-all; }
+.grown .facts b { display: block; }
+.steps li { font-size: 17px; }
+.install { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-top: 22px; }
+.install .where { font-size: 14px; color: var(--muted); }
+.alt { margin: 14px 0 0; font-size: 14.5px; color: var(--muted); }
+.alt a { font-weight: 700; white-space: nowrap; }
+.face-card.quest { border-color: #a9d59a; }
+.face-card.quest u { color: var(--good); background: var(--lime); }
+/* ----- reviewed at full width ----- */
+h2, .hero h1 { font-weight: 800; }
+p, li { word-break: keep-all; }
+.hero { align-items: center; }
+.two { align-items: start; }
+.two > div:first-child { position: sticky; top: 28px; padding-top: 34px; }
+.cta .btn { justify-content: center; min-width: 150px; }
+section.block > h2, .two h2 { line-height: 1.3; }
+.shelf { padding: 16px 14px 10px; }
+
+/* ----- reviewed at phone width ----- */
+@media (max-width: 700px) {
+  .wrap { padding: 0 18px; }
+  header.top { padding: 14px 0 10px; }
+  .hero { padding: 10px 0 8px; gap: 8px; }
+  .hero .tags { gap: 6px; margin-bottom: 12px; }
+  .hero .tags span { padding: 4px 11px; font-size: 12px; }
+  .letter { transform: rotate(-.6deg); margin-top: 20px; padding: 20px 16px 14px; }
+  .bridge { margin-top: 20px; }
+  .three { gap: 8px; }
+  /* the two buttons share the row, so neither hangs to the left */
+  .cta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cta .btn { min-width: 0; padding: 13px 8px; }
+  .stage { padding-top: 58px; margin-top: 6px; }
+  .stage .mascot { width: 220px; }
+  section.block { margin-top: 48px; }
+  .two > div:first-child { position: static; padding-top: 0; }
+  #try-dict { margin-top: 6px; }
+  .legend { gap: 6px; }
+  .legend span { font-size: 13px; padding: 5px 12px; }
+  button.card { padding: 14px 16px 14px 4px; }
+  .card .mascot { width: 92px; }
+  /* numbers on the left, words on the right: shorter, and aligned with everything else */
+  .perk { display: grid; grid-template-columns: 76px 1fr; column-gap: 12px; align-items: center; text-align: left; padding: 14px 16px; }
+  .perk .big { grid-row: span 2; text-align: center; font-size: 30px; }
+  .perk b { margin: 0; align-self: end; }
+  .perk p { align-self: start; }
+  .shelf { grid-template-columns: repeat(4, 1fr); padding: 12px 8px 6px; }
+  .walker { width: 72px; }
+  .center .btn { display: flex; width: 100%; justify-content: center; }
+  .steps li { font-size: 16px; }
+  .grown { padding: 20px 18px 18px; border-radius: 22px; }
+  .note { padding: 14px 15px; }
+  footer { margin-top: 40px; }
+  .hero { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 33px; } .two, .perks, .grown .facts, .three { grid-template-columns: 1fr; }
+  .three li { padding: 14px 12px 12px 52px; } .three li::before { top: 14px; }
+  section.block h2 { font-size: 25px; } .float { display: none; }
+}
+</style>
+<style>
+/* ---------- the install page ---------- */
+html[lang="ko"] [data-l="en"], html[lang="en"] [data-l="ko"] { display: none !important; }
+.hero .lead { margin-top: 16px; }
+.stage .mascot { cursor: default; }
+.file { margin: 10px 0 0; font-size: 13px; font-weight: 700; color: var(--muted); }
+code { background: #fff; border: 1px solid var(--line); border-radius: 7px; padding: 1px 7px; font: 600 14px ui-monospace, "SF Mono", Menlo, Consolas, monospace; white-space: nowrap; }
+
+/* the steps: a small picture of what to look for, then what to do */
+.how { list-style: none; counter-reset: how; margin: 0; padding: 0; display: grid; gap: 14px; }
+.how li { counter-increment: how; position: relative; display: grid; grid-template-columns: 220px 1fr; gap: 20px; align-items: center; border-radius: 24px; background: #fff; border: 2px solid #ece9f8; padding: 14px 20px 14px 14px; }
+.how li::before { content: counter(how); position: absolute; left: -10px; top: -10px; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 15px; color: #fff; background: var(--accent); box-shadow: 0 4px 10px rgba(0, 0, 0, .12); }
+.how li:nth-child(3n+2)::before { background: #ffc23d; color: #5b3d00; }
+.how li:nth-child(3n)::before { background: var(--good); color: var(--lime); }
+.how .pic { height: 104px; border-radius: 18px; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 8px 10px; overflow: hidden; }
+.how li:nth-child(4n+1) .pic { background: #fff0f4; } .how li:nth-child(4n+2) .pic { background: #fff6dd; }
+.how li:nth-child(4n+3) .pic { background: #e9f3ff; } .how li:nth-child(4n) .pic { background: #fff0e4; }
+.how b.t { display: block; font-size: 18px; line-height: 1.4; }
+.how p { margin: 3px 0 0; font-size: 15px; line-height: 1.65; color: #4a4663; }
+.pic svg { display: block; flex: none; }
+.pic .arrow { font-weight: 900; font-size: 20px; color: var(--accent); animation: nudge 1.4s ease-in-out infinite; }
+@keyframes nudge { 0%, 100% { translate: 0 0; } 50% { translate: 5px 0; } }
+.bar { display: flex; align-items: center; gap: 7px; background: #fff; border: 1.5px solid #dcd8ee; border-radius: 999px; padding: 7px 14px 7px 9px; font: 700 12.5px ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: var(--m-ink); box-shadow: 0 3px 8px rgba(60, 50, 120, .1); white-space: nowrap; }
+.bar::before { content: ""; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #b9b4d6; }
+.bar::after { content: ""; width: 1.5px; height: 14px; background: var(--accent); margin-left: -4px; animation: caret 1s steps(1) infinite; }
+@keyframes caret { 50% { opacity: 0; } }
+.sw-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 12px; padding: 9px 12px; font-size: 13px; font-weight: 700; color: var(--m-ink); box-shadow: 0 3px 8px rgba(60, 50, 120, .1); white-space: nowrap; }
+.sw { position: relative; width: 36px; height: 20px; border-radius: 999px; background: #cfcbe3; animation: sw-on 3.2s ease-in-out infinite; }
+.sw::after { content: ""; position: absolute; left: 3px; top: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); animation: sw-knob 3.2s ease-in-out infinite; }
+@keyframes sw-on { 0%, 25% { background: #cfcbe3; } 40%, 100% { background: var(--accent); } }
+@keyframes sw-knob { 0%, 25% { translate: 0 0; } 40%, 100% { translate: 16px 0; } }
+.mock-btn { position: relative; background: #fff; border: 1.5px solid var(--accent); color: var(--accent); border-radius: 9px; padding: 7px 10px; font-size: 11.5px; font-weight: 800; line-height: 1.3; text-align: center; box-shadow: 0 3px 8px rgba(60, 50, 120, .1); max-width: 118px; }
+.mock-btn svg { position: absolute; right: -8px; bottom: -12px; }
+.pin-row { display: flex; align-items: center; gap: 7px; background: #fff; border-radius: 12px; padding: 7px 9px 7px 8px; font-size: 12.5px; font-weight: 800; color: var(--m-ink); box-shadow: 0 3px 8px rgba(60, 50, 120, .1); }
+.pin-row .logo svg { width: 22px; height: 22px; }
+.pin-row .pin { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #efedf9; animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(101, 95, 159, .45); } 60% { box-shadow: 0 0 0 7px rgba(101, 95, 159, 0); } }
+.win { width: 168px; border-radius: 11px; background: #fff; border: 1.5px solid #dcd8ee; overflow: hidden; box-shadow: 0 4px 10px rgba(60, 50, 120, .12); }
+.win-bar { height: 13px; background: #2e2a47; display: flex; gap: 3px; align-items: center; padding: 0 6px; }
+.win-bar i { width: 4px; height: 4px; border-radius: 50%; background: #ff6b6b; } .win-bar i:nth-child(2) { background: #ffd166; } .win-bar i:nth-child(3) { background: #7fd67f; }
+.win-body { display: grid; grid-template-columns: 1fr 70px; height: 66px; }
+.win-page { padding: 9px 8px; display: grid; gap: 5px; align-content: start; }
+.win-page s { display: block; height: 5px; border-radius: 3px; background: #ece9f8; } .win-page s:nth-child(2) { width: 70%; } .win-page s:nth-child(3) { width: 85%; }
+.win-panel { background: #efedf9; border-left: 1.5px solid #dcd8ee; display: grid; place-items: center; align-content: center; gap: 4px; }
+.win-panel .logo svg { width: 24px; height: 24px; }
+.win-panel em { font-style: normal; font-size: 8.5px; font-weight: 800; background: #fff; border: 1px solid #dcd8ee; border-radius: 999px; padding: 1px 7px; color: var(--m-ink); }
+.code { display: flex; gap: 5px; }
+.code i { width: 24px; height: 32px; border-radius: 8px; background: #fff; border: 1.5px solid #e6c9a8; display: grid; place-items: center; font-style: normal; font: 800 15px ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: var(--m-ink); box-shadow: 0 2px 5px rgba(120, 80, 30, .1); }
+.code i.now { border-color: var(--accent); }
+.code i.now::after { content: ""; width: 1.5px; height: 15px; background: var(--accent); animation: caret 1s steps(1) infinite; }
+
+/* all done: a note from the mascot */
+.done { display: flex; align-items: center; gap: 14px; margin-top: 22px; padding: 12px 22px 12px 10px; border-radius: 6px 20px 20px 20px; background: #fffbe9; box-shadow: 0 10px 24px rgba(120, 100, 40, .15); transform: rotate(-.6deg); }
+.done .mascot { flex: none; width: 104px; margin: 0; cursor: default; }
+.done p { margin: 0; font-size: 16px; line-height: 1.65; color: #3a3320; }
+.done b { background: linear-gradient(transparent 60%, #ffe08a 60%); }
+.three p { margin: 5px 0 0; font-size: 13.5px; line-height: 1.5; color: #4a4663; }
+.after { margin: 14px 0 0; font-size: 14.5px; color: var(--muted); }
+
+@media (max-width: 700px) {
+  .how li { grid-template-columns: 1fr; gap: 10px; padding: 12px 14px 14px; }
+  .how .pic { height: 96px; }
+  .how b.t { font-size: 17px; }
+  .done { padding: 10px 16px 10px 4px; gap: 8px; }
+  .done .mascot { width: 84px; }
+  .done p { font-size: 15px; }
+}
 </style>
 </head>
-<body>
-<main>
-  <div class="lang"><button id="ko" aria-pressed="true">한국어</button>·<button id="en" aria-pressed="false">English</button></div>
+<body class="home">
+<div class="wrap">
+<header class="top">
+  <a class="brand" href="./" aria-label="VOQUIZ"><span class="icon"><svg viewBox="0 0 128 128" aria-hidden="true">
+  <rect width="128" height="128" rx="28" fill="#655f9f"/>
+  <path d="M64 30 v-10 M64 22 q-11 -9 -16 0 q9 6 16 0 M64 22 q11 -9 16 0 q-9 6 -16 0" fill="#bbd86b" stroke="#23552b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M50 30 h28 a30 30 0 0 1 30 30 v10 a30 30 0 0 1 -30 30 h-22 l-17 15 l3 -17 a30 30 0 0 1 -22 -28 v-10 a30 30 0 0 1 30 -30 z" fill="#d6d2f0"/>
+  <ellipse cx="39" cy="79" rx="8" ry="5" fill="#ff8fab" opacity=".75"/><ellipse cx="89" cy="79" rx="8" ry="5" fill="#ff8fab" opacity=".75"/>
+  <circle cx="48" cy="66" r="7" fill="#2e2a47"/><circle cx="80" cy="66" r="7" fill="#2e2a47"/>
+  <circle cx="50.5" cy="63.5" r="2.4" fill="#fff"/><circle cx="82.5" cy="63.5" r="2.4" fill="#fff"/>
+  <path d="M57 77 q7 7 14 0" fill="none" stroke="#2e2a47" stroke-width="3.4" stroke-linecap="round"/>
+</svg></span><span class="word"><svg viewBox="-6 -12 218 62" role="img" aria-label="VOQUIZ">
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="12">
+    <path d="M4 17 L14 33 L32 5" stroke="#23552b" transform="translate(0 3)"/>
+    <path d="M4 17 L14 33 L32 5" stroke="#bbd86b"/>
+    <g stroke="currentColor">
+      <g transform="translate(0 -4)"><circle cx="96" cy="21" r="13"/><path d="M103 29 l8 8"/></g>
+      <path d="M124 9 v13 a11 11 0 0 0 22 0 v-13" transform="rotate(5 135 20) translate(0 3)"/>
+      <path d="M163 10 v23" transform="rotate(-5 163 20) translate(0 -1)"/>
+      <path d="M178 9 h20 L178 35 h20" transform="rotate(4 188 20) translate(0 2)"/>
+    </g>
+  </g>
+  <circle cx="58" cy="23" r="17" fill="#d6d2f0" stroke="currentColor" stroke-width="5"/>
+  <circle cx="52" cy="21.5" r="2.8" fill="#2e2a47"/><circle cx="64" cy="21.5" r="2.8" fill="#2e2a47"/>
+  <circle cx="53" cy="20.5" r="1" fill="#fff"/><circle cx="65" cy="20.5" r="1" fill="#fff"/>
+  <path d="M55 27.5 q3 3.2 6 0" fill="none" stroke="#2e2a47" stroke-width="2" stroke-linecap="round"/>
+  <ellipse cx="47.5" cy="27" rx="3" ry="2" fill="#ff8fab" opacity=".8"/><ellipse cx="68.500" cy="27" rx="3" ry="2" fill="#ff8fab" opacity=".8"/>
+  <path d="M58 5 q-7 -9 -11 -2 q6 5 11 2 M58 5 q7 -9 11 -2 q-6 5 -11 2" fill="#bbd86b" stroke="#23552b" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M160 -7 l1.6 3.4 l3.4 1.6 l-3.4 1.6 l-1.6 3.4 l-1.6 -3.4 l-3.4 -1.6 l3.4 -1.6 z" fill="#ffd166"/>
+</svg></span></a>
+  <nav class="lang"><a href="#ko" lang="ko">한국어</a><a href="#en" lang="en">English</a></nav>
+</header>
 
-  <h1><span>VOQUIZ</span> <span data-l="ko" style="color:inherit">설치하기</span><span data-l="en" style="color:inherit">Install</span></h1>
-  <p class="lead" data-l="ko">크롬 웹 스토어를 쓸 수 없을 때(예: 스토어가 막힌 학교 계정) 쓰는 설치 파일이에요. 크롬(컴퓨터)에서만 돼요. 스토어를 쓸 수 있다면 <a href="https://chromewebstore.google.com/detail/ofbdlindljeoffhooafjjefebcdpkedi">크롬 웹 스토어에서 설치</a>하는 편이 좋아요. 새 버전이 알아서 올라가요.</p>
-  <p class="lead" data-l="en">An install file for when the Chrome Web Store cannot be used (a school account with the store blocked, for example). It works in Chrome on a computer. If you can use the store, <a href="https://chromewebstore.google.com/detail/ofbdlindljeoffhooafjjefebcdpkedi">install from the Chrome Web Store</a> instead: new versions arrive by themselves.</p>
-
-  <a class="get" href="download/voquiz.zip" download data-l="ko">설치 파일 받기<small>voquiz.zip · 버전 0.1.19</small></a>
-  <a class="get" href="download/voquiz.zip" download data-l="en">Download the install file<small>voquiz.zip · version 0.1.19</small></a>
-
-  <h2 data-l="ko">설치 방법</h2>
-  <ol data-l="ko">
-    <li><div>받은 <b>voquiz.zip</b>의 압축을 풀어요. 나온 <b>voquiz</b> 폴더를 지워지지 않을 곳(예: 문서 폴더)에 두세요. 설치한 뒤에 폴더를 옮기거나 지우면 VOQUIZ가 사라져요.</div></li>
-    <li><div>크롬 주소창에 <code>chrome://extensions</code>를 입력해 열어요.</div></li>
-    <li><div>오른쪽 위의 <b>개발자 모드</b>를 켜요.</div></li>
-    <li><div>왼쪽 위의 <b>압축해제된 확장 프로그램을 로드합니다</b>를 누르고 <b>voquiz</b> 폴더를 골라요.</div></li>
-    <li><div>주소창 오른쪽의 퍼즐 모양 아이콘을 누르고 VOQUIZ 옆의 핀을 눌러 고정해요.</div></li>
-    <li><div>VOQUIZ 아이콘을 누르면 옆에 창이 열려요. Google 계정으로 로그인해요.</div></li>
-    <li><div>처음 쓰는 계정은 <b>초대 코드</b>를 넣어야 해요. 초대해 준 사람에게 코드를 받으세요.</div></li>
-  </ol>
-  <div class="note" data-l="ko">
-    <b>알아 두세요</b>
-    <ul>
-      <li>새 버전이 나오면 앱에 "새 버전이 나왔어요"가 떠요. 이 페이지에서 파일을 다시 받아 폴더 내용을 바꾼 뒤, <code>chrome://extensions</code>에서 VOQUIZ의 새로 고침(동그란 화살표)을 누르세요.</li>
-      <li>크롬을 켤 때 "개발자 모드 확장 프로그램" 안내가 뜰 수 있어요. 닫으면 돼요.</li>
-      <li>스토어에 올라간 뒤 스토어에서 다시 설치해도, 같은 Google 계정이면 단어장과 포인트가 그대로예요.</li>
-    </ul>
+<section class="hero">
+  <div>
+    <div class="tags" data-l="ko"><span class="fill">파일로 설치</span><span>컴퓨터의 크롬</span><span>버전 0.1.19</span></div>
+    <div class="tags" data-l="en"><span class="fill">Install from a file</span><span>Chrome on a computer</span><span>Version 0.1.19</span></div>
+    <h1 data-l="ko">스토어를 쓸 수 없어도<br><em>파일로</em> 설치할 수 있어요</h1>
+    <h1 data-l="en">Store blocked?<br>Install it <em>from a file</em></h1>
+    <p class="lead" data-l="ko">스토어가 막힌 학교 계정처럼 크롬 웹 스토어를 쓸 수 없을 때 쓰는 방법이에요. 스토어를 쓸 수 있다면 스토어에서 설치하는 편이 좋아요. 새 버전이 알아서 올라가요.</p>
+    <p class="lead" data-l="en">For when the Chrome Web Store cannot be used, such as a school account with the store blocked. If you can use the store, install from there instead: new versions arrive by themselves.</p>
+    <div class="cta" data-l="ko"><a class="btn" href="download/voquiz.zip" download>설치 파일 받기</a><a class="btn ghost" href="https://chromewebstore.google.com/detail/ofbdlindljeoffhooafjjefebcdpkedi" target="_blank" rel="noopener">스토어에서 설치</a></div>
+    <div class="cta" data-l="en"><a class="btn" href="download/voquiz.zip" download>Download the file</a><a class="btn ghost" href="https://chromewebstore.google.com/detail/ofbdlindljeoffhooafjjefebcdpkedi" target="_blank" rel="noopener">Install from the store</a></div>
+    <p class="file" data-l="ko">voquiz.zip · 버전 0.1.19 · 크롬 확장 프로그램</p>
+    <p class="file" data-l="en">voquiz.zip · version 0.1.19 · a Chrome extension</p>
   </div>
-
-  <h2 data-l="en">How to install</h2>
-  <ol data-l="en">
-    <li><div>Unzip <b>voquiz.zip</b>. Keep the <b>voquiz</b> folder somewhere it won't be deleted (your Documents folder, for example). If you move or delete it later, VOQUIZ disappears.</div></li>
-    <li><div>Type <code>chrome://extensions</code> in Chrome's address bar and open it.</div></li>
-    <li><div>Turn on <b>Developer mode</b> at the top right.</div></li>
-    <li><div>Click <b>Load unpacked</b> at the top left and choose the <b>voquiz</b> folder.</div></li>
-    <li><div>Click the puzzle icon to the right of the address bar, then the pin next to VOQUIZ.</div></li>
-    <li><div>Click the VOQUIZ icon to open the side panel, and sign in with a Google account.</div></li>
-    <li><div>A new account needs an <b>invite code</b>. Ask the person who invited you for one.</div></li>
-  </ol>
-  <div class="note" data-l="en">
-    <b>Good to know</b>
-    <ul>
-      <li>When a new version is out, the app says "A new version is ready". Download the file from this page again, replace what is in the folder, then click the reload arrow on VOQUIZ in <code>chrome://extensions</code>.</li>
-      <li>Chrome may show a "developer mode extensions" notice when it starts. You can close it.</li>
-      <li>Once VOQUIZ is in the store you can install it from there: with the same Google account your words and points stay.</li>
-    </ul>
+  <div class="stage">
+    <span class="say" data-l="ko">같이 설치해 보자!</span><span class="say" data-l="en">Let's set it up together!</span>
+    <span class="mascot" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
+  <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"/>
+  <g class="m-tiles">
+    <g class="m-tile t1"><rect x="-11" y="-11" width="22" height="22" rx="6"/><text y="5">0</text></g>
+    <g class="m-tile t2"><rect x="-11" y="-11" width="22" height="22" rx="6"/><text y="5">1</text></g>
+    <g class="m-tile t3"><rect x="-11" y="-11" width="22" height="22" rx="6"/><text y="5">?</text></g>
+  </g>
+  <g class="m-legs">
+    <path class="m-leg l" style="stroke:#5a8fa3" d="M89 106 v24 h-8"/>
+    <path class="m-leg r" style="stroke:#5a8fa3" d="M111 106 v24 h8"/>
+  </g>
+  <g class="m-bob">
+    <path class="m-arm l" style="stroke:#5a8fa3" d="M72 80 Q50 72 58 52"/>
+    <path class="m-arm r" style="stroke:#5a8fa3" d="M128 80 Q150 72 142 52"/>
+    
+    <path class="m-body" d="M72 52 h56 a8 8 0 0 1 8 8 v44 a8 8 0 0 1 -8 8 h-56 a8 8 0 0 1 -8 -8 v-44 a8 8 0 0 1 8 -8 z" style="fill:#a6d8ea"/>
+    <circle cx="71" cy="60" r="2.6" fill="#5a8fa3"/><circle cx="129" cy="60" r="2.6" fill="#5a8fa3"/><path d="M90 104 h20" fill="none" stroke="#5a8fa3" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M100 52 v-11" fill="none" stroke="#5a8fa3" stroke-width="3" stroke-linecap="round"/><circle cx="100" cy="39" r="4.5" fill="#ff5d5d"/>
+    
+    <g class="m-face">
+      <ellipse class="m-cheek" cx="78" cy="93" rx="7" ry="4.5"/>
+      <ellipse class="m-cheek" cx="122" cy="93" rx="7" ry="4.5"/>
+      <g class="m-look">
+        <g class="m-eyes e e-default">
+          <circle cx="86" cy="82" r="5.5"/><circle cx="114" cy="82" r="5.5"/>
+          <circle class="m-glint" cx="88" cy="80" r="1.9"/><circle class="m-glint" cx="116" cy="80" r="1.9"/>
+        </g>
+        <g class="e e-wide">
+          <circle cx="86" cy="81" r="7.5"/><circle cx="114" cy="81" r="7.5"/>
+          <circle class="m-glint" cx="89" cy="78" r="2.6"/><circle class="m-glint" cx="117" cy="78" r="2.6"/>
+        </g>
+        <g class="e e-wink">
+          <circle cx="86" cy="82" r="5.5"/><circle class="m-glint" cx="88" cy="80" r="1.9"/>
+          <path class="line" d="M108 84 q6 -8 12 0"/>
+        </g>
+      </g>
+      <g class="e e-happy"><path class="line" d="M80 84 q6 -8 12 0"/><path class="line" d="M108 84 q6 -8 12 0"/></g>
+      <g class="e e-closed"><path class="line" d="M80 82 q6 5 12 0"/><path class="line" d="M108 82 q6 5 12 0"/></g>
+      <g class="e e-laugh"><path class="line" d="M81 77 l9 5 l-9 5"/><path class="line" d="M119 77 l-9 5 l9 5"/></g>
+      <g class="e e-dizzy"><path class="line" d="M81 77 l10 10 M91 77 l-10 10"/><path class="line" d="M109 77 l10 10 M119 77 l-10 10"/></g>
+      <g class="e e-heart">
+        <path d="M86 88 l-7 -7 a4 4 0 0 1 7 -4 a4 4 0 0 1 7 4 z"/><path d="M114 88 l-7 -7 a4 4 0 0 1 7 -4 a4 4 0 0 1 7 4 z"/>
+      </g>
+      <g class="e e-star">
+        <path d="M86 74 l2.4 5 l5.6 .7 l-4.1 3.8 l1.1 5.5 l-5 -2.8 l-5 2.8 l1.1 -5.5 l-4.1 -3.8 l5.6 -.7 z"/>
+        <path d="M114 74 l2.4 5 l5.6 .7 l-4.1 3.8 l1.1 5.5 l-5 -2.8 l-5 2.8 l1.1 -5.5 l-4.1 -3.8 l5.6 -.7 z"/>
+      </g>
+      <path class="m-smile mo mo-smile" d="M95 90 q5 5 10 0"/>
+      <path class="mo mo-cat line" d="M93 90 q3.5 4.5 7 0 q3.5 4.5 7 0"/>
+      <path class="mo mo-wavy line" d="M93 92 q3.5 -4 7 0 q3.5 4 7 0"/>
+      <ellipse class="mo mo-o" cx="100" cy="93" rx="3.6" ry="4.6"/>
+      <g class="mo mo-yawn"><ellipse cx="100" cy="94" rx="6" ry="7.5"/><ellipse class="m-tongue" cx="100" cy="98" rx="3.6" ry="2.6"/></g>
+      <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"/><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"/></g>
+    </g>
+  </g>
+</svg></span>
   </div>
-</main>
+</section>
+
+<section class="block" id="steps">
+  <span class="eyebrow" data-l="ko">설치 방법</span><span class="eyebrow" data-l="en">How to install</span>
+  <h2 data-l="ko">일곱 단계면 끝!</h2><h2 data-l="en">Seven steps and you're in!</h2>
+  <p class="sub" data-l="ko">파일을 받았다면 위에서부터 차례대로 따라 하세요. 5분이면 돼요.</p>
+  <p class="sub" data-l="en">Once you have the file, follow the steps from the top. It takes about five minutes.</p>
+  <ol class="how">
+    <li>
+      <div class="pic" aria-hidden="true">
+        <svg viewBox="0 0 48 58" width="40"><path d="M7 3 h22 l13 13 v35 a4 4 0 0 1 -4 4 h-31 a4 4 0 0 1 -4 -4 v-44 a4 4 0 0 1 4 -4 z" fill="#fff" stroke="#655f9f" stroke-width="2.6" stroke-linejoin="round"/><path d="M29 3 v13 h13" fill="#ece9f8" stroke="#655f9f" stroke-width="2.6" stroke-linejoin="round"/><path d="M17 9 v26" stroke="#655f9f" stroke-width="2.6" stroke-dasharray="3.5 3"/><rect x="12.500" y="35" width="9" height="11" rx="2.5" fill="#bbd86b" stroke="#23552b" stroke-width="2"/></svg>
+        <span class="arrow">→</span>
+        <svg viewBox="0 0 68 54" width="72"><path d="M4 11 a4 4 0 0 1 4 -4 h15 l6 6 h31 a4 4 0 0 1 4 4 v29 a4 4 0 0 1 -4 4 h-52 a4 4 0 0 1 -4 -4 z" fill="#ffd166" stroke="#c79a00" stroke-width="2.6" stroke-linejoin="round"/><text x="34" y="37" text-anchor="middle" font-size="12" font-weight="800" fill="#5b3d00" font-family="-apple-system, 'Segoe UI', sans-serif">voquiz</text></svg>
+      </div>
+      <div>
+        <b class="t" data-l="ko">압축을 풀어요</b><b class="t" data-l="en">Unzip the file</b>
+        <p data-l="ko">받은 <b>voquiz.zip</b>의 압축을 풀고, 나온 <b>voquiz</b> 폴더를 지워지지 않을 곳(예: 문서 폴더)에 두세요.</p>
+        <p data-l="en">Unzip <b>voquiz.zip</b> and keep the <b>voquiz</b> folder somewhere it won't be deleted (your Documents folder, for example).</p>
+      </div>
+    </li>
+    <li>
+      <div class="pic" aria-hidden="true"><span class="bar">chrome://extensions</span></div>
+      <div>
+        <b class="t" data-l="ko">확장 프로그램 페이지를 열어요</b><b class="t" data-l="en">Open the extensions page</b>
+        <p data-l="ko">크롬 주소창에 <code>chrome://extensions</code>를 입력하고 Enter를 눌러요.</p>
+        <p data-l="en">Type <code>chrome://extensions</code> in Chrome's address bar and press Enter.</p>
+      </div>
+    </li>
+    <li>
+      <div class="pic" aria-hidden="true"><span class="sw-row"><span data-l="ko">개발자 모드</span><span data-l="en">Developer mode</span><i class="sw"></i></span></div>
+      <div>
+        <b class="t" data-l="ko">개발자 모드를 켜요</b><b class="t" data-l="en">Turn on Developer mode</b>
+        <p data-l="ko">페이지 오른쪽 위에 있는 <b>개발자 모드</b> 스위치예요.</p>
+        <p data-l="en">It's the <b>Developer mode</b> switch at the top right of the page.</p>
+      </div>
+    </li>
+    <li>
+      <div class="pic" aria-hidden="true">
+        <span class="mock-btn"><span data-l="ko">압축해제된 확장 프로그램을 로드합니다</span><span data-l="en">Load unpacked</span><svg viewBox="0 0 24 24" width="22"><path d="M5 3 l13 9 l-6 1.200 l-2.500 6 z" fill="#2e2a47" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+        <span class="arrow">→</span>
+        <svg viewBox="0 0 68 54" width="58"><path d="M4 11 a4 4 0 0 1 4 -4 h15 l6 6 h31 a4 4 0 0 1 4 4 v29 a4 4 0 0 1 -4 4 h-52 a4 4 0 0 1 -4 -4 z" fill="#ffd166" stroke="#c79a00" stroke-width="2.6" stroke-linejoin="round"/><text x="34" y="37" text-anchor="middle" font-size="12" font-weight="800" fill="#5b3d00" font-family="-apple-system, 'Segoe UI', sans-serif">voquiz</text></svg>
+      </div>
+      <div>
+        <b class="t" data-l="ko">voquiz 폴더를 골라요</b><b class="t" data-l="en">Choose the voquiz folder</b>
+        <p data-l="ko">왼쪽 위의 <b>압축해제된 확장 프로그램을 로드합니다</b>를 누르고, 1번에서 둔 <b>voquiz</b> 폴더를 골라요.</p>
+        <p data-l="en">Click <b>Load unpacked</b> at the top left and choose the <b>voquiz</b> folder from step 1.</p>
+      </div>
+    </li>
+    <li>
+      <div class="pic" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="30"><path d="M10 4 a2 2 0 0 1 4 0 v1.500 h4 a1 1 0 0 1 1 1 v3.500 h1.500 a2 2 0 0 1 0 4 h-1.500 v4.500 a1 1 0 0 1 -1 1 h-4 v-1.500 a2 2 0 0 0 -4 0 v1.500 h-4 a1 1 0 0 1 -1 -1 v-4 h1.500 a2 2 0 0 0 0 -4 h-1.500 v-4 a1 1 0 0 1 1 -1 h4 z" fill="#fff" stroke="#2e2a47" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        <span class="arrow">→</span>
+        <span class="pin-row"><span class="logo"><svg viewBox="0 0 128 128" aria-hidden="true"><rect width="128" height="128" rx="28" fill="#655f9f"/><path d="M64 30 v-10 M64 22 q-11 -9 -16 0 q9 6 16 0 M64 22 q11 -9 16 0 q-9 6 -16 0" fill="#bbd86b" stroke="#23552b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M50 30 h28 a30 30 0 0 1 30 30 v10 a30 30 0 0 1 -30 30 h-22 l-17 15 l3 -17 a30 30 0 0 1 -22 -28 v-10 a30 30 0 0 1 30 -30 z" fill="#d6d2f0"/><ellipse cx="39" cy="79" rx="8" ry="5" fill="#ff8fab" opacity=".75"/><ellipse cx="89" cy="79" rx="8" ry="5" fill="#ff8fab" opacity=".75"/><circle cx="48" cy="66" r="7" fill="#2e2a47"/><circle cx="80" cy="66" r="7" fill="#2e2a47"/><circle cx="50.5" cy="63.5" r="2.4" fill="#fff"/><circle cx="82.5" cy="63.5" r="2.4" fill="#fff"/><path d="M57 77 q7 7 14 0" fill="none" stroke="#2e2a47" stroke-width="3.4" stroke-linecap="round"/></svg></span>VOQUIZ<span class="pin"><svg viewBox="0 0 24 24" width="15"><path d="M9 3 h6 l-1 6 l3.500 3 v2 h-4.500 v5 l-1 2 l-1 -2 v-5 h-4.500 v-2 l3.500 -3 z" fill="#655f9f"/></svg></span></span>
+      </div>
+      <div>
+        <b class="t" data-l="ko">VOQUIZ를 고정해요</b><b class="t" data-l="en">Pin VOQUIZ</b>
+        <p data-l="ko">주소창 오른쪽의 퍼즐 모양 아이콘을 누르고, VOQUIZ 옆의 핀을 눌러요.</p>
+        <p data-l="en">Click the puzzle icon to the right of the address bar, then the pin next to VOQUIZ.</p>
+      </div>
+    </li>
+    <li>
+      <div class="pic" aria-hidden="true">
+        <div class="win"><div class="win-bar"><i></i><i></i><i></i></div><div class="win-body"><div class="win-page"><s></s><s></s><s></s></div><div class="win-panel"><span class="logo"><svg viewBox="0 0 128 128" aria-hidden="true"><rect width="128" height="128" rx="28" fill="#655f9f"/><path d="M64 30 v-10 M64 22 q-11 -9 -16 0 q9 6 16 0 M64 22 q11 -9 16 0 q-9 6 -16 0" fill="#bbd86b" stroke="#23552b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M50 30 h28 a30 30 0 0 1 30 30 v10 a30 30 0 0 1 -30 30 h-22 l-17 15 l3 -17 a30 30 0 0 1 -22 -28 v-10 a30 30 0 0 1 30 -30 z" fill="#d6d2f0"/><ellipse cx="39" cy="79" rx="8" ry="5" fill="#ff8fab" opacity=".75"/><ellipse cx="89" cy="79" rx="8" ry="5" fill="#ff8fab" opacity=".75"/><circle cx="48" cy="66" r="7" fill="#2e2a47"/><circle cx="80" cy="66" r="7" fill="#2e2a47"/><circle cx="50.5" cy="63.5" r="2.4" fill="#fff"/><circle cx="82.5" cy="63.5" r="2.4" fill="#fff"/><path d="M57 77 q7 7 14 0" fill="none" stroke="#2e2a47" stroke-width="3.4" stroke-linecap="round"/></svg></span><em data-l="ko">Google 로그인</em><em data-l="en">Google sign-in</em></div></div></div>
+      </div>
+      <div>
+        <b class="t" data-l="ko">열고 로그인해요</b><b class="t" data-l="en">Open it and sign in</b>
+        <p data-l="ko">VOQUIZ 아이콘을 누르면 옆에 창이 열려요. Google 계정으로 로그인해요.</p>
+        <p data-l="en">Click the VOQUIZ icon to open the side panel, and sign in with a Google account.</p>
+      </div>
+    </li>
+    <li>
+      <div class="pic" aria-hidden="true"><div class="code"><i>K</i><i>7</i><i>M</i><i class="now"></i><i></i><i></i></div></div>
+      <div>
+        <b class="t" data-l="ko">초대 코드를 넣어요</b><b class="t" data-l="en">Enter your invite code</b>
+        <p data-l="ko">처음 쓰는 계정은 <b>초대 코드</b>가 필요해요. 초대해 준 사람에게 코드를 받으세요.</p>
+        <p data-l="en">A new account needs an <b>invite code</b>. Ask the person who invited you for one.</p>
+      </div>
+    </li>
+  </ol>
+  <div class="done">
+    <span class="mascot" aria-hidden="true"><svg viewBox="0 0 200 150" role="img" aria-label="VOQUIZ">
+  <ellipse class="m-shadow" cx="100" cy="139" rx="32" ry="5"/>
+  <g class="m-tiles">
+    <g class="m-tile t1"><rect x="-11" y="-11" width="22" height="22" rx="6"/><text y="5">A</text></g>
+    <g class="m-tile t2"><rect x="-11" y="-11" width="22" height="22" rx="6"/><text y="5">가</text></g>
+    <g class="m-tile t3"><rect x="-11" y="-11" width="22" height="22" rx="6"/><text y="5">?</text></g>
+  </g>
+  <g class="m-legs">
+    <path class="m-leg l" d="M89 106 v24 h-8"/>
+    <path class="m-leg r" d="M111 106 v24 h8"/>
+  </g>
+  <g class="m-bob">
+    <path class="m-arm l" d="M72 80 Q50 72 58 52"/>
+    <path class="m-arm r" d="M128 80 Q150 72 142 52"/>
+    
+    <path class="m-body" d="M88 50 h24 a26 26 0 0 1 26 26 v10 a26 26 0 0 1 -26 26 h-20 l-14 12 l2 -13 a26 26 0 0 1 -18 -25 v-10 a26 26 0 0 1 26 -26 z"/>
+    <path class="m-shine" d="M80 60 q10 -7 22 -6"/>
+    <path class="m-sprout" d="M100 50 v-9 M100 43 q-9 -8 -13 0 q7 5 13 0 M100 43 q9 -8 13 0 q-7 5 -13 0"/>
+    
+    <g class="m-face">
+      <ellipse class="m-cheek" cx="78" cy="93" rx="7" ry="4.5"/>
+      <ellipse class="m-cheek" cx="122" cy="93" rx="7" ry="4.5"/>
+      <g class="m-look">
+        <g class="m-eyes e e-default">
+          <circle cx="86" cy="82" r="5.5"/><circle cx="114" cy="82" r="5.5"/>
+          <circle class="m-glint" cx="88" cy="80" r="1.9"/><circle class="m-glint" cx="116" cy="80" r="1.9"/>
+        </g>
+        <g class="e e-wide">
+          <circle cx="86" cy="81" r="7.5"/><circle cx="114" cy="81" r="7.5"/>
+          <circle class="m-glint" cx="89" cy="78" r="2.6"/><circle class="m-glint" cx="117" cy="78" r="2.6"/>
+        </g>
+        <g class="e e-wink">
+          <circle cx="86" cy="82" r="5.5"/><circle class="m-glint" cx="88" cy="80" r="1.9"/>
+          <path class="line" d="M108 84 q6 -8 12 0"/>
+        </g>
+      </g>
+      <g class="e e-happy"><path class="line" d="M80 84 q6 -8 12 0"/><path class="line" d="M108 84 q6 -8 12 0"/></g>
+      <g class="e e-closed"><path class="line" d="M80 82 q6 5 12 0"/><path class="line" d="M108 82 q6 5 12 0"/></g>
+      <g class="e e-laugh"><path class="line" d="M81 77 l9 5 l-9 5"/><path class="line" d="M119 77 l-9 5 l9 5"/></g>
+      <g class="e e-dizzy"><path class="line" d="M81 77 l10 10 M91 77 l-10 10"/><path class="line" d="M109 77 l10 10 M119 77 l-10 10"/></g>
+      <g class="e e-heart">
+        <path d="M86 88 l-7 -7 a4 4 0 0 1 7 -4 a4 4 0 0 1 7 4 z"/><path d="M114 88 l-7 -7 a4 4 0 0 1 7 -4 a4 4 0 0 1 7 4 z"/>
+      </g>
+      <g class="e e-star">
+        <path d="M86 74 l2.4 5 l5.6 .7 l-4.1 3.8 l1.1 5.5 l-5 -2.8 l-5 2.8 l1.1 -5.5 l-4.1 -3.8 l5.6 -.7 z"/>
+        <path d="M114 74 l2.4 5 l5.6 .7 l-4.1 3.8 l1.1 5.5 l-5 -2.8 l-5 2.8 l1.1 -5.5 l-4.1 -3.8 l5.6 -.7 z"/>
+      </g>
+      <path class="m-smile mo mo-smile" d="M95 90 q5 5 10 0"/>
+      <path class="mo mo-cat line" d="M93 90 q3.5 4.5 7 0 q3.5 4.5 7 0"/>
+      <path class="mo mo-wavy line" d="M93 92 q3.5 -4 7 0 q3.5 4 7 0"/>
+      <ellipse class="mo mo-o" cx="100" cy="93" rx="3.6" ry="4.6"/>
+      <g class="mo mo-yawn"><ellipse cx="100" cy="94" rx="6" ry="7.5"/><ellipse class="m-tongue" cx="100" cy="98" rx="3.6" ry="2.6"/></g>
+      <g class="mo mo-laugh"><path d="M93 89 h14 a7 7 0 0 1 -14 0 z"/><path class="m-tongue" d="M96 93.5 a4 3 0 0 1 8 0 a7 7 0 0 1 -8 0 z"/></g>
+    </g>
+  </g>
+</svg></span>
+    <p data-l="ko"><b>다 됐어요!</b> 이제 궁금한 단어를 찾아보세요. 웹페이지에서 단어를 선택하고 우클릭해도 돼요.</p>
+    <p data-l="en"><b>All done!</b> Now look up a word. You can also select a word on any web page and right-click.</p>
+  </div>
+</section>
+
+<section class="block" id="update">
+  <span class="eyebrow" data-l="ko">새 버전</span><span class="eyebrow" data-l="en">New versions</span>
+  <h2 data-l="ko">새 버전이 나오면 이렇게 바꿔요</h2><h2 data-l="en">When a new version is out</h2>
+  <p class="sub" data-l="ko">앱에 "새 버전이 나왔어요"가 뜨면 세 가지만 하면 돼요.</p>
+  <p class="sub" data-l="en">When the app says "A new version is ready", three things are all it takes.</p>
+  <ol class="three">
+    <li><b data-l="ko">파일 다시 받기</b><b data-l="en">Download again</b><p data-l="ko">이 페이지에서 voquiz.zip을 다시 받아 압축을 풀어요.</p><p data-l="en">Download voquiz.zip from this page again and unzip it.</p></li>
+    <li><b data-l="ko">폴더 내용 바꾸기</b><b data-l="en">Replace the folder's contents</b><p data-l="ko">쓰던 voquiz 폴더 안의 내용을 새것으로 바꿔요.</p><p data-l="en">Put the new files in place of the old ones in your voquiz folder.</p></li>
+    <li><b data-l="ko">새로 고침 누르기</b><b data-l="en">Press reload</b><p data-l="ko"><code>chrome://extensions</code>에서 VOQUIZ의 동그란 화살표(↻)를 눌러요.</p><p data-l="en">In <code>chrome://extensions</code>, click the round arrow (↻) on VOQUIZ.</p></li>
+  </ol>
+  <p class="after" data-l="ko">단어장과 포인트는 계정에 저장되어 있어서 그대로예요.</p>
+  <p class="after" data-l="en">Your words and points are saved with your account, so they stay as they are.</p>
+</section>
+
+<section class="block grown">
+  <span class="eyebrow" data-l="ko">알아 두세요</span><span class="eyebrow" data-l="en">Good to know</span>
+  <div class="facts" data-l="ko">
+    <div><b>폴더는 그대로 두세요</b>설치한 뒤에 voquiz 폴더를 옮기거나 지우면 VOQUIZ가 사라져요.</div>
+    <div><b>"개발자 모드" 안내가 떠도 괜찮아요</b>크롬을 켤 때 "개발자 모드 확장 프로그램" 안내가 뜰 수 있어요. 닫으면 돼요.</div>
+    <div><b>기록은 계정에 남아요</b>나중에 스토어에서 다시 설치해도, 같은 Google 계정이면 단어장과 포인트가 그대로예요.</div>
+    <div><b>컴퓨터의 크롬에서만</b>휴대폰과 태블릿의 크롬에는 설치할 수 없어요.</div>
+  </div>
+  <div class="facts" data-l="en">
+    <div><b>Leave the folder where it is</b>If you move or delete the voquiz folder after installing, VOQUIZ disappears.</div>
+    <div><b>The "developer mode" notice is fine</b>Chrome may show a "developer mode extensions" notice when it starts. You can close it.</div>
+    <div><b>Your records stay with your account</b>If you install from the store later, with the same Google account your words and points stay.</div>
+    <div><b>Chrome on a computer only</b>It cannot be installed in Chrome on a phone or a tablet.</div>
+  </div>
+</section>
+
+<footer data-l="ko"><a href="./">VOQUIZ 소개</a> &nbsp;·&nbsp; <a href="privacy.html">개인정보처리방침</a><br>문의: <a href="mailto:jjungjjai@gmail.com">jjungjjai@gmail.com</a></footer>
+<footer data-l="en"><a href="en.html">About VOQUIZ</a> &nbsp;·&nbsp; <a href="privacy-en.html">Privacy Policy</a><br>Contact: <a href="mailto:jjungjjai@gmail.com">jjungjjai@gmail.com</a></footer>
+</div>
 <script>
+(() => {
+  // One page, two languages. #ko or #en in the address chooses; otherwise the browser's language does.
   const set = (lang) => {
     document.documentElement.lang = lang;
-    document.getElementById("ko").setAttribute("aria-pressed", String(lang === "ko"));
-    document.getElementById("en").setAttribute("aria-pressed", String(lang === "en"));
+    for (const a of document.querySelectorAll(".lang a")) a.classList.toggle("on", a.lang === lang);
+    document.querySelector(".brand").href = lang === "ko" ? "./" : "en.html";
+    document.title = lang === "ko" ? "VOQUIZ 설치하기" : "Install VOQUIZ";
   };
-  document.getElementById("ko").onclick = () => set("ko");
-  document.getElementById("en").onclick = () => set("en");
-  if (!(navigator.language || "").startsWith("ko")) set("en");
+  const asked = () => ({ "#ko": "ko", "#en": "en" })[location.hash];
+  set(asked() || ((navigator.language || "").toLowerCase().startsWith("ko") ? "ko" : "en"));
+  addEventListener("hashchange", () => { if (asked()) set(asked()); });
+})();
 </script>
 </body>
 </html>
