@@ -685,6 +685,12 @@ code { background: #fff; border: 1px solid var(--line); border-radius: 7px; padd
 .how b.t { display: block; font-size: 18px; line-height: 1.4; }
 .how p { margin: 3px 0 0; font-size: 15px; line-height: 1.65; color: #4a4663; }
 .pic svg { display: block; flex: none; }
+/* two ways to the same place, one above the other */
+.how .pic.ways { flex-direction: column; gap: 9px; }
+.or { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+.or i { font-style: normal; }
+.pic .or .arrow { font-size: 14px; }
+.menu-item { background: #fff; border-radius: 8px; padding: 4px 8px; font-weight: 800; color: #2e2a47; box-shadow: 0 3px 8px rgba(60, 50, 120, .1); }
 .pic .arrow { font-weight: 900; font-size: 20px; color: var(--accent); animation: nudge 1.4s ease-in-out infinite; }
 @keyframes nudge { 0%, 100% { translate: 0 0; } 50% { translate: 5px 0; } }
 .bar { display: flex; align-items: center; gap: 7px; background: #fff; border: 1.5px solid #dcd8ee; border-radius: 999px; padding: 7px 14px 7px 9px; font: 700 12.5px ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: var(--m-ink); box-shadow: 0 3px 8px rgba(60, 50, 120, .1); white-space: nowrap; }
@@ -860,11 +866,14 @@ code { background: #fff; border: 1px solid var(--line); border-radius: 7px; padd
       </div>
     </li>
     <li>
-      <div class="pic" aria-hidden="true"><span class="bar">chrome://extensions</span></div>
+      <div class="pic ways" aria-hidden="true">
+        <span class="bar">chrome://extensions</span>
+        <span class="or"><i data-l="ko">또는</i><i data-l="en">or</i><svg viewBox="0 0 24 24" width="20"><path d="M10 4 a2 2 0 0 1 4 0 v1.500 h4 a1 1 0 0 1 1 1 v3.500 h1.500 a2 2 0 0 1 0 4 h-1.500 v4.500 a1 1 0 0 1 -1 1 h-4 v-1.500 a2 2 0 0 0 -4 0 v1.500 h-4 a1 1 0 0 1 -1 -1 v-4 h1.500 a2 2 0 0 0 0 -4 h-1.500 v-4 a1 1 0 0 1 1 -1 h4 z" fill="#fff" stroke="#2e2a47" stroke-width="1.7" stroke-linejoin="round"/></svg><span class="arrow">→</span><span class="menu-item"><span data-l="ko">확장 프로그램 관리</span><span data-l="en">Manage extensions</span></span></span>
+      </div>
       <div>
         <b class="t" data-l="ko">확장 프로그램 페이지를 열어요</b><b class="t" data-l="en">Open the extensions page</b>
-        <p data-l="ko">크롬 주소창에 <code>chrome://extensions</code>를 입력하고 Enter를 눌러요.</p>
-        <p data-l="en">Type <code>chrome://extensions</code> in Chrome's address bar and press Enter.</p>
+        <p data-l="ko">크롬 주소창에 <code>chrome://extensions</code>를 입력하고 Enter를 눌러요. 또는 주소창 오른쪽의 퍼즐 모양 아이콘을 누르고 <b>확장 프로그램 관리</b>를 눌러도 돼요.</p>
+        <p data-l="en">Type <code>chrome://extensions</code> in Chrome's address bar and press Enter. Or click the puzzle icon to the right of the address bar, then <b>Manage extensions</b>.</p>
       </div>
     </li>
     <li>
