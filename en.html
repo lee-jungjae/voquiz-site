@@ -506,6 +506,149 @@ section.block > h2, .two h2 { line-height: 1.3; }
   .three li { padding: 14px 12px 12px 52px; } .three li::before { top: 14px; }
   section.block h2 { font-size: 25px; } .float { display: none; }
 }
+/* film:start */
+/* ---------- the story film at the top: characters act out why VOQUIZ exists ---------- */
+/* Words on the left, a small stage on the right. The stage is drawn at 480 x 300 and scaled to fit
+   (--k, set in the script), so everything on it is placed in those units. */
+.film { display: grid; grid-template-columns: minmax(0, 1fr) 480px; grid-template-areas: "words stage" "controls stage"; grid-template-rows: 1fr auto; column-gap: 26px; margin: 4px 0 10px; padding: 20px 22px 18px 30px; border-radius: 30px; background: #f1eff8; transition: background .6s; }
+.film[data-mood="answer"] { background: #f3f9df; }
+.film[data-mood="end"] { background: #ece8ff; }
+.film-words { grid-area: words; align-self: end; min-width: 0; }
+.film-chip { display: inline-block; font-size: 13px; font-weight: 800; border-radius: 999px; padding: 4px 13px; background: #2e2a47; color: #fff; transition: background .4s, color .4s; }
+.film[data-mood="answer"] .film-chip { background: var(--good); color: var(--lime); }
+.film[data-mood="end"] .film-chip { background: var(--accent); color: #fff; }
+.film-caption { margin: 12px 0 0; min-height: 4.2em; font-size: 25px; font-weight: 800; line-height: 1.4; letter-spacing: -.02em; word-break: keep-all; }
+.film-caption.in { animation: film-cap .45s cubic-bezier(.3, 1.3, .5, 1); }
+@keyframes film-cap { from { opacity: 0; transform: translateY(8px); } }
+.film-controls { grid-area: controls; align-self: start; display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.film-dots { display: flex; gap: 6px; }
+.film-dots button { width: 30px; height: 26px; padding: 0; border: 0; background: none; display: grid; align-items: center; cursor: pointer; }
+.film-dots button span { display: block; height: 9px; border-radius: 999px; background: rgba(46, 42, 71, .16); overflow: hidden; }
+.film-dots button i { display: block; width: 0; height: 100%; border-radius: 999px; background: var(--accent); }
+.film-dots button.done i { width: 100%; }
+@keyframes film-fill { from { width: 0; } to { width: 100%; } }
+.film-pause { width: 30px; height: 30px; border-radius: 50%; border: 0; padding: 0; background: #fff; color: var(--m-ink); font-size: 10px; font-weight: 900; line-height: 1; display: grid; place-items: center; box-shadow: 0 2px 6px rgba(0, 0, 0, .1); cursor: pointer; }
+.film.paused * { animation-play-state: paused !important; }
+.film[hidden], .film-pause[hidden] { display: none; }
+.film-box { grid-area: stage; position: relative; aspect-ratio: 480 / 300; }
+.film-stage { position: absolute; left: 0; top: 0; width: 480px; height: 300px; transform-origin: 0 0; transform: scale(var(--k, 1)); }
+
+/* a scene: its things appear step by step (the script adds s1, s2, … to the scene) */
+.f-scene { position: absolute; inset: 0; opacity: 0; transition: opacity .3s; }
+.f-scene.on { opacity: 1; }
+.f-actor { position: absolute; width: 230px; margin: 0; cursor: default; pointer-events: none; transition: transform .6s cubic-bezier(.3, 1.3, .5, 1), opacity .4s; }
+.f-scene.problem .f-actor .m-tiles { opacity: 0; }
+.f-prop { position: absolute; opacity: 0; transform: translateY(14px) scale(.94); transition: opacity .35s, transform .5s cubic-bezier(.3, 1.5, .5, 1); }
+.f-card .f-prop { position: static; display: block; }
+.s1 .p1, .s2 .p2, .s3 .p3, .s4 .p4, .s5 .p5, .s6 .p6, .s7 .p7 { opacity: 1; transform: none; }
+.s2 .h2, .s3 .h3, .s4 .h4 { opacity: 0; transform: scale(.9); }
+.f-card { background: #fff; border-radius: 18px; padding: 13px 16px 14px; box-shadow: 0 10px 24px rgba(60, 50, 120, .16); }
+.f-card small { display: block; font-size: 11.5px; font-weight: 800; letter-spacing: .03em; color: var(--muted); }
+.f-hw { display: block; font-size: 24px; line-height: 1.3; letter-spacing: -.02em; }
+.f-say { background: var(--text); color: #fff; border-radius: 999px; padding: 7px 15px; font-size: 14.5px; font-weight: 700; white-space: nowrap; }
+.f-say::after { content: ""; position: absolute; left: 50%; bottom: -4px; width: 10px; height: 10px; background: inherit; transform: translateX(-50%) rotate(45deg); border-radius: 2px; }
+.f-q, .f-z, .f-spark, .f-coin { position: absolute; font-style: normal; font-weight: 900; opacity: 0; }
+.f-q { font-size: 26px; color: var(--accent); }
+.s2 .q2, .s3 .q3, .s5 .q5 { animation: film-q 1.6s ease-in-out infinite; }
+@keyframes film-q { 0% { opacity: 0; transform: translateY(8px) rotate(-8deg) scale(.6); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-22px) rotate(10deg) scale(1.1); } }
+.f-spark { font-size: 22px; color: #ffc23d; }
+.s1 .k1, .s3 .k3 { animation: film-spark 1.2s ease-in-out infinite; }
+@keyframes film-spark { 0%, 100% { opacity: 0; transform: scale(.4) rotate(0deg); } 50% { opacity: 1; transform: scale(1.1) rotate(20deg); } }
+.f-late { animation-delay: .5s !important; } .f-later { animation-delay: 1s !important; }
+
+/* 1: found it in English, but what is it in Korean? */
+.f-dict p { margin: 5px 0 0; font-size: 15px; line-height: 1.5; color: #4a4663; }
+.f-vq-top { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 900; letter-spacing: .04em; color: var(--accent); }
+.f-vq-top svg { display: block; width: 20px; height: 20px; }
+.f-vq-head { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; margin-top: 5px; }
+.f-vq-head em { display: inline-block; font-style: normal; font-weight: 800; font-size: 18px; background: var(--lime); color: var(--good); border-radius: 999px; padding: 1px 12px; }
+.f-card .f-line { display: flex; gap: 8px; align-items: flex-start; margin: 8px 0 0; font-size: 14.5px; line-height: 1.45; color: #3b3852; }
+.f-line i { flex: none; margin-top: 1px; font-style: normal; font-size: 10.5px; font-weight: 900; border-radius: 6px; padding: 2px 6px; background: var(--accent); color: #fff; }
+.f-line i.en { background: var(--good); color: var(--lime); }
+
+/* 2: looked it up yesterday, gone today */
+.f-cloud { border-radius: 26px; text-align: center; }
+.f-cloud-word { position: relative; height: 34px; margin-top: 3px; }
+.f-cloud-word b { position: absolute; left: 0; right: 0; top: 0; transition: opacity .9s, transform 1.1s ease-in, filter .9s; }
+.s2 .f-fly { opacity: 0; transform: translate(74px, -46px) rotate(14deg) scale(.7); filter: blur(3px); }
+.f-gone { opacity: 0; color: var(--muted); }
+.s3 .f-gone { opacity: 1; }
+.f-dot { width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 4px 10px rgba(60, 50, 120, .16); }
+.f-dot.small { width: 9px; height: 9px; }
+.f-list-top { display: flex; align-items: baseline; justify-content: space-between; }
+.f-list-top b { font-size: 16px; }
+.f-card .f-row { display: flex; align-items: center; gap: 8px; margin-top: 7px; padding: 8px 10px; border-radius: 12px; background: var(--surface); font-size: 15px; transform: translateY(-16px) scale(.94); }
+.s2 .f-row.p2, .s3 .f-row.p3, .s4 .f-row.p4 { transform: none; }
+.f-row span { font-weight: 800; }
+.f-row em { margin-left: auto; font-style: normal; font-size: 13.5px; color: var(--muted); }
+.f-row i { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 12px; font-weight: 900; background: var(--lime); color: var(--good); }
+.f-row i.found { background: #ffe08a; color: #6b4a00; } .f-row i.review { background: #ffd9c2; color: #a04a00; }
+
+/* 3: a new tab for every word */
+.f-win { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 24px rgba(60, 50, 120, .16); }
+.fw-bar { height: 22px; background: #2e2a47; display: flex; gap: 5px; align-items: center; padding: 0 10px; }
+.fw-bar i { width: 7px; height: 7px; border-radius: 50%; background: #ff6b6b; } .fw-bar i:nth-child(2) { background: #ffd166; } .fw-bar i:nth-child(3) { background: #7fd67f; }
+.fw-page { padding: 14px 16px; display: grid; gap: 9px; }
+.fw-page s, .f-tab s, .fw-panel s { display: block; height: 8px; border-radius: 4px; background: #ece9f8; }
+.fw-page p { margin: 0; font-size: 14px; color: #4a4663; white-space: nowrap; }
+.fw-page mark { background: #ffe08a; border-radius: 5px; padding: 1px 5px; font-weight: 800; color: #3a3320; }
+.f-tab { width: 176px; background: #fff; border: 1.5px solid #e4e0f3; border-radius: 12px; padding: 9px 12px 11px; box-shadow: 0 8px 18px rgba(60, 50, 120, .2); }
+.f-tab b { display: block; font-size: 13px; white-space: nowrap; }
+.f-tab s { height: 7px; margin-top: 7px; }
+.s2 .f-tab.p2, .s3 .f-tab.p3, .s4 .f-tab.p4, .s5 .f-tab.p5 { transform: rotate(var(--r, 0deg)); }
+.fw-panel { position: absolute; right: 0; top: 22px; bottom: 0; width: 128px; padding: 12px 10px; background: #efedf9; border-left: 1.5px solid #dcd8ee; display: grid; gap: 6px; align-content: start; transform: translateX(105%); transition: transform .5s cubic-bezier(.3, 1.2, .5, 1); }
+.s3 .fw-panel { transform: none; }
+.fw-panel svg { display: block; width: 22px; height: 22px; }
+.fw-panel b { font-size: 15px; }
+.fw-panel em { justify-self: start; font-style: normal; font-weight: 800; font-size: 14px; background: var(--lime); color: var(--good); border-radius: 999px; padding: 0 10px; }
+.f-menu { display: flex; align-items: center; gap: 6px; background: #fff; border: 1.5px solid #e4e0f3; border-radius: 10px; padding: 7px 12px 7px 8px; font-size: 13px; font-weight: 800; color: var(--m-ink); box-shadow: 0 8px 18px rgba(60, 50, 120, .25); white-space: nowrap; }
+.f-menu svg { display: block; width: 16px; height: 16px; }
+
+/* 4: no one to quiz me */
+.f-flash { width: 176px; height: 108px; perspective: 600px; }
+.f-flip { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .7s cubic-bezier(.4, 0, .2, 1); }
+.s2 .f-flip { transform: rotateY(180deg); }
+.f-flip span { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 16px; font-size: 22px; font-weight: 800; background: #fff; box-shadow: 0 10px 24px rgba(60, 50, 120, .16); backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.f-flip .back { transform: rotateY(180deg); background: var(--lime); color: var(--good); }
+.f-quiz b { display: block; margin-top: 3px; font-size: 15.5px; line-height: 1.35; }
+.f-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 9px; }
+.f-opts span { border: 1.5px solid var(--line); border-radius: 10px; padding: 6px 4px; text-align: center; font-size: 13.5px; font-weight: 700; transition: background .3s, border-color .3s, color .3s, transform .3s; }
+.s2 .f-opts .right { background: var(--lime); border-color: var(--good); color: var(--good); transform: scale(1.06); }
+.f-ok { background: #ffd166; color: #5b3d00; font-weight: 900; font-size: 16px; border-radius: 999px; padding: 5px 14px; transform: scale(.3) rotate(-14deg); white-space: nowrap; }
+.s2 .f-ok.p2 { transform: rotate(8deg); }
+.f-actor.b { opacity: 0; transform: translateX(120px); }
+.s3 .f-actor.b { opacity: 1; transform: none; }
+.f-score { display: flex; align-items: center; justify-content: space-between; background: #2e2a47; color: #fff; border-radius: 999px; padding: 8px 16px; font-size: 15px; white-space: nowrap; }
+.f-score em { font-style: normal; font-size: 11px; font-weight: 900; background: var(--lime); color: var(--good); border-radius: 999px; padding: 2px 9px; }
+
+/* 5: too much bother, until it turns into a game */
+.f-z { font-size: 22px; color: var(--accent); }
+.s2 .z2 { animation: film-z 2s ease-in-out infinite; }
+@keyframes film-z { 0% { opacity: 0; transform: translate(0, 6px) scale(.6); } 30% { opacity: .9; } 100% { opacity: 0; transform: translate(14px, -22px) scale(1.2); } }
+.f-book { width: 92px; height: 66px; border-radius: 6px 12px 12px 6px; background: #b9b4d6; border-left: 9px solid #8f89b8; display: grid; place-items: center; color: #fff; font-size: 15px; font-weight: 800; }
+.s1 .f-book.p1 { transform: rotate(-8deg); }
+.f-coin { font-size: 17px; color: #5b3d00; background: #ffd166; border-radius: 999px; padding: 2px 10px; }
+.s1 .c1 { animation: film-coin 1.5s ease-out infinite; }
+@keyframes film-coin { 0% { opacity: 0; transform: translateY(10px) scale(.6); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(-64px) scale(1.05); } }
+.f-mini { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 6px; }
+.f-mini .mascot { width: 100%; height: 66px; margin: 0; border-radius: 14px; background: var(--surface); overflow: hidden; cursor: default; transition: filter .4s; }
+.f-mini .mascot svg { transform: scale(1.9); transform-origin: 50% 84%; }
+.f-mini .m-tiles { display: none; }
+.s3 .f-mini .m3, .s4 .f-mini .m4, .s5 .f-mini .m5, .s6 .f-mini .m6 { filter: none; animation: film-pop .5s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes film-pop { from { transform: scale(.7); } }
+.f-league { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 999px; padding: 7px 16px 7px 8px; box-shadow: 0 10px 24px rgba(60, 50, 120, .16); font-size: 15.5px; white-space: nowrap; }
+.f-league i { width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe9a8, #ffc23d); color: #5b3d00; font-style: normal; font-weight: 900; display: grid; place-items: center; box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .12); }
+.f-league em { font-style: normal; font-weight: 900; font-size: 13px; color: var(--good); background: var(--lime); border-radius: 999px; padding: 1px 9px; }
+.f-logo { color: var(--accent); }
+.f-logo svg { display: block; width: 100%; height: auto; }
+
+@media (max-width: 860px) {
+  .film { grid-template-columns: minmax(0, 1fr); grid-template-areas: "words" "stage" "controls"; grid-template-rows: auto; padding: 16px 14px 12px; border-radius: 24px; }
+  .film-caption { margin-top: 8px; min-height: 2.8em; font-size: 20px; }
+  .film-box { margin-top: 8px; }
+  .film-controls { justify-content: center; margin-top: 6px; }
+}
+/* film:end */
 </style>
 </head>
 <body class="home">
@@ -540,6 +683,13 @@ section.block > h2, .two h2 { line-height: 1.3; }
 </svg></span></a>
   <nav class="lang"><a href="./" lang="ko">한국어</a><a class="on" href="#" lang="en">English</a></nav>
 </header>
+<!-- film:start -->
+<section class="film" id="film" data-mood="problem" hidden>
+  <div class="film-words"><span class="film-chip" id="film-chip"></span><p class="film-caption" id="film-caption"></p></div>
+  <div class="film-box"><div class="film-stage" id="film-stage" aria-hidden="true"></div></div>
+  <div class="film-controls"><div class="film-dots" id="film-dots"></div><button type="button" class="film-pause" id="film-pause"></button></div>
+</section>
+<!-- film:end -->
 <section class="hero">
   <div>
     <div class="tags"><span class="fill">Grades 3–12</span><span>한국어 · English</span><span>Right in Chrome</span></div>
@@ -1608,5 +1758,212 @@ section.block > h2, .two h2 { line-height: 1.3; }
   $("#all").addEventListener("click", (e) => { if (e.target === $("#all")) $("#all").close(); });
 })();
 </script>
+<script>/* film:start */
+(() => {
+  // The story film: five little stories, each a problem and then what VOQUIZ does about it.
+  // A scene is some markup on a 480 x 300 stage and a list of timed steps. A step either adds a
+  // class to the scene (s1, s2, …: the styles do the rest) or makes a character act.
+  const film = document.getElementById("film");
+  if (!film) return;
+  const ko = document.documentElement.lang === "ko";
+  const L = (k, e) => (ko ? k : e);
+  const $ = (id) => document.getElementById(id);
+  const pic = (id) => (document.querySelector(`.pick[aria-label="${id}"] .mascot`) || document.querySelector(`[data-art="${id}"]`)).innerHTML;
+  const logo = document.querySelector(".brand .icon").innerHTML;
+  const wordmark = document.querySelector(".brand .word").innerHTML;
+  const actor = (id, name, place) => `<span class="mascot f-actor ${name}" style="${place}" data-eyes="default" data-mouth="smile">${pic(id)}</span>`;
+  const mini = (id, step) => `<span class="mascot shade ${step}">${pic(id)}</span>`;
+  const bar = '<div class="fw-bar"><i></i><i></i><i></i></div>';
+  const page = (mark) => `<div class="fw-page"><s style="width:70%"></s><p>… the whole ${mark} depends on …</p><s></s><s style="width:80%"></s><s style="width:55%"></s></div>`;
+  const pointer = '<svg viewBox="0 0 24 24"><path d="M5 3 l13 9 l-6 1.2 l-2.5 6 z" fill="#2e2a47" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+
+  const STORIES = [
+    { name: L("두 언어로", "Two languages"), scenes: [
+      { ms: 4300, cap: L("영어로 찾았더니 영어 뜻만… 한국어로는 뭐라고 하지?", "Looked it up in English and got English only… what is it in Korean?"),
+        html: () => `${actor("rabbit", "a", "left:-20px;bottom:6px")}
+          <div class="f-prop p1 f-card f-dict" style="left:186px;top:40px;width:270px"><small>ENGLISH DICTIONARY</small><b class="f-hw">photosynthesis</b><p>the process by which green plants make their own food from sunlight</p></div>
+          <div class="f-prop p2 f-say" style="left:20px;top:100px">${L("한국어로는… 뭐지?", "…and in Korean?")}</div>
+          <i class="f-q q2" style="left:150px;top:160px">?</i><i class="f-q q2 f-late" style="left:14px;top:150px">?</i>`,
+        steps: [[300, "s1"], [1300, ["a", "wide", "o", "pop"]], [2100, "s2"], [2100, ["a", "wide", "wavy", "tilt"]], [3300, ["a", "closed", "wavy", "sway"]]] },
+      { ms: 4500, cap: L("VOQUIZ는 한 번 찾으면 한국어와 영어, 두 언어로 알려 줘!", "One search in VOQUIZ explains it in both Korean and English!"),
+        html: () => `${actor("rabbit", "a", "left:-20px;bottom:6px")}
+          <div class="f-prop p1 f-card" style="left:178px;top:24px;width:286px">
+            <span class="f-vq-top">${logo}VOQUIZ</span>
+            <div class="f-vq-head"><b class="f-hw">photosynthesis</b><em class="f-prop p2">광합성</em></div>
+            <p class="f-prop p2 f-line"><i>${L("한", "KO")}</i>식물이 햇빛으로 양분을 만드는 일</p>
+            <p class="f-prop p3 f-line"><i class="en">EN</i>how plants make food from sunlight</p>
+          </div>
+          <i class="f-spark k3" style="left:158px;top:14px">✦</i><i class="f-spark k3 f-late" style="left:448px;top:176px">✦</i>`,
+        steps: [[250, "s1"], [900, "s2"], [1500, "s3"], [1700, ["a", "star", "laugh", "jump"]], [3000, ["a", "heart", "cat", "wiggle"]]] },
+    ] },
+    { name: L("단어장", "Word list"), scenes: [
+      { ms: 4300, cap: L("어제 찾아본 단어인데… 뭐였더라?", "I looked that word up yesterday… what was it again?"),
+        html: () => `${actor("penguin", "a", "left:125px;bottom:6px")}
+          <div class="f-prop p1 f-card f-cloud" style="left:112px;top:20px;width:256px"><small>${L("어제 찾아본 단어", "A WORD I LOOKED UP YESTERDAY")}</small>
+            <div class="f-cloud-word"><b class="f-hw f-fly">resilient</b><b class="f-hw f-gone">${L("뭐였더라…?", "what was it…?")}</b></div></div>
+          <i class="f-prop p1 f-dot" style="left:226px;top:120px"></i><i class="f-prop p1 f-dot small" style="left:238px;top:144px"></i>
+          <i class="f-q q3" style="left:150px;top:160px">?</i><i class="f-q q3 f-late" style="left:316px;top:150px">?</i>`,
+        steps: [[300, "s1"], [1400, "s2"], [1500, ["a", "wide", "o", "pop"]], [2500, "s3"], [2500, ["a", "dizzy", "wavy", "shake"]], [3500, ["a", "closed", "wavy", "sway"]]] },
+      { ms: 4500, cap: L("찾은 단어는 단어장에 알아서 쏙! 언제든 다시 볼 수 있어.", "Every word you look up saves itself in your word list."),
+        html: () => `${actor("penguin", "a", "left:-18px;bottom:6px")}
+          <div class="f-prop p1 f-card" style="left:192px;top:20px;width:268px">
+            <div class="f-list-top"><b>${L("내 단어장", "My words")}</b><small>${L("오늘", "TODAY")}</small></div>
+            <div class="f-prop p2 f-row"><span>resilient</span><em>회복력 있는</em><i>✓</i></div>
+            <div class="f-prop p3 f-row"><span>photosynthesis</span><em>광합성</em><i class="found">✦</i></div>
+            <div class="f-prop p4 f-row"><span>ecosystem</span><em>생태계</em><i class="review">↻</i></div>
+          </div>`,
+        steps: [[250, "s1"], [700, "s2"], [1150, "s3"], [1600, "s4"], [1900, ["a", "heart", "cat", "wiggle"]], [3100, ["a", "happy", "laugh", "jump"]]] },
+    ] },
+    { name: L("바로 옆에서", "Right beside the page"), scenes: [
+      { ms: 4400, cap: L("모르는 단어마다 새 창 열고, 검색하고, 돌아오고…", "A new tab for every word: open, search, come back…"),
+        html: () => `<div class="f-prop p1 f-win" style="left:22px;top:24px;width:300px;height:188px">${bar}${page("<mark>ecosystem</mark>")}</div>
+          <div class="f-prop p2 f-tab" style="left:150px;top:10px;--r:-4deg"><b>${L("새 탭", "New tab")}</b><s></s></div>
+          <div class="f-prop p3 f-tab" style="left:204px;top:58px;--r:5deg"><b>${L("검색: ecosystem", "Search: ecosystem")}</b><s></s></div>
+          <div class="f-prop p4 f-tab" style="left:134px;top:104px;--r:-6deg"><b>${L("사전", "Dictionary")}</b><s></s></div>
+          <div class="f-prop p5 f-tab" style="left:214px;top:148px;--r:4deg"><b>${L("번역기", "Translator")}</b><s></s></div>
+          ${actor("bee", "a", "left:286px;bottom:6px")}`,
+        steps: [[300, "s1"], [900, "s2"], [1300, "s3"], [1700, "s4"], [2100, "s5"], [2300, ["a", "dizzy", "wavy", "spin"]], [3400, ["a", "dizzy", "wavy", "shake"]]] },
+      { ms: 4600, cap: L("보던 페이지 바로 옆에서! 단어를 고르고 우클릭하면 끝.", "Right beside the page you're reading: select a word and right-click."),
+        html: () => `<div class="f-prop p1 f-win" style="left:20px;top:22px;width:336px;height:196px">${bar}${page("<mark>ecosystem</mark>")}
+            <div class="fw-panel">${logo}<b>ecosystem</b><em>생태계</em><s></s><s style="width:70%"></s></div></div>
+          <div class="f-prop p2 h3 f-menu" style="left:92px;top:98px">${pointer}${L("VOQUIZ에서 찾기", "Look up in VOQUIZ")}</div>
+          ${actor("bee", "a", "left:290px;bottom:6px")}`,
+        steps: [[300, "s1"], [1000, "s2"], [1900, "s3"], [2200, ["a", "wink", "cat", "squish"]], [3400, ["a", "happy", "laugh", "jump"]]] },
+    ] },
+    { name: L("퀴즈와 대결", "Quizzes and duels"), scenes: [
+      { ms: 4400, cap: L("혼자서는 테스트하기 어려워. 누가 문제 좀 내 줘!", "Testing yourself alone is hard. Who will quiz me?"),
+        html: () => `${actor("cat", "a", "left:16px;bottom:6px")}
+          <div class="f-prop p1 f-flash" style="left:250px;top:96px"><div class="f-flip"><span>resilient</span><span class="back">회복력 있는</span></div></div>
+          <div class="f-prop p2 h3 f-say" style="left:70px;top:106px">${L("앗, 답이 보여!", "Oops, I saw the answer!")}</div>
+          <div class="f-prop p3 f-say" style="left:52px;top:106px">${L("누가 문제 좀 내 줘…", "Somebody quiz me…")}</div>`,
+        steps: [[300, "s1"], [1300, "s2"], [1300, ["a", "wide", "o", "pop"]], [2600, "s3"], [2600, ["a", "closed", "wavy", "shrink"]]] },
+      { ms: 4800, cap: L("내가 찾은 단어로 퀴즈가 뚝딱! 친구와 대결도 할 수 있어.", "Quizzes made from your own words, and duels with friends!"),
+        html: () => `${actor("cat", "a", "left:-34px;bottom:6px")}
+          <div class="f-prop p1 f-card f-quiz" style="left:142px;top:12px;width:210px"><small>${L("퀴즈", "QUIZ")}</small><b>${L("‘회복력 있는’은 영어로?", "Which word means 회복력 있는?")}</b>
+            <div class="f-opts"><span>fragile</span><span class="right">resilient</span><span>ancient</span><span>narrow</span></div></div>
+          <div class="f-prop p2 f-ok" style="left:322px;top:2px">${L("정답!", "Correct!")}</div>
+          ${actor("fox", "b", "left:286px;bottom:6px")}
+          <div class="f-prop p3 f-score" style="left:146px;top:208px;width:202px"><b>${L("나", "Me")} 7</b><em>${L("대결", "DUEL")}</em><b>6 ${L("친구", "Friend")}</b></div>`,
+        steps: [[250, "s1"], [1200, "s2"], [1200, ["a", "star", "laugh", "jump"]], [2300, "s3"], [2500, ["b", "happy", "cat", "bounce"]], [3400, ["a", "heart", "laugh", "party"]], [3500, ["b", "star", "laugh", "jump"]]] },
+    ] },
+    { name: L("모으는 재미", "Collect and compete"), scenes: [
+      { ms: 4100, cap: L("단어 찾기? 귀찮아… 내일 할래.", "Looking up words? Too much bother… maybe tomorrow."),
+        html: () => `${actor("burger", "a", "left:110px;bottom:6px")}
+          <div class="f-prop p1 f-say" style="left:150px;top:104px">${L("귀찮아… 내일 할래", "Maybe tomorrow…")}</div>
+          <i class="f-z z2" style="left:286px;top:160px">z</i><i class="f-z z2 f-late" style="left:306px;top:134px">Z</i><i class="f-z z2 f-later" style="left:326px;top:106px">z</i>
+          <div class="f-prop p1 f-book" style="left:356px;top:216px">${L("단어", "WORDS")}</div>`,
+        steps: [[300, "s1"], [1000, "s2"], [1000, ["a", "closed", "yawn", "sway"]], [2600, ["a", "closed", "wavy", "sway"]]] },
+      { ms: 5000, cap: L("찾을수록 포인트가 쌓여! 캐릭터도 모으고 리그에서 겨뤄.", "Every word earns points: collect characters and climb the league!"),
+        html: () => `${actor("burger", "a", "left:-30px;bottom:6px")}
+          <i class="f-coin c1" style="left:66px;top:138px">+5</i><i class="f-coin c1 f-late" style="left:116px;top:152px">+5</i><i class="f-coin c1 f-later" style="left:22px;top:158px">+5</i>
+          <div class="f-prop p2 f-card" style="left:174px;top:18px;width:288px"><small>${L("모으는 캐릭터 95종", "95 CHARACTERS TO COLLECT")}</small>
+            <div class="f-mini">${mini("sunflower", "m3")}${mini("butterfly", "m4")}${mini("cupcake", "m5")}${mini("robot", "m6")}</div></div>
+          <div class="f-prop p7 f-league" style="left:190px;top:178px"><i>1</i><b>${L("주간 리그 1위!", "1st in the league!")}</b><em>+300</em></div>`,
+        steps: [[250, "s1"], [250, ["a", "star", "laugh", "jump"]], [900, "s2"], [1300, "s3"], [1650, "s4"], [2000, "s5"], [2350, "s6"], [2900, "s7"], [2900, ["a", "heart", "laugh", "party"]], [4000, ["a", "star", "laugh", "jump"]]] },
+    ] },
+  ];
+  const END = { ms: 3800, cap: L("모르는 단어? 두 언어로 쉽게, VOQUIZ!", "Stuck on a word? Two languages, made easy: VOQUIZ!"),
+    html: () => `<div class="f-prop p1 f-logo" style="left:130px;top:22px;width:220px">${wordmark}</div>${actor("bubble", "a", "left:125px;bottom:14px")}
+      <i class="f-spark k1" style="left:96px;top:120px">✦</i><i class="f-spark k1 f-late" style="left:366px;top:104px">✦</i><i class="f-spark k1 f-later" style="left:330px;top:210px">✦</i>`,
+    steps: [[200, "s1"], [500, ["a", "star", "laugh", "party"]], [2000, ["a", "wink", "cat", "squish"]]] };
+
+  // one flat list to play through: problem, answer, problem, answer, …, the closing card
+  const SCENES = [];
+  STORIES.forEach((story, n) => story.scenes.forEach((scene, part) => SCENES.push({ ...scene, story: n, mood: part ? "answer" : "problem", before: part ? story.scenes[0].ms : 0, whole: story.scenes[0].ms + story.scenes[1].ms })));
+  SCENES.push({ ...END, story: STORIES.length, mood: "end" });
+  const CHIP = { problem: L("이럴 때 있지?", "Sound familiar?"), answer: L("VOQUIZ라면!", "With VOQUIZ!"), end: "VOQUIZ" };
+  const MOVES = ["jump", "spin", "wiggle", "squish", "stretch", "flip", "party", "shrink", "pop", "sway", "shake", "tilt", "bounce", "hop"];
+  const calm = matchMedia("(prefers-reduced-motion: reduce)").matches; // then nothing plays by itself: each story shows its answer
+
+  const stage = $("film-stage"), chip = $("film-chip"), caption = $("film-caption"), pause = $("film-pause");
+  film.setAttribute("aria-label", L("VOQUIZ를 소개하는 짧은 애니메이션", "A short animation about VOQUIZ"));
+  $("film-dots").innerHTML = STORIES.map((s) => `<button type="button" aria-label="${s.name}" title="${s.name}"><span><i></i></span></button>`).join("");
+  const dots = [...$("film-dots").children];
+  let index = 0, timers = [], paused = false, running = false;
+
+  function act(root, who, eyes, mouth, move) {
+    const m = root.querySelector(".f-actor." + who);
+    if (!m) return;
+    m.dataset.eyes = eyes;
+    m.dataset.mouth = mouth;
+    m.classList.remove(...MOVES);
+    void m.offsetWidth;
+    if (move) m.classList.add(move);
+  }
+  function stop() { timers.forEach(clearTimeout); timers = []; running = false; }
+  // Shows scene i. `still`: at its end state, with nothing moving on (reduced motion).
+  function show(i, still) {
+    stop();
+    index = i;
+    const s = SCENES[i];
+    film.dataset.mood = s.mood;
+    chip.textContent = CHIP[s.mood];
+    if (caption.textContent !== s.cap) { caption.textContent = s.cap; caption.classList.remove("in"); void caption.offsetWidth; caption.classList.add("in"); }
+    const old = stage.querySelectorAll(".f-scene");
+    const root = document.createElement("div");
+    root.className = `f-scene ${s.mood}`;
+    root.innerHTML = s.html();
+    stage.append(root);
+    void root.offsetWidth;
+    root.classList.add("on");
+    for (const o of old) { o.classList.remove("on"); setTimeout(() => o.remove(), 320); }
+    dots.forEach((dot, n) => {
+      dot.classList.toggle("done", n < s.story);
+      dot.setAttribute("aria-current", String(n === s.story));
+      const fill = dot.querySelector("i");
+      fill.style.animation = "none";
+      fill.style.width = "";
+      if (n !== s.story) return;
+      if (still) { fill.style.width = "100%"; return; }
+      void fill.offsetWidth;
+      fill.style.animation = `film-fill ${s.whole}ms linear -${s.before}ms forwards`;
+    });
+    const run = ([, what]) => (typeof what === "string" ? root.classList.add(what) : act(root, ...what));
+    if (still) { s.steps.forEach(run); return; }
+    running = true;
+    for (const step of s.steps) timers.push(setTimeout(() => run(step), step[0]));
+    timers.push(setTimeout(() => show((i + 1) % SCENES.length), s.ms));
+  }
+  const first = (story) => SCENES.findIndex((s) => s.story === story);
+  dots.forEach((dot, n) => dot.addEventListener("click", () => {
+    if (calm) return show(first(n) + 1, true);
+    setPaused(false);
+    show(first(n));
+  }));
+  function setPaused(now) {
+    paused = now;
+    film.classList.toggle("paused", paused);
+    pause.textContent = paused ? "▶" : "❙❙";
+    pause.setAttribute("aria-label", paused ? L("재생", "Play") : L("일시 정지", "Pause"));
+  }
+  pause.addEventListener("click", () => {
+    setPaused(!paused);
+    if (paused) stop(); else show(index);
+  });
+
+  // the stage is drawn at 480 wide and scaled to its box
+  const box = stage.parentElement;
+  const fit = () => stage.style.setProperty("--k", String(box.clientWidth / 480));
+  new ResizeObserver(fit).observe(box);
+  chip.textContent = CHIP.problem;
+  caption.textContent = SCENES[0].cap;
+  film.hidden = false;
+  fit();
+
+  if (calm) { pause.hidden = true; show(1, true); return; }
+  setPaused(false);
+  // It plays only while it can be seen: off the screen or in a hidden tab it waits, then starts the scene again.
+  let seen = false;
+  const sync = () => {
+    const can = seen && !document.hidden && !paused;
+    if (can && !running) show(index);
+    else if (!can && running) stop();
+  };
+  new IntersectionObserver(([entry]) => { seen = entry.isIntersecting; sync(); }, { threshold: 0.25 }).observe(film);
+  document.addEventListener("visibilitychange", sync);
+  seen = film.getBoundingClientRect().top < innerHeight; // at the top of the page it can start at once
+  sync();
+})();
+/* film:end */</script>
 </body>
 </html>
