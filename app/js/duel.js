@@ -6,6 +6,7 @@
 // (the element builder, translations, the shared state, points, the character drawings).
 import { WORD_LISTS } from "./wordlists.js";
 import { WORD_DEFS } from "./worddefs.js";
+import { clockNow } from "./clock.js";
 
 export const DUEL_LENGTHS = [60, 100, 180]; // seconds; the challenger chooses
 export const DUEL_CHARGES = 3; // challenges a student can hold
@@ -14,7 +15,7 @@ export const DUEL_REFILL_MS = 60 * 60 * 1000; // one comes back every hour
 // How many challenges are left, worked out from the times the earlier ones were sent: every
 // challenge uses a charge, and while fewer than DUEL_CHARGES are held one returns each hour.
 // (create_duel in 0016_duel_charges.sql counts the same way.)  -> { left, nextAt }
-export function duelCharges(sentTimes, now = Date.now()) {
+export function duelCharges(sentTimes, now = clockNow()) {
   let left = DUEL_CHARGES;
   let since = 0; // when the hour that is running began
   const refill = (at) => {
@@ -99,12 +100,12 @@ export function initDuel(c) {
   const seconds = () => (DUEL_LENGTHS.includes(state.duelSeconds) ? state.duelSeconds : 60);
   // Challenges sent in the last 24 hours, and how many are left (the database counts the same way).
   const charges = () => duelCharges((state.duels || []).filter((d) => d.role === "challenger").map((d) => new Date(d.created_at).getTime())
-    .filter((at) => Date.now() - at < 24 * 60 * 60 * 1000));
+    .filter((at) => clockNow() - at < 24 * 60 * 60 * 1000));
   const sendsLeft = () => charges().left;
   // Until the next charge: a clock that counts down every second. It changes only its own text,
   // and the screen is drawn again when the charge arrives.
   let chargeTicker = 0;
-  const waitLeft = () => Math.max(0, Math.ceil((charges().nextAt - Date.now()) / 1000));
+  const waitLeft = () => Math.max(0, Math.ceil((charges().nextAt - clockNow()) / 1000));
   const waitLabel = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
   function waitClock() {
     if (!charges().nextAt) return null;
@@ -265,6 +266,54 @@ export function initDuel(c) {
         sendsLeft() ? t("상대 고르기") : t("충전을 기다리는 중"))),
       sendsLeft() === 0 && h("p", { class: "small muted center" }, t("받은 도전은 횟수와 상관없이 받을 수 있어요.")),
     ];
+  }
+
+  // The duel on the quiz page of the desktop frame: what its card shows, and the lists under the
+  // cards. A past duel shows both characters, glad or sad, so who won is plain at a glance.
+  const STEPS = () => [
+    t("상대와 시간을 고르고 문제를 풀어 기록을 세워요."),
+    t("상대가 같은 문제로 내 기록에 도전해요. 틀리면 3초 동안 멈춰요."),
+    t("더 많이 맞힌 쪽이 이겨요. 도전은 7일 동안 기다려요."),
+  ];
+  function desk() {
+    if (state.duelSetup) return { setup: t("대결을 쓰려면 Supabase SQL Editor에서 0004_duels.sql을 한 번 실행해야 해요."), steps: STEPS(), lists: [] };
+    refresh(false);
+    const list = state.duels || [];
+    const waiting = incoming();
+    const sent = list.filter((d) => d.role === "challenger" && d.status === "open");
+    const done = list.filter((d) => d.status === "done").slice(0, 6);
+    const how = (d) => (d.my_score > d.their_score ? "win" : d.my_score === d.their_score ? "draw" : "lose");
+    const word = { win: t("승"), draw: t("무"), lose: t("패") };
+    return {
+      fee: Math.min(FEE, state.user.points || 0), win: WIN, draw: DRAW,
+      sendsLeft: sendsLeft(), sendsAll: DUEL_CHARGES, wait: sendsLeft() === 0 ? waitClock() : null, pick: openPicker, steps: STEPS(),
+      // Past duels, for the list of every game played: when it ended, and its row (both characters, glad or sad).
+      records: done.map((d) => {
+        const r = how(d);
+        return {
+          at: d.finished_at || d.created_at,
+          row: (when) => h("button", { class: `play-row duel ${r}`, title: t("결과 다시 보기"), onclick: () => openDetail(d) },
+            h("span", { class: "play-who" },
+              face(d.my_character || c.myShop().character, r === "lose" ? "comfort" : "cheer", false, true),
+              h("span", { class: "them" }, face(d.their_character || "bubble", r === "win" ? "comfort" : "cheer", false, true))),
+            h("span", { class: "play-what" }, h("b", null, t("대결"), " · ", who(d.other)), h("small", null, `${when} · ${lengthLabel(d.seconds || 180)}`)),
+            h("b", { class: "play-score" }, `${d.my_score} : ${d.their_score}`),
+            h("span", { class: `mark ${r}` }, word[r])),
+        };
+      }),
+      lists: [
+        waiting.length > 0 && h("section", { class: "duel-list" },
+          h("h3", null, t("받은 도전"), h("small", null, String(waiting.length))),
+          waiting.map((d) => h("div", { class: "duel-row hot" },
+            h("span", { class: "who" }, who(d.other), h("small", null, t("{n}개를 넘으면 승리", { n: d.their_score }))),
+            h("button", { class: "mini buy", onclick: () => start(d) }, t("받기"))))),
+        sent.length > 0 && h("section", { class: "duel-list" },
+          h("h3", null, t("답을 기다리는 중")),
+          sent.map((d) => h("div", { class: "duel-row" },
+            h("span", { class: "who" }, who(d.other), h("small", null, t("내 기록 {n}개", { n: d.my_score }))),
+            h("span", { class: "tagline" }, t("대기 중"))))),
+      ],
+    };
   }
 
   function openPicker() {
@@ -460,12 +509,14 @@ export function initDuel(c) {
     const q = d.questions[d.index % d.questions.length];
     if (option === q.answer) {
       c.sfx.right(c.myShop().character);
+      c.cheer?.();
       d.score += 1;
       d.marks.push(Math.round((Date.now() - d.startedAt) / 1000));
       d.index += 1;
     } else {
       // Wrong: the right answer is shown and everything stops for three seconds.
       c.sfx.wrong();
+      c.miss?.();
       d.picked = option;
       d.frozenUntil = Date.now() + FREEZE_MS;
       setTimeout(() => {
@@ -492,7 +543,7 @@ export function initDuel(c) {
         if (row) Object.assign(row, { my_score: d.score, my_character: character, my_marks: d.marks, status: "done" });
         d.won = reward(d.score, d.their.score);
         d.mode = "result";
-        if (d.score > d.their.score) c.sfx.grand(character); else if (d.score < d.their.score) c.sfx.aww();
+        if (d.score > d.their.score) { c.sfx.grand(character); c.win?.(); } else if (d.score < d.their.score) c.sfx.aww();
         c.render();
         await settle(true);
         if (d.befriend) {
@@ -598,8 +649,8 @@ export function initDuel(c) {
 
   // ---------- screens ----------
 
-  const face = (character, mood, mystery) =>
-    h("div", { class: `face${mystery ? " mystery" : ""}`, "aria-hidden": "true" }, c.reaction(character, mood), mystery && h("i", null, "?"));
+  const face = (character, mood, mystery, still) =>
+    h("div", { class: `face${mystery ? " mystery" : ""}`, "aria-hidden": "true" }, c.reaction(character, mood, Boolean(still)), mystery && h("i", null, "?"));
 
   function introView() {
     const d = state.duel;
@@ -699,5 +750,5 @@ export function initDuel(c) {
     return resultView();
   }
 
-  return { refresh, badge, banner, home, view, stop, openTab, start };
+  return { refresh, badge, banner, home, view, stop, openTab, start, desk };
 }

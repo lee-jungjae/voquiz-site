@@ -1,12 +1,16 @@
 import { api, DEMO } from "./api.js";
 import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js";
-import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js";
 import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js";
 import { cleanEntry } from "./clean.js";
 import { mascot, portrait, reaction, giftArt } from "./mascot.js";
 import { CHARACTERS } from "./characters.js";
 import { logoIcon, wordmark } from "./logo.js";
 import { film } from "./film.js";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js";
+import { initDesktop } from "./desktop.js";
+import { clockNow } from "./clock.js";
 import { BANDS, bandOf } from "./levels.js";
 import { CHARACTER_LINES } from "./character-lines.js";
 import { initDuel } from "./duel.js";
@@ -21,6 +25,12 @@ import { WORD_DEFS } from "./worddefs.js";
 import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js";
 
 const app = document.getElementById("app");
+// The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
+const WEB = document.documentElement.classList.contains("web");
+// On a phone the web version looks exactly like the extension. Only a wide window (a tablet on its
+// side, a desktop) gets the bare home, the tabs at the top and the yard.
+const wideQuery = WEB ? globalThis.matchMedia?.("(min-width: 860px)") : null;
+const WIDE = () => Boolean(wideQuery?.matches);
 
 // Tiny element builder. Text always goes in as text nodes, never as HTML.
 function h(tag, props, ...kids) {
@@ -132,7 +142,7 @@ async function loadWords() {
 // database part (0007_plus.sql) is not installed, so there is no limit and no Plus to show.
 const FREE_SEARCHES = 20; // keep in step with FREE_DAILY_SEARCHES of the lookup function
 const planKey = () => `wb_plan_${state.user.id}`;
-const isPlus = () => Boolean(state.plan?.plus && state.plan.until && new Date(state.plan.until) > new Date());
+const isPlus = () => Boolean(state.plan?.plus && state.plan.until && new Date(state.plan.until) > nowDate());
 const plansOn = () => Boolean(state.plan && !state.plan.off);
 async function loadPlan() {
   if (!state.user) return;
@@ -147,7 +157,7 @@ async function loadPlan() {
   render();
 }
 // Different words searched today, and whether a free student has used them all.
-const searchedToday = () => state.words.filter((w) => dayOf(w.last_searched_at) === dayOf(new Date())).length;
+const searchedToday = () => state.words.filter((w) => dayOf(w.last_searched_at) === todayKey()).length;
 const searchesLeft = () => Math.max(0, FREE_SEARCHES - searchedToday());
 const limitReached = () => plansOn() && !isPlus() && searchesLeft() === 0;
 
@@ -158,7 +168,7 @@ const limitReached = () => plansOn() && !isPlus() && searchesLeft() === 0;
 // The day and how many were picked are kept with the account ({ day, picks }). It is the field
 // older versions use for the Plus present ({ day }), which counts here as one pick, so no present
 // is given twice whichever version is open.
-const giftPicks = () => (state.user.gift?.day === dayOf(new Date()) ? state.user.gift.picks ?? 1 : 0);
+const giftPicks = () => (isToday(state.user.gift?.day) ? state.user.gift.picks ?? 1 : 0);
 const giftAllowed = () => (isPlus() ? tuning("gift").plusPicks : tuning("gift").picks);
 const giftWaiting = () => giftPicks() < giftAllowed();
 function drawPrize() {
@@ -187,10 +197,10 @@ function openDailyGift() {
       if (taken) return;
       taken = true;
       // run: days in a row with a present taken; best: the longest such run (it earns a character).
+      if (!giftWaiting()) return close(); // today's present was taken meanwhile (in another window)
       const before = state.user.gift || {};
-      const today = dayOf(new Date());
-      const run = before.day === today ? before.run || 1 : before.day === dayOf(new Date(Date.now() - 86400000)) ? (before.run || 1) + 1 : 1;
-      state.user.gift = { day: today, picks: giftPicks() + 1, run, best: Math.max(before.best || 0, run) };
+      const run = isToday(before.day) ? before.run || 1 : before.day === dayOf(clockNow() - 86400000) ? (before.run || 1) + 1 : 1;
+      state.user.gift = { day: keepDay(before.day), picks: giftPicks() + 1, run, best: Math.max(before.best || 0, run) };
       api.saveProfile({ gift: state.user.gift }).catch(console.error);
       award(prize, t("오늘의 선물")); // paid at once, so closing the panel now loses nothing
       if (prize >= 100) sfx.cheer(myShop().character); else sfx.chirp(myShop().character);
@@ -218,11 +228,11 @@ function openDailyGift() {
 // the 25th. Like the Plus present, the character on the home screen holds it until it is tapped.
 const SANTA_DAILY = 200;
 const SANTA_BIG = 1000;
-const santaDay = (now = new Date()) => (now.getMonth() === 11 && now.getDate() <= 25 ? now.getDate() : 0);
-const santaWaiting = () => santaDay() > 0 && myShop().owned.includes("character:santa") && state.user.santa?.day !== dayOf(new Date());
+const santaDay = (now = nowDate()) => (now.getMonth() === 11 && now.getDate() <= 25 ? now.getDate() : 0);
+const santaWaiting = () => santaDay() > 0 && myShop().owned.includes("character:santa") && !isToday(state.user.santa?.day);
 function takeSantaGift() {
   const big = santaDay() === 25;
-  state.user.santa = { day: dayOf(new Date()) };
+  state.user.santa = { day: keepDay(state.user.santa?.day) };
   api.saveProfile({ santa: state.user.santa }).catch(console.error);
   award(big ? SANTA_BIG : SANTA_DAILY, big ? t("메리 크리스마스!") : t("산타의 선물"), true);
   return big ? t("메리 크리스마스! 내년 12월에 또 만나") : t("산타의 선물이야! 내일 또 올게");
@@ -280,7 +290,7 @@ function plusSection() {
 const memberKey = () => `wb_member_${state.user.id}`;
 async function checkMember() {
   if (!state.user) return;
-  if (localStorage.getItem(memberKey())) { state.member = true; return; }
+  if (localStorage.getItem(memberKey())) { state.member = true; localStorage.removeItem(TYPED_CODE); return; }
   state.member = undefined;
   try {
     state.member = Boolean(await api.isMember());
@@ -290,10 +300,15 @@ async function checkMember() {
     console.error(err);
     if (err?.status === 401) return fail(err).then(render);
     state.member = true;
+    localStorage.removeItem(TYPED_CODE);
     return render();
   }
   if (state.member) localStorage.setItem(memberKey(), "1");
+  // A code typed before signing in (the web version's first screen): a new student joins with it at once.
+  const typed = typedCode();
+  localStorage.removeItem(TYPED_CODE);
   render();
+  if (!state.member && typed) await joinWithCode(typed);
 }
 
 async function joinWithCode(code) {
@@ -490,7 +505,7 @@ async function search(term) {
   if (!term || state.busy) return;
   state.level = null; // a new search shows the student's own level again
   if (limitReached()) {
-    const again = state.words.find((w) => dayOf(w.last_searched_at) === dayOf(new Date()) && [w.headword, w.term_norm, w.content?.counterpart].some((x) => (x || "").toLowerCase() === term.toLowerCase()));
+    const again = state.words.find((w) => dayOf(w.last_searched_at) === todayKey() && [w.headword, w.term_norm, w.content?.counterpart].some((x) => (x || "").toLowerCase() === term.toLowerCase()));
     Object.assign(state, { tab: "search", query: term, entry: again || null, notice: again ? null : { text: ERRORS().search_limit } });
     return render();
   }
@@ -502,9 +517,10 @@ async function search(term) {
     if (result.word) result.word.content = cleanEntry(result.word.content);
     if (result.valid) {
       const before = state.words.find((w) => w.term_norm === result.word.term_norm);
-      const firstToday = !before || dayOf(before.last_searched_at) !== dayOf(new Date());
+      const firstToday = !before || dayOf(before.last_searched_at) !== todayKey();
       state.words = [result.word, ...state.words.filter((w) => w.term_norm !== result.word.term_norm)];
       state.entry = result.word;
+      state.listWord = null; // beside the word list, the newest word shows again
       if (firstToday) awardSearch(result.word.headword);
       checkWeekly();
       // Nobody had looked this word up before: it goes down as this student's discovery.
@@ -577,7 +593,7 @@ function startQuestionTimer() {
 }
 
 function startQuiz() {
-  const cards = buildQuizSet(state.words, state.scope, Date.now(), tuning("quiz").max);
+  const cards = buildQuizSet(state.words, state.scope, clockNow(), tuning("quiz").max);
   if (!cards.length) return;
   const fee = quizFee(cards.length);
   award(-fee, t("퀴즈에 사용"));
@@ -585,6 +601,7 @@ function startQuiz() {
   const questions = makeQuestions(cards, state.words);
   state.quiz = { cards, questions, fee, index: 0, phase: "ask", typed: "", correct: false, results: [] };
   state.focus = "answer";
+  if (WIDE()) { comboFx(0); stamp(t("시작!"), "go"); }
   startQuestionTimer();
   render();
 }
@@ -606,7 +623,9 @@ function submitAnswer(typed, picked) {
   Object.assign(quiz, { phase: "result", typed: typed.trim(), correct, perfect, earned: (quiz.earned || 0) + earned });
   quiz.results.push({ word, correct });
   state.focus = "next";
-  if (correct) sfx.right(myShop().character); else sfx.wrong();
+  if (correct) { sfx.right(myShop().character); cheerYard(); } else sfx.wrong();
+  if (WIDE()) gameFx(correct, quizRun(quiz), perfect);
+  if (last) recordPlay({ k: "q", r: quiz.results.filter((r) => r.correct).length, n: quiz.results.length, p: quiz.earned - quiz.fee });
   // A word that has just been learned gets the celebration to itself (the points still arrive).
   const patch = applyAnswer(word, correct, !picked);
   const learned = Boolean(patch.mastered_at);
@@ -618,6 +637,18 @@ function submitAnswer(typed, picked) {
   else state.quiz.auto = false;
   patchWord(word, patch);
   if (learned) checkWeekly();
+}
+
+// How many right answers in a row the quiz has just now.
+const quizRun = (quiz) => { let n = 0; for (let i = quiz.results.length - 1; i >= 0 && quiz.results[i].correct; i--) n += 1; return n; };
+// The desktop frame shows an answer with more than a sound: paper in the air (more of it the longer
+// the run), a stamp for the run, a glow round the window; a shake and a red flash for a miss.
+function gameFx(correct, run, grand) {
+  if (!correct) { missFx(); comboFx(0); return; }
+  confetti(26 + Math.min(run, 6) * 12, 0.8 + Math.min(run, 6) * 0.05);
+  comboFx(run);
+  if (run >= 2) stamp(`🔥 ${t("{n}연속", { n: run })}`, run >= 4 ? "combo hot" : "combo");
+  if (grand) setTimeout(() => fireworks(4), 250);
 }
 
 // After a right answer the quiz moves on by itself. Tapping the result card stops the countdown;
@@ -665,10 +696,17 @@ function award(points, label, big, { league = true } = {}) {
   countUp(points);
   saveSoon();
 }
+// The games played, newest first (the last 20), kept with the account: a word-list quiz is
+// { k: "q", at, r: right answers, n: questions, p: points won less points used }, a streak run is
+// { k: "s", at, n: answers in a row, p: points won, rec: 1 for a new record }. Duels have their own record on the server.
+function recordPlay(play) {
+  state.user.plays = [{ ...play, at: nowDate().toISOString() }, ...(Array.isArray(state.user.plays) ? state.user.plays : [])].slice(0, 20);
+  saveSoon();
+}
 function saveSoon() {
   clearTimeout(saveTimer); // several changes in a row become one save
   saveTimer = setTimeout(() => {
-    api.saveProfile({ points: state.user.points, search: state.user.search, shop: state.user.shop, challenge: state.user.challenge, weekly: state.user.weekly }).catch(console.error);
+    api.saveProfile({ points: state.user.points, search: state.user.search, shop: state.user.shop, challenge: state.user.challenge, weekly: state.user.weekly, plays: state.user.plays || [] }).catch(console.error);
     publishRank();
   }, 1500);
 }
@@ -694,23 +732,32 @@ const DISCOVERY_POINTS = 10;
 const SEARCH_POINTS = 5;
 const SEARCH_DAILY_MAX = 100;
 const dayOf = (when) => new Date(when).toLocaleDateString("sv"); // local date as YYYY-MM-DD
+// "Today" is the server's day, not the computer's (clock.js): the day's limits do not start again
+// when the clock of the computer is moved.
+const nowDate = () => new Date(clockNow());
+const todayKey = () => dayOf(clockNow());
+// A day kept with the account (or on this computer) counts as today when it is today, or tomorrow:
+// a time zone can put a computer a day ahead, and setting it back must not open the day again.
+// A day further ahead than that was written by a wrong clock and counts as past.
+const isToday = (day) => Boolean(day) && (day === todayKey() || day === dayOf(clockNow() + 86400000));
+const keepDay = (day) => (isToday(day) ? day : todayKey()); // what to write: never an earlier day over a later one
 
 function searchPointsToday() {
   const search = state.user?.search;
-  return search?.day === dayOf(new Date()) ? search.points : 0;
+  return isToday(search?.day) ? search.points : 0;
 }
 
 // What the Golden sunshine background has added to today's search points (it comes on top of
 // the day's limit), and today's words with what each paid: [[word, points, bonus], ...].
-const searchBonusToday = () => (state.user.search?.day === dayOf(new Date()) ? state.user.search.bonus || 0 : 0);
-const searchLogToday = () => (state.user.search?.day === dayOf(new Date()) && Array.isArray(state.user.search.log) ? state.user.search.log : []);
+const searchBonusToday = () => (isToday(state.user.search?.day) ? state.user.search.bonus || 0 : 0);
+const searchLogToday = () => (isToday(state.user.search?.day) && Array.isArray(state.user.search.log) ? state.user.search.log : []);
 function awardSearch(word) {
   const sofar = searchPointsToday();
   const add = Math.min(SEARCH_POINTS, SEARCH_DAILY_MAX - sofar);
   if (add <= 0) return;
   const bonus = sunriseOn() ? SUNRISE_BONUS : 0;
   state.user.search = {
-    day: dayOf(new Date()), points: sofar + add, bonus: searchBonusToday() + bonus,
+    day: keepDay(state.user.search?.day), points: sofar + add, bonus: searchBonusToday() + bonus,
     log: [...searchLogToday(), [String(word || "").slice(0, 24), add, bonus]].slice(-40),
   };
   const total = sofar + add;
@@ -750,7 +797,7 @@ function searchPointsSheet() {
 // in proportion to the goal, once a week. Kept with the account: { goal, claimed: <week> }.
 const WEEK_GOALS = [10, 20, 35, 50, 70];
 const WEEK_DEFAULT = 35;
-function weekStart(when = new Date()) {
+function weekStart(when = nowDate()) {
   const d = new Date(when.getFullYear(), when.getMonth(), when.getDate());
   d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); // back to Monday
   return d;
@@ -898,7 +945,8 @@ function celebrate(points, label, text = `+${points}`) {
     state.user && reaction(myShop().character, "cheer"));
   document.body.append(el);
   if (state.user) sfx.cheer(myShop().character);
-  setTimeout(() => el.remove(), 2000);
+  if (WEB) syncStage();
+  setTimeout(() => { el.remove(); if (WEB) syncStage(); }, 2000);
 }
 
 // The score in the header counts up to its new value instead of jumping.
@@ -1099,7 +1147,7 @@ function star(word) {
   }, word.favorite ? "★" : "☆");
 }
 
-const title = (text, en) => h("h3", null, text, getLang() !== "en" && h("small", null, en));
+const title = (text, en, ko) => h("h3", null, text, getLang() !== "en" ? h("small", null, en) : WIDE() && ko ? h("small", null, ko) : null);
 
 // ---------- dictionary entry ----------
 
@@ -1173,32 +1221,106 @@ function useRows(c, patterns) {
     list.map((p) => h("p", { class: "use-row" },
       h("b", null, c.language === "ko" ? p.ko : p.en), h("span", null, c.language === "ko" ? p.en : p.ko))));
 }
+// ----- a wide window: a word's two languages side by side -----
+// Two dictionaries next to each other. For an English word: an English-English one (the word
+// explained in English) and an English-Korean one (the same word explained in Korean); for a
+// Korean word the same the other way round. The language of the screen stands on the left (an
+// English screen: English-English on the left; a Korean or Chinese one: English-Korean on the left).
+// Each side is whole by itself (its own word and part of speech, its own labels, its own text), so
+// either column can be read alone from top to bottom. What is being explained stands on both sides
+// as it is: the sentence the word is used in, a pattern, a similar word, the syllables of the Korean
+// word. The side of the other language adds what each of them means.
+const DUO_ALL = "wb_dk_senses"; // "open": the student asked for every meaning opened
+const duoOpen = new Map(); // word -> the places of its meanings that are open
+let duoFresh = ""; // "word|place" of the meaning opened by the last press: only that one comes in with a move
+function duoSides() {
+  const far = getLang() === "en" ? "ko" : "en";
+  return [{ lang: koFirst() ? "ko" : "en", say: (key) => t(key) }, { lang: far, say: (key) => tIn(far, key) }];
+}
+function duoSense(c, sense, whole = false) { // whole: a word's only meaning (its examples, origin and similar words have sections of their own)
+  const sides = duoSides();
+  const own = c.language === "ko" ? "ko" : "en"; // the language of the word itself
+  // One row: the same thing on the two sides. flat: the same once, for a window with no room for two columns.
+  const row = (kind, cell, flat = null) => {
+    const cells = sides.map(cell);
+    if (!cells.some(Boolean)) return null;
+    return h("div", { class: `duo d-${kind}` },
+      cells.map((content, n) => h("div", { class: n ? "duo-cell other" : "duo-cell" }, content)),
+      flat && h("div", { class: "duo-flat" }, flat));
+  };
+  const labelled = (side, key, content) => [h("span", { class: "sense-label" }, side.say(key)), content];
+  const line = (text) => h("p", { class: "sense-line" }, text);
+  const pos = String(sense.part_of_speech || "").split("·").map((part) => part.trim()); // "noun · 명사"
+  const word = (lang) => (lang === own ? c.headword : sense.counterpart || c.counterpart);
+  const patterns = (Array.isArray(sense.patterns) ? sense.patterns : []).filter((p) => p?.en && p?.ko);
+  const tiles = () => h("div", { class: "eq-rows" }, h("div", { class: "eq-row ko" }, h("div", { class: "eq" },
+    String(sense.hun_eum).split("+").map((part) => part.trim()).filter(Boolean).map((part) => syllableTile({ hun_eum: part, meaning_en: "" })),
+    h("span", { class: "sum" }, h("span", { class: "op" }, "="), h("span", { class: "result" }, word("ko"))))));
+  const kin = [["비슷한 말", sense.synonyms, "syn"], ["반대말", sense.antonyms, "ant"]]
+    .map(([key, list, kind]) => [key, (Array.isArray(list) ? list : []).filter((w) => w?.[own]), kind]).filter(([, list]) => list.length > 0);
+  return [
+    row("head", (side) => {
+      const kind = side.lang === "ko" ? pos[1] || pos[0] : pos[0], name = word(side.lang);
+      return kind || name ? [kind && h("span", { class: "sense-pos" }, kind), name && h("b", null, name)] : null;
+    }),
+    row("def", (side) => sense[`definition_${side.lang}`] && h("p", { class: "sense-def" }, sense[`definition_${side.lang}`])),
+    row("note", (side) => sense[`note_${side.lang}`] && labelled(side, "알아 두기", line(sense[`note_${side.lang}`]))),
+    // The sentence itself on both sides, and what it says on the side of the other language.
+    !whole && (sense.example_ko || sense.example_en) && row("ex", (side) => labelled(side, "예문", [
+      sense[`example_${own}`] && line(sense[`example_${own}`]),
+      side.lang !== own && sense[`example_${side.lang}`] && h("p", { class: "sense-line gloss" }, sense[`example_${side.lang}`])]),
+      h("div", { class: "sense-ex" }, h("span", { class: "sense-label" }, t("예문")),
+        (koFirst() ? [sense.example_ko, sense.example_en] : [sense.example_en, sense.example_ko]).filter(Boolean).map((text, n) => h("p", { class: n ? "sense-line second" : "sense-line" }, text)))),
+    // How the word is used: the pattern itself on both sides, and what it means on the side of the other language.
+    patterns.length > 0 && row("use", (side) => labelled(side, "이렇게 써요", patterns.map((p) =>
+      h("p", { class: "use-row" }, h("b", null, p[own]), side.lang !== own && h("span", null, p[side.lang])))), useRows(c, patterns)),
+    !whole && row("origin", (side) => (sense.hun_eum || sense[`origin_${side.lang}`])
+      && labelled(side, "어디서 온 말일까?", [sense.hun_eum && tiles(), sense[`origin_${side.lang}`] && line(sense[`origin_${side.lang}`])])),
+    // Similar and opposite words: the words themselves on both sides, each with its meaning on the side of the other language.
+    !whole && kin.length > 0 && row("kin", (side) => h("div", { class: "kin" }, kin.map(([key, list, kind]) =>
+      h("div", { class: `kin-row ${kind}` },
+        h("span", { class: "kin-label" }, side.say(key)),
+        h("div", { class: "kin-words" }, list.map((w) =>
+          h("button", { class: "kin-word", title: side.say("이 단어 찾기"), onclick: () => search(w[own]) },
+            h("b", null, w[own]), side.lang !== own && w[side.lang] && h("span", null, w[side.lang]))))))),
+      kinRows(c, sense.synonyms, sense.antonyms)),
+  ];
+}
+// A sentence of a word with one meaning, in both languages. In a wide window it is two columns
+// like the meanings: the sentence alone on the side of the word's own language, the sentence and
+// what it says on the other side.
+function exampleLines(e, c) {
+  if (!WIDE()) return h("div", null, koFirst()
+    ? [h("p", null, highlight(e.ko, c)), h("p", { class: "en" }, highlight(e.en, c))]
+    : [h("p", null, highlight(e.en, c)), h("p", { class: "en" }, highlight(e.ko, c))]);
+  const own = c.language === "ko" ? "ko" : "en";
+  return h("div", { class: "duo-ex" }, duoSides().map((side) => h("div", { class: side.lang === own ? "mono" : "" },
+    h("p", null, highlight(e[own], c)), side.lang !== own && h("p", { class: "en" }, highlight(e[side.lang], c)))));
+}
 // Do the meanings carry their own similar and opposite words? (Entries written before that do not.)
 const kinBySense = (c) => manySenses(c) && c.senses.some((sense) => Array.isArray(sense?.synonyms) || Array.isArray(sense?.antonyms));
 const WHOLE_WORD = ["story", "kin", "say"]; // order of the sections under a word with several meanings
 function entryBlocks(word) {
   const c = word.content;
   const sections = [
-    ["kin", title(t("비슷한 말 · 반대말"), "SYNONYMS · ANTONYMS"), !kinBySense(c) && kinRows(c, c.synonyms, c.antonyms)],
+    ["kin", title(t("비슷한 말 · 반대말"), "SYNONYMS · ANTONYMS", "비슷한 말 · 반대말"), !kinBySense(c) && kinRows(c, c.synonyms, c.antonyms)],
     // The word split into its parts and the story of where it comes from are one thing: both say
     // what the word is made of. (How to remember a meaning is shown with that meaning.)
-    ["story", title(t("어디서 온 말일까?"), "ORIGIN"),
+    ["story", title(t("어디서 온 말일까?"), "ORIGIN", "어디서 온 말일까?"),
       (buildBlock(c) || c.origin_ko || c.origin_en) && [
         buildBlock(c),
         (c.origin_ko || c.origin_en) && h("div", { class: "tip-box" }, inBoth(c.origin_ko, c.origin_en)),
       ]],
-    ["ex", title(t("예문"), "EXAMPLES"),
+    ["ex", title(t("예문"), "EXAMPLES", "예문"),
       c.examples?.length > 0 && h("ol", null, c.examples.map((e, i) => h("li", null,
         h("span", { class: "num" }, String(i + 1)),
-        h("div", null, koFirst()
-          ? [h("p", null, highlight(e.ko, c)), h("p", { class: "en" }, highlight(e.en, c))]
-          : [h("p", null, highlight(e.en, c)), h("p", { class: "en" }, highlight(e.ko, c))]))))],
-    ["say", title(t("속담·사자성어"), "SAYINGS"),
+        exampleLines(e, c))))],
+    ["say", title(t("속담·사자성어"), "SAYINGS", "속담·사자성어"),
       c.related?.length > 0 && h("ul", null, c.related.map((r) => h("li", null,
         h("span", { class: "tag" }, KIND()[r.kind] || ""),
         h("span", { class: "tag from" }, sayingSource(r)),
         h("p", { class: "saying" }, r.text),
-        both(r.meaning_ko, r.meaning_en))))],
+        WIDE() ? h("div", { class: "pair" }, both(r.meaning_ko, r.meaning_en)) : both(r.meaning_ko, r.meaning_en))))],
   ].filter(([name, , content]) => content && !(manySenses(c) && name === "ex"))
     .sort((a, b) => (manySenses(c) ? WHOLE_WORD.indexOf(a[0]) - WHOLE_WORD.indexOf(b[0]) : 0));
 
@@ -1250,14 +1372,17 @@ function sayButtons(c) {
 }
 
 function hero(c, word) {
+  const duo = WIDE() && !manySenses(c); // a wide window: the one meaning in two columns, each with the word in its language
   return h("section", { class: "hero" },
     word && star(word),
     word?.discovered && h("div", { class: "found-line" }, h("i", { "aria-hidden": "true" }, "✦"), t("내가 처음 발견한 단어")),
     h("h2", null, c.headword),
-    !manySenses(c) && h("div", { class: "cp" }, h("small", null, "⇄"), c.counterpart),
-    h("div", { class: "meta" }, [c.pronunciation, !manySenses(c) && c.part_of_speech].filter(Boolean).join("  ·  "), sayButtons(c)),
+    !manySenses(c) && !duo && h("div", { class: "cp" }, h("small", null, "⇄"), c.counterpart),
+    h("div", { class: "meta" }, [c.pronunciation, !manySenses(c) && !duo && c.part_of_speech].filter(Boolean).join("  ·  "), sayButtons(c)),
     word && levelBar(word), // always here: under the word, above its meanings
-    manySenses(c) ? sensesList(c, word?.term_norm || c.headword) : [
+    manySenses(c) ? sensesList(c, word?.term_norm || c.headword)
+    : duo ? h("div", { class: "duo-rows" }, duoSense(c, { ...(c.senses?.[0] || {}), definition_ko: c.definition_ko, definition_en: c.definition_en, part_of_speech: c.part_of_speech, counterpart: c.counterpart }, true))
+    : [
       h("div", { class: "def" }, koFirst()
         ? [h("p", null, c.definition_ko), h("p", null, c.definition_en)]
         : [h("p", null, c.definition_en), h("p", null, c.definition_ko)]),
@@ -1274,11 +1399,49 @@ const manySenses = (c) => Array.isArray(c.senses) && c.senses.filter((sense) => 
 const posIn = (label) => { const parts = String(label || "").split("·").map((part) => part.trim()); return (koFirst() ? parts[1] : parts[0]) || parts[0] || ""; };
 function sensesList(c, key) {
   const senses = c.senses.filter((sense) => sense?.definition_ko || sense?.definition_en);
-  const open = (state.openSense[key] ??= new Set([0]));
+  const wide = WIDE(); // the two languages of each meaning side by side (duoSense)
+  const open = wide ? new Set() : (state.openSense[key] ??= new Set([0]));
   const pair = (ko, en) => (koFirst() ? [ko, en] : [en, ko]).filter(Boolean);
   // "동사 2 · 명사 1": what kinds of word this is, at a glance.
   const kinds = new Map();
   for (const sense of senses) kinds.set(posIn(sense.part_of_speech), (kinds.get(posIn(sense.part_of_speech)) || 0) + 1);
+  // A wide window: every meaning shows its word and what it means, and no more, so that all the
+  // meanings are seen at once. A press on a meaning opens the rest of it (its example, how it is
+  // used, where it comes from, similar words). "모두 펼치기" is remembered for the words after this one.
+  if (wide) {
+    if (!duoOpen.has(key)) duoOpen.set(key, new Set(localStorage.getItem(DUO_ALL) === "open" ? senses.keys() : []));
+    const shown = duoOpen.get(key);
+    const parts = senses.map((sense) => {
+      const rows = duoSense(c, sense).filter(Boolean);
+      const top = (row) => row.classList.contains("d-head") || row.classList.contains("d-def");
+      return { top: rows.filter(top), more: rows.filter((row) => !top(row)) };
+    });
+    const allOpen = parts.every((part, i) => !part.more.length || shown.has(i));
+    const setAll = (on) => {
+      on ? localStorage.setItem(DUO_ALL, "open") : localStorage.removeItem(DUO_ALL);
+      duoOpen.clear();
+      duoOpen.set(key, new Set(on ? senses.keys() : []));
+      render();
+    };
+    return h("div", { class: "senses-box" },
+      h("div", { class: "senses-sum" },
+        h("b", null, t("뜻 {n}개", { n: senses.length })),
+        [...kinds].filter(([kind]) => kind).map(([kind, n]) => h("span", { class: "sense-pos" }, n > 1 ? `${kind} ${n}` : kind)),
+        parts.some((part) => part.more.length > 0) && h("button", { class: "link senses-all duo-all", onclick: () => setAll(!allOpen) }, allOpen ? t("모두 접기") : t("모두 펼치기"))),
+      h("ol", { class: "senses" }, parts.map(({ top, more }, i) => {
+        const isOpen = more.length > 0 && shown.has(i);
+        const fresh = isOpen && duoFresh === `${key}|${i}`;
+        if (fresh) duoFresh = "";
+        const toggle = () => { shown.has(i) ? shown.delete(i) : shown.add(i); duoFresh = shown.has(i) ? `${key}|${i}` : ""; render(); };
+        // The word and its meaning are the handle too (not while text in them is being selected).
+        if (more.length) for (const row of top) { row.classList.add("duo-tap"); row.onclick = () => { if (!String(getSelection())) toggle(); }; }
+        return h("li", { class: `duo-li${isOpen ? " open" : ""}${fresh ? " fresh" : ""}` },
+          h("span", { class: "sense-no", "aria-hidden": "true" }, String(i + 1)),
+          h("div", { class: "duo-rows" }, top, isOpen && more),
+          more.length > 0 && h("button", { class: "duo-toggle", "aria-expanded": String(isOpen), title: isOpen ? t("접기") : t("펼치기"), "aria-label": isOpen ? t("접기") : t("펼치기"), onclick: toggle },
+            h("span", null, isOpen ? t("접기") : t("펼치기")), h("i", { "aria-hidden": "true" }, "⌄")));
+      })));
+  }
   return h("div", { class: "senses-box" },
     h("div", { class: "senses-sum" },
       h("b", null, t("뜻 {n}개", { n: senses.length })),
@@ -1377,14 +1540,34 @@ function levelBar(word) {
     h("button", { class: "level-step", disabled: busy || i === BANDS.length - 1, onclick: () => showLevel(word, BANDS[i + 1]) }, t("더 자세히"), h("i", { "aria-hidden": "true" }, "›")));
 }
 
-function entryCard(word) {
+// Beside a result in a wide window: the words looked up today, each one tap away, and the next
+// step from here: a quiz on exactly these words, or the whole list.
+function todayBox() {
+  const today = state.words.filter((w) => dayOf(w.last_searched_at) === todayKey());
+  if (!today.length) return null;
+  const open = (w) => { Object.assign(state, { entry: w, notice: null, level: null }); render(); };
+  return h("section", { class: "today-box" },
+    h("h3", null, t("오늘 찾은 단어"), h("small", null, t("{n}개", { n: today.length }))),
+    h("div", { class: "chips" }, today.slice(0, 14).map((w) =>
+      h("button", { class: "chip", "aria-pressed": String(state.entry?.term_norm === w.term_norm), onclick: () => open(w) }, w.headword))),
+    h("button", { class: "btn ghost wide", onclick: () => { Object.assign(state, { tab: "quiz", notice: null, scope: { type: "days", days: 1, custom: true } }); render(); } }, t("오늘 찾은 단어로 퀴즈")),
+    h("button", { class: "link", onclick: () => { Object.assign(state, { tab: "words", wordLang: "recent", filter: "all", listWord: null, notice: null }); render(); } }, t("단어장에서 모두 보기")));
+}
+// Desktop: what stands beside an open word, in the right column (its origin, sayings, similar words).
+function entrySide(word) {
+  if (levelOf(word)?.busy && levelOf(word).live) return null;
+  const content = shownContent(word);
+  return entryBlocks(content === word.content ? word : { ...word, content }).filter((el) => el && !el.classList.contains("ex"));
+}
+function entryCard(word, flat = false) { // flat: one column even in a wide window (beside the word list)
   if (levelOf(word)?.busy && levelOf(word).live) return h("article", { class: "entry" }, levelLive(word));
   const content = shownContent(word);
-  return h("article", { class: "entry" },
-    hero(content, word),
-    entryBlocks(content === word.content ? word : { ...word, content }),
-    h("div", { class: "card-foot" },
-      h("button", { class: "link", onclick: () => removeWord(word) }, t("단어장에서 삭제"))));
+  const blocks = entryBlocks(content === word.content ? word : { ...word, content }).filter(Boolean);
+  const foot = h("div", { class: "card-foot" },
+    h("button", { class: "link", onclick: () => removeWord(word) }, t("단어장에서 삭제")));
+  // A wide window: the meanings (and the examples of a one-meaning word) on the left, to read down;
+  // beside them, staying in view, where the word comes from, its sayings and its similar words.
+  return h("article", { class: "entry" }, hero(content, word), blocks, foot);
 }
 
 function noticeBox() {
@@ -1444,7 +1627,7 @@ function buildLive(box, between = null) { // between: what goes under the word (
     }),
   };
   el.cp.append(el.counterpart);
-  el.def.append(el.defKo, el.defEn);
+  el.def.append(...(koFirst() ? [el.defKo, el.defEn] : [el.defEn, el.defKo]));
   box.className = "live-box";
   box.replaceChildren(h("div", { class: "live" },
     h("section", { class: "hero" }, el.headword, el.cp, el.meta, between, el.def),
@@ -1513,16 +1696,15 @@ const GIFT_DAILY_MAX = 20;
 function mascotGift() {
   const key = `wb_gift_${state.user.id}`;
   const saved = JSON.parse(localStorage.getItem(key) || "null");
-  const today = dayOf(new Date());
-  const given = saved?.day === today ? saved.points : 0;
+  const given = isToday(saved?.day) ? saved.points : 0;
   if (given >= GIFT_DAILY_MAX || Math.random() >= GIFT_CHANCE) return null;
   const gift = Math.min(randomInt(1, 3), GIFT_DAILY_MAX - given);
-  localStorage.setItem(key, JSON.stringify({ day: today, points: given + gift }));
+  localStorage.setItem(key, JSON.stringify({ day: keepDay(saved?.day), points: given + gift }));
   award(gift, t("캐릭터가 준 선물!"));
   return t("선물이야!");
 }
 
-const quotaKey = () => `${dayOf(new Date())}:${searchesLeft()}:${weekCount()}`;
+const quotaKey = () => `${todayKey()}:${searchesLeft()}:${weekCount()}`;
 // How many searches are left today, in the character's own words. It says so when the home
 // screen opens and again whenever the number has changed, not on every redraw.
 function quotaLine() {
@@ -1538,7 +1720,172 @@ function quotaLine() {
     : t("오늘 {n}번 더 찾을 수 있어!", { n: left });
 }
 
+// ----- the web version's home: as bare as a search engine's -----
+// The word box in the middle, two things worth doing next under it, and nothing else. The
+// student's characters are in the yard at the bottom of the window instead of in the page.
+const webHome = () => WIDE() && state.tab === "search" && !state.busy && !state.entry && !state.notice;
+// One line about collecting characters: a character ready to be taken, or else the quest nearest
+// to done with how far it has come. It opens the point shop, where the quests are.
+function questHint() {
+  if (claimable().length > 0) return h("button", { class: "quest-hint ready", onclick: openShop }, t("받을 수 있는 캐릭터가 있어요"), h("i", { "aria-hidden": "true" }, " →"));
+  const next = earnedCharacters().filter((c) => !ownsCharacter(c) && QUESTS[c.earn.by])
+    .sort((a, b) => questNow(b) / b.earn.goal - questNow(a) / a.earn.goal)[0];
+  if (!next) return null;
+  return h("button", { class: "quest-hint", title: t("포인트샵 열기"), onclick: openShop },
+    h("span", { class: "quest-face", "aria-hidden": "true" }, portrait(next.id)),
+    h("span", null, t("캐릭터 퀘스트"), " · ", QUESTS[next.earn.by].text(next.earn.goal)),
+    h("b", null, `${questNow(next)} / ${next.earn.goal}`));
+}
+// The day at a glance, on the first screen of the desktop frame: what searching has paid today, how
+// far the week's goal is, and the character quest that is nearest. Each opens its own detail.
+function todayRow() {
+  const got = searchPointsToday(), count = weekCount(), goal = weekGoal();
+  const meter = (ratio, label, value, act, title) => h("button", { class: `today-meter${ratio >= 1 ? " done" : ""}`, title, onclick: act },
+    h("i", { class: "goal-ring", style: `--p:${Math.min(1, Math.max(0, ratio)) * 360}deg`, "aria-hidden": "true" }),
+    h("span", null, label), h("b", null, value));
+  const quest = earnedCharacters().filter((c) => !ownsCharacter(c) && QUESTS[c.earn.by])
+    .sort((a, b) => questNow(b) / b.earn.goal - questNow(a) / a.earn.goal)[0];
+  return h("div", { class: "web-today", role: "group", "aria-label": t("오늘") },
+    meter(got / SEARCH_DAILY_MAX, t("오늘 검색 포인트"), `${got + searchBonusToday()} / ${SEARCH_DAILY_MAX}`, searchPointsSheet, t("단어를 찾을 때마다 +{p}점", { p: SEARCH_POINTS })),
+    meter(count / goal, weekLocked() ? t("이번 주 익힌 단어") : t("이번 주 목표"), `${count} / ${goal}`, weeklyGoalSheet, weekLocked() ? t("이번 주 목표") : t("이번 주 목표 정하기")),
+    claimable().length === 0 && quest && meter(questNow(quest) / quest.earn.goal, `${t("캐릭터 퀘스트")} · ${QUESTS[quest.earn.by].text(quest.earn.goal)}`, `${questNow(quest)} / ${quest.earn.goal}`, openShop, t("포인트샵 열기")));
+}
+// Under the word box of the first screen: only how the day and the week stand. What to do next
+// (the present, a quiz, the word of the day, a character to take) is the yard character's to say.
+function webActions() {
+  return [todayRow()];
+}
+function webQuiet() {
+  const recent = WIDE() ? [] : state.words.slice(0, 8);
+  const open = (w) => { Object.assign(state, { entry: w, notice: null }); render(); };
+  return h("div", { class: "web-quiet" },
+    duel().banner(),
+    friends().banner(),
+    limitReached() && h("p", { class: "small muted" }, t("오늘 검색 {n}개를 모두 썼어요. 이미 찾은 단어는 단어장에서 볼 수 있어요.", { n: FREE_SEARCHES })),
+    recent.length > 0 && h("div", { class: "chips center recent" }, recent.map((w) => h("button", { class: "chip", onclick: () => open(w) }, w.headword))));
+}
+// Who is in the yard: the student's own character, and the others they chose to put there.
+let yardCast = null;
+let yardTurn = 0; // how many suggestions the characters have made
+let yardHeld = false; // while the frame is redrawn for a phone, the yard keeps its characters for their run out
+const YARD_MAX = 8; // besides the student's own character: nine in all
+function yardSheet() {
+  document.getElementById("sheet")?.remove();
+  const lead = myShop().character;
+  const mine = ALL_CHARACTERS.filter((c) => c.id !== lead && (ownsCharacter(c) || (c.cost === 0 && !c.earn)));
+  // Starts from what is in the yard now, so opening the sheet changes nothing by itself.
+  let picked = (Array.isArray(myShop().yard) ? myShop().yard : []).filter((id) => mine.some((c) => c.id === id));
+  const close = () => el.remove();
+  const count = h("b", null);
+  const grid = h("div", { class: "yard-grid" });
+  const empty = h("button", { class: "link small", onclick: () => { picked = []; saveShop({ ...myShop(), yard: picked }); draw(); } }, t("모두 빼기"));
+  const draw = () => {
+    count.textContent = `${picked.length} / ${YARD_MAX}`;
+    empty.hidden = picked.length === 0;
+    for (const button of grid.children) button.setAttribute("aria-pressed", String(picked.includes(button.dataset.id)));
+  };
+  const toggle = (id) => {
+    if (picked.includes(id)) picked = picked.filter((x) => x !== id);
+    else if (picked.length < YARD_MAX) picked = [...picked, id];
+    else return toastText(t("내 캐릭터까지 {n}마리가 함께 다닐 수 있어요.", { n: YARD_MAX + 1 }));
+    saveShop({ ...myShop(), yard: picked }); // kept with the account, so the yard is the same on every computer
+    draw();
+  };
+  grid.append(...mine.map((c) => h("button", { class: "yard-pick", "data-id": c.id, title: c.name, "aria-label": c.name, onclick: () => toggle(c.id) }, portrait(c.id))));
+  const el = h("div", { id: "sheet", class: "sheet-wrap", onclick: (e) => { if (e.target === el) close(); } },
+    h("div", { class: "sheet yard-sheet", role: "dialog", "aria-modal": "true", "aria-label": t("함께 다닐 캐릭터 고르기") },
+      h("h2", null, t("함께 다닐 캐릭터 고르기")),
+      h("p", null, t("눌러서 넣거나 빼세요. 고른 캐릭터는 화면 아래에서 내 캐릭터와 함께 다녀요."), " ", count, " ", empty),
+      mine.length > 0 ? grid : h("p", { class: "small" }, t("아직 다른 캐릭터가 없어요. 포인트샵에서 캐릭터를 모아 보세요.")),
+      h("button", { class: "btn wide", onclick: close }, t("닫기"))));
+  draw();
+  document.body.append(el);
+}
+// Where the app draws the student's own character (a result, the start of a duel, a celebration):
+// the one in the yard goes there instead of standing below as a second one (yard.js, the stage).
+const OWN_ART = ".feedback .art .mascot, .score-art .mascot, .versus .side.me .face .mascot, .lane.me .runner .mascot, .league-join-art .mascot, .celebrate .mascot";
+const syncStage = () => stageYard(WIDE() ? document.querySelector(OWN_ART) : null);
+// Catching a visitor: a few points, CATCH_DAILY times a day on this computer.
+const CATCH_POINTS = 2, CATCH_DAILY = 10, CATCH_KEY = "wb_catch";
+const catchKept = () => { try { return JSON.parse(localStorage.getItem(CATCH_KEY) || "{}") || {}; } catch { return {}; } };
+function catchesToday() {
+  const kept = catchKept();
+  return isToday(kept.day) ? kept.n || 0 : 0;
+}
+function catchVisitor(id) {
+  const n = catchesToday();
+  sfx.chirp(id);
+  if (n >= CATCH_DAILY) return "♥";
+  localStorage.setItem(CATCH_KEY, JSON.stringify({ day: keepDay(catchKept().day), n: n + 1 }));
+  award(CATCH_POINTS, t("{name} 발견!", { name: ALL_CHARACTERS.find((c) => c.id === id)?.name || "" }));
+  return `+${CATCH_POINTS}`;
+}
+if (DEMO) globalThis.voquizVisit = visitNow; // for trying a visitor out in the demo
+
+function syncYard() {
+  if (yardHeld) return;
+  const inside = WIDE() && state.user?.grade && state.member && hasChosenLang() && state.update !== "force" && !presentWaiting();
+  if (!inside) return showYard(null);
+  const lead = myShop().character;
+  const mine = ALL_CHARACTERS.filter((c) => c.id !== lead && (ownsCharacter(c) || (c.cost === 0 && !c.earn))).map((c) => c.id);
+  // In the yard: the student's own character and the ones they put there themselves (yardSheet).
+  // Everybody else stays in hiding (they look out from under the menus).
+  const picked = Array.isArray(myShop().yard) ? myShop().yard.filter((id) => mine.includes(id)).slice(0, YARD_MAX) : [];
+  const key = [lead, mine.length, picked.join(",")].join("|");
+  if (yardCast?.key !== key) {
+    yardCast = { key, ids: [lead, ...picked], rest: mine.filter((id) => !picked.includes(id)).sort(() => Math.random() - 0.5) };
+  }
+  // What a character suggests, one thing at a time. What is waiting (a present, a duel, a friend's
+  // request) comes every other time; the everyday ones take turns in between.
+  const to = (tab) => () => goTab(tab);
+  const gift = () => giftWaiting() || santaWaiting();
+  const nudges = () => [
+    gift() && { waits: true, text: t("오늘의 선물 받을래?"), act: () => (giftWaiting() ? openDailyGift() : takeSantaGift()) },
+    claimable().length > 0 && state.tab !== "shop" && { waits: true, text: t("받을 수 있는 캐릭터가 있어!"), act: openShop },
+    duel().badge() > 0 && state.tab !== "quiz" && { waits: true, text: t("대결 신청이 왔어!"), act: to("quiz") },
+    friends().gifts() > 0 && { waits: true, text: t("친구가 선물을 보냈어!"), act: () => friends().collect() },
+    friends().badge() > friends().gifts() && state.tab !== "friends" && { waits: true, text: t("친구 신청이 왔어!"), act: () => friends().open() },
+    state.suggest && !limitReached() && webHome() && { text: t("오늘의 단어 {w}, 찾아볼까?", { w: state.suggest }), act: () => search(state.suggest) },
+    state.words.length > 0 && state.tab !== "quiz" && { text: t("퀴즈 한 판 어때?"), act: to("quiz") },
+    state.tab !== "rank" && { text: t("이번 주 순위 볼래?"), act: to("rank") },
+    { text: t("새 단어 찾으러 가자!"), act: () => { if (state.tab !== "search") goTab("search"); document.getElementById("q")?.focus(); } },
+  ].filter(Boolean);
+  const nextNudge = (asked) => {
+    // Not in the middle of a question or a sheet, and (unless the student asked by tapping) not while they type.
+    if (playing() || document.querySelector("main .choices, main .search.answer") || document.getElementById("sheet")) return null;
+    if (!asked && document.activeElement?.matches?.("input, textarea")) return null;
+    const list = nudges(), waiting = list.filter((n) => n.waits), rest = list.filter((n) => !n.waits);
+    yardTurn += 1;
+    if (!waiting.length) return rest[yardTurn % rest.length];
+    const pool = yardTurn % 2 === 1 ? waiting : rest;
+    return pool[(yardTurn >> 1) % pool.length];
+  };
+  showYard({
+    ids: yardCast.ids, lead, gift: gift(),
+    onEdit: yardSheet, editLabel: t("함께 다닐 캐릭터 고르기"),
+    label: (id) => ALL_CHARACTERS.find((c) => c.id === id)?.name || id,
+    nudge: () => nextNudge(false),
+    // The others come by now and then; catching one is worth a few points (a few times a day).
+    visitors: () => (playing() || document.getElementById("sheet") || catchesToday() >= CATCH_DAILY ? [] : yardCast.rest),
+    onCatch: catchVisitor,
+    stay: state.tab === "shop" ? "right" : null, // the shop is looked at tile by tile: nobody stands on it
+    eager: webHome(), // on the first screen the character is the one who says what to do next: it speaks up sooner and more often
+    // The column of the screen (what is read and pressed): the characters stand beside it.
+    clear: () => {
+      const boxes = [...document.querySelectorAll(".dk > main > *")].filter((el) => !el.matches(".dk-back, .fx-hurry") && el.offsetWidth > 0).map((el) => el.getBoundingClientRect());
+      return boxes.length ? { left: Math.min(...boxes.map((b) => b.left)), right: Math.max(...boxes.map((b) => b.right)) } : null;
+    },
+    onTap: (id, isLead) => {
+      sfx.chirp(id);
+      if (isLead && gift()) { (giftWaiting() ? openDailyGift : takeSantaGift)(); return ""; } // the present it holds
+      return nextNudge(true);
+    },
+  });
+  syncStage();
+}
+
 function searchHome() {
+  if (WIDE()) return webQuiet();
   const RECENT = 6;
   const recent = state.words.slice(0, RECENT);
   const open = (w) => { Object.assign(state, { entry: w, notice: null }); render(); };
@@ -1550,7 +1897,7 @@ function searchHome() {
       ? [h("p", { class: "small" }, t("오늘 검색 {n}개를 모두 썼어요. 이미 찾은 단어는 단어장에서 볼 수 있어요.", { n: FREE_SEARCHES })),
          h("p", { class: "small" }, h("button", { class: "link", onclick: () => { state.plusOpen = true; openSettings(); } }, t("플러스로 전환하면 무제한으로 찾을 수 있어요")))]
       : [h("p", { class: "small" }, t("한국어나 영어 단어를 찾아보세요.")),
-         h("p", { class: "small" }, t("웹페이지에서 단어를 선택해 우클릭해도 돼요."))],
+         !WEB && h("p", { class: "small" }, t("웹페이지에서 단어를 선택해 우클릭해도 돼요."))],
     mascot({
       character: myShop().character, t, onTap: () => { sfx.chirp(myShop().character); return mascotGift() || mascotSuggests(); },
       signature: isPlus() ? { pops: SIGNATURES[myShop().character] || ["✦", "♥", "★"], line: CHARACTER_LINES[myShop().character]?.[["ko", "en", "zh"].indexOf(getLang())] || "" } : null,
@@ -1590,17 +1937,26 @@ function mascotSuggests() {
   return t("이 단어 어때? {w}", { w: state.suggest });
 }
 
-function searchView() {
+// The word box. In a wide window it sits in the top bar on every screen but the bare home, so a
+// word can be looked up from anywhere (as on any dictionary site); otherwise it heads the search tab.
+function searchForm(top = false) {
   state.suggest ||= suggestWord();
   const input = h("input", {
     type: "text", id: "q", value: state.query, maxLength: 40, autocomplete: "off",
     placeholder: state.suggest || t("단어 입력 · Type a word"), "aria-label": t("찾을 단어"),
     oninput: (e) => (state.query = e.target.value),
+    onfocus: (e) => e.target.select(), // the next word replaces the last one
   });
+  return h("form", { class: `search${top ? " top" : ""}${searchPointsToday() < SEARCH_DAILY_MAX ? " tempt" : ""}`, onsubmit: (e) => { e.preventDefault(); const typed = input.value.trim(); if (!typed) state.suggest = null; search(typed || input.placeholder); } },
+    input, h("button", { class: "btn", disabled: state.busy }, t("찾기")));
+}
+const topSearch = () => WIDE() && !webHome(); // the word box is in the top bar
+function searchView() {
+  const home = webHome();
   return [
-    h("form", { class: `search${searchPointsToday() < SEARCH_DAILY_MAX ? " tempt" : ""}`, onsubmit: (e) => { e.preventDefault(); const typed = input.value.trim(); if (!typed) state.suggest = null; search(typed || input.placeholder); } },
-      input, h("button", { class: "btn", disabled: state.busy }, t("찾기"))),
-    dailyGoal(),
+    home && h("p", { class: "dk-hello" }, greeting()),
+    !topSearch() && searchForm(),
+    home ? webActions() : !WIDE() && dailyGoal(),
     noticeBox(),
     state.busy && loadingView(),
     state.entry && entryCard(state.entry),
@@ -1611,7 +1967,7 @@ function searchView() {
 // ---------- word list tab ----------
 
 function dayLabel(day) {
-  const today = new Date();
+  const today = nowDate();
   if (day === dayOf(today)) return t("오늘");
   if (day === dayOf(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1))) return t("어제");
   return new Date(day + "T12:00:00").toLocaleDateString(locale(), { month: "long", day: "numeric", weekday: "short" });
@@ -1678,9 +2034,12 @@ function meanings(c) {
 function wordRow(w) {
   const many = meanings(w.content);
   const grouping = state.filter === "favorites" && canGroup() && w.favorite;
-  return h("div", { class: "item" },
+  // A wide window keeps the list and shows the word beside it; a phone opens the word in the dictionary tab.
+  const open = () => { Object.assign(state, { entry: w, tab: "search", query: "", notice: null }); render(); };
+  const shownNow = WIDE() && state.tab === "search" && state.entry?.term_norm === w.term_norm; // the word open beside the list
+  return h("div", { class: `item${shownNow ? " on" : ""}` },
     h("div", { class: "avatar", "aria-hidden": "true" }, [...w.headword][0].toUpperCase()),
-    h("button", { class: "open", onclick: () => { Object.assign(state, { entry: w, tab: "search", query: "", notice: null }); render(); } },
+    h("button", { class: "open", onclick: open },
       h("div", { class: "word" }, w.headword, w.discovered && tag("found", "✦", t("첫 발견")), w.needs_review && tag("review", "↻", t("복습")), isLearned(w) && tag("learned", "✓", t("다 익힘")), grouping && w.folder && h("span", { class: "badge folder" }, w.folder)),
       h("div", { class: `sub${many ? " many" : ""}` }, many ? many.map((meaning, i) => h("span", { class: "mean" }, h("i", { "aria-hidden": "true" }, String(i + 1)), meaning)) : w.content.counterpart, state.filter === "learned" && isLearned(w) && h("small", { class: "learned-on" }, t("{d}에 익힘", { d: new Date(w.mastered_at).toLocaleDateString(locale(), { month: "short", day: "numeric" }) })))),
     grouping && state.confirmDelete !== w.term_norm && h("button", { class: `folder-btn${w.folder ? " on" : ""}`, "aria-label": t("그룹 정하기"), title: t("그룹 정하기"), onclick: () => folderSheet(w) }, icon("folder")),
@@ -1713,7 +2072,12 @@ function filterChips(filters) {
   return box;
 }
 
+// The word shown beside the list in a wide window: the one picked, or the newest until one is.
+const chosenWord = () => state.words.find((w) => w.term_norm === state.listWord) || state.words[0] || null;
 function wordsView() {
+  return wordsList();
+}
+function wordsList() {
   const langs = [["recent", t("최근")], ["en", t("영어")], ["ko", t("한국어")]];
   const filters = [["all", t("전체")], ["favorites", t("★ 즐겨찾기")], ["review", t("복습 필요")], ["learned", t("✓ 다 익힘")], ["found", t("✦ 내가 발견")]];
   // "recent" is every word, newest first, whichever language it was searched in.
@@ -1721,8 +2085,10 @@ function wordsView() {
   // Favourites can be narrowed to one group (Plus).
   const grouped = state.filter === "favorites" && canGroup();
   const group = grouped && folders().includes(state.folder) ? state.folder : null;
+  const find = WIDE() ? (state.wordsFind || "").trim().toLowerCase() : ""; // the desktop panel's box: a word of the list, or its other-language word
   const shown = inLang(state.wordLang).filter((w) =>
-    state.filter === "favorites" ? w.favorite && (!group || w.folder === group) : state.filter === "review" ? w.needs_review : state.filter === "learned" ? isLearned(w) : state.filter === "found" ? w.discovered : true);
+    state.filter === "favorites" ? w.favorite && (!group || w.folder === group) : state.filter === "review" ? w.needs_review : state.filter === "learned" ? isLearned(w) : state.filter === "found" ? w.discovered : true)
+    .filter((w) => !find || w.headword.toLowerCase().includes(find) || String(w.content?.counterpart || "").toLowerCase().includes(find));
   // Learned words: those learned a month or more ago can go back into the quizzes.
   const old = state.filter === "learned" ? shown.filter((w) => canRetest(w)) : [];
   const learnedRow = state.filter !== "learned" ? null : h("div", { class: "learned-box" },
@@ -1752,7 +2118,7 @@ function wordsView() {
   state.openWeeks ||= new Set([weekKey()]);
   const weekSection = ([key, words]) => {
     const current = key === weekKey();
-    const open = state.openWeeks.has(key);
+    const open = Boolean(find) || state.openWeeks.has(key); // every week is open while finding a word
     const whole = state.filter === "all" && state.wordLang === "recent"; // the goal counts every word of the week
     return h("section", { class: `day week${open ? " open" : ""}` },
       h("button", { class: "week-head", "aria-expanded": String(open), onclick: () => { state.openWeeks[open ? "delete" : "add"](key); render(); } },
@@ -1774,7 +2140,7 @@ function wordsView() {
         h("button", { "aria-pressed": String((state.groupBy || "day") === id), onclick: () => { state.groupBy = id; render(); } }, label)))),
     groupRow,
     learnedRow,
-    noticeBox(),
+    !WIDE() && noticeBox(), // in the desktop frame the screen beside the list shows notices
     shown.length === 0
       ? h("div", { class: "empty" },
           state.words.length ? t("여기에 해당하는 단어가 없어요.") : t("아직 찾아본 단어가 없어요."))
@@ -1788,7 +2154,7 @@ function wordsView() {
 function weekLabel(key) {
   const start = new Date(key + "T12:00:00");
   if (key === weekKey()) return t("이번 주");
-  const lastWeek = new Date(); lastWeek.setDate(lastWeek.getDate() - 7);
+  const lastWeek = nowDate(); lastWeek.setDate(lastWeek.getDate() - 7);
   if (key === weekKey(lastWeek)) return t("지난주");
   const end = new Date(start); end.setDate(end.getDate() + 6);
   const show = (d) => d.toLocaleDateString(locale(), { month: "long", day: "numeric" });
@@ -1820,7 +2186,7 @@ const shuffle = (list) => [...list].sort(() => Math.random() - 0.5);
 const gradeList = (grade) => WORD_LISTS[grade] || [];
 const bestStreak = () => state.user.challenge?.best || 0;
 // Runs left today. The profile keeps the day and how many runs were started on it.
-const triesUsed = () => (state.user.challenge?.day === dayOf(new Date()) ? state.user.challenge.tries || 0 : 0);
+const triesUsed = () => (isToday(state.user.challenge?.day) ? state.user.challenge.tries || 0 : 0);
 const triesLeft = () => Math.max(0, streakRules().tries - triesUsed());
 
 // ----- the start screens of the two games: the character explains, three steps, the numbers -----
@@ -1833,6 +2199,16 @@ const guideSteps = (steps) => h("ol", { class: "guide-steps" }, steps.map((step)
 const coin = () => h("i", { "aria-hidden": "true" }, "P");
 const guideStat = (label, value, kind) => h("div", { class: `stat${kind ? ` ${kind}` : ""}` }, h("b", null, value), h("span", null, label));
 
+const challengeSteps = (grade) => [
+  t("G{g} 권장 단어 {n}개에서 문제가 나와요. 알맞은 답을 골라요.", { g: grade, n: gradeList(grade).length }),
+  t("{n}개를 맞힐 때마다 단계가 올라가고, 정답 점수도 커져요.", { n: streakRules().step }),
+  t("단계가 오르면 보너스를 받아요. 한 번 틀리면 끝나요."),
+];
+// The stages ahead, with what a right answer pays in each.
+const stageLadder = () => h("div", { class: "stage-ladder", role: "list", "aria-label": t("단계") }, STAGES.map((look, i) =>
+  h("div", { class: "stage-rung", role: "listitem", "data-stage": look.id },
+    h("i", { "aria-hidden": "true" }, look.icon), h("b", null, t(look.name)), h("small", null, `+${stagePoints(i)}`))));
+
 function challengeCard() {
   const grade = Math.min(12, Math.max(3, state.user.grade));
   return [
@@ -1842,15 +2218,8 @@ function challengeCard() {
       h("span", { class: "record-label" }, t("내 최고 기록")),
       h("div", { class: "record-number" }, h("b", null, String(bestStreak())), h("span", null, t("연속"))),
       h("p", null, bestStreak() > 0 ? t("{n}연속을 넘으면 새 기록!", { n: bestStreak() }) : t("첫 기록을 세워 봐요!"))),
-    guideSteps([
-      t("G{g} 권장 단어 {n}개에서 문제가 나와요. 알맞은 답을 골라요.", { g: grade, n: gradeList(grade).length }),
-      t("{n}개를 맞힐 때마다 단계가 올라가고, 정답 점수도 커져요.", { n: streakRules().step }),
-      t("단계가 오르면 보너스를 받아요. 한 번 틀리면 끝나요."),
-    ]),
-    // The stages ahead, with what a right answer pays in each.
-    h("div", { class: "stage-ladder", role: "list", "aria-label": t("단계") }, STAGES.map((look, i) =>
-      h("div", { class: "stage-rung", role: "listitem", "data-stage": look.id },
-        h("i", { "aria-hidden": "true" }, look.icon), h("b", null, t(look.name)), h("small", null, `+${stagePoints(i)}`)))),
+    guideSteps(challengeSteps(grade)),
+    stageLadder(),
     h("p", { class: "streak-note" },
       h("span", null, t("오늘 남은 도전"), " ", h("b", null, `${triesLeft()} / ${streakRules().tries}`)),
       h("span", null, t("단계 보너스"), " ", h("b", null, `+${stageBonus(1)}~${stageBonus(STAGES.length)}`))),
@@ -1862,7 +2231,7 @@ function challengeCard() {
 function startChallenge() {
   if (triesLeft() === 0) return;
   const grade = Math.min(12, Math.max(3, state.user.grade));
-  state.user.challenge = { best: bestStreak(), day: dayOf(new Date()), tries: triesUsed() + 1 };
+  state.user.challenge = { best: bestStreak(), day: keepDay(state.user.challenge?.day), tries: triesUsed() + 1 };
   api.saveProfile({ challenge: state.user.challenge }).catch(console.error); // at once, so that closing the panel does not give the run back
   state.challenge = { grade, queue: shuffle(gradeList(grade)), streak: 0, levels: 0, earned: 0, phase: "ask" };
   nextChallengeWord();
@@ -1940,6 +2309,7 @@ function pickChallenge(option) {
     c.earned += points;
     c.phase = "right";
     sfx.climb(c.streak % step || step, step); // one note higher with every answer of the stage
+    if (WIDE()) { confetti(20 + Math.min(stage, 5) * 10, 0.8); comboFx(Math.min(5, 1 + Math.floor(c.streak / 3))); }
     award(points, t("{n}연속", { n: c.streak }));
     const reached = stageOf(c.streak);
     setTimeout(() => {
@@ -1950,6 +2320,7 @@ function pickChallenge(option) {
       c.bonus = stageBonus(reached);
       c.earned += c.bonus;
       sfx.cheer(myShop().character);
+      if (WIDE()) { fireworks(3); confetti(70, 1); }
       if (c.bonus) award(c.bonus, t("{n}단계 돌파!", { n: reached + 1 }));
       render();
       setTimeout(() => {
@@ -1960,6 +2331,7 @@ function pickChallenge(option) {
     }, 500);
   } else {
     sfx.wrong();
+    if (WIDE()) { missFx(); comboFx(0); }
     c.phase = "wrong"; // show the right answer for a moment before the result
     setTimeout(() => { if (state.challenge === c && c.phase === "wrong") missChallenge(); }, 1700);
   }
@@ -1984,6 +2356,7 @@ function finishChallenge(clearedAll) {
   c.phase = "over";
   c.clearedAll = clearedAll;
   c.record = c.streak > bestStreak();
+  recordPlay({ k: "s", n: c.streak, p: c.earned, rec: c.record ? 1 : 0 });
   if (c.record) {
     state.user.challenge = { ...state.user.challenge, best: c.streak };
     celebrate(0, t("새 최고 기록!"), String(c.streak));
@@ -2054,6 +2427,7 @@ function challengeView() {
     top, lamps,
     c.phase === "ask" && h("div", { class: "timer", role: "timer", "aria-label": t("남은 시간") },
       h("i", { style: `animation-duration:${c.limit}ms;animation-delay:-${Math.max(0, c.limit - (c.deadline - Date.now()))}ms` })),
+    c.phase === "ask" && hurry(c.deadline),
     c.timedOut && h("p", { class: "center act-note timeout" }, t("시간이 다 됐어요!")),
     h("div", { class: `ch-prompt${c.question.shown.startsWith("d") ? " long" : ""}` }, c.question.prompt),
     h("div", { class: `choices act${c.question.asked.startsWith("d") ? " wide defs" : c.question.options.some((o) => o.length > 9) ? " wide" : ""}` },
@@ -2238,7 +2612,7 @@ function leagueCard(rows) {
   const tier = myTier(), league = TIERS[tier];
   const index = rows.findIndex((row) => row.me), me = rows[index];
   const ahead = [...rows].reverse().find((row) => row.score > me.score);
-  const left = 7 - ((new Date().getDay() + 6) % 7);
+  const left = 7 - ((nowDate().getDay() + 6) % 7);
   const up = state.leagueUp > 0;
   const friendsOnly = state.rankScope === "friends";
   const safe = rows[rows.length - MOVE - 1]; // the last place that stays
@@ -2262,7 +2636,7 @@ function leagueCard(rows) {
 function leagueInfoView() {
   const from = weekStart(), to = new Date(from.getTime() + 6 * 86400000);
   const date = (d) => d.toLocaleDateString(locale(), { month: "short", day: "numeric", weekday: "short" });
-  const left = 7 - ((new Date().getDay() + 6) % 7);
+  const left = 7 - ((nowDate().getDay() + 6) % 7);
   const tier = myTier(), league = TIERS[tier];
   const rows = leagueRows();
   const me = rows.find((row) => row.me);
@@ -2431,13 +2805,36 @@ function rankView() {
 
 // ---------- quiz tab ----------
 
-function quizSetup() {
+// A choice from a short list in the desktop frame, drawn like the rest of the app: a button that
+// shows the choice, and a list that opens under it. (A phone and the extension keep the browser's
+// own select.) options: [value, text] pairs; a plain string is a heading between them.
+function pickMenu(id, label, options, value, onPick) {
+  const open = state.pickOpen === id;
+  const same = (o) => Array.isArray(o) && String(o[0]) === String(value);
+  const now = options.find(same);
+  return h("div", { class: `pick${open ? " open" : ""}` },
+    h("button", { type: "button", id, class: "pick-button", "aria-haspopup": "listbox", "aria-expanded": String(open), "aria-label": label,
+      onclick: () => { state.pickOpen = open ? null : id; render(); } },
+      h("span", null, now ? String(now[1]).replace(/\s*[(（].*[)）]\s*$/, "") : ""), h("i", { "aria-hidden": "true" }, "▾")),
+    open && h("div", { class: "pick-menu", role: "listbox", "aria-label": label }, options.map((o) => (Array.isArray(o)
+      ? h("button", { type: "button", role: "option", "aria-selected": String(same(o)), onclick: () => { state.pickOpen = null; onPick(o[0]); } },
+          h("span", null, o[1]), same(o) && h("i", { "aria-hidden": "true" }, "✓"))
+      : h("h6", null, o)))));
+}
+document.addEventListener("click", (e) => { // a click anywhere else closes an open menu
+  if (state.pickOpen && !e.target.closest?.(".pick")) { state.pickOpen = null; render(); }
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && state.pickOpen) { state.pickOpen = null; render(); }
+});
+
+function quizScope() {
   const scope = state.scope;
   const setScope = (next) => { state.scope = next; render(); };
   const inRange = quizPool(state.words, scope).length; // a quiz asks at most tuning("quiz").max of them
-  const cards = buildQuizSet(state.words, scope, Date.now(), tuning("quiz").max);
+  const cards = buildQuizSet(state.words, scope, clockNow(), tuning("quiz").max);
   const review = cards.filter((w) => w.needs_review).length;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = nowDate().toISOString().slice(0, 10);
   const select = h("select", {
     id: "scope", "aria-label": t("시험 범위"),
     onchange: (e) => setScope({
@@ -2458,29 +2855,52 @@ function quizSetup() {
     h("option", { value: "learned" }, t("다 익힌 단어 다시 확인 ({d}일 지난 것)", { d: RETEST_DAYS })),
     h("option", { value: "all" }, t("전체 단어")));
   select.value = scope.type === "days" ? (scope.custom ? "days" : "7") : scope.type;
+  // The same choice as a menu of the desktop frame.
+  const picker = () => pickMenu("scope", t("시험 범위"), [...select.options].map((o) => [o.value, o.textContent]), select.value,
+    (v) => { select.value = v; select.dispatchEvent(new Event("change")); });
+
+  const daysInput = () => h("input", {
+    type: "number", id: "days", min: 1, max: 365, value: scope.days, "aria-label": t("최근 며칠 동안 찾은 단어"),
+    onchange: (e) => setScope({ ...scope, days: Math.max(1, Math.min(365, Number(e.target.value) || 1)) }),
+  });
+  const dateInputs = () => [
+    h("input", { type: "date", "aria-label": t("시작일"), value: scope.from, max: today, onchange: (e) => setScope({ ...scope, from: e.target.value }) }),
+    "~",
+    h("input", { type: "date", "aria-label": t("종료일"), value: scope.to, max: today, onchange: (e) => setScope({ ...scope, to: e.target.value }) }),
+  ];
+  const fields = [
+    h("div", { class: "field" }, h("label", { htmlFor: "scope" }, t("시험 범위")), select),
+    scope.custom && h("div", { class: "field" },
+      h("label", { htmlFor: "days" }, t("최근 며칠 동안 찾은 단어")),
+      h("div", { class: "row" }, daysInput(), t("일"))),
+    scope.type === "range" && h("div", { class: "field" },
+      h("label", null, t("찾은 날짜")),
+      h("div", { class: "row" }, dateInputs())),
+  ];
+  // The same in one line, for the card of a phone: the number of days, or the two dates, sit in the
+  // line of the choice itself, so nothing under it moves. (The list beside them shows only its arrow.)
+  const inline = scope.custom ? [h("span", null, t("시험 범위")), h("span", { class: "qz-custom" }, daysInput(), t("일"))]
+    : scope.type === "range" ? [h("span", { class: "qz-custom dates" }, dateInputs())] : null;
+  // One line under the numbers: why the count is what it is.
+  const note = cards.length === 0 ? (scope.type === "review" ? t("지금은 틀린 단어가 없어요!") : scope.type === "learned" && inRange === 0 ? t("익힌 지 {d}일이 지난 단어가 아직 없어요.", { d: RETEST_DAYS }) : t("이 범위에는 단어가 없어요. 범위를 바꿔 보세요."))
+    : inRange > cards.length ? t("범위에 {n}개가 있어요. 그중 {m}개를 골라서 내요.", { n: inRange, m: cards.length })
+    : review > 0 && scope.type !== "review" ? t("지난번에 틀린 복습 단어 {n}개 포함", { n: review }) : "";
+  // The same in short, for the desktop card: nothing to ask (a line), or what the count holds (tags).
+  const empty = cards.length === 0 ? note : "";
+  return { scope, fields, select, picker, custom: fields.slice(1), inline, cards, inRange, review: scope.type !== "review" ? review : 0, note, empty };
+}
+const QUIZ_STEPS = () => [
+  t("뜻을 보고 단어를 쓰거나 골라요."),
+  t("고르는 문제는 {a}초, 쓰는 문제는 {b}초예요.", { a: QUESTION_MS / 1000, b: TYPED_MS / 1000 }),
+  t("{n}번 연속(쓰기 1번 포함) 맞히면 다 익힌 단어가 되어 퀴즈에서 빠져요.", { n: MASTER_STREAK }),
+];
+function quizSetup() {
+  const { scope, fields, cards, inRange, review } = quizScope();
 
   return [
     guideHero(t("오늘 찾은 단어, 기억나?"), t("내 단어장에서 문제를 낼게. 틀려도 괜찮아, 다시 나오니까!")),
-    guideSteps([
-      t("뜻을 보고 단어를 쓰거나 골라요."),
-      t("고르는 문제는 {a}초, 쓰는 문제는 {b}초예요.", { a: QUESTION_MS / 1000, b: TYPED_MS / 1000 }),
-      t("{n}번 연속(쓰기 1번 포함) 맞히면 다 익힌 단어가 되어 퀴즈에서 빠져요.", { n: MASTER_STREAK }),
-    ]),
-    h("div", { class: "guide-form" },
-      h("div", { class: "field" }, h("label", { htmlFor: "scope" }, t("시험 범위")), select),
-      scope.custom && h("div", { class: "field" },
-        h("label", { htmlFor: "days" }, t("최근 며칠 동안 찾은 단어")),
-        h("div", { class: "row" },
-          h("input", {
-            type: "number", id: "days", min: 1, max: 365, value: scope.days,
-            onchange: (e) => setScope({ ...scope, days: Math.max(1, Math.min(365, Number(e.target.value) || 1)) }),
-          }), t("일"))),
-      scope.type === "range" && h("div", { class: "field" },
-        h("label", null, t("찾은 날짜")),
-        h("div", { class: "row" },
-          h("input", { type: "date", "aria-label": t("시작일"), value: scope.from, max: today, onchange: (e) => setScope({ ...scope, from: e.target.value }) }),
-          "~",
-          h("input", { type: "date", "aria-label": t("종료일"), value: scope.to, max: today, onchange: (e) => setScope({ ...scope, to: e.target.value }) })))),
+    guideSteps(QUIZ_STEPS()),
+    h("div", { class: "guide-form" }, fields),
     inRange > cards.length && h("p", { class: "small muted quiz-cut" }, t("범위에 {n}개가 있어요. 그중 {m}개를 골라서 내요.", { n: inRange, m: cards.length })),
     scope.type === "learned" && inRange === 0 && h("p", { class: "small muted quiz-cut" }, t("익힌 지 {d}일이 지난 단어가 아직 없어요.", { d: RETEST_DAYS })),
     h("div", { class: "guide-stats" },
@@ -2497,6 +2917,14 @@ function quizSetup() {
 function quizProgress() {
   const { cards, index, phase } = state.quiz;
   const done = index + (phase === "result" ? 1 : 0);
+  // The desktop frame shows each question as a dot (green for right, red for wrong) and the run of right answers.
+  if (WIDE()) {
+    const { results } = state.quiz, run = quizRun(state.quiz);
+    return h("div", { class: "progress dots" },
+      h("span", null, `${Math.min(index + 1, cards.length)} / ${cards.length}`),
+      h("div", { class: "qz-dots", "aria-hidden": "true" }, cards.map((_, i) => h("i", { class: results[i] ? (results[i].correct ? "ok" : "no") : i === index ? "now" : "" }))),
+      run >= 2 && h("b", { class: "qz-run" }, `🔥 ${t("{n}연속", { n: run })}`));
+  }
   return h("div", { class: "progress" },
     `${Math.min(index + 1, cards.length)} / ${cards.length}`,
     h("div", { class: "bar" }, h("i", { style: `width:${(done / cards.length) * 100}%` })));
@@ -2509,6 +2937,9 @@ function wordIn(c, lang) {
   const headIsKorean = /[가-힣]/.test(c.headword);
   return (lang === "ko") === headIsKorean ? c.headword : c.counterpart || c.headword;
 }
+
+// The last three seconds of a question in the desktop frame: the edges of the window beat red.
+const hurry = (deadline) => WIDE() && h("i", { class: "fx-hurry", "aria-hidden": "true", style: `animation-delay:${Math.max(0, deadline - Date.now() - 3000)}ms` });
 
 function quizAsk() {
   const quiz = state.quiz;
@@ -2523,6 +2954,7 @@ function quizAsk() {
   });
   return [
     quizProgress(),
+    hurry(quiz.deadline),
     h("div", { class: "timer", role: "timer", "aria-label": t("남은 시간") },
       h("i", { style: `animation-duration:${quiz.limit}ms;animation-delay:-${Math.max(0, quiz.limit - (quiz.deadline - Date.now()))}ms` })),
     h("div", { class: `question${(first || "").length > (main === "ko" ? 55 : 95) ? " long" : ""}` },
@@ -2608,6 +3040,11 @@ function quizDone() {
   const { results } = state.quiz;
   const wrong = results.filter((r) => !r.correct);
   const ratio = (results.length - wrong.length) / results.length;
+  if (WIDE() && !state.quiz.cheered) { // once, as the result appears
+    state.quiz.cheered = true;
+    comboFx(0);
+    if (ratio >= 0.6) { confetti(ratio === 1 ? 110 : 60, 1); setTimeout(() => fireworks(ratio === 1 ? 5 : 2), 200); }
+  }
   return [
     h("div", { class: "card center" },
       h("div", { class: "score-art", "aria-hidden": "true" }, reaction(myShop().character, ratio >= 0.6 ? "cheer" : "comfort")),
@@ -2621,6 +3058,8 @@ function quizDone() {
           h("div", { class: "word" }, word.headword),
           h("div", { class: "sub" }, word.content.counterpart))))),
     h("p", { class: "act" }, h("button", { class: "btn wide", onclick: () => { state.quiz = null; render(); } }, t("확인"))),
+    h("p", { class: "act-note center" }, h("button", { class: "link", onclick: () => { state.quiz = null; openRankings(); } }, t("이번 주 내 순위 보기"))),
+    WIDE() && questHint(),
   ];
 }
 
@@ -2629,6 +3068,9 @@ function duel() {
   return (duelModule ||= initDuel({
     h, t, state, api, render, award, fail, reaction, portrait, myShop, displayName, nameOf,
     guideHero, guideSteps, guideStat, coin, toastText, locale, sfx,
+    cheer: () => { cheerYard(); if (WIDE()) confetti(16, 0.7); },
+    miss: () => { if (WIDE()) missFx(); },
+    win: () => { if (WIDE()) { fireworks(4); confetti(90, 1); } },
     winBonus: () => (using("lion") ? LION_BONUS : 0),
     askFriend: (email) => friends().ask(email),
     refreshFriends: (force) => friends().refresh(force),
@@ -2638,10 +3080,120 @@ function duel() {
 let friendsModule = null;
 function friends() {
   return (friendsModule ||= initFriends({
-    h, t, state, api, render, fail, nameOf, toastText, openPage, storeUrl, logoIcon, displayName,
+    h, t, state, api, render, fail, nameOf, toastText, openPage, storeUrl, logoIcon, displayName, award, locale,
+    today: todayKey,
     startDuel: (other) => duel().start({ other }),
   }));
 }
+
+// The quiz page of the desktop frame: three cards side by side, one for each game, so it is plain
+// that there are three to choose from. Each card says what the game is, shows its numbers, and has
+// its own start button (all three on one line). How a game works is one click away. Under the
+// cards: the duels that wait for an answer, and the past ones.
+function howSheet(title, steps, extra) {
+  document.getElementById("sheet")?.remove();
+  const close = () => el.remove();
+  const el = h("div", { id: "sheet", class: "sheet-wrap", onclick: (e) => { if (e.target === el) close(); } },
+    h("div", { class: "sheet how-sheet", role: "dialog", "aria-modal": "true", "aria-label": title },
+      h("h2", null, title), guideSteps(steps), extra,
+      h("button", { class: "btn wide", onclick: close }, t("닫기"))));
+  document.body.append(el);
+}
+// Under the cards: every game played, newest first, whichever game it was. A word-list quiz and a
+// streak run show the student's character (glad or sad) and the result; a duel shows both players.
+function playsList(duels, only) { // only: "q" word-list quiz, "s" streak, "d" duel; nothing = every game
+  const me = myShop().character;
+  const when = (at) => `${dayLabel(dayOf(at))} ${new Date(at).toLocaleTimeString(locale(), { hour: "numeric", minute: "2-digit" })}`;
+  const face = (mood) => h("span", { class: "face", "aria-hidden": "true" }, reaction(me, mood, true)); // glad or sorry, and still
+  const signed = (n) => `${n > 0 ? "+" : ""}${n}`;
+  const mine = (Array.isArray(state.user.plays) ? state.user.plays : []).filter((p) => !only || p.k === only).map((p) => ({
+    at: p.at,
+    el: p.k === "q"
+      ? h("div", { class: "play-row" },
+          h("span", { class: "play-who" }, face(p.n && p.r / p.n >= 0.6 ? "cheer" : "comfort")),
+          h("span", { class: "play-what" }, h("b", null, t("단어장 퀴즈")), h("small", null, when(p.at))),
+          h("b", { class: "play-score" }, `${p.r} / ${p.n}`),
+          h("span", { class: `play-points${p.p > 0 ? " up" : p.p < 0 ? " down" : ""}` }, coin(), signed(p.p)))
+      : h("div", { class: "play-row" },
+          h("span", { class: "play-who" }, face(p.rec || p.n >= 10 ? "cheer" : "comfort")),
+          h("span", { class: "play-what" }, h("b", null, t("연속 도전"), p.rec ? h("em", { class: "play-new" }, t("새 기록!")) : null), h("small", null, when(p.at))),
+          h("b", { class: "play-score" }, t("{n}연속", { n: p.n })),
+          h("span", { class: `play-points${p.p > 0 ? " up" : ""}` }, coin(), signed(p.p))),
+  }));
+  const rows = [...mine, ...(!only || only === "d" ? duels : []).map((d) => ({ at: d.at, el: d.row(when(d.at)) }))].filter((r) => r.at).sort((a, b) => new Date(b.at) - new Date(a.at)).slice(0, 10);
+  if (!rows.length) return null;
+  return h("section", { class: "plays" }, h("h3", null, t("최근 결과")), rows.map((r) => r.el));
+}
+// The characters that host the three games on the quiz page: others the student owns first (never
+// the one that lives in the yard), then any others.
+function quizHosts() {
+  const lead = myShop().character;
+  return [...(yardCast?.rest || []), ...ALL_CHARACTERS.map((c) => c.id)].filter((id, i, all) => id !== lead && all.indexOf(id) === i).slice(0, 4);
+}
+function quizGames() {
+  const quiz = quizScope();
+  const versus = duel().desk();
+  const grade = Math.min(12, Math.max(3, state.user.grade));
+  const [host1, host2, host3, host4] = quizHosts();
+  // Every card is built the same way, so the same kind of thing sits at the same height in all three:
+  // who hosts it, its name, two lines about it, one slot (a choice, or what is left today), three numbers, the start.
+  const game = (id, art, name, text, slot, numbers, more, start, steps, extra) => h("section", { class: `qz-game ${id}` },
+    h("div", { class: "qz-art", "aria-hidden": "true" }, art),
+    h("h2", null, name),
+    h("p", { class: "qz-text" }, text),
+    slot,
+    h("div", { class: "guide-stats qz-nums" }, numbers),
+    more,
+    start,
+    h("button", { class: "link qz-how", onclick: () => howSheet(name, steps, extra) }, t("하는 방법")));
+  const slot = (label, control, custom) => h("div", { class: `qz-slot${custom ? " custom" : ""}` }, custom || h("span", null, label), control);
+  const pips = (left, all) => h("span", { class: "qz-pips" },
+    h("span", { class: "pips", "aria-hidden": "true" }, Array.from({ length: all }, (_, i) => h("i", { class: i < left ? "on" : "" }))),
+    h("b", null, `${left} / ${all}`));
+  const points = streakRules().points;
+  return {
+    review: game("review", [portrait(host1), h("i", { class: "qz-tile a" }, "A"), h("i", { class: "qz-tile b" }, "가")],
+        t("단어장 퀴즈"), t("내가 찾은 단어로 풀어요."),
+        WIDE() ? slot(t("시험 범위"), quiz.picker()) : slot(t("시험 범위"), quiz.select, quiz.inline), // a phone keeps the browser's own list
+        // How many are asked, and (when the range holds more than a quiz asks) out of how many.
+        [guideStat(t("문제 수"), t("{n}개", { n: quiz.inRange > quiz.cards.length ? `${quiz.cards.length} / ${quiz.inRange}` : quiz.cards.length })), guideStat(t("쓰는 포인트"), [coin(), `-${quizFee(quiz.cards.length)}`], "use"), guideStat(t("다 맞히면 최대"), [coin(), `+${quizMax(quiz.cards.length)}`], "gain")],
+        [WIDE() && quiz.custom, quiz.empty ? h("p", { class: "qz-note" }, quiz.empty) : quiz.review > 0 && h("p", { class: "qz-tags" }, h("span", { class: "qz-tag" }, "↻ ", t("복습"), " ", h("b", null, String(quiz.review))))],
+        h("button", { class: "btn", disabled: quiz.cards.length === 0, onclick: startQuiz }, t("퀴즈 시작")),
+        QUIZ_STEPS()),
+    streak: game("streak", [portrait(host2), h("i", { class: "qz-step s1" }), h("i", { class: "qz-step s2" }), h("i", { class: "qz-step s3" })],
+        t("연속 도전"), t("틀릴 때까지 이어져요."),
+        slot(t("오늘 남은 도전"), pips(triesLeft(), streakRules().tries)),
+        [guideStat(t("내 최고 기록"), t("{n}연속", { n: bestStreak() })), guideStat(t("정답 점수"), [coin(), `+${points[0]}~${points[points.length - 1]}`], "gain"), guideStat(t("단계 보너스"), [coin(), `+${stageBonus(1)}~${stageBonus(STAGES.length)}`], "gain")],
+        triesLeft() === 0 && h("p", { class: "qz-note" }, t("오늘 도전은 끝! 내일 또 만나요")),
+        h("button", { class: "btn", disabled: triesLeft() === 0, onclick: startChallenge }, t("도전 시작")),
+        challengeSteps(grade), stageLadder()),
+    duel: game("duel", [portrait(host3), h("i", { class: "qz-vs" }, "VS"), h("span", { class: "qz-rival" }, portrait(host4))],
+        t("대결"), t("친구와 같은 문제로 겨뤄요."),
+        versus.setup ? h("p", { class: "qz-note" }, versus.setup) : slot(t("보낼 수 있는 도전"), pips(versus.sendsLeft, versus.sendsAll)),
+        versus.setup ? null : [guideStat(t("쓰는 포인트"), [coin(), `-${versus.fee}`], "use"), guideStat(t("이기면"), [coin(), `+${versus.win}`], "gain"), guideStat(t("비기면"), [coin(), `+${versus.draw}`], "gain")],
+        versus.wait && h("p", { class: "qz-note" }, versus.wait),
+        h("button", { class: "btn", disabled: Boolean(versus.setup) || versus.sendsLeft === 0, onclick: versus.pick }, t("상대 고르기")),
+        versus.steps),
+    lists: versus.lists,
+    records: versus.records || [],
+  };
+}
+// The desktop frame: the three cards side by side, then the duels that wait and every game played.
+function quizHub() {
+  const games = quizGames();
+  return [
+    h("h1", { class: "qz-title" }, t("퀴즈")),
+    h("p", { class: "qz-lead" }, t("세 가지 퀴즈 중에서 골라 시작해요.")),
+    h("div", { class: "qz-games" }, games.review, games.streak, games.duel),
+    games.lists,
+    playsList(games.records),
+  ];
+}
+// A game is being played (not its start screen, not its result): the desktop frame shows nothing else.
+const playing = () => state.tab === "quiz" && Boolean(
+  (state.challenge && state.challenge.phase !== "over")
+  || (!state.challenge && state.duel && ["intro", "play", "saving"].includes(state.duel.mode))
+  || (!state.challenge && !state.duel && state.quiz && state.quiz.index < state.quiz.cards.length));
 
 function quizView() {
   if (state.challenge) return challengeView();
@@ -2652,11 +3204,18 @@ function quizView() {
     const modes = [["review", t("단어장 퀴즈")], ["streak", t("연속 도전")], ["duel", t("대결")]];
     const waiting = duel().badge();
     const mode = state.quizMode || "review";
+    const choose = (id) => () => { state.quizMode = id; if (id === "duel") state.duelNews = []; render(); };
+    if (WIDE()) return quizHub();
+    // A phone (and the extension's panel): one game at a time under the tabs, as the same card. The
+    // start button is at the same height in every tab; what was played lately follows below it.
+    const games = quizGames();
     return [
       h("div", { class: "segment three", role: "tablist" }, modes.map(([id, label]) =>
-        h("button", { role: "tab", "aria-selected": String(mode === id), onclick: () => { state.quizMode = id; if (id === "duel") state.duelNews = []; render(); } },
+        h("button", { role: "tab", "aria-selected": String(mode === id), onclick: choose(id) },
           label, id === "duel" && waiting > 0 && h("em", { class: "dot" }, String(waiting))))),
-      mode === "duel" ? duel().home() : mode === "streak" ? challengeCard() : quizSetup(),
+      h("div", { class: "qz-games one" }, mode === "duel" ? games.duel : mode === "streak" ? games.streak : games.review),
+      mode === "duel" && games.lists,
+      playsList(games.records, mode === "duel" ? "d" : mode === "streak" ? "s" : "q"),
     ];
   }
   if (quiz.index >= quiz.cards.length) return quizDone();
@@ -2948,11 +3507,14 @@ function settingsView() {
   const grade = h("select", { id: "grade-select", "aria-label": t("학년"), onchange: (e) => chooseGrade(Number(e.target.value)) },
     BANDS.map((band) => h("optgroup", { label: `${band.label} · ${t(band.name)}` }, band.grades.map((g) => h("option", { value: String(g) }, `G${g}`)))));
   grade.value = String(state.user.grade);
+  const gradeMenu = () => pickMenu("grade-select", t("학년"), BANDS.flatMap((band) => [`${band.label} · ${t(band.name)}`, ...band.grades.map((g) => [String(g), `G${g}`])]),
+    String(state.user.grade), (v) => chooseGrade(Number(v)));
   return [
     h("div", { class: "page-head" },
       h("button", { class: "back", "aria-label": t("뒤로"), title: t("뒤로"), onclick: openSettings }, "←"),
       h("h2", { class: "page-title" }, t("설정"))),
     h("section", { class: "block prefs" },
+      WIDE() && h("h3", null, t("내 정보")),
       h("form", { class: "row", onsubmit: async (e) => {
         e.preventDefault();
         state.notice = null;
@@ -2983,7 +3545,7 @@ function settingsView() {
       h("div", { class: "pref-row" },
         h("div", { class: "chips", role: "group", "aria-label": t("언어") }, LANGS.map(([id, label]) =>
           h("button", { class: "chip", "aria-pressed": String(getLang() === id), onclick: () => { setLang(id); render(); } }, label))),
-        h("label", { class: "grade-pick" }, t("학년"), grade))),
+        WIDE() ? h("div", { class: "grade-pick" }, t("학년"), gradeMenu()) : h("label", { class: "grade-pick" }, t("학년"), grade))),
     plansOn() && plusSection(),
     h("section", { class: "block" },
       h("h3", null, t("소리")),
@@ -3004,9 +3566,10 @@ function settingsView() {
       // one under another, each as wide as the panel: the labels differ a lot in length between languages
       h("div", { class: "btn-stack" },
         storeUrl && h("button", { class: "btn ghost", onclick: sharePrompt }, t("친구에게 공유"),
-          state.invites && h("span", { class: "btn-note" }, t("남은 초대장 {n}장", { n: friends().unusedInvites().length }))),
+          state.invites && !WIDE() && h("span", { class: "btn-note" }, t("남은 초대장 {n}장", { n: friends().unusedInvites().length }))),
         storeUrl && h("button", { class: "btn ghost", onclick: ratePrompt }, t("평가하기")),
-        HOME_URL && h("button", { class: "btn ghost", onclick: () => window.open(HOME_URL + (getLang() === "ko" ? "" : "en.html"), "_blank", "noopener") }, t("VOQUIZ 홈페이지 열기")))),
+        HOME_URL && h("button", { class: "btn ghost", onclick: () => window.open(HOME_URL + (getLang() === "ko" ? "" : "en.html"), "_blank", "noopener") }, t("VOQUIZ 홈페이지 열기"))),
+      WIDE() && storeUrl && state.invites && h("p", { class: "small muted btn-caption" }, t("남은 초대장 {n}장", { n: friends().unusedInvites().length }))),
     h("section", { class: "block" },
       h("h3", null, t("계정")),
       h("p", { class: "muted" }, state.user.email),
@@ -3070,7 +3633,35 @@ function gradePicker() {
         h("div", { class: "grades" }, band.grades.map((g) => h("button", { onclick: () => chooseGrade(g) }, `G${g}`)))))));
 }
 
+// An invite code typed on the web version's first screen, kept until the student has signed in
+// (signing in with Google leaves the page and comes back).
+const TYPED_CODE = "wb_invite_typed";
+const typedCode = () => localStorage.getItem(TYPED_CODE) || "";
 function loginView() {
+  // The web version: the logo first, the film in the middle, then the invite code and the way in.
+  if (WEB) return h("div", { class: "step splash with-film web-login" },
+    h("h1", { class: "brand" }, wordmark(46)),
+    h("p", { class: "web-tag" }, t("한국어와 영어, 두 언어로 단어를 쉽게 익혀요.")),
+    film(),
+    h("div", { class: "after-film" },
+      // The way in for everyone who has joined already: no code is asked for.
+      h("button", { class: "btn", disabled: state.busy, onclick: () => { localStorage.removeItem(TYPED_CODE); signIn(); } }, DEMO ? t("데모로 시작하기") : t("Google 계정으로 로그인")),
+      noticeBox(),
+      // A first visit: VOQUIZ is invite-only, so the code a friend gave goes here. It is kept while
+      // Google's page is open and used as soon as the student is back, signed in.
+      h("form", { class: "login-code", onsubmit: (e) => {
+        e.preventDefault();
+        const box = document.getElementById("login-code"), code = box.value.trim().toUpperCase();
+        if (!code) return box.focus();
+        localStorage.setItem(TYPED_CODE, code);
+        signIn();
+      } },
+        h("label", { htmlFor: "login-code" }, t("처음이신가요?")),
+        h("div", { class: "row" },
+          h("input", { type: "text", id: "login-code", maxLength: 8, autocomplete: "off", autocapitalize: "characters", spellcheck: false,
+            value: typedCode(), placeholder: t("초대 코드 6자리"), "aria-label": t("초대 코드 6자리") }),
+          h("button", { class: "btn ghost", disabled: state.busy }, t("초대 코드로 가입하기"))),
+        h("small", null, t("친구에게 받은 초대 코드를 넣으면 Google 로그인 뒤에 바로 가입돼요.")))));
   return h("div", { class: "step splash with-film" },
     film(),
     h("div", { class: "after-film" },
@@ -3153,7 +3744,7 @@ function urgentBand() {
 // ----- is this the newest version? -----
 // The server says which version is the newest and which is the oldest still allowed. An older app
 // shows a small notice; one that is too old shows only the "update needed" screen.
-const APP_VERSION = globalThis.chrome?.runtime?.getManifest?.().version || new URLSearchParams(location.search).get("v") || null;
+const APP_VERSION = globalThis.chrome?.runtime?.getManifest?.().version || document.documentElement.dataset.version || new URLSearchParams(location.search).get("v") || null;
 function olderThan(mine, other) {
   const a = String(mine).split(".").map(Number), b = String(other).split(".").map(Number);
   for (let i = 0; i < Math.max(a.length, b.length); i++) {
@@ -3180,6 +3771,7 @@ const fromStore = () => {
   return Boolean(runtime?.getManifest?.().update_url || (runtime?.id && STORE_URL.endsWith(`/${runtime.id}`)));
 };
 function updateNow() {
+  if (WEB) return location.reload(); // the site always serves the newest files
   const runtime = globalThis.chrome?.runtime;
   if (!runtime?.requestUpdateCheck || !fromStore()) {
     state.updateNote = t("다운로드 페이지를 열었어요. 새 파일을 받아 폴더를 바꾼 뒤 확장 프로그램을 새로 고쳐 주세요.");
@@ -3228,6 +3820,50 @@ function askWeekGoal() {
   weeklyGoalSheet();
 }
 
+// Going to one of the main screens (the phone's bar at the bottom, the desktop's menu at the top).
+function goTab(id) {
+  // Leaving the quiz tab ends a run that is still going, and closes a finished one.
+  if (state.challenge && state.challenge.phase !== "over") finishChallenge(false);
+  if (state.challenge && id !== "quiz") state.challenge = null;
+  // A duel being played ends with the score so far; other duel screens just close.
+  if (state.duel) { if (state.duel.mode === "play" || state.duel.mode === "saving") duel().stop(); else state.duel = null; }
+  if (state.tab === "shop") markShopSeen();
+  if (id === "rank") return openRankings();
+  if (id === "search" && state.tab === "search") return goHome(); // pressed again: from a result back to the start
+  Object.assign(state, { tab: id, notice: null, nameSaved: false, confirmBuy: null });
+  render();
+}
+let desktopModule;
+const desktop = () => (desktopModule ||= initDesktop({
+  h, t, state, render, logoIcon, wordmark, searchForm, goHome, goTab, openShop, openSettings, openPage, webHome, star, isLearned, dayOf, dayLabel,
+  wordsList, icon,
+  dailyGoal, todayBox, questHint, entrySide, giftArt, portrait,
+  residents: () => yardCast?.rest || [], // the characters that are not out in the yard
+  duelBadge: () => duel().badge(), friendsBadge: () => friends().badge(),
+  shopMark: () => (claimable().length > 0 || (state.tab !== "shop" && newCount("character") + newCount("theme") + newCount("bg") > 0)) && h("em", { class: "dot new" }, "N"),
+  presentWaiting: () => giftWaiting() || santaWaiting(), openPresent: () => (giftWaiting() ? openDailyGift() : takeSantaGift()),
+}));
+// The desktop: the browser's Back and Forward buttons move between the screens that were open.
+let navKey = null, navFromHistory = false;
+function trackNav() {
+  const key = `${state.tab}|${state.tab === "search" ? state.entry?.term_norm || "" : ""}`;
+  if (key === navKey) return;
+  const first = navKey === null;
+  navKey = key;
+  if (navFromHistory) return;
+  const mark = { voquiz: true, tab: state.tab, term: state.tab === "search" ? state.entry?.term_norm || null : null };
+  if (first) history.replaceState(mark, ""); else history.pushState(mark, "");
+}
+if (WEB) globalThis.addEventListener("popstate", (e) => {
+  const mark = e.state;
+  if (!mark?.voquiz || !state.user?.grade) return;
+  if (state.challenge && state.challenge.phase !== "over") finishChallenge(false);
+  if (state.duel) state.duel = null;
+  Object.assign(state, { tab: mark.tab, entry: mark.term ? state.words.find((w) => w.term_norm === mark.term) || null : null, notice: null, quiz: null, level: null });
+  navFromHistory = true;
+  render();
+  navFromHistory = false;
+});
 function render() {
   // The streak challenge colours the screen by its stage (app.css, body[data-stage]).
   const running = state.challenge && state.challenge.phase !== "over" && state.tab === "quiz";
@@ -3256,37 +3892,37 @@ function render() {
   else if (!state.user.grade) app.replaceChildren(...[banner, gradePicker()].filter(Boolean));
   else if (presentWaiting()) app.replaceChildren(...[banner, giftPicker()].filter(Boolean));
   else {
+    // A wide window has no word list screen of its own: the list on the left of the frame is the whole word list.
+    if (WIDE() && state.tab === "words") { state.tab = "search"; desktop().showWords(); }
     const tabs = [["search", t("사전")], ["words", t("단어장")], ["quiz", t("퀴즈")], ["rank", t("랭킹")]];
     const view = { search: searchView, words: wordsView, quiz: quizView, rank: rankView, settings: settingsView, shop: shopView, friends: () => friends().view() }[state.tab]();
-    app.replaceChildren(...[
-      h("header", null,
-        h("h1", null, h("button", { class: "home", title: t("처음 화면으로"), onclick: goHome }, logoIcon(28), wordmark(25))),
-        h("button", { class: "points", id: "points", title: t("포인트샵 열기"), "aria-pressed": String(state.tab === "shop"), "aria-label": t("단어포인트"), onclick: openShop }, h("i", { "aria-hidden": "true" }, "P"), h("span", null, String(state.user.points || 0)), // One mark for the shop: a character is ready to be taken, or something in it is new.
-          (claimable().length > 0 || (state.tab !== "shop" && newCount("character") + newCount("theme") + newCount("bg") > 0))
-            && h("em", { class: "dot new", title: claimable().length > 0 ? t("받을 수 있는 캐릭터가 있어요") : t("새로 나왔어요") }, "N")),
-        h("button", { class: "gear people", "aria-label": t("친구"), title: t("친구"), "aria-pressed": String(state.tab === "friends"), onclick: () => openPage("friends") },
-          icon("friends"), friends().badge() > 0 && h("em", { class: "dot" }, String(friends().badge()))),
-        h("button", { class: "gear", "aria-label": t("설정"), title: t("설정"), "aria-pressed": String(state.tab === "settings"), onclick: openSettings }, icon("settings"))),
-      banner,
-      urgentBand(),
-      updateBanner(),
-      h("main", { class: sameScreen ? "still" : null }, view),
-      h("nav", null, tabs.map(([id, label]) => h("button", {
-        "aria-current": state.tab === id ? "page" : null,
-        onclick: () => {
-          // Leaving the quiz tab ends a run that is still going, and closes a finished one.
-          if (state.challenge && state.challenge.phase !== "over") finishChallenge(false);
-          if (state.challenge && id !== "quiz") state.challenge = null;
-          // A duel being played ends with the score so far; other duel screens just close.
-          if (state.duel) { if (state.duel.mode === "play" || state.duel.mode === "saving") duel().stop(); else state.duel = null; }
-          if (state.tab === "shop") markShopSeen();
-          if (id === "rank") return openRankings();
-          if (id === "search" && state.tab === "search") return goHome(); // pressed again: from a result back to the start
-          Object.assign(state, { tab: id, notice: null, nameSaved: false, confirmBuy: null });
-          render();
-        },
-      }, icon(id), h("span", null, label), id === "quiz" && duel().badge() > 0 && h("em", { class: "dot" }, String(duel().badge()))))),
-    ].filter(Boolean));
+    const wide = WIDE();
+    const tabBar = h("nav", null, tabs.map(([id, label]) => h("button", {
+      "aria-current": state.tab === id ? "page" : null,
+      onclick: () => goTab(id),
+    }, icon(id), h("span", null, label), id === "quiz" && duel().badge() > 0 && h("em", { class: "dot" }, String(duel().badge())))));
+    if (wide) {
+      app.replaceChildren(desktop().frame({ banners: [banner, urgentBand(), updateBanner()].filter(Boolean), view, focus: playing(), mainClass: [sameScreen && "still", webHome() && "home"].filter(Boolean).join(" ") || null }));
+      trackNav();
+    } else {
+      app.replaceChildren(...[
+        h("header", null,
+          h("h1", null, h("button", { class: "home", title: t("처음 화면으로"), onclick: goHome }, logoIcon(28), wordmark(25))),
+          wide && tabBar,
+          topSearch() && searchForm(true),
+          h("button", { class: "points", id: "points", title: t("포인트샵 열기"), "aria-pressed": String(state.tab === "shop"), "aria-label": t("단어포인트"), onclick: openShop }, h("i", { "aria-hidden": "true" }, "P"), h("span", null, String(state.user.points || 0)), // One mark for the shop: a character is ready to be taken, or something in it is new.
+            (claimable().length > 0 || (state.tab !== "shop" && newCount("character") + newCount("theme") + newCount("bg") > 0))
+              && h("em", { class: "dot new", title: claimable().length > 0 ? t("받을 수 있는 캐릭터가 있어요") : t("새로 나왔어요") }, "N")),
+          h("button", { class: "gear people", "aria-label": t("친구"), title: t("친구"), "aria-pressed": String(state.tab === "friends"), onclick: () => openPage("friends") },
+            icon("friends"), friends().badge() > 0 && h("em", { class: "dot" }, String(friends().badge()))),
+          h("button", { class: "gear", "aria-label": t("설정"), title: t("설정"), "aria-pressed": String(state.tab === "settings"), onclick: openSettings }, icon("settings"))),
+        banner,
+        urgentBand(),
+        updateBanner(),
+        h("main", { class: [sameScreen && "still", webHome() && "home"].filter(Boolean).join(" ") || null }, view),
+        !wide && tabBar,
+      ].filter(Boolean));
+    }
   }
   state.justRevealed = null;
   const main = document.querySelector("main");
@@ -3298,6 +3934,7 @@ function render() {
   }
   if (keepFocus) document.getElementById(keepFocus)?.focus();
   animateLoading();
+  if (WEB) { if (!playing()) comboFx(0); syncYard(); }
 }
 
 // A word picked with right-click → "VOQUIZ" arrives through session storage.
@@ -3313,7 +3950,34 @@ if (globalThis.chrome?.storage?.session) {
   });
 }
 
+// A keyboard is at hand in a wide window: 1 to 4 pick the choice with that number.
+document.addEventListener("keydown", (e) => {
+  if (!WIDE() || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || "") || document.getElementById("sheet")) return;
+  // "/" or a letter, with no question on screen: the word box takes it (the next word to look up).
+  if ((e.key === "/" || /^[a-zA-Z]$/.test(e.key)) && !document.querySelector("main .choices, main .search.answer")) {
+    const box = document.getElementById("q");
+    if (box) { if (e.key === "/") e.preventDefault(); box.focus(); }
+    return;
+  }
+  if (e.key === "Enter" && document.activeElement === document.body) return void document.querySelector("main #next")?.click(); // on to the next question
+  if (!/^[1-4]$/.test(e.key)) return;
+  const choice = document.querySelectorAll("main .choices .choice")[Number(e.key) - 1];
+  if (choice && !choice.disabled) { e.preventDefault(); choice.click(); }
+});
 document.addEventListener("visibilitychange", refreshAlerts);
+// The server's time comes with its answers (clock.js). When the window is looked at again after a
+// while (the computer slept, or its clock was moved meanwhile), one small question is asked, so
+// that the day is right before anything is pressed; the screen is drawn again if the day changed.
+let clockAsked = 0;
+function refreshClock() {
+  if (DEMO || document.hidden || !state.user?.grade || performance.now() - clockAsked < 60_000) return;
+  clockAsked = performance.now();
+  const before = todayKey();
+  api.myPlan().then((plan) => { state.plan = plan; }).catch(() => {}).finally(() => { if (todayKey() !== before) render(); });
+}
+document.addEventListener("visibilitychange", refreshClock);
+window.addEventListener("focus", refreshClock);
 setInterval(refreshAlerts, 3 * 60 * 1000);
 setTimeout(loadNotices, 3500); // after the first screen (and last week's league result) has settled
 setInterval(loadNotices, 15 * 60 * 1000);
@@ -3324,6 +3988,23 @@ const loadTuning = () => api.appConfig().then((config) => { if (setTuning(config
 loadTuning();
 setInterval(loadTuning, 3 * 3600 * 1000);
 globalThis.matchMedia?.("(prefers-color-scheme: dark)").addEventListener("change", () => render());
+// The window was made wide or narrow. Going narrow, the characters of the yard run to the dictionary
+// tab (the first one, now at the bottom) and jump in; the tab gives a little gulp for each.
+wideQuery?.addEventListener("change", () => {
+  const narrowed = !WIDE();
+  yardHeld = narrowed;
+  render(); // the tabs are at the bottom now (or back in the top bar)
+  yardHeld = false;
+  if (!narrowed) return;
+  const box = document.querySelector("nav button")?.getBoundingClientRect();
+  leaveYard(box && { x: box.left + box.width / 2, y: box.top + box.height / 2 - 8 }, () => {
+    const tab = document.querySelector("nav button");
+    if (!tab) return;
+    tab.classList.remove("gulp");
+    void tab.offsetWidth;
+    tab.classList.add("gulp");
+  });
+});
 // A member seen on this computer before is let straight in; anyone else is checked first.
 if (state.user) state.member = localStorage.getItem(memberKey()) ? true : undefined;
 render();

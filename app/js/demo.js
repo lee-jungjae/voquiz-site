@@ -441,6 +441,35 @@ function friendList() {
   return list;
 }
 export async function listFriends() { return friendList(); }
+// Points given between friends: one gift waits to begin with; giving is remembered for the day.
+const GIFTS_KEY = "wb_demo_gifts";
+function giftBox() {
+  let box = read(GIFTS_KEY, null);
+  if (!box) {
+    const from = ({ id, nickname, tag }) => ({ id, nickname, tag });
+    box = { sent: {}, waiting: [{ id: "g-first", points: 10, at: new Date().toISOString(), from: from(rivalOf("r1")) }], got: [] };
+    write(GIFTS_KEY, box);
+  }
+  return box;
+}
+export async function pointGifts(day) {
+  const box = giftBox();
+  return { sent: Object.keys(box.sent).filter((id) => box.sent[id] === day), waiting: box.waiting, got: box.got };
+}
+export async function sendPointGift(friend, day) {
+  const box = giftBox();
+  if (box.sent[friend] === day) fail("gift_already");
+  box.sent[friend] = day;
+  write(GIFTS_KEY, box);
+}
+export async function claimPointGifts() {
+  const box = giftBox();
+  const gifts = box.waiting;
+  box.got = [...gifts.map((g) => ({ points: g.points, at: new Date().toISOString(), from: g.from })), ...box.got].slice(0, 20);
+  box.waiting = [];
+  write(GIFTS_KEY, box);
+  return { points: gifts.reduce((sum, g) => sum + g.points, 0), gifts };
+}
 export async function requestFriend(email) {
   if (!/@/.test(email)) fail("friend_nobody");
   const list = friendList();
@@ -519,10 +548,12 @@ export function seed(grade = 5) {
   const day = 24 * 60 * 60 * 1000;
   const words = ["gravity", "transport", "democracy", "friend", "노력", "photosynthesis"].map((term, i) => {
     const when = new Date(Date.now() - (i < 3 ? day : 0) - (6 - i) * 60 * 1000).toISOString();
+    // The same entry a search for the word gives: the whole one of the student's level where there is one.
+    const content = FULL[term]?.[bandOf(grade).id] ?? SAMPLES[term];
     return {
-      term_norm: term, headword: SAMPLES[term].headword, favorite: term === "friend", search_count: 1,
+      term_norm: term, headword: content.headword, favorite: term === "friend", search_count: 1,
       first_searched_at: when, last_searched_at: when, needs_review: term === "gravity", streak: 0,
-      last_reviewed_at: null, content: SAMPLES[term], discovered: term === "photosynthesis",
+      last_reviewed_at: null, content, discovered: term === "photosynthesis",
     };
   });
   write(WORDS_KEY, words);

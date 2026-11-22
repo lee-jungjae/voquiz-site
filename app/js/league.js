@@ -2,6 +2,7 @@
 // playing along so that there is always someone just ahead to catch. The characters are shown as
 // characters (their own name and a "character" tag), never as students.
 import { CHARACTERS } from "./characters.js";
+import { clockNow } from "./clock.js";
 
 function hash(text) {
   let n = 2166136261;
@@ -57,7 +58,7 @@ function progress(weights, sinceMonday) {
 
 // -> [{ character, score, final }]  The same characters with the same pace for everyone in a tier,
 // all week. In a higher tier they are faster.
-export function leagueCharacters(week, monday, tier = 0, now = Date.now()) {
+export function leagueCharacters(week, monday, tier = 0, now = clockNow()) {
   const count = CHARACTERS_PER_LEAGUE, pace = TIERS[tier]?.pace || 1;
   const next = random(hash(`league:${week}:${tier}`));
   const pool = [...CHARACTERS];

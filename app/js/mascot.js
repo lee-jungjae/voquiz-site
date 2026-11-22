@@ -147,10 +147,17 @@ const REACTIONS = {
     { move: "stretch", eyes: "happy", mouth: "smile", time: 1100 },
   ],
 };
-export function reaction(id, kind = "cheer") {
+// still: one face and no movement at all (a list of past results, where many of them stand together).
+export function reaction(id, kind = "cheer", still = false) {
   const el = document.createElement("span");
-  el.className = `mascot reaction ${kind}`;
+  el.className = `mascot reaction ${kind}${still ? " still" : ""}`;
   el.innerHTML = `<span class="m-pose">${draw(characterById(id))}</span>`;
+  if (still) {
+    el.dataset.eyes = kind === "comfort" ? "closed" : "happy";
+    el.dataset.mouth = kind === "comfort" ? "wavy" : "laugh";
+    el.dataset.blush = "";
+    return el;
+  }
   let step = 0;
   const play = () => {
     // Cheering picks moods at random; comforting goes through its moods in order.

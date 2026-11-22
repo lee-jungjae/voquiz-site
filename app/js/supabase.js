@@ -1,6 +1,7 @@
 // Minimal Supabase client over fetch (no build step, no bundled library).
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
 import { parsePartial } from "./partial.js";
+import { syncClock, clockNow } from "./clock.js";
 
 const SESSION_KEY = "wb_session";
 let session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
@@ -31,6 +32,7 @@ async function request(path, { method = "GET", body, token, headers = {} } = {})
     },
     body: body ? JSON.stringify(body) : undefined,
   });
+  syncClock(res.headers.get("date")); // the server's time (clock.js)
   const text = await res.text();
   const data = text ? JSON.parse(text) : null;
   // A database function that refuses (raise exception 'duel_off') answers with code P0001 and the reason as its message.
@@ -58,14 +60,43 @@ async function accessToken() {
 
 const authed = async (path, options = {}) => request(path, { ...options, token: await accessToken() });
 
-const toUser = (u) => ({ id: u.id, email: u.email, grade: u.user_metadata?.grade ?? null, points: u.user_metadata?.points ?? 0, search: u.user_metadata?.search ?? null, nickname: u.user_metadata?.nickname ?? "", shop: u.user_metadata?.shop ?? null, challenge: u.user_metadata?.challenge ?? null, nameChanges: u.user_metadata?.nameChanges ?? 0, noDuels: u.user_metadata?.noDuels ?? false, gift: u.user_metadata?.gift ?? null, weekly: u.user_metadata?.weekly ?? null, motto: u.user_metadata?.motto ?? "", welcome: u.user_metadata?.welcome ?? "", santa: u.user_metadata?.santa ?? null, duelFrom: u.user_metadata?.duelFrom ?? (u.user_metadata?.noDuels ? "none" : "all") });
+const toUser = (u) => ({ id: u.id, email: u.email, grade: u.user_metadata?.grade ?? null, points: u.user_metadata?.points ?? 0, search: u.user_metadata?.search ?? null, nickname: u.user_metadata?.nickname ?? "", shop: u.user_metadata?.shop ?? null, challenge: u.user_metadata?.challenge ?? null, nameChanges: u.user_metadata?.nameChanges ?? 0, noDuels: u.user_metadata?.noDuels ?? false, gift: u.user_metadata?.gift ?? null, weekly: u.user_metadata?.weekly ?? null, plays: Array.isArray(u.user_metadata?.plays) ? u.user_metadata.plays : [], motto: u.user_metadata?.motto ?? "", welcome: u.user_metadata?.welcome ?? "", santa: u.user_metadata?.santa ?? null, duelFrom: u.user_metadata?.duelFrom ?? (u.user_metadata?.noDuels ? "none" : "all") });
 
 export function getUser() {
   return session ? toUser(session.user) : null;
 }
 
-// Google sign-in through Supabase, in a browser popup managed by Chrome.
+// Web only: back from Google, the address carries the session after "#". It is stored and taken
+// out of the address before the app starts (index.html calls this first). -> true if signed in.
+export async function finishSignIn() {
+  const params = new URLSearchParams(location.hash.slice(1));
+  const access_token = params.get("access_token");
+  if (!access_token && !params.get("error")) return false;
+  history.replaceState(null, "", location.pathname + location.search);
+  if (!access_token) return false;
+  try {
+    const user = await request("/auth/v1/user", { token: access_token });
+    save({
+      access_token,
+      refresh_token: params.get("refresh_token"),
+      expires_at: Number(params.get("expires_at")) || Math.floor(Date.now() / 1000) + Number(params.get("expires_in") || 3600),
+      user,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Google sign-in through Supabase. In the extension Chrome runs it in a popup of its own. On the
+// web the page leaves for Google and comes back to this address (see finishSignIn); that address
+// has to be on the project's list of redirect addresses.
 export async function signIn() {
+  if (!globalThis.chrome?.identity) {
+    const back = new URL("./", location.href).href; // always the folder itself (…/web/), so one allowed address is enough
+    location.assign(`${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(back)}`);
+    return new Promise(() => {}); // the page is on its way out
+  }
   const redirect = chrome.identity.getRedirectURL();
   const url = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirect)}`;
   const result = await chrome.identity.launchWebAuthFlow({ url, interactive: true });
@@ -106,7 +137,7 @@ export async function publishRank(row) {
   const send = (body) => authed("/rest/v1/profiles?on_conflict=user_id", {
     method: "POST",
     headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
-    body: { user_id: session.user.id, ...body, updated_at: new Date().toISOString() },
+    body: { user_id: session.user.id, ...body, updated_at: new Date(clockNow()).toISOString() },
   });
   try {
     await send(row);
@@ -155,6 +186,7 @@ export async function lookup(term, onPartial, view) { // view: another group's e
     headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${await accessToken()}`, "Content-Type": "application/json" },
     body: JSON.stringify({ term, grade: getUser().grade, ...(view ? { view } : {}) }),
   });
+  syncClock(res.headers.get("date"));
   const toResult = (data) => ({
     valid: data.valid,
     content: data.content,
@@ -289,6 +321,11 @@ export const listFriends = () => rpc("my_friends");
 export const requestFriend = (email) => rpc("request_friend", { p_email: email }); // -> "pending" | "accepted"
 export const answerFriend = (id, accept) => rpc("answer_friend", { p_id: id, p_accept: accept });
 export const removeFriend = (id) => rpc("remove_friend", { p_id: id });
+// ---------- points given between friends (supabase/migrations/0020_point_gifts.sql) ----------
+// day: the student's own date (YYYY-MM-DD). -> { sent: [friend id], waiting: [{ id, points, at, from }], got: [{ points, at, from }] }
+export const pointGifts = (day) => rpc("my_point_gifts", { p_day: day });
+export const sendPointGift = (friend, day) => rpc("send_point_gift", { p_friend: friend, p_day: day });
+export const claimPointGifts = () => rpc("claim_point_gifts"); // -> { points, gifts: [{ points, from }] }
 export const myInvites = () => rpc("my_invites");
 export const useInvite = (code) => rpc("use_invite", { p_code: code });
 
