@@ -2513,3 +2513,12 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   .dk-nav { gap: 12px; }
   .dk-me { gap: 2px; }
 }
+/* ----- desktop: one tidy line under the word box of the first screen (no buttons there) ----- */
+@media (min-width: 860px) {
+  .web-today { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 0; margin-top: 22px; }
+  .today-meter { gap: 8px; padding: 6px 18px; border-radius: 999px; font-size: 13.5px; }
+  .today-meter + .today-meter { position: relative; }
+  .today-meter + .today-meter::before { content: ""; position: absolute; left: 0; top: 50%; width: 1px; height: 14px; margin-top: -7px; background: var(--line); }
+  .today-meter:hover::before, .today-meter:hover + .today-meter::before { opacity: 0; }
+  .today-meter .goal-ring { width: 18px; height: 18px; -webkit-mask: radial-gradient(circle, transparent 5px, #000 5.5px); mask: radial-gradient(circle, transparent 5px, #000 5.5px); }
+}

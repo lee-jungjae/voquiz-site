@@ -10,7 +10,7 @@
 //  - leaving: when the window becomes a phone's, everybody runs to the dictionary tab (leaveYard).
 // The app only says who is there and what a tap does; everything that moves is in here.
 // The page needs an element with the id "yard" (the web version's index.html has one).
-import { portrait, giftArt } from "./mascot.js?v=0.1.23-tow1ge";
+import { portrait, giftArt } from "./mascot.js?v=0.1.23-tow2e1";
 
 const still = () => Boolean(globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -99,7 +99,7 @@ function nudge() {
   const w = walkers.get(opts.lead);
   const next = !leaving && !document.hidden && w && !w.away ? opts.nudge?.() : null;
   if (next) { hop(w); say(w, next.text, next.act); }
-  nudgeTimer = setTimeout(nudge, 40000);
+  nudgeTimer = setTimeout(nudge, opts.eager ? 15000 : 40000);
 }
 
 function body(id) {
@@ -138,12 +138,14 @@ function add(id) {
 //         visitors(): the characters that may come by, onCatch(id): one was caught; what it
 //         returns is shown where it was caught ("+2"), clear(): the column of the screen
 //         ({ left, right } in the window) that the characters keep beside,
-//         stay: "right" when they should keep to the right, out of the way of the screen }.
+//         stay: "right" when they should keep to the right, out of the way of the screen,
+//         eager: true where the lead is the one to say what to do next (it speaks sooner, more often) }.
 // An empty list (or nothing) empties the yard.
 export function showYard(next) {
   root ??= document.getElementById("yard");
   if (!root || leaving) return;
   const asked = (next?.stay || null) !== (opts.stay || null); // asked to move over, or free again
+  const speakUp = Boolean(next?.eager) && !opts.eager; // just arrived on a screen where the character leads
   opts = next || {};
   const ids = opts.ids || [];
   root.hidden = ids.length === 0;
@@ -154,6 +156,7 @@ export function showYard(next) {
     offStage();
   } else {
     if (!nudgeTimer) nudgeTimer = setTimeout(nudge, 2500);
+    else if (speakUp) { clearTimeout(nudgeTimer); nudgeTimer = setTimeout(nudge, 1200); }
     if (!visitTimer) visitTimer = setTimeout(visit, rand(14000, 24000));
     if (visitor && !visitor.fits()) sendHome(); // the place it was looking out from is gone
   }

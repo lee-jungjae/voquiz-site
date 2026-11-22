@@ -818,6 +818,8 @@ const T = {
   "{name} 발견!": ["Caught {name}!", "发现了{name}！"],
   "세 가지 퀴즈 중에서 골라 시작해요.": ["Pick one of three quizzes and start.", "从三种测验中选一个开始吧。"],
   "하는 방법": ["How it works", "玩法"],
+  "받을 수 있는 캐릭터가 있어!": ["A character is ready for you!", "有可以领取的角色！"],
+  "오늘의 단어 {w}, 찾아볼까?": ["Word of the day: {w}. Look it up?", "今日单词 {w}，查一查？"],
   "알아 두기": ["Good to know", "小贴士"],
   "이렇게 써요": ["How to use it", "这样用"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],

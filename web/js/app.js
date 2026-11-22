@@ -1,27 +1,27 @@
-import { api, DEMO } from "./api.js?v=0.1.23-tow1ge";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tow1ge";
-import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tow1ge";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tow1ge";
-import { cleanEntry } from "./clean.js?v=0.1.23-tow1ge";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tow1ge";
-import { CHARACTERS } from "./characters.js?v=0.1.23-tow1ge";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tow1ge";
-import { film } from "./film.js?v=0.1.23-tow1ge";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.23-tow1ge";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.23-tow1ge";
-import { initDesktop } from "./desktop.js?v=0.1.23-tow1ge";
-import { BANDS, bandOf } from "./levels.js?v=0.1.23-tow1ge";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tow1ge";
-import { initDuel } from "./duel.js?v=0.1.23-tow1ge";
-import { initFriends } from "./friends.js?v=0.1.23-tow1ge";
-import { MOTTOS } from "./mottos.js?v=0.1.23-tow1ge";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tow1ge";
-import { SIGNATURES } from "./signatures.js?v=0.1.23-tow1ge";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tow1ge";
-import { tuning, setTuning } from "./tuning.js?v=0.1.23-tow1ge";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow1ge";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow1ge";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tow1ge";
+import { api, DEMO } from "./api.js?v=0.1.23-tow2e1";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tow2e1";
+import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tow2e1";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tow2e1";
+import { cleanEntry } from "./clean.js?v=0.1.23-tow2e1";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tow2e1";
+import { CHARACTERS } from "./characters.js?v=0.1.23-tow2e1";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tow2e1";
+import { film } from "./film.js?v=0.1.23-tow2e1";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.23-tow2e1";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.23-tow2e1";
+import { initDesktop } from "./desktop.js?v=0.1.23-tow2e1";
+import { BANDS, bandOf } from "./levels.js?v=0.1.23-tow2e1";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tow2e1";
+import { initDuel } from "./duel.js?v=0.1.23-tow2e1";
+import { initFriends } from "./friends.js?v=0.1.23-tow2e1";
+import { MOTTOS } from "./mottos.js?v=0.1.23-tow2e1";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tow2e1";
+import { SIGNATURES } from "./signatures.js?v=0.1.23-tow2e1";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tow2e1";
+import { tuning, setTuning } from "./tuning.js?v=0.1.23-tow2e1";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow2e1";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow2e1";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tow2e1";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -1611,19 +1611,12 @@ function todayRow() {
   return h("div", { class: "web-today", role: "group", "aria-label": t("오늘") },
     meter(got / SEARCH_DAILY_MAX, t("오늘 검색 포인트"), `${got + searchBonusToday()} / ${SEARCH_DAILY_MAX}`, searchPointsSheet, t("단어를 찾을 때마다 +{p}점", { p: SEARCH_POINTS })),
     meter(count / goal, weekLocked() ? t("이번 주 익힌 단어") : t("이번 주 목표"), `${count} / ${goal}`, weeklyGoalSheet, weekLocked() ? t("이번 주 목표") : t("이번 주 목표 정하기")),
-    claimable().length > 0 ? meter(1, t("받을 수 있는 캐릭터가 있어요"), "→", openShop, t("포인트샵 열기"))
-      : quest && meter(questNow(quest) / quest.earn.goal, `${t("캐릭터 퀘스트")} · ${QUESTS[quest.earn.by].text(quest.earn.goal)}`, `${questNow(quest)} / ${quest.earn.goal}`, openShop, t("포인트샵 열기")));
+    claimable().length === 0 && quest && meter(questNow(quest) / quest.earn.goal, `${t("캐릭터 퀘스트")} · ${QUESTS[quest.earn.by].text(quest.earn.goal)}`, `${questNow(quest)} / ${quest.earn.goal}`, openShop, t("포인트샵 열기")));
 }
+// Under the word box of the first screen: only how the day and the week stand. What to do next
+// (the present, a quiz, the word of the day, a character to take) is the yard character's to say.
 function webActions() {
-  const toQuiz = () => { Object.assign(state, { tab: "quiz", notice: null }); render(); };
-  return [
-    h("div", { class: "web-actions" },
-      // Today's present, while it waits: the first thing to do on a new day.
-      (giftWaiting() || santaWaiting()) && h("button", { class: "present", onclick: () => (giftWaiting() ? openDailyGift() : takeSantaGift()) }, giftArt(), t("오늘의 선물 받기")),
-      h("button", { onclick: toQuiz }, t("퀴즈 한 판")),
-      state.suggest && !limitReached() && h("button", { onclick: () => search(state.suggest) }, t("오늘의 단어: {w}", { w: state.suggest }))),
-    todayRow(),
-  ];
+  return [todayRow()];
 }
 function webQuiet() {
   const recent = WIDE() ? [] : state.words.slice(0, 8);
@@ -1709,8 +1702,10 @@ function syncYard() {
   const gift = () => giftWaiting() || santaWaiting();
   const nudges = () => [
     gift() && { waits: true, text: t("오늘의 선물 받을래?"), act: () => (giftWaiting() ? openDailyGift() : takeSantaGift()) },
+    claimable().length > 0 && state.tab !== "shop" && { waits: true, text: t("받을 수 있는 캐릭터가 있어!"), act: openShop },
     duel().badge() > 0 && state.tab !== "quiz" && { waits: true, text: t("대결 신청이 왔어!"), act: to("quiz") },
     friends().badge() > 0 && state.tab !== "friends" && { waits: true, text: t("친구 신청이 왔어!"), act: () => openPage("friends") },
+    state.suggest && !limitReached() && webHome() && { text: t("오늘의 단어 {w}, 찾아볼까?", { w: state.suggest }), act: () => search(state.suggest) },
     state.words.length > 0 && state.tab !== "quiz" && { text: t("퀴즈 한 판 어때?"), act: to("quiz") },
     state.tab !== "rank" && { text: t("이번 주 순위 볼래?"), act: to("rank") },
     { text: t("새 단어 찾으러 가자!"), act: () => { if (state.tab !== "search") goTab("search"); document.getElementById("q")?.focus(); } },
@@ -1734,6 +1729,7 @@ function syncYard() {
     visitors: () => (playing() || document.getElementById("sheet") || catchesToday() >= CATCH_DAILY ? [] : yardCast.rest),
     onCatch: catchVisitor,
     stay: state.tab === "shop" ? "right" : null, // the shop is looked at tile by tile: nobody stands on it
+    eager: webHome(), // on the first screen the character is the one who says what to do next: it speaks up sooner and more often
     // The column of the screen (what is read and pressed): the characters stand beside it.
     clear: () => {
       const boxes = [...document.querySelectorAll(".dk > main > *")].filter((el) => !el.matches(".dk-back, .fx-hurry") && el.offsetWidth > 0).map((el) => el.getBoundingClientRect());
