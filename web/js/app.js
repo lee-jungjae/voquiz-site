@@ -1,26 +1,26 @@
-import { api, DEMO } from "./api.js?v=0.1.23-tovyjt";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tovyjt";
-import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tovyjt";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tovyjt";
-import { cleanEntry } from "./clean.js?v=0.1.23-tovyjt";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tovyjt";
-import { CHARACTERS } from "./characters.js?v=0.1.23-tovyjt";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tovyjt";
-import { film } from "./film.js?v=0.1.23-tovyjt";
-import { showYard, leaveYard, cheerYard } from "./yard.js?v=0.1.23-tovyjt";
-import { initDesktop } from "./desktop.js?v=0.1.23-tovyjt";
-import { BANDS, bandOf } from "./levels.js?v=0.1.23-tovyjt";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tovyjt";
-import { initDuel } from "./duel.js?v=0.1.23-tovyjt";
-import { initFriends } from "./friends.js?v=0.1.23-tovyjt";
-import { MOTTOS } from "./mottos.js?v=0.1.23-tovyjt";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tovyjt";
-import { SIGNATURES } from "./signatures.js?v=0.1.23-tovyjt";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tovyjt";
-import { tuning, setTuning } from "./tuning.js?v=0.1.23-tovyjt";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tovyjt";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tovyjt";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tovyjt";
+import { api, DEMO } from "./api.js?v=0.1.23-tovz0f";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tovz0f";
+import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tovz0f";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tovz0f";
+import { cleanEntry } from "./clean.js?v=0.1.23-tovz0f";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tovz0f";
+import { CHARACTERS } from "./characters.js?v=0.1.23-tovz0f";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tovz0f";
+import { film } from "./film.js?v=0.1.23-tovz0f";
+import { showYard, leaveYard, cheerYard } from "./yard.js?v=0.1.23-tovz0f";
+import { initDesktop } from "./desktop.js?v=0.1.23-tovz0f";
+import { BANDS, bandOf } from "./levels.js?v=0.1.23-tovz0f";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tovz0f";
+import { initDuel } from "./duel.js?v=0.1.23-tovz0f";
+import { initFriends } from "./friends.js?v=0.1.23-tovz0f";
+import { MOTTOS } from "./mottos.js?v=0.1.23-tovz0f";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tovz0f";
+import { SIGNATURES } from "./signatures.js?v=0.1.23-tovz0f";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tovz0f";
+import { tuning, setTuning } from "./tuning.js?v=0.1.23-tovz0f";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tovz0f";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tovz0f";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tovz0f";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -1606,9 +1606,9 @@ function webQuiet() {
     limitReached() && h("p", { class: "small muted" }, t("오늘 검색 {n}개를 모두 썼어요. 이미 찾은 단어는 단어장에서 볼 수 있어요.", { n: FREE_SEARCHES })),
     recent.length > 0 && h("div", { class: "chips center recent" }, recent.map((w) => h("button", { class: "chip", onclick: () => open(w) }, w.headword))));
 }
-// Who is in the yard: the student's own character and a handful of the others they own (as many
-// as the window has room for; the same handful until something changes).
+// Who is in the yard: the student's own character, and the others they chose to put there.
 let yardCast = null;
+let yardTurn = 0; // how many suggestions the characters have made
 let yardHeld = false; // while the frame is redrawn for a phone, the yard keeps its characters for their run out
 const YARD_MAX = 8; // besides the student's own character: nine in all
 function yardSheet() {
@@ -1616,12 +1616,14 @@ function yardSheet() {
   const lead = myShop().character;
   const mine = ALL_CHARACTERS.filter((c) => c.id !== lead && (ownsCharacter(c) || (c.cost === 0 && !c.earn)));
   // Starts from what is in the yard now, so opening the sheet changes nothing by itself.
-  let picked = (Array.isArray(myShop().yard) ? myShop().yard : (yardCast?.ids || [])).filter((id) => mine.some((c) => c.id === id));
+  let picked = (Array.isArray(myShop().yard) ? myShop().yard : []).filter((id) => mine.some((c) => c.id === id));
   const close = () => el.remove();
   const count = h("b", null);
   const grid = h("div", { class: "yard-grid" });
+  const empty = h("button", { class: "link small", onclick: () => { picked = []; saveShop({ ...myShop(), yard: picked }); draw(); } }, t("모두 빼기"));
   const draw = () => {
     count.textContent = `${picked.length} / ${YARD_MAX}`;
+    empty.hidden = picked.length === 0;
     for (const button of grid.children) button.setAttribute("aria-pressed", String(picked.includes(button.dataset.id)));
   };
   const toggle = (id) => {
@@ -1635,7 +1637,7 @@ function yardSheet() {
   const el = h("div", { id: "sheet", class: "sheet-wrap", onclick: (e) => { if (e.target === el) close(); } },
     h("div", { class: "sheet yard-sheet", role: "dialog", "aria-modal": "true", "aria-label": t("마당 캐릭터 고르기") },
       h("h2", null, t("마당 캐릭터 고르기")),
-      h("p", null, t("마당에 둘 캐릭터를 눌러서 넣거나 빼세요. 내 캐릭터는 늘 함께 있어요."), " ", count),
+      h("p", null, t("마당에 둘 캐릭터를 눌러서 넣거나 빼세요. 내 캐릭터는 늘 함께 있어요."), " ", count, " ", empty),
       mine.length > 0 ? grid : h("p", { class: "small" }, t("아직 다른 캐릭터가 없어요. 포인트샵에서 캐릭터를 모아 보세요.")),
       h("button", { class: "btn wide", onclick: close }, t("닫기"))));
   draw();
@@ -1647,23 +1649,44 @@ function syncYard() {
   if (!inside) return showYard(null);
   const lead = myShop().character;
   const mine = ALL_CHARACTERS.filter((c) => c.id !== lead && (ownsCharacter(c) || (c.cost === 0 && !c.earn))).map((c) => c.id);
-  const many = 3;
-  // The student's own choice (yardSheet), or, until they make one, a handful picked at random.
-  const picked = Array.isArray(myShop().yard) ? myShop().yard.filter((id) => mine.includes(id)) : null;
-  const key = [lead, many, mine.length, picked ? picked.join(",") : "auto"].join("|");
+  // In the yard: the student's own character and the ones they put there themselves (yardSheet).
+  // Everybody else stays in hiding (they look out from under the menus).
+  const picked = Array.isArray(myShop().yard) ? myShop().yard.filter((id) => mine.includes(id)).slice(0, YARD_MAX) : [];
+  const key = [lead, mine.length, picked.join(",")].join("|");
   if (yardCast?.key !== key) {
-    const others = picked || [...mine].sort(() => Math.random() - 0.5);
-    yardCast = { key, ids: [lead, ...others.slice(0, many - 1)], rest: others.slice(many - 1) };
+    yardCast = { key, ids: [lead, ...picked], rest: mine.filter((id) => !picked.includes(id)).sort(() => Math.random() - 0.5) };
   }
-  const lines = [t("퀴즈 한 판 어때?"), t("새 단어 찾으러 가자!"), t("오늘도 같이 하자!")];
+  // What a character suggests, one thing at a time. What is waiting (a present, a duel, a friend's
+  // request) comes every other time; the everyday ones take turns in between.
+  const to = (tab) => () => goTab(tab);
+  const gift = () => giftWaiting() || santaWaiting();
+  const nudges = () => [
+    gift() && { waits: true, text: t("오늘의 선물 받을래?"), act: () => (giftWaiting() ? openDailyGift() : takeSantaGift()) },
+    duel().badge() > 0 && state.tab !== "quiz" && { waits: true, text: t("대결 신청이 왔어!"), act: to("quiz") },
+    friends().badge() > 0 && state.tab !== "friends" && { waits: true, text: t("친구 신청이 왔어!"), act: () => openPage("friends") },
+    state.words.length > 0 && state.tab !== "quiz" && { text: t("퀴즈 한 판 어때?"), act: to("quiz") },
+    state.tab !== "rank" && { text: t("이번 주 순위 볼래?"), act: to("rank") },
+    { text: t("새 단어 찾으러 가자!"), act: () => { if (state.tab !== "search") goTab("search"); document.getElementById("q")?.focus(); } },
+  ].filter(Boolean);
+  const nextNudge = (asked) => {
+    // Not in the middle of a question or a sheet, and (unless the student asked by tapping) not while they type.
+    if (document.querySelector("main .choices, main .search.answer") || document.getElementById("sheet")) return null;
+    if (!asked && document.activeElement?.matches?.("input, textarea")) return null;
+    const list = nudges(), waiting = list.filter((n) => n.waits), rest = list.filter((n) => !n.waits);
+    yardTurn += 1;
+    if (!waiting.length) return rest[yardTurn % rest.length];
+    const pool = yardTurn % 2 === 1 ? waiting : rest;
+    return pool[(yardTurn >> 1) % pool.length];
+  };
   showYard({
-    ids: yardCast.ids, lead, gift: giftWaiting() || santaWaiting(),
+    ids: yardCast.ids, lead, gift: gift(),
     onEdit: yardSheet, editLabel: t("마당 캐릭터 고르기"),
+    label: (id) => ALL_CHARACTERS.find((c) => c.id === id)?.name || id,
+    nudge: () => nextNudge(false),
     onTap: (id, isLead) => {
       sfx.chirp(id);
-      if (isLead && giftWaiting()) { openDailyGift(); return null; }
-      if (isLead && santaWaiting()) { takeSantaGift(); return null; }
-      return (isLead && webHome() && mascotSuggests()) || lines[Math.floor(Math.random() * lines.length)];
+      if (isLead && gift()) { (giftWaiting() ? openDailyGift : takeSantaGift)(); return ""; } // the present it holds
+      return nextNudge(true);
     },
   });
 }

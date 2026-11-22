@@ -2,7 +2,7 @@
 // They walk about, stop, hop now and then, and react when tapped. The app only says who is there
 // (showYard) and what a tap does; everything that moves is in here.
 // The page needs an element with the id "yard" (the web version's index.html has one).
-import { portrait, giftArt } from "./mascot.js?v=0.1.23-tovyjt";
+import { portrait, giftArt } from "./mascot.js?v=0.1.23-tovz0f";
 
 const still = () => Boolean(globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -11,7 +11,7 @@ let root = null;
 let opts = {};
 let leaving = false; // on their way out (leaveYard): nothing else touches them until they are gone
 
-const room = () => Math.max(0, root.clientWidth - 90); // how far right a character may stand
+const room = (w) => Math.max(0, root.clientWidth - (w?.el.offsetWidth || 90) - 44); // how far right a character may stand (the button at the end stays free)
 function place(w, x, seconds = 0) {
   w.x = Math.round(x);
   w.el.style.transitionDuration = `${seconds}s`;
@@ -31,7 +31,7 @@ function stroll(w) {
   const roll = Math.random();
   if (roll < 0.2) { hop(w); w.timer = setTimeout(() => stroll(w), rand(900, 2400)); return; }
   if (roll < 0.42) { w.timer = setTimeout(() => stroll(w), rand(1500, 5000)); return; }
-  const to = Math.min(room(), Math.max(0, w.x + rand(-280, 280)));
+  const to = Math.min(room(w), Math.max(0, w.x + rand(-280, 280)));
   const seconds = Math.max(0.6, Math.abs(to - w.x) / rand(26, 44)); // pixels a second: an unhurried walk
   w.el.classList.toggle("left", to < w.x);
   w.el.classList.add("walk");
@@ -42,14 +42,29 @@ function stroll(w) {
   }, seconds * 1000);
 }
 
-function say(w, text) {
+// A bubble over a character. With `act`, the bubble is something to press: it does what it says.
+function say(w, text, act) {
   w.el.querySelector(".yard-say")?.remove();
   if (!text) return;
   const bubble = document.createElement("span");
-  bubble.className = "yard-say";
+  bubble.className = act ? "yard-say act" : "yard-say";
   bubble.textContent = text;
+  if (act) {
+    bubble.setAttribute("role", "button");
+    bubble.addEventListener("click", (e) => { e.stopPropagation(); bubble.remove(); act(); });
+  }
   w.el.append(bubble);
-  setTimeout(() => bubble.remove(), 3800);
+  setTimeout(() => bubble.remove(), act ? 9000 : 3800);
+}
+
+// Every so often the student's own character suggests the next thing to do (opts.nudge decides what).
+let nudgeTimer = 0;
+function nudge() {
+  clearTimeout(nudgeTimer);
+  const w = walkers.get(opts.lead);
+  const next = !leaving && !document.hidden && w ? opts.nudge?.() : null;
+  if (next) { hop(w); say(w, next.text, next.act); }
+  nudgeTimer = setTimeout(nudge, 40000);
 }
 
 function add(id) {
@@ -66,10 +81,11 @@ function add(id) {
   const w = { el, x: 0, timer: 0 };
   el.addEventListener("click", () => {
     hop(w);
-    say(w, opts.onTap?.(id, id === opts.lead) || "");
+    const said = opts.onTap?.(id, id === opts.lead);
+    if (said && typeof said === "object") say(w, said.text, said.act); else say(w, said || "");
   });
   root.append(el);
-  place(w, rand(0, room()));
+  place(w, rand(0, room(w)));
   walkers.set(id, w);
   w.timer = setTimeout(() => stroll(w), rand(300, 2600));
 }
@@ -85,6 +101,7 @@ export function showYard(next) {
   opts = next || {};
   const ids = opts.ids || [];
   root.hidden = ids.length === 0;
+  if (ids.length === 0) { clearTimeout(nudgeTimer); nudgeTimer = 0; } else if (!nudgeTimer) nudgeTimer = setTimeout(nudge, 2500);
   for (const [id, w] of walkers) {
     if (ids.includes(id)) continue;
     clearTimeout(w.timer);
@@ -164,5 +181,5 @@ export function cheerYard() {
 // A narrower window: nobody is left standing outside it.
 globalThis.addEventListener?.("resize", () => {
   if (!root) return;
-  for (const w of walkers.values()) if (w.x > room()) place(w, room());
+  for (const w of walkers.values()) if (w.x > room(w)) place(w, room(w));
 });
