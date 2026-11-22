@@ -1211,19 +1211,10 @@ function entryBlocks(word) {
 
 // ----- hearing the word -----
 // The device's own voices read it (the browser's speech synthesis): nothing is sent anywhere, it
-// costs nothing and it works for every word. An English word can be heard the American and the
-// British way; a Korean word in standard Korean. Which voices exist depends on the device.
-const SAY = { en: [["en-US", "us", "미국식 발음 듣기"], ["en-GB", "gb", "영국식 발음 듣기"]], ko: [["ko-KR", "", "발음 듣기"]] };
-// Small flags, drawn (Windows has no flag emoji). Fixed markup, no user data.
-const FLAGS = {
-  us: `<svg viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><path d="M0 1h20M0 5h20M0 9h20M0 13h20" stroke="#b22234" stroke-width="2"/><rect width="9" height="8" fill="#3c3b6e"/></svg>`,
-  gb: `<svg viewBox="0 0 20 14"><rect width="20" height="14" fill="#012169"/><path d="M0 0l20 14M20 0L0 14" stroke="#fff" stroke-width="2.8"/><path d="M0 0l20 14M20 0L0 14" stroke="#c8102e" stroke-width="1"/><path d="M10 0v14M0 7h20" stroke="#fff" stroke-width="4.6"/><path d="M10 0v14M0 7h20" stroke="#c8102e" stroke-width="2.6"/></svg>`,
-};
-function flag(code) {
-  const el = h("span", { class: "flag", "aria-hidden": "true" });
-  el.innerHTML = FLAGS[code];
-  return el;
-}
+// costs nothing and it works for every word. An English word is read the American way, a Korean
+// word in standard Korean. (A British button was tried and taken out: some devices list a British
+// voice and then read with the default one, which the page cannot notice.)
+const SAY = { en: ["en-US", "미국식 발음 듣기"], ko: ["ko-KR", "발음 듣기"] }; // an English word is read the American way
 const canSay = () => "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
 if (canSay()) speechSynthesis.getVoices(); // asks the browser to load its list early
 function voiceFor(lang) {
@@ -1253,9 +1244,9 @@ function sayWord(text, lang, button) {
 }
 function sayButtons(c) {
   if (!canSay() || !c?.headword || !SAY[c.language]) return null;
-  return h("span", { class: "speak-set" }, SAY[c.language].map(([lang, country, title]) =>
-    h("button", { class: "speak", title: t(title), "aria-label": t(title), onclick: (e) => sayWord(c.headword, lang, e.currentTarget) },
-      h("i", { "aria-hidden": "true" }, "▶"), country && flag(country))));
+  const [lang, title] = SAY[c.language];
+  return h("button", { class: "speak", title: t(title), "aria-label": t(title), onclick: (e) => sayWord(c.headword, lang, e.currentTarget) },
+    h("i", { "aria-hidden": "true" }, "▶"));
 }
 
 function hero(c, word) {

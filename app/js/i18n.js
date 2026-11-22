@@ -773,7 +773,6 @@ const T = {
   "더 쉽게, 더 자세히! 설명을 내 수준에 맞게 바꿔 볼 수 있어.": ["Easier or more detailed: switch the explanation to your level!", "更简单，或更详细！可以把解释换成适合自己的难度。"],
   "너무 어려워…": ["Too hard…", "太难了……"],
   "미국식 발음 듣기": ["Hear it the American way", "听美式发音"],
-  "영국식 발음 듣기": ["Hear it the British way", "听英式发音"],
   "발음 듣기": ["Hear the word", "听发音"],
   "이 기기에는 이 발음을 들려줄 음성이 없어요.": ["This device has no voice for that pronunciation.", "这台设备没有这种发音的语音。"],
   "내 학년": ["My grade", "我的年级"],
