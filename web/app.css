@@ -2764,3 +2764,83 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
 .web-login .login-code .row { display: flex; gap: 8px; align-items: stretch; }
 .web-login .login-code input { flex: 1; min-width: 0; padding: 11px 12px; font-size: 16px; text-align: left; }
 .web-login .after-film .login-code .btn { flex: none; padding: 11px 14px; font-size: 14px; white-space: nowrap; }
+/* ----- the quiz menu on a phone (and in the extension's panel): one card under the tabs ----- */
+@media (max-width: 859.98px) {
+  .qz-games.one { display: block; margin-top: 4px; }
+  .qz-game { position: relative; display: flex; flex-direction: column; min-width: 0; padding: 16px 16px 10px; border-radius: 20px; background: var(--surface); }
+  .qz-game.review { background: color-mix(in srgb, var(--accent) 10%, var(--bg)); }
+  .qz-game.streak { background: color-mix(in srgb, #ff9f43 15%, var(--bg)); }
+  .qz-game.duel { background: color-mix(in srgb, #7fae4a 17%, var(--bg)); }
+  .qz-art { position: relative; display: flex; align-items: flex-end; gap: 2px; height: 70px; margin-bottom: 10px; }
+  .qz-art .mascot { display: block; flex: none; width: 74px; }
+  .qz-art .qz-rival { display: block; flex: none; width: 74px; margin-left: 2px; }
+  .qz-art .qz-rival .mascot svg { transform: scaleX(-1); }
+  .qz-tile { display: grid; place-items: center; width: 22px; height: 26px; margin: 0 0 28px 2px; border-radius: 7px; background: var(--bg); box-shadow: 0 1px 3px rgba(0, 0, 0, .12); font-style: normal; font-size: 12px; font-weight: 800; color: var(--accent-dark, var(--accent)); transform: rotate(-8deg); }
+  .qz-tile.b { margin: 0 0 10px -2px; color: var(--good); transform: rotate(9deg); }
+  .qz-step { align-self: flex-end; width: 13px; border-radius: 5px 5px 2px 2px; margin-left: 4px; }
+  .qz-step.s1 { height: 15px; margin-left: 8px; background: #bbd86b; }
+  .qz-step.s2 { height: 28px; background: #ffd166; }
+  .qz-step.s3 { height: 42px; background: #ff9f43; }
+  .qz-vs { align-self: center; margin: 0 -4px 0 -2px; font-style: normal; font-size: 12px; font-weight: 900; color: var(--good); }
+  .qz-game h2 { display: none; } /* the tab above already names the game */
+  .qz-text { min-height: 20px; margin: 0 0 12px; font-size: 14px; color: var(--muted); }
+  .qz-slot { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 52px; padding: 6px 8px 6px 14px; border-radius: 14px; background: var(--bg); font-size: 13.5px; color: var(--muted); }
+  .qz-slot > span:first-child { min-width: 0; line-height: 1.3; }
+  .qz-slot select { flex: none; max-width: 62%; padding: 8px 4px 8px 8px; border: 0; background: none; font: inherit; font-weight: 600; color: var(--text); text-align: right; }
+  /* a range the student types: the days, or the two dates, in the same line; the list keeps only its arrow */
+  .qz-slot.custom { gap: 6px; }
+  .qz-slot.custom .qz-custom { display: flex; align-items: center; gap: 6px; min-width: 0; margin-left: auto; font-weight: 600; color: var(--text); }
+  .qz-slot.custom .qz-custom.dates { flex: 1; margin-left: -6px; }
+  .qz-slot.custom .qz-custom input { min-width: 0; padding: 7px 8px; border-radius: 10px; font-size: 13.5px; font-weight: 600; background: var(--surface); border-color: transparent; }
+  .qz-slot.custom .qz-custom input[type="number"] { width: 62px; text-align: center; }
+  .qz-slot.custom .qz-custom.dates input { position: relative; flex: 1; width: 0; padding: 7px 4px; text-align: center; }
+  .qz-slot.custom .qz-custom.dates input::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: auto; height: auto; margin: 0; padding: 0; opacity: 0; cursor: pointer; }
+  .qz-slot.custom select { width: 24px; max-width: none; padding-left: 0; padding-right: 0; text-indent: 40px; }
+  .qz-pips { flex: none; display: inline-flex; align-items: center; gap: 8px; padding-right: 6px; }
+  .qz-pips .pips { display: flex; gap: 3px; }
+  .qz-pips .pips i { width: 9px; height: 16px; border-radius: 4px; background: var(--border); }
+  .qz-pips .pips i.on { background: var(--accent); }
+  .qz-pips b { font-size: 14px; color: var(--text); font-variant-numeric: tabular-nums; }
+  .qz-game .qz-nums { display: grid; grid-auto-flow: row; grid-auto-columns: auto; gap: 9px; margin: 14px 0 0; }
+  .qz-game .qz-nums .stat { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0; border: 0; border-radius: 0; background: none; text-align: left; overflow: visible; }
+  .qz-game .qz-nums .stat span { order: -1; font-size: 13.5px; color: var(--muted); }
+  .qz-game .qz-nums .stat b { font-size: 15px; max-width: none; }
+  .qz-game .field { margin: 10px 0 0; }
+  .qz-game .field label { font-size: 12px; color: var(--muted); }
+  .qz-game .field .row { flex-wrap: wrap; gap: 6px; }
+  /* Whatever a card has to say (nothing in this range, no tries left today) goes under its start
+     button, and what a quiz holds sits in the card's corner: the button never moves. */
+  .qz-game > .qz-note { order: 5; margin: 10px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); text-align: center; }
+  .qz-game > .qz-tags { position: absolute; top: 14px; right: 14px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin: 0; }
+  .qz-tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; background: var(--bg); font-size: 12px; color: var(--muted); }
+  .qz-tag b { color: var(--text); }
+  .qz-game > .btn { order: 4; width: 100%; margin-top: 24px; padding: 14px 10px; border-radius: 14px; font-size: 16px; }
+  .qz-how { order: 6; align-self: center; margin-top: 4px; padding: 8px 10px; font-size: 13px; font-weight: 500; color: var(--muted); text-decoration: none; }
+  .how-sheet .guide-steps { margin: 6px 0 4px; text-align: left; }
+  .how-sheet .stage-ladder { margin: 12px 0 4px; }
+  .how-sheet .btn { margin-top: 16px; }
+  .qz-games.one ~ .duel-list { margin-top: 18px; }
+  /* what was played lately, under the card */
+  .plays { margin-top: 22px; }
+  .plays h3 { margin: 0 0 6px; font-size: 14px; }
+  .play-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; column-gap: 10px; width: 100%; padding: 8px 0; border-top: 1px solid var(--line); text-align: left; }
+  .play-who { display: flex; align-items: flex-end; gap: 2px; }
+  .play-who .face { position: relative; display: block; flex: none; width: 40px; font-size: 0; line-height: 0; }
+  .play-who .face .mascot { display: block; width: 100%; }
+  .play-who .them { display: block; }
+  .play-who .them .face .mascot svg { transform: scaleX(-1); }
+  .play-what { display: grid; min-width: 0; }
+  .play-what b { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .play-what small { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .play-new { padding: 1px 7px; border-radius: 999px; background: #ffd166; color: #5a3d00; font-style: normal; font-size: 10.5px; font-weight: 700; }
+  .play-score { font-size: 17px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .play-points { display: inline-flex; align-items: center; justify-content: flex-end; gap: 3px; min-width: 44px; font-size: 13px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .play-points.up { color: var(--good); }
+  .play-points.down { color: #b93a2b; }
+  .play-points i { width: 15px; height: 15px; font-size: 0; flex: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23ffd166' stroke='%23e6a700' stroke-width='1.6'/%3E%3Ccircle cx='8.6' cy='12' r='1.5' fill='%237a5200'/%3E%3Ccircle cx='15.4' cy='12' r='1.5' fill='%237a5200'/%3E%3Cpath d='M9.4 15q2.6 2.4 5.2 0' fill='none' stroke='%237a5200' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+  .play-row .mark { justify-self: end; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800; background: var(--surface); color: var(--muted); }
+  .play-row .mark.win { background: var(--good); color: var(--lime); }
+  .play-row .mark.lose { background: #fde8e6; color: #b93a2b; }
+}
+/* one card under the tabs is as wide as the screen, whatever the width (the extension's panel can be made wide) */
+.qz-games.one { display: block; }
