@@ -1,27 +1,27 @@
-import { api, DEMO } from "./api.js?v=0.1.23-tow0fb";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tow0fb";
-import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tow0fb";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tow0fb";
-import { cleanEntry } from "./clean.js?v=0.1.23-tow0fb";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tow0fb";
-import { CHARACTERS } from "./characters.js?v=0.1.23-tow0fb";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tow0fb";
-import { film } from "./film.js?v=0.1.23-tow0fb";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.23-tow0fb";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.23-tow0fb";
-import { initDesktop } from "./desktop.js?v=0.1.23-tow0fb";
-import { BANDS, bandOf } from "./levels.js?v=0.1.23-tow0fb";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tow0fb";
-import { initDuel } from "./duel.js?v=0.1.23-tow0fb";
-import { initFriends } from "./friends.js?v=0.1.23-tow0fb";
-import { MOTTOS } from "./mottos.js?v=0.1.23-tow0fb";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tow0fb";
-import { SIGNATURES } from "./signatures.js?v=0.1.23-tow0fb";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tow0fb";
-import { tuning, setTuning } from "./tuning.js?v=0.1.23-tow0fb";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow0fb";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow0fb";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tow0fb";
+import { api, DEMO } from "./api.js?v=0.1.23-tow0jl";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tow0jl";
+import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tow0jl";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tow0jl";
+import { cleanEntry } from "./clean.js?v=0.1.23-tow0jl";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tow0jl";
+import { CHARACTERS } from "./characters.js?v=0.1.23-tow0jl";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tow0jl";
+import { film } from "./film.js?v=0.1.23-tow0jl";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.23-tow0jl";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.23-tow0jl";
+import { initDesktop } from "./desktop.js?v=0.1.23-tow0jl";
+import { BANDS, bandOf } from "./levels.js?v=0.1.23-tow0jl";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tow0jl";
+import { initDuel } from "./duel.js?v=0.1.23-tow0jl";
+import { initFriends } from "./friends.js?v=0.1.23-tow0jl";
+import { MOTTOS } from "./mottos.js?v=0.1.23-tow0jl";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tow0jl";
+import { SIGNATURES } from "./signatures.js?v=0.1.23-tow0jl";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tow0jl";
+import { tuning, setTuning } from "./tuning.js?v=0.1.23-tow0jl";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow0jl";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow0jl";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tow0jl";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -1882,7 +1882,8 @@ function wordRow(w) {
   const grouping = state.filter === "favorites" && canGroup() && w.favorite;
   // A wide window keeps the list and shows the word beside it; a phone opens the word in the dictionary tab.
   const open = () => { Object.assign(state, { entry: w, tab: "search", query: "", notice: null }); render(); };
-  return h("div", { class: "item" },
+  const shownNow = WIDE() && state.tab === "search" && state.entry?.term_norm === w.term_norm; // the word open beside the list
+  return h("div", { class: `item${shownNow ? " on" : ""}` },
     h("div", { class: "avatar", "aria-hidden": "true" }, [...w.headword][0].toUpperCase()),
     h("button", { class: "open", onclick: open },
       h("div", { class: "word" }, w.headword, w.discovered && tag("found", "✦", t("첫 발견")), w.needs_review && tag("review", "↻", t("복습")), isLearned(w) && tag("learned", "✓", t("다 익힘")), grouping && w.folder && h("span", { class: "badge folder" }, w.folder)),
@@ -1930,8 +1931,10 @@ function wordsList() {
   // Favourites can be narrowed to one group (Plus).
   const grouped = state.filter === "favorites" && canGroup();
   const group = grouped && folders().includes(state.folder) ? state.folder : null;
+  const find = WIDE() ? (state.wordsFind || "").trim().toLowerCase() : ""; // the desktop panel's box: a word of the list, or its other-language word
   const shown = inLang(state.wordLang).filter((w) =>
-    state.filter === "favorites" ? w.favorite && (!group || w.folder === group) : state.filter === "review" ? w.needs_review : state.filter === "learned" ? isLearned(w) : state.filter === "found" ? w.discovered : true);
+    state.filter === "favorites" ? w.favorite && (!group || w.folder === group) : state.filter === "review" ? w.needs_review : state.filter === "learned" ? isLearned(w) : state.filter === "found" ? w.discovered : true)
+    .filter((w) => !find || w.headword.toLowerCase().includes(find) || String(w.content?.counterpart || "").toLowerCase().includes(find));
   // Learned words: those learned a month or more ago can go back into the quizzes.
   const old = state.filter === "learned" ? shown.filter((w) => canRetest(w)) : [];
   const learnedRow = state.filter !== "learned" ? null : h("div", { class: "learned-box" },
@@ -1961,7 +1964,7 @@ function wordsList() {
   state.openWeeks ||= new Set([weekKey()]);
   const weekSection = ([key, words]) => {
     const current = key === weekKey();
-    const open = state.openWeeks.has(key);
+    const open = Boolean(find) || state.openWeeks.has(key); // every week is open while finding a word
     const whole = state.filter === "all" && state.wordLang === "recent"; // the goal counts every word of the week
     return h("section", { class: `day week${open ? " open" : ""}` },
       h("button", { class: "week-head", "aria-expanded": String(open), onclick: () => { state.openWeeks[open ? "delete" : "add"](key); render(); } },
@@ -1983,7 +1986,7 @@ function wordsList() {
         h("button", { "aria-pressed": String((state.groupBy || "day") === id), onclick: () => { state.groupBy = id; render(); } }, label)))),
     groupRow,
     learnedRow,
-    noticeBox(),
+    !WIDE() && noticeBox(), // in the desktop frame the screen beside the list shows notices
     shown.length === 0
       ? h("div", { class: "empty" },
           state.words.length ? t("여기에 해당하는 단어가 없어요.") : t("아직 찾아본 단어가 없어요."))
@@ -3507,8 +3510,7 @@ function goTab(id) {
 let desktopModule;
 const desktop = () => (desktopModule ||= initDesktop({
   h, t, state, render, logoIcon, wordmark, searchForm, goHome, goTab, openShop, openSettings, openPage, webHome, star, isLearned, dayOf, dayLabel,
-  weekKey, weekLabel, canGroup, folders, folderSheet, canRetest, retest, removeWord, meanings, locale, icon, MASTER_STREAK, RETEST_DAYS,
-  openPlus: () => { state.plusOpen = true; openSettings(); },
+  wordsList,
   dailyGoal, todayBox, questHint, entrySide, giftArt, portrait,
   residents: () => yardCast?.rest || [], // the characters that are not out in the yard
   duelBadge: () => duel().badge(), friendsBadge: () => friends().badge(),

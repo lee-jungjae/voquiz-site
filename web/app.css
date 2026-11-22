@@ -2377,3 +2377,39 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   @keyframes fx-good { 0% { transform: scale(.9); opacity: 0; } 55% { transform: scale(1.04); opacity: 1; } 100% { transform: scale(1); } }
   @media (prefers-reduced-motion: reduce) { .fx-hurry, body[data-combo] .dk.focus::before, .qz-dots i.now, .peeker.out .mascot { animation: none; } }
 }
+/* ----- desktop: the left panel holds the extension's own word list (same tabs, chips, marks, rows) ----- */
+@media (min-width: 860px) {
+  .dk { grid-template-columns: 348px minmax(0, 1fr); }
+  html.web #app:has(.dk-words) ~ #yard:not(.leaving) { left: 348px; }
+  .dk-words { gap: 10px; padding: 26px 0 0 0; }
+  .dk-words-head, #dk-find { margin-left: 22px; margin-right: 18px; }
+  #dk-find { width: auto; }
+  .dk-words-head .dk-fold { margin-left: auto; }
+  .dk-wl { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 18px 200px 22px; }
+  .dk-wl .segment { margin-bottom: 12px; }
+  .dk-wl .segment button { padding: 10px 0; font-size: 14px; }
+  .dk-wl .chip { padding: 6px 12px; font-size: 12.5px; }
+  .dk-wl .filter-row .chip-scroll { margin-left: -22px; margin-right: -18px; }
+  .dk-wl .filter-row .chip-scroll .chips.one-line { padding-left: 22px; padding-right: 18px; }
+  .dk-wl .filter-row .chip-more.right { right: 10px; }
+  .dk-wl .day h3 { top: -4px; background: var(--surface); backdrop-filter: none; }
+  .dk-wl .item { gap: 10px; padding: 11px 8px; margin: 0 -8px; border-bottom: 0; border-radius: 12px; animation: none; }
+  .dk-wl .item:hover, .dk-wl .item.on { background: var(--bg); }
+  .dk-wl .item.on { box-shadow: 0 1px 2px rgba(0, 0, 0, .06); }
+  .dk-wl .item .avatar { width: 36px; height: 36px; border-radius: 10px; background: var(--bg); font-size: 15px; }
+  .dk-wl .item:hover .avatar, .dk-wl .item.on .avatar { background: var(--surface); }
+  .dk-wl .item .word { font-size: 15px; }
+  .dk-wl .item .sub { font-size: 13px; }
+  .dk-wl .item .star { font-size: 19px; }
+  .dk-wl .item .trash { width: 26px; height: 26px; opacity: 0; }
+  .dk-wl .item:hover .trash, .dk-wl .item:focus-within .trash, .dk-wl .item .trash.keep, .dk-wl .item .trash.sure { opacity: 1; }
+  .dk-wl .item:has(.trash-ask) { margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
+  .dk-wl .week-head { padding: 6px 0; }
+  .dk-wl .week-head .week-name { font-size: 14px; }
+  .dk-wl .empty { padding: 28px 0; font-size: 14px; }
+  .dk.opening .dk-words > * { min-width: 250px; }
+}
+@media (min-width: 860px) and (max-width: 1179px) {
+  .dk { grid-template-columns: 300px minmax(0, 1fr); }
+  html.web #app:has(.dk-words) ~ #yard:not(.leaving) { left: 300px; }
+}
