@@ -91,7 +91,7 @@ export async function finishSignIn() {
 // has to be on the project's list of redirect addresses.
 export async function signIn() {
   if (!globalThis.chrome?.identity) {
-    const back = location.origin + location.pathname;
+    const back = new URL("./", location.href).href; // always the folder itself (…/web/), so one allowed address is enough
     location.assign(`${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(back)}`);
     return new Promise(() => {}); // the page is on its way out
   }
