@@ -1,7 +1,7 @@
 // Minimal Supabase client over fetch (no build step, no bundled library).
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js?v=0.1.27-towj9f";
-import { parsePartial } from "./partial.js?v=0.1.27-towj9f";
-import { syncClock } from "./clock.js?v=0.1.27-towj9f";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js?v=0.1.27-towjyf";
+import { parsePartial } from "./partial.js?v=0.1.27-towjyf";
+import { syncClock, clockNow } from "./clock.js?v=0.1.27-towjyf";
 
 const SESSION_KEY = "wb_session";
 let session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
@@ -137,7 +137,7 @@ export async function publishRank(row) {
   const send = (body) => authed("/rest/v1/profiles?on_conflict=user_id", {
     method: "POST",
     headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
-    body: { user_id: session.user.id, ...body, updated_at: new Date().toISOString() },
+    body: { user_id: session.user.id, ...body, updated_at: new Date(clockNow()).toISOString() },
   });
   try {
     await send(row);

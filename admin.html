@@ -19,9 +19,10 @@
   button.main { background: var(--accent); border-color: var(--accent); color: #fff; padding: 12px 22px; font-size: 15px; }
   button:hover { border-color: var(--ink); }
   h2 { display: flex; align-items: center; gap: 8px; font-size: 16px; margin: 30px 0 10px; }
+  h3 { font-size: 13.5px; margin: 18px 0 0; color: var(--muted); font-weight: 700; }
   .count { font-size: 11px; font-weight: 800; color: #fff; background: #c2452f; border-radius: 999px; padding: 1px 8px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
-  .tile { min-width: 0; display: grid; gap: 1px; padding: 12px 14px; border-radius: 14px; background: var(--surface); }
+  .tile { min-width: 0; display: grid; gap: 1px; align-content: start; padding: 12px 14px; border-radius: 14px; background: var(--surface); }
   .tile small { font-size: 12px; color: var(--muted); font-weight: 600; }
   .tile b { font-size: 26px; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
   .tile span { font-size: 12px; color: var(--muted); }
@@ -40,6 +41,7 @@
   table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 10px; }
   th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
   th { font-size: 12px; color: var(--muted); font-weight: 600; }
+  th.n, td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
   tr.warn td { background: #fff4ef; }
   .links { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
   .links a { display: grid; gap: 2px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); color: inherit; text-decoration: none; }
@@ -48,7 +50,10 @@
   .links small { font-size: 12px; color: var(--muted); }
   .center { min-height: 60vh; display: grid; place-content: center; justify-items: center; gap: 14px; text-align: center; }
   .note { color: var(--muted); font-size: 13px; }
+  p.note { margin: 10px 0 0; }
   .error { color: var(--warn); background: var(--warn-bg); border-radius: 12px; padding: 10px 14px; font-size: 13.5px; }
+  .old { margin: 10px 0 0; }
+  code { font: 600 12.5px ui-monospace, "SF Mono", Menlo, Consolas, monospace; background: var(--surface); border-radius: 6px; padding: 1px 6px; }
 </style>
 </head>
 <body>
@@ -56,8 +61,8 @@
 <script>
 // The board for the people who run VOQUIZ. Anyone can open this page, but the numbers come from
 // the server function admin_board(), which answers only an account listed in `admins`
-// (supabase/migrations/0013_admin_board.sql). Signing in is Google, through Supabase.
-// The address and key below are the public ones the extension itself ships with.
+// (supabase/migrations/0013_admin_board.sql, redone in 0021_admin_board.sql). Signing in is Google,
+// through Supabase. The address and key below are the public ones the extension itself ships with.
 const SUPABASE_URL = "https://axstdfuufvgdjanahght.supabase.co";
 const PUBLIC_KEY = "sb_publishable_BPj_xNsd9JWjDGVsXK0MtA_Ydov6fol";
 const PROJECT = "axstdfuufvgdjanahght";
@@ -68,6 +73,7 @@ const TIERS = ["🌸", "🏝️", "🐳", "❄️", "🌈", "☁️", "⭐"];
 const app = document.getElementById("app");
 const DEMO = new URLSearchParams(location.search).has("demo");
 const esc = (text) => String(text ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const num = (n) => Number(n ?? 0).toLocaleString("ko-KR");
 
 let session = null;
 try { session = JSON.parse(sessionStorage.getItem(SESSION)); } catch { /* none */ }
@@ -105,6 +111,21 @@ async function board() {
   if (!res.ok) throw new Error(data?.message === "forbidden" ? "forbidden" : res.status === 404 ? "not_installed" : data?.message || "failed");
   return data;
 }
+// What this site itself offers now: the web version, and the file on the install page. (The store's
+// own version cannot be read from a page; the store's dashboard is among the links.)
+async function published() {
+  if (DEMO) return { web: "0.1.27", file: "0.1.27" };
+  const read = async (path, pattern) => {
+    try { const res = await fetch(path, { cache: "no-store" }); return res.ok ? (pattern.exec(await res.text()) || [])[1] || null : null; } catch { return null; }
+  };
+  const [web, file] = await Promise.all([read("web/index.html", /app\.js\?v=(\d+\.\d+\.\d+)/), read("install.html", /(?:Version|버전)\s+(\d+\.\d+\.\d+)/)]);
+  return { web, file };
+}
+const older = (a, b) => { // is version a older than version b?
+  const x = String(a || "").split(".").map(Number), y = String(b || "").split(".").map(Number);
+  for (let i = 0; i < Math.max(x.length, y.length); i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) < (y[i] || 0);
+  return false;
+};
 
 function gate(message) {
   app.innerHTML = `<div class="center">
@@ -118,68 +139,99 @@ function gate(message) {
   if (session) document.getElementById("out").onclick = () => { keep(null); gate(); };
 }
 
-const tile = (label, value, note, warn) => `<div class="tile${warn ? " warn" : ""}"><small>${esc(label)}</small><b>${esc(value ?? 0)}</b>${note ? `<span>${esc(note)}</span>` : ""}</div>`;
+const tile = (label, value, note, warn) => `<div class="tile${warn ? " warn" : ""}"><small>${esc(label)}</small><b>${esc(typeof value === "number" ? num(value) : value ?? 0)}</b>${note ? `<span>${esc(note)}</span>` : ""}</div>`;
 function chart(daily, key, label) {
   const top = Math.max(1, ...daily.map((d) => d[key]));
-  return `<div class="chart"><small>${esc(label)} <em>· 최고 ${top}</em></small>
+  return `<div class="chart"><small>${esc(label)} <em>· 최고 ${num(top)}</em></small>
     <div class="bars" role="img" aria-label="${esc(label)}: ${daily.map((d) => d[key]).join(", ")}">${daily.map((d) =>
-      `<i data-tip="${esc(d.day.slice(5))} · ${d[key]}" style="height:${Math.max(3, Math.round((d[key] / top) * 100))}%"></i>`).join("")}</div>
+      `<i data-tip="${esc(d.day.slice(5))} · ${num(d[key])}" style="height:${Math.max(3, Math.round((d[key] / top) * 100))}%"></i>`).join("")}</div>
     <div class="axis"><span>${esc(daily[0].day.slice(5))}</span><span>오늘</span></div></div>`;
 }
 const link = (label, href, note) => `<a href="${esc(href)}" target="_blank" rel="noopener"><b>${esc(label)} ↗</b>${note ? `<small>${esc(note)}</small>` : ""}</a>`;
 const who = (row) => `${esc(row.nickname || `탐험가 ${row.tag}`)}<br><span class="note">${esc(row.email)}</span>`;
+const when = (at) => new Date(at).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit" });
+// What the server wrote when it held an account's points back, in plain words.
+function reason(text) {
+  let m;
+  if ((m = /^points: \+(\d+) in one day, limit (\d+)/.exec(text || ""))) return `하루에 ${num(m[1])}점을 받으려 해서 한도 ${num(m[2])}점까지만 인정했어요.`;
+  if ((m = /^week points: sent (\d+), had (\d+)/.exec(text || ""))) return `주간 점수를 한 번에 ${num(m[2])}점에서 ${num(m[1])}점으로 올리려 해서 막았어요.`;
+  if ((m = /^best streak: sent (\d+)/.exec(text || ""))) return `연속 도전 기록을 ${num(m[1])}개로 보내서 막았어요. 단어 목록보다 길어요.`;
+  return text || "";
+}
 
-function show(b) {
-  const worry = b.rankings.flagged + b.rankings.odd_rows.length;
+function show(b, site) {
+  const fresh = b.rev >= 2; // the server function of 0021; the one of 0013 answers with less, and some of it wrong
+  const r = b.rankings;
+  const cap = r.cap || 6000;
+  const flagged = r.flagged_rows || [];
+  const near = r.near_cap_rows || [];
+  const top = r.top_rows || [];
+  const notices = b.notice_rows || [];
+  const worry = fresh ? flagged.length + near.length : 0;
+  const latest = b.version?.latest;
+  const behind = site.web && latest && older(latest, site.web); // the site already offers a newer version than the server tells the apps about
   app.innerHTML = `
     <header><h1><span>VOQUIZ</span> 운영 보드</h1><span class="spacer"></span>
       <button id="again">새로 고침</button>${DEMO ? "" : `<button id="out">로그아웃</button>`}</header>
-    <p class="stamp">${esc(new Date(b.at).toLocaleString("ko-KR"))} 기준${DEMO ? " · 보기용 가짜 숫자" : ""}</p>
+    <p class="stamp">${esc(new Date(b.at).toLocaleString("ko-KR"))} 기준 · 날짜는 한국 시간${DEMO ? " · 보기용 가짜 숫자" : ""}</p>
+    ${fresh ? "" : `<p class="error old">서버 함수가 예전 것이라 AI 호출, 활성 이용자, 랭킹 점검 숫자가 정확하지 않아요. Supabase SQL Editor에서 <code>0021_admin_board.sql</code>을 한 번 실행해 주세요.</p>`}
 
     <h2>이용자</h2>
     <div class="grid">
-      ${tile("가입자", b.users.members, `오늘 +${b.users.new_today} · 7일 +${b.users.new_7d}`)}
-      ${tile("오늘 활성", b.users.active_today, "단어를 찾거나 포인트를 받은 사람")}
-      ${tile("7일 활성", b.users.active_7d, `30일 ${b.users.active_30d}`)}
+      ${tile("가입자", b.users.members, `오늘 +${num(b.users.new_today)} · 7일 +${num(b.users.new_7d)}`)}
+      ${tile("오늘 활성", b.users.active_today, "단어를 찾거나 포인트가 저장된 학생")}
+      ${tile("7일 활성", b.users.active_7d, `30일 ${num(b.users.active_30d)}`)}
       ${tile("로그인만 한 계정", b.users.signed_in - b.users.members, "초대 코드 미입력")}
-      ${tile("플러스", b.users.plus, `쿠폰 사용 ${b.social.coupons_used}`)}
+      ${tile("플러스", b.users.plus, `쿠폰 사용 ${num(b.social.coupons_used)}`)}
     </div>
     <div class="charts">${chart(b.daily, "active", "하루 활성 이용자 (14일)")}${chart(b.daily, "joined", "하루 가입자 (14일)")}</div>
 
     <h2>단어와 AI 사용</h2>
     <div class="grid">
-      ${tile("사전 단어", b.words.dictionary, `단어가 아니라고 판단한 것 ${b.words.not_words}`)}
-      ${tile("단어장에 담긴 수", b.words.saved, `오늘 찾은 수 ${b.words.searched_today}`)}
-      ${tile("오늘 AI 호출", b.ai.today, "새로 만든 단어 1개 = 1회")}
-      ${tile("7일 / 30일 AI 호출", `${b.ai.d7} / ${b.ai.d30}`, `전체 ${b.ai.total}`)}
+      ${tile("사전 단어", b.words.dictionary, b.words.entries != null ? `학년 수준별 설명 ${num(b.words.entries)}개 · 단어 아님 ${num(b.words.not_words)}` : `단어가 아니라고 판단한 것 ${num(b.words.not_words)}`)}
+      ${tile("단어장에 담긴 수", b.words.saved, `오늘 찾은 수 ${num(b.words.searched_today)}`)}
+      ${tile("오늘 AI가 새로 쓴 단어", b.ai.today, "학생이 처음 찾은 단어 1개 = 1회")}
+      ${tile("7일 / 30일", `${num(b.ai.d7)} / ${num(b.ai.d30)}`, `전체 ${num(b.ai.total)}`)}
     </div>
-    <div class="charts">${chart(b.daily, "made", "하루 AI 호출 (14일)")}</div>
+    <div class="charts">${chart(b.daily, "made", "하루에 AI가 새로 쓴 단어 (14일)")}</div>
+    <p class="note">AI 숫자는 학생이 처음 찾아서 AI가 새로 쓴 단어 수예요. 한꺼번에 채워 넣은 사전과 다른 학년 수준의 설명은 들어가지 않고, 날짜는 서버 날짜(한국 시간 오전 9시에 바뀜) 기준이에요. 실제 비용은 아래 Anthropic 사용량에서 보세요.</p>
 
     <h2>랭킹 점검 ${worry ? `<span class="count">${worry}</span>` : ""}</h2>
     <div class="grid">
-      ${tile("서버가 점수를 깎은 계정", b.rankings.flagged, "하루 한도 초과 등", b.rankings.flagged > 0)}
-      ${tile("랭킹에서 숨긴 계정", b.rankings.hidden)}
-      ${tile("주간 점수가 이상한 계정", b.rankings.odd_rows.length, "300점 이상인데 단어당 30점 이상", b.rankings.odd_rows.length > 0)}
+      ${tile("최근 14일에 점수가 제한된 계정", r.flagged, `하루 한도 ${num(cap)}점 초과 등`, fresh && r.flagged > 0)}
+      ${tile("오늘 한도에 가까운 계정", near.length, `오늘 ${num(Math.round(cap * 0.8))}점 이상`, near.length > 0)}
+      ${tile("랭킹에서 숨긴 계정", r.hidden)}
     </div>
     ${worry ? `<table><thead><tr><th>계정</th><th>내용</th></tr></thead><tbody>
-      ${b.rankings.flagged_rows.map((row) => `<tr class="warn"><td>${who(row)}</td><td>${esc(row.reason)}<br><span class="note">${esc(new Date(row.at).toLocaleString("ko-KR"))}${row.hidden ? " · 랭킹에서 숨김" : ""}</span></td></tr>`).join("")}
-      ${b.rankings.odd_rows.map((row) => `<tr><td>${who(row)}</td><td>이번 주 ${row.week_points}점 · 찾은 단어 ${row.words}개 · 단어당 ${row.per_word}점</td></tr>`).join("")}
+      ${flagged.map((row) => `<tr class="warn"><td>${who(row)}</td><td>${esc(reason(row.reason))}<br><span class="note">${esc(when(row.at))}${row.hidden ? " · 랭킹에서 숨김" : ""}</span></td></tr>`).join("")}
+      ${near.map((row) => `<tr><td>${who(row)}</td><td>오늘 ${num(row.points_today)}점 · 이번 주 ${num(row.week_points)}점</td></tr>`).join("")}
     </tbody></table>` : `<p class="note">지금은 살펴볼 계정이 없어요.</p>`}
+    ${r.flagged_old ? `<p class="note">14일보다 오래됐거나 예전 한도(2,000점) 때 생긴 표시 ${num(r.flagged_old)}개는 세지 않았어요. 한 번에 지우려면 <code>supabase/checks/clear_old_flags.sql</code>을 실행하면 돼요.</p>` : ""}
+    ${top.length ? `<h3>이번 주 상위 ${top.length}명 (참고용)</h3>
+    <table><thead><tr><th>계정</th><th>리그</th><th class="n">이번 주</th><th class="n">오늘</th><th class="n">찾은 단어</th></tr></thead><tbody>
+      ${top.map((row) => `<tr><td>${who(row)}${row.hidden ? ` <span class="note">· 숨김</span>` : ""}</td><td>${TIERS[row.tier] || ""}</td><td class="n">${num(row.week_points)}</td><td class="n">${num(row.points_today)}</td><td class="n">${num(row.words)}</td></tr>`).join("")}
+    </tbody></table>
+    <p class="note">선물, 주간 목표, 연속 도전, 대결은 새 단어를 찾지 않아도 점수가 되므로, 찾은 단어가 적어도 점수가 높을 수 있어요.</p>` : ""}
 
     <h2>리그 · 친구 · 운영</h2>
     <div class="grid">
       ${tile("이번 주 리그 참여", b.league.playing, TIERS.map((emoji, i) => `${emoji}${b.league.tiers[i] || 0}`).join(" "))}
-      ${tile("7일 대결", b.social.duels_7d, `친구 관계 ${b.social.friendships}`)}
-      ${tile("쓰인 초대장", b.social.invites_used, `남은 초대장 ${b.social.invites_left}`)}
+      ${tile("7일 대결", b.social.duels_7d, `친구 관계 ${num(b.social.friendships)}`)}
+      ${tile("쓰인 초대장", b.social.invites_used, `남은 초대장 ${num(b.social.invites_left)}`)}
       ${tile("진행 중 공지", b.notices)}
-      ${tile("앱 버전", b.version?.latest || "-", `최소 허용 ${b.version?.minimum || "-"}`)}
+      ${tile("앱에 알리는 최신 버전", latest || "-", behind ? `사이트는 ${site.web} · 알림 SQL을 아직 실행하지 않았어요` : `최소 허용 ${b.version?.minimum || "-"}`, Boolean(behind))}
+      ${site.web || site.file ? tile("이 사이트에 올라간 버전", site.web || "-", `설치 파일 ${site.file || "-"}`) : ""}
     </div>
+    ${notices.length ? `<table><thead><tr><th>진행 중 공지</th><th>대상</th><th>끝나는 때</th></tr></thead><tbody>
+      ${notices.map((n) => `<tr><td>${esc(n.title)}${n.kind === "urgent" ? ` <span class="count">긴급</span>` : ""}</td><td>${n.below ? `${esc(n.below)}보다 낮은 버전` : "모두"}</td><td>${n.ends_at ? esc(when(n.ends_at)) : "직접 끝낼 때까지"}</td></tr>`).join("")}
+    </tbody></table>` : ""}
+    ${notices.filter((n) => n.below).length > 1 ? `<p class="note">업데이트 공지가 여러 개 떠 있으면 오래된 앱에는 창이 여러 번 떠요. 새 알림 SQL(0.1.27부터)은 앞의 업데이트 공지를 함께 끝내요.</p>` : ""}
 
     <h2>바로 가기</h2>
     <div class="links">
       ${link("Anthropic 사용량", "https://console.anthropic.com/usage", "실제 AI 비용")}
       ${link("스토어 리뷰와 평점", `https://chromewebstore.google.com/detail/${STORE_ID}/reviews`)}
-      ${link("스토어 개발자 대시보드", "https://chrome.google.com/webstore/devconsole", "설치 수, 심사 상태")}
+      ${link("스토어 개발자 대시보드", "https://chrome.google.com/webstore/devconsole", "설치 수, 심사 상태, 스토어의 현재 버전")}
       ${link("Supabase SQL Editor", `https://supabase.com/dashboard/project/${PROJECT}/sql/new`, "공지, 버전 숫자, 랭킹 점검")}
       ${link("서버 함수 로그", `https://supabase.com/dashboard/project/${PROJECT}/functions/lookup/logs`)}
       ${link("로그인한 계정 목록", `https://supabase.com/dashboard/project/${PROJECT}/auth/users`)}
@@ -192,28 +244,46 @@ async function load() {
   if (!DEMO && !session) return gate();
   app.innerHTML = `<div class="center"><p class="note">불러오는 중…</p></div>`;
   try {
-    show(await board());
+    const [data, site] = await Promise.all([board(), published()]);
+    show(data, site);
   } catch (err) {
     gate({ signed_out: "", forbidden: "이 계정은 운영자로 등록되어 있지 않아요.", not_installed: "서버에 0013_admin_board.sql이 아직 실행되지 않았어요." }[err.message] ?? `불러오지 못했어요. (${err.message})`);
   }
 }
 
-// Made-up numbers, for looking at the layout: admin.html?demo
+// Made-up numbers, for looking at the layout: admin.html?demo (admin.html?demo&old shows what the
+// page does with the answer of the earlier server function).
 function sample() {
   const day = (n) => new Date(Date.now() - n * 86400000).toLocaleDateString("sv");
-  return {
+  const data = {
+    rev: 2,
     at: new Date().toISOString(),
     users: { signed_in: 58, members: 46, new_today: 2, new_7d: 9, plus: 5, active_today: 14, active_7d: 31, active_30d: 40 },
-    words: { dictionary: 1284, not_words: 37, saved: 5210, searched_today: 96 },
+    words: { dictionary: 4210, entries: 10817, not_words: 37, saved: 5210, searched_today: 96 },
     ai: { today: 23, d7: 188, d30: 640, total: 1321 },
     social: { friendships: 71, duels_7d: 44, invites_used: 39, invites_left: 191, coupons_used: 5 },
-    league: { playing: 27, tiers: { 0: 30, 1: 11, 2: 4, 3: 1 } },
-    rankings: { flagged: 1, hidden: 0,
-      flagged_rows: [{ email: "someone@example.com", nickname: "준서", tag: 733, reason: "points: +2600 in one day, limit 2000 (sent 9100)", at: new Date().toISOString(), hidden: false }],
-      odd_rows: [{ email: "other@example.com", nickname: "", tag: 482, week_points: 640, words: 9, per_word: 71.1 }] },
-    notices: 1, version: { latest: "0.1.2", minimum: "0.1.0" },
+    league: { playing: 27, tiers: { 0: 18, 1: 6, 2: 2, 3: 1 } },
+    rankings: { cap: 6000, flagged: 1, flagged_old: 7, hidden: 0,
+      flagged_rows: [{ email: "someone@example.com", nickname: "준서", tag: 733, reason: "points: +7400 in one day, limit 6000 (sent 21900)", at: new Date().toISOString(), hidden: false }],
+      near_cap_rows: [{ email: "other@example.com", nickname: "", tag: 482, points_today: 5120, week_points: 9300 }],
+      top_rows: [
+        { email: "other@example.com", nickname: "", tag: 482, tier: 2, week_points: 9300, points_today: 5120, words: 61, hidden: false },
+        { email: "harin@example.com", nickname: "하린", tag: 215, tier: 1, week_points: 3140, points_today: 420, words: 148, hidden: false },
+        { email: "minjun@example.com", nickname: "민준", tag: 901, tier: 0, week_points: 1880, points_today: 0, words: 9, hidden: false },
+      ] },
+    notices: 2,
+    notice_rows: [
+      { title: "새 버전이 나왔어요!", kind: "news", below: "0.1.27", starts_at: new Date().toISOString(), ends_at: new Date(Date.now() + 60 * 86400000).toISOString() },
+      { title: "주말 점검 안내", kind: "urgent", below: null, starts_at: new Date().toISOString(), ends_at: null },
+    ],
+    version: { latest: "0.1.24", minimum: "0.1.0" },
     daily: Array.from({ length: 14 }, (_, i) => ({ day: day(13 - i), joined: [0, 1, 0, 2, 1, 0, 0, 3, 1, 0, 1, 2, 0, 2][i], active: [8, 11, 9, 14, 12, 6, 5, 13, 15, 12, 16, 14, 7, 14][i], made: [12, 20, 15, 31, 22, 9, 6, 28, 35, 24, 30, 27, 11, 23][i] })),
   };
+  if (new URLSearchParams(location.search).has("old")) { // the shape the function of 0013 answers with
+    delete data.rev; delete data.notice_rows; delete data.words.entries;
+    data.rankings = { flagged: 9, hidden: 0, flagged_rows: data.rankings.flagged_rows, odd_rows: [] };
+  }
+  return data;
 }
 
 load();
