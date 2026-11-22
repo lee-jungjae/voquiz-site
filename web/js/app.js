@@ -1,27 +1,27 @@
-import { api, DEMO } from "./api.js?v=0.1.25-towa3f";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.25-towa3f";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.25-towa3f";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.25-towa3f";
-import { cleanEntry } from "./clean.js?v=0.1.25-towa3f";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.25-towa3f";
-import { CHARACTERS } from "./characters.js?v=0.1.25-towa3f";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.25-towa3f";
-import { film } from "./film.js?v=0.1.25-towa3f";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.25-towa3f";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.25-towa3f";
-import { initDesktop } from "./desktop.js?v=0.1.25-towa3f";
-import { BANDS, bandOf } from "./levels.js?v=0.1.25-towa3f";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.25-towa3f";
-import { initDuel } from "./duel.js?v=0.1.25-towa3f";
-import { initFriends } from "./friends.js?v=0.1.25-towa3f";
-import { MOTTOS } from "./mottos.js?v=0.1.25-towa3f";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.25-towa3f";
-import { SIGNATURES } from "./signatures.js?v=0.1.25-towa3f";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.25-towa3f";
-import { tuning, setTuning } from "./tuning.js?v=0.1.25-towa3f";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.25-towa3f";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.25-towa3f";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.25-towa3f";
+import { api, DEMO } from "./api.js?v=0.1.25-tosbci";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.25-tosbci";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.25-tosbci";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.25-tosbci";
+import { cleanEntry } from "./clean.js?v=0.1.25-tosbci";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.25-tosbci";
+import { CHARACTERS } from "./characters.js?v=0.1.25-tosbci";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.25-tosbci";
+import { film } from "./film.js?v=0.1.25-tosbci";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.25-tosbci";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.25-tosbci";
+import { initDesktop } from "./desktop.js?v=0.1.25-tosbci";
+import { BANDS, bandOf } from "./levels.js?v=0.1.25-tosbci";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.25-tosbci";
+import { initDuel } from "./duel.js?v=0.1.25-tosbci";
+import { initFriends } from "./friends.js?v=0.1.25-tosbci";
+import { MOTTOS } from "./mottos.js?v=0.1.25-tosbci";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.25-tosbci";
+import { SIGNATURES } from "./signatures.js?v=0.1.25-tosbci";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.25-tosbci";
+import { tuning, setTuning } from "./tuning.js?v=0.1.25-tosbci";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.25-tosbci";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.25-tosbci";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.25-tosbci";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -1220,6 +1220,9 @@ function useRows(c, patterns) {
 // either column can be read alone from top to bottom. What is being explained stands on both sides
 // as it is: the sentence the word is used in, a pattern, a similar word, the syllables of the Korean
 // word. The side of the other language adds what each of them means.
+const DUO_ALL = "wb_dk_senses"; // "open": the student asked for every meaning opened
+const duoOpen = new Map(); // word -> the places of its meanings that are open
+let duoFresh = ""; // "word|place" of the meaning opened by the last press: only that one comes in with a move
 function duoSides() {
   const far = getLang() === "en" ? "ko" : "en";
   return [{ lang: koFirst() ? "ko" : "en", say: (key) => t(key) }, { lang: far, say: (key) => tIn(far, key) }];
@@ -1386,12 +1389,49 @@ const manySenses = (c) => Array.isArray(c.senses) && c.senses.filter((sense) => 
 const posIn = (label) => { const parts = String(label || "").split("·").map((part) => part.trim()); return (koFirst() ? parts[1] : parts[0]) || parts[0] || ""; };
 function sensesList(c, key) {
   const senses = c.senses.filter((sense) => sense?.definition_ko || sense?.definition_en);
-  const wide = WIDE(); // every meaning open, and its two languages side by side (duoSense)
-  const open = wide ? new Set(senses.keys()) : (state.openSense[key] ??= new Set([0]));
+  const wide = WIDE(); // the two languages of each meaning side by side (duoSense)
+  const open = wide ? new Set() : (state.openSense[key] ??= new Set([0]));
   const pair = (ko, en) => (koFirst() ? [ko, en] : [en, ko]).filter(Boolean);
   // "동사 2 · 명사 1": what kinds of word this is, at a glance.
   const kinds = new Map();
   for (const sense of senses) kinds.set(posIn(sense.part_of_speech), (kinds.get(posIn(sense.part_of_speech)) || 0) + 1);
+  // A wide window: every meaning shows its word and what it means, and no more, so that all the
+  // meanings are seen at once. A press on a meaning opens the rest of it (its example, how it is
+  // used, where it comes from, similar words). "모두 펼치기" is remembered for the words after this one.
+  if (wide) {
+    if (!duoOpen.has(key)) duoOpen.set(key, new Set(localStorage.getItem(DUO_ALL) === "open" ? senses.keys() : []));
+    const shown = duoOpen.get(key);
+    const parts = senses.map((sense) => {
+      const rows = duoSense(c, sense).filter(Boolean);
+      const top = (row) => row.classList.contains("d-head") || row.classList.contains("d-def");
+      return { top: rows.filter(top), more: rows.filter((row) => !top(row)) };
+    });
+    const allOpen = parts.every((part, i) => !part.more.length || shown.has(i));
+    const setAll = (on) => {
+      on ? localStorage.setItem(DUO_ALL, "open") : localStorage.removeItem(DUO_ALL);
+      duoOpen.clear();
+      duoOpen.set(key, new Set(on ? senses.keys() : []));
+      render();
+    };
+    return h("div", { class: "senses-box" },
+      h("div", { class: "senses-sum" },
+        h("b", null, t("뜻 {n}개", { n: senses.length })),
+        [...kinds].filter(([kind]) => kind).map(([kind, n]) => h("span", { class: "sense-pos" }, n > 1 ? `${kind} ${n}` : kind)),
+        parts.some((part) => part.more.length > 0) && h("button", { class: "link senses-all duo-all", onclick: () => setAll(!allOpen) }, allOpen ? t("모두 접기") : t("모두 펼치기"))),
+      h("ol", { class: "senses" }, parts.map(({ top, more }, i) => {
+        const isOpen = more.length > 0 && shown.has(i);
+        const fresh = isOpen && duoFresh === `${key}|${i}`;
+        if (fresh) duoFresh = "";
+        const toggle = () => { shown.has(i) ? shown.delete(i) : shown.add(i); duoFresh = shown.has(i) ? `${key}|${i}` : ""; render(); };
+        // The word and its meaning are the handle too (not while text in them is being selected).
+        if (more.length) for (const row of top) { row.classList.add("duo-tap"); row.onclick = () => { if (!String(getSelection())) toggle(); }; }
+        return h("li", { class: `duo-li${isOpen ? " open" : ""}${fresh ? " fresh" : ""}` },
+          h("span", { class: "sense-no", "aria-hidden": "true" }, String(i + 1)),
+          h("div", { class: "duo-rows" }, top, isOpen && more),
+          more.length > 0 && h("button", { class: "duo-toggle", "aria-expanded": String(isOpen), title: isOpen ? t("접기") : t("펼치기"), "aria-label": isOpen ? t("접기") : t("펼치기"), onclick: toggle },
+            h("i", { "aria-hidden": "true" }, "⌄")));
+      })));
+  }
   return h("div", { class: "senses-box" },
     h("div", { class: "senses-sum" },
       h("b", null, t("뜻 {n}개", { n: senses.length })),
@@ -1399,7 +1439,6 @@ function sensesList(c, key) {
       h("button", { class: "link senses-all", onclick: () => { state.openSense[key] = open.size === senses.length ? new Set() : new Set(senses.keys()); render(); } },
         open.size === senses.length ? t("모두 접기") : t("모두 펼치기"))),
     h("ol", { class: "senses" }, senses.map((sense, i) => {
-      if (wide) return h("li", { class: "open duo-li" }, h("span", { class: "sense-no", "aria-hidden": "true" }, String(i + 1)), h("div", { class: "duo-rows" }, duoSense(c, sense)));
       const [first, second] = pair(sense.definition_ko, sense.definition_en);
       const shown = open.has(i);
       return h("li", { class: shown ? "open" : "" },

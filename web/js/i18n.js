@@ -854,6 +854,7 @@ const T = {
   "처음이신가요?": ["New here?", "第一次来？"],
   "초대 코드로 가입하기": ["Join with a code", "用邀请码加入"],
   "친구에게 받은 초대 코드를 넣으면 Google 로그인 뒤에 바로 가입돼요.": ["Enter the invite code a friend gave you. After you sign in with Google, you join right away.", "填好友给的邀请码，用 Google 登录后就能立刻加入。"],
+  "펼치기": ["Show more", "展开"],
   "알아 두기": ["Good to know", "小贴士"],
   "이렇게 써요": ["How to use it", "这样用"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],
