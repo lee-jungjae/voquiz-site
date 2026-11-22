@@ -4,8 +4,8 @@
 //
 // This file holds the rules and the screens. It gets what it needs from app.js through `c`
 // (the element builder, translations, the shared state, points, the character drawings).
-import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow36j";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow36j";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow3we";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow3we";
 
 export const DUEL_LENGTHS = [60, 100, 180]; // seconds; the challenger chooses
 export const DUEL_CHARGES = 3; // challenges a student can hold
@@ -286,24 +286,26 @@ export function initDuel(c) {
     return {
       fee: Math.min(FEE, state.user.points || 0), win: WIN, draw: DRAW,
       sendsLeft: sendsLeft(), sendsAll: DUEL_CHARGES, wait: sendsLeft() === 0 ? waitClock() : null, pick: openPicker, steps: STEPS(),
+      // Past duels, for the list of every game played: when it ended, and its row (both characters, glad or sad).
+      records: done.map((d) => {
+        const r = how(d);
+        return {
+          at: d.finished_at || d.created_at,
+          row: (when) => h("button", { class: `play-row duel ${r}`, title: t("결과 다시 보기"), onclick: () => openDetail(d) },
+            h("span", { class: "play-who" },
+              face(d.my_character || c.myShop().character, r === "lose" ? "comfort" : "cheer"),
+              h("span", { class: "them" }, face(d.their_character || "bubble", r === "win" ? "comfort" : "cheer"))),
+            h("span", { class: "play-what" }, h("b", null, t("대결"), " · ", who(d.other)), h("small", null, `${when} · ${lengthLabel(d.seconds || 180)}`)),
+            h("b", { class: "play-score" }, `${d.my_score} : ${d.their_score}`),
+            h("span", { class: `mark ${r}` }, word[r])),
+        };
+      }),
       lists: [
         waiting.length > 0 && h("section", { class: "duel-list" },
           h("h3", null, t("받은 도전"), h("small", null, String(waiting.length))),
           waiting.map((d) => h("div", { class: "duel-row hot" },
             h("span", { class: "who" }, who(d.other), h("small", null, t("{n}개를 넘으면 승리", { n: d.their_score }))),
             h("button", { class: "mini buy", onclick: () => start(d) }, t("받기"))))),
-        done.length > 0 && h("section", { class: "duel-list records" },
-          h("h3", null, t("최근 결과")),
-          done.map((d) => {
-            const r = how(d);
-            return h("button", { class: `duel-record ${r}`, title: t("결과 다시 보기"), onclick: () => openDetail(d) },
-              h("span", { class: "rec-side me" }, face(d.my_character || c.myShop().character, r === "lose" ? "comfort" : "cheer")),
-              h("b", { class: "rec-score" }, h("i", null, String(d.my_score)), h("em", null, ":"), h("i", null, String(d.their_score))),
-              h("span", { class: "rec-side them" }, face(d.their_character || "bubble", r === "win" ? "comfort" : "cheer")),
-              h("span", { class: "who" }, who(d.other), h("small", null, lengthLabel(d.seconds || 180))),
-              h("span", { class: `mark ${r}` }, word[r]),
-              h("span", { class: "chev", "aria-hidden": "true" }, "›"));
-          })),
         sent.length > 0 && h("section", { class: "duel-list" },
           h("h3", null, t("답을 기다리는 중")),
           sent.map((d) => h("div", { class: "duel-row" },

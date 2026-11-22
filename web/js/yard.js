@@ -10,7 +10,7 @@
 //  - leaving: when the window becomes a phone's, everybody runs to the dictionary tab (leaveYard).
 // The app only says who is there and what a tap does; everything that moves is in here.
 // The page needs an element with the id "yard" (the web version's index.html has one).
-import { portrait, giftArt } from "./mascot.js?v=0.1.23-tow36j";
+import { portrait, giftArt } from "./mascot.js?v=0.1.23-tow3we";
 
 const still = () => Boolean(globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -108,6 +108,18 @@ function nudge() {
   nudgeTimer = setTimeout(nudge, opts.eager ? 15000 : 40000);
 }
 
+// What can be pressed right under the pointer, behind a character (nothing: the character itself is meant).
+const PRESSABLE = "button, a, input, select, textarea, label, summary, [role=button], [role=tab], [role=option]";
+function under(e) {
+  if (e.clientX == null || e.target.closest?.(".yard-say")) return null;
+  for (const el of document.elementsFromPoint(e.clientX, e.clientY)) {
+    if (root.contains(el)) continue;
+    const control = el.closest?.(PRESSABLE);
+    if (control && !control.disabled) return control;
+    if (el.closest?.("main, aside, header")) return null; // plain content: nothing to press there
+  }
+  return null;
+}
 function body(id) {
   const flip = document.createElement("span"); // turns to face the way it walks
   const bob = document.createElement("span"); // bobs while walking, jumps on a hop
@@ -123,8 +135,14 @@ function add(id) {
   el.className = "walker";
   el.append(body(id));
   const w = { el, x: 0, timer: 0, away: false };
-  el.addEventListener("click", () => {
+  // Standing on something that can be pressed: the press goes to that, not to the character, and
+  // the character fades while the pointer is on it so that what is under it can be seen.
+  el.addEventListener("pointermove", (e) => el.classList.toggle("thin", Boolean(under(e))));
+  el.addEventListener("pointerleave", () => el.classList.remove("thin"));
+  el.addEventListener("click", (e) => {
     if (w.away) return;
+    const below = under(e);
+    if (below) { below.focus?.(); below.click(); return; }
     hop(w);
     const said = opts.onTap?.(id, id === opts.lead);
     if (said && typeof said === "object") say(w, said.text, said.act); else say(w, said || "");

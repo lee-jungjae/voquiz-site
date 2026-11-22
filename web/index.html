@@ -10,16 +10,16 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon48.png">
   <link rel="apple-touch-icon" href="icons/icon128.png">
-  <link rel="stylesheet" href="app.css?v=0.1.23-tow36j">
+  <link rel="stylesheet" href="app.css?v=0.1.23-tow3we">
 </head>
 <body>
   <div id="app"></div>
   <div id="yard" hidden></div>
   <script type="module">
     // Back from signing in with Google? The session is taken out of the address first.
-    import { finishSignIn } from "./js/supabase.js?v=0.1.23-tow36j";
+    import { finishSignIn } from "./js/supabase.js?v=0.1.23-tow3we";
     await finishSignIn();
-    await import("./js/app.js?v=0.1.23-tow36j");
+    await import("./js/app.js?v=0.1.23-tow3we");
   </script>
 </body>
 </html>

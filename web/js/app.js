@@ -1,27 +1,27 @@
-import { api, DEMO } from "./api.js?v=0.1.23-tow36j";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tow36j";
-import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tow36j";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tow36j";
-import { cleanEntry } from "./clean.js?v=0.1.23-tow36j";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tow36j";
-import { CHARACTERS } from "./characters.js?v=0.1.23-tow36j";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tow36j";
-import { film } from "./film.js?v=0.1.23-tow36j";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.23-tow36j";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.23-tow36j";
-import { initDesktop } from "./desktop.js?v=0.1.23-tow36j";
-import { BANDS, bandOf } from "./levels.js?v=0.1.23-tow36j";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tow36j";
-import { initDuel } from "./duel.js?v=0.1.23-tow36j";
-import { initFriends } from "./friends.js?v=0.1.23-tow36j";
-import { MOTTOS } from "./mottos.js?v=0.1.23-tow36j";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tow36j";
-import { SIGNATURES } from "./signatures.js?v=0.1.23-tow36j";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tow36j";
-import { tuning, setTuning } from "./tuning.js?v=0.1.23-tow36j";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow36j";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow36j";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tow36j";
+import { api, DEMO } from "./api.js?v=0.1.23-tow3we";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tow3we";
+import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tow3we";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tow3we";
+import { cleanEntry } from "./clean.js?v=0.1.23-tow3we";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tow3we";
+import { CHARACTERS } from "./characters.js?v=0.1.23-tow3we";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tow3we";
+import { film } from "./film.js?v=0.1.23-tow3we";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.23-tow3we";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.23-tow3we";
+import { initDesktop } from "./desktop.js?v=0.1.23-tow3we";
+import { BANDS, bandOf } from "./levels.js?v=0.1.23-tow3we";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tow3we";
+import { initDuel } from "./duel.js?v=0.1.23-tow3we";
+import { initFriends } from "./friends.js?v=0.1.23-tow3we";
+import { MOTTOS } from "./mottos.js?v=0.1.23-tow3we";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tow3we";
+import { SIGNATURES } from "./signatures.js?v=0.1.23-tow3we";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tow3we";
+import { tuning, setTuning } from "./tuning.js?v=0.1.23-tow3we";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow3we";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow3we";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tow3we";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -619,6 +619,7 @@ function submitAnswer(typed, picked) {
   state.focus = "next";
   if (correct) { sfx.right(myShop().character); cheerYard(); } else sfx.wrong();
   if (WIDE()) gameFx(correct, quizRun(quiz), perfect);
+  if (last) recordPlay({ k: "q", r: quiz.results.filter((r) => r.correct).length, n: quiz.results.length, p: quiz.earned - quiz.fee });
   // A word that has just been learned gets the celebration to itself (the points still arrive).
   const patch = applyAnswer(word, correct, !picked);
   const learned = Boolean(patch.mastered_at);
@@ -689,10 +690,17 @@ function award(points, label, big, { league = true } = {}) {
   countUp(points);
   saveSoon();
 }
+// The games played, newest first (the last 20), kept with the account: a word-list quiz is
+// { k: "q", at, r: right answers, n: questions, p: points won less points used }, a streak run is
+// { k: "s", at, n: answers in a row, p: points won, rec: 1 for a new record }. Duels have their own record on the server.
+function recordPlay(play) {
+  state.user.plays = [{ ...play, at: new Date().toISOString() }, ...(Array.isArray(state.user.plays) ? state.user.plays : [])].slice(0, 20);
+  saveSoon();
+}
 function saveSoon() {
   clearTimeout(saveTimer); // several changes in a row become one save
   saveTimer = setTimeout(() => {
-    api.saveProfile({ points: state.user.points, search: state.user.search, shop: state.user.shop, challenge: state.user.challenge, weekly: state.user.weekly }).catch(console.error);
+    api.saveProfile({ points: state.user.points, search: state.user.search, shop: state.user.shop, challenge: state.user.challenge, weekly: state.user.weekly, plays: state.user.plays || [] }).catch(console.error);
     publishRank();
   }, 1500);
 }
@@ -2216,6 +2224,7 @@ function finishChallenge(clearedAll) {
   c.phase = "over";
   c.clearedAll = clearedAll;
   c.record = c.streak > bestStreak();
+  recordPlay({ k: "s", n: c.streak, p: c.earned, rec: c.record ? 1 : 0 });
   if (c.record) {
     state.user.challenge = { ...state.user.challenge, best: c.streak };
     celebrate(0, t("새 최고 기록!"), String(c.streak));
@@ -2738,7 +2747,9 @@ function quizScope() {
   const note = cards.length === 0 ? (scope.type === "review" ? t("지금은 틀린 단어가 없어요!") : scope.type === "learned" && inRange === 0 ? t("익힌 지 {d}일이 지난 단어가 아직 없어요.", { d: RETEST_DAYS }) : t("이 범위에는 단어가 없어요. 범위를 바꿔 보세요."))
     : inRange > cards.length ? t("범위에 {n}개가 있어요. 그중 {m}개를 골라서 내요.", { n: inRange, m: cards.length })
     : review > 0 && scope.type !== "review" ? t("지난번에 틀린 복습 단어 {n}개 포함", { n: review }) : "";
-  return { scope, fields, picker, custom: fields.slice(1), cards, inRange, review, note };
+  // The same in short, for the desktop card: nothing to ask (a line), or what the count holds (tags).
+  const empty = cards.length === 0 ? note : "";
+  return { scope, fields, picker, custom: fields.slice(1), cards, inRange, review: scope.type !== "review" ? review : 0, note, empty };
 }
 const QUIZ_STEPS = () => [
   t("뜻을 보고 단어를 쓰거나 골라요."),
@@ -2949,6 +2960,31 @@ function howSheet(title, steps, extra) {
       h("button", { class: "btn wide", onclick: close }, t("닫기"))));
   document.body.append(el);
 }
+// Under the cards: every game played, newest first, whichever game it was. A word-list quiz and a
+// streak run show the student's character (glad or sad) and the result; a duel shows both players.
+function playsList(duels) {
+  const me = myShop().character;
+  const when = (at) => `${dayLabel(dayOf(at))} ${new Date(at).toLocaleTimeString(locale(), { hour: "numeric", minute: "2-digit" })}`;
+  const face = (mood) => h("span", { class: "face", "aria-hidden": "true" }, reaction(me, mood));
+  const signed = (n) => `${n > 0 ? "+" : ""}${n}`;
+  const mine = (Array.isArray(state.user.plays) ? state.user.plays : []).map((p) => ({
+    at: p.at,
+    el: p.k === "q"
+      ? h("div", { class: "play-row" },
+          h("span", { class: "play-who" }, face(p.n && p.r / p.n >= 0.6 ? "cheer" : "comfort")),
+          h("span", { class: "play-what" }, h("b", null, t("단어장 퀴즈")), h("small", null, when(p.at))),
+          h("b", { class: "play-score" }, `${p.r} / ${p.n}`),
+          h("span", { class: `play-points${p.p > 0 ? " up" : p.p < 0 ? " down" : ""}` }, coin(), signed(p.p)))
+      : h("div", { class: "play-row" },
+          h("span", { class: "play-who" }, face(p.rec || p.n >= 10 ? "cheer" : "comfort")),
+          h("span", { class: "play-what" }, h("b", null, t("연속 도전"), p.rec ? h("em", { class: "play-new" }, t("새 기록!")) : null), h("small", null, when(p.at))),
+          h("b", { class: "play-score" }, t("{n}연속", { n: p.n })),
+          h("span", { class: `play-points${p.p > 0 ? " up" : ""}` }, coin(), signed(p.p))),
+  }));
+  const rows = [...mine, ...duels.map((d) => ({ at: d.at, el: d.row(when(d.at)) }))].filter((r) => r.at).sort((a, b) => new Date(b.at) - new Date(a.at)).slice(0, 10);
+  if (!rows.length) return null;
+  return h("section", { class: "plays" }, h("h3", null, t("최근 결과")), rows.map((r) => r.el));
+}
 // The characters that host the three games on the quiz page: others the student owns first (never
 // the one that lives in the yard), then any others.
 function quizHosts() {
@@ -2983,25 +3019,27 @@ function quizHub() {
       game("review", [portrait(host1), h("i", { class: "qz-tile a" }, "A"), h("i", { class: "qz-tile b" }, "가")],
         t("단어장 퀴즈"), t("내가 찾은 단어로 풀어요."),
         slot(t("시험 범위"), quiz.picker()),
-        [guideStat(t("문제 수"), t("{n}개", { n: quiz.cards.length })), guideStat(t("쓰는 포인트"), [coin(), `-${quizFee(quiz.cards.length)}`], "use"), guideStat(t("다 맞히면 최대"), [coin(), `+${quizMax(quiz.cards.length)}`], "gain")],
-        [quiz.custom, quiz.note && h("p", { class: "qz-note" }, quiz.note)],
+        // How many are asked, and (when the range holds more than a quiz asks) out of how many.
+        [guideStat(t("문제 수"), t("{n}개", { n: quiz.inRange > quiz.cards.length ? `${quiz.cards.length} / ${quiz.inRange}` : quiz.cards.length })), guideStat(t("쓰는 포인트"), [coin(), `-${quizFee(quiz.cards.length)}`], "use"), guideStat(t("다 맞히면 최대"), [coin(), `+${quizMax(quiz.cards.length)}`], "gain")],
+        [quiz.custom, quiz.empty ? h("p", { class: "qz-note" }, quiz.empty) : quiz.review > 0 && h("p", { class: "qz-tags" }, h("span", { class: "qz-tag" }, "↻ ", t("복습"), " ", h("b", null, String(quiz.review))))],
         h("button", { class: "btn", disabled: quiz.cards.length === 0, onclick: startQuiz }, t("퀴즈 시작")),
         QUIZ_STEPS()),
       game("streak", [portrait(host2), h("i", { class: "qz-step s1" }), h("i", { class: "qz-step s2" }), h("i", { class: "qz-step s3" })],
         t("연속 도전"), t("틀릴 때까지 이어져요."),
         slot(t("오늘 남은 도전"), pips(triesLeft(), streakRules().tries)),
         [guideStat(t("내 최고 기록"), t("{n}연속", { n: bestStreak() })), guideStat(t("정답 점수"), [coin(), `+${points[0]}~${points[points.length - 1]}`], "gain"), guideStat(t("단계 보너스"), [coin(), `+${stageBonus(1)}~${stageBonus(STAGES.length)}`], "gain")],
-        null,
-        h("button", { class: "btn", disabled: triesLeft() === 0, onclick: startChallenge }, triesLeft() ? t("도전 시작") : t("오늘 도전은 끝! 내일 또 만나요")),
+        triesLeft() === 0 && h("p", { class: "qz-note" }, t("오늘 도전은 끝! 내일 또 만나요")),
+        h("button", { class: "btn", disabled: triesLeft() === 0, onclick: startChallenge }, t("도전 시작")),
         challengeSteps(grade), stageLadder()),
       game("duel", [portrait(host3), h("i", { class: "qz-vs" }, "VS"), h("span", { class: "qz-rival" }, portrait(host4))],
         t("대결"), t("친구와 같은 문제로 겨뤄요."),
         versus.setup ? h("p", { class: "qz-note" }, versus.setup) : slot(t("보낼 수 있는 도전"), pips(versus.sendsLeft, versus.sendsAll)),
         versus.setup ? null : [guideStat(t("쓰는 포인트"), [coin(), `-${versus.fee}`], "use"), guideStat(t("이기면"), [coin(), `+${versus.win}`], "gain"), guideStat(t("비기면"), [coin(), `+${versus.draw}`], "gain")],
         versus.wait && h("p", { class: "qz-note" }, versus.wait),
-        h("button", { class: "btn", disabled: Boolean(versus.setup) || versus.sendsLeft === 0, onclick: versus.pick }, versus.setup || versus.sendsLeft ? t("상대 고르기") : t("충전을 기다리는 중")),
+        h("button", { class: "btn", disabled: Boolean(versus.setup) || versus.sendsLeft === 0, onclick: versus.pick }, t("상대 고르기")),
         versus.steps)),
     versus.lists,
+    playsList(versus.records || []),
   ];
 }
 // A game is being played (not its start screen, not its result): the desktop frame shows nothing else.
