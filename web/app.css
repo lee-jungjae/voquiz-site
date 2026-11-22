@@ -2684,3 +2684,26 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   .dk:not(.folded) .qz-text { min-height: 0; }
   .dk:not(.folded) .qz-game > .btn { margin-top: 18px; }
 }
+/* ----- points between friends: a heart that says +10 (every layout) ----- */
+.gift-heart { flex: none; display: inline-flex; align-items: center; gap: 4px; padding: 5px 11px 5px 9px; border-radius: 999px; background: #ffe3ec; color: #d6336c; font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; transition: transform .15s, background .15s; }
+.gift-heart i { font-style: normal; font-size: 14px; line-height: 1; animation: gift-beat 1.6s ease-in-out infinite; }
+.gift-heart:not(:disabled):hover { background: #ffd0de; transform: translateY(-1px); }
+.gift-heart:not(:disabled):active { transform: scale(.94); }
+.gift-heart.sent, .gift-heart:disabled { background: var(--surface); color: var(--muted); font-weight: 600; cursor: default; }
+.gift-heart.sent i, .gift-heart:disabled i { animation: none; opacity: .6; }
+@keyframes gift-beat { 0%, 100% { transform: scale(1); } 12% { transform: scale(1.22); } 24% { transform: scale(1); } 36% { transform: scale(1.14); } 48% { transform: scale(1); } }
+.gift-mark { flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #ffe3ec; color: #d6336c; font-size: 14px; }
+.gift-points { flex: none; color: #d6336c; font-variant-numeric: tabular-nums; }
+.duel-row.hot.gift { border-color: #f3a6bd; background: #fff5f8; }
+.gift-collect { margin: 8px 0 0; }
+.gift-collect .btn { background: #d6336c; }
+.gift-hint { margin: -2px 0 6px; }
+.duel-banner.gift { background: #d6336c; box-shadow: 0 6px 18px rgba(214, 51, 108, .3); }
+.duel-banner.gift .duel-vs { background: #fff; color: #d6336c; font-size: 16px; }
+.duel-banner.gift .go { color: #d6336c; }
+@media (prefers-reduced-motion: reduce) { .gift-heart i { animation: none; } }
+@media (min-width: 860px) {
+  .dk .duel-banner.gift { background: var(--bg); box-shadow: inset 0 0 0 1px #f3a6bd; }
+  .dk .duel-banner.gift .duel-vs { background: #ffe3ec; color: #d6336c; }
+  .dk .duel-banner.gift .go { background: #d6336c; color: #fff; }
+}

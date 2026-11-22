@@ -1,6 +1,6 @@
 // Minimal Supabase client over fetch (no build step, no bundled library).
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js?v=0.1.23-tow3we";
-import { parsePartial } from "./partial.js?v=0.1.23-tow3we";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js?v=0.1.24-tow4d2";
+import { parsePartial } from "./partial.js?v=0.1.24-tow4d2";
 
 const SESSION_KEY = "wb_session";
 let session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
@@ -318,6 +318,11 @@ export const listFriends = () => rpc("my_friends");
 export const requestFriend = (email) => rpc("request_friend", { p_email: email }); // -> "pending" | "accepted"
 export const answerFriend = (id, accept) => rpc("answer_friend", { p_id: id, p_accept: accept });
 export const removeFriend = (id) => rpc("remove_friend", { p_id: id });
+// ---------- points given between friends (supabase/migrations/0020_point_gifts.sql) ----------
+// day: the student's own date (YYYY-MM-DD). -> { sent: [friend id], waiting: [{ id, points, at, from }], got: [{ points, at, from }] }
+export const pointGifts = (day) => rpc("my_point_gifts", { p_day: day });
+export const sendPointGift = (friend, day) => rpc("send_point_gift", { p_friend: friend, p_day: day });
+export const claimPointGifts = () => rpc("claim_point_gifts"); // -> { points, gifts: [{ points, from }] }
 export const myInvites = () => rpc("my_invites");
 export const useInvite = (code) => rpc("use_invite", { p_code: code });
 

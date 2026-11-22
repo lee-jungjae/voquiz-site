@@ -1,8 +1,8 @@
 // Demo backend: no server, no Claude. Everything stays in this browser's localStorage.
 // Used automatically while js/config.js is empty, so the UI can be tried right away.
-import { parsePartial } from "./partial.js?v=0.1.23-tow3we";
-import { bandOf } from "./levels.js?v=0.1.23-tow3we";
-import { FULL } from "./demo_levels.js?v=0.1.23-tow3we";
+import { parsePartial } from "./partial.js?v=0.1.24-tow4d2";
+import { bandOf } from "./levels.js?v=0.1.24-tow4d2";
+import { FULL } from "./demo_levels.js?v=0.1.24-tow4d2";
 
 const USER_KEY = "wb_demo_user";
 const WORDS_KEY = "wb_demo_words";
@@ -441,6 +441,35 @@ function friendList() {
   return list;
 }
 export async function listFriends() { return friendList(); }
+// Points given between friends: one gift waits to begin with; giving is remembered for the day.
+const GIFTS_KEY = "wb_demo_gifts";
+function giftBox() {
+  let box = read(GIFTS_KEY, null);
+  if (!box) {
+    const from = ({ id, nickname, tag }) => ({ id, nickname, tag });
+    box = { sent: {}, waiting: [{ id: "g-first", points: 10, at: new Date().toISOString(), from: from(rivalOf("r1")) }], got: [] };
+    write(GIFTS_KEY, box);
+  }
+  return box;
+}
+export async function pointGifts(day) {
+  const box = giftBox();
+  return { sent: Object.keys(box.sent).filter((id) => box.sent[id] === day), waiting: box.waiting, got: box.got };
+}
+export async function sendPointGift(friend, day) {
+  const box = giftBox();
+  if (box.sent[friend] === day) fail("gift_already");
+  box.sent[friend] = day;
+  write(GIFTS_KEY, box);
+}
+export async function claimPointGifts() {
+  const box = giftBox();
+  const gifts = box.waiting;
+  box.got = [...gifts.map((g) => ({ points: g.points, at: new Date().toISOString(), from: g.from })), ...box.got].slice(0, 20);
+  box.waiting = [];
+  write(GIFTS_KEY, box);
+  return { points: gifts.reduce((sum, g) => sum + g.points, 0), gifts };
+}
 export async function requestFriend(email) {
   if (!/@/.test(email)) fail("friend_nobody");
   const list = friendList();

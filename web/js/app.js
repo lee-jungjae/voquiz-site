@@ -1,27 +1,27 @@
-import { api, DEMO } from "./api.js?v=0.1.23-tow3we";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tow3we";
-import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tow3we";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tow3we";
-import { cleanEntry } from "./clean.js?v=0.1.23-tow3we";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tow3we";
-import { CHARACTERS } from "./characters.js?v=0.1.23-tow3we";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tow3we";
-import { film } from "./film.js?v=0.1.23-tow3we";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.23-tow3we";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.23-tow3we";
-import { initDesktop } from "./desktop.js?v=0.1.23-tow3we";
-import { BANDS, bandOf } from "./levels.js?v=0.1.23-tow3we";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tow3we";
-import { initDuel } from "./duel.js?v=0.1.23-tow3we";
-import { initFriends } from "./friends.js?v=0.1.23-tow3we";
-import { MOTTOS } from "./mottos.js?v=0.1.23-tow3we";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tow3we";
-import { SIGNATURES } from "./signatures.js?v=0.1.23-tow3we";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tow3we";
-import { tuning, setTuning } from "./tuning.js?v=0.1.23-tow3we";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow3we";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow3we";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tow3we";
+import { api, DEMO } from "./api.js?v=0.1.24-tow4d2";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.24-tow4d2";
+import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.24-tow4d2";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.24-tow4d2";
+import { cleanEntry } from "./clean.js?v=0.1.24-tow4d2";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.24-tow4d2";
+import { CHARACTERS } from "./characters.js?v=0.1.24-tow4d2";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.24-tow4d2";
+import { film } from "./film.js?v=0.1.24-tow4d2";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.24-tow4d2";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.24-tow4d2";
+import { initDesktop } from "./desktop.js?v=0.1.24-tow4d2";
+import { BANDS, bandOf } from "./levels.js?v=0.1.24-tow4d2";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.24-tow4d2";
+import { initDuel } from "./duel.js?v=0.1.24-tow4d2";
+import { initFriends } from "./friends.js?v=0.1.24-tow4d2";
+import { MOTTOS } from "./mottos.js?v=0.1.24-tow4d2";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.24-tow4d2";
+import { SIGNATURES } from "./signatures.js?v=0.1.24-tow4d2";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.24-tow4d2";
+import { tuning, setTuning } from "./tuning.js?v=0.1.24-tow4d2";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.24-tow4d2";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.24-tow4d2";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.24-tow4d2";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -1712,7 +1712,8 @@ function syncYard() {
     gift() && { waits: true, text: t("오늘의 선물 받을래?"), act: () => (giftWaiting() ? openDailyGift() : takeSantaGift()) },
     claimable().length > 0 && state.tab !== "shop" && { waits: true, text: t("받을 수 있는 캐릭터가 있어!"), act: openShop },
     duel().badge() > 0 && state.tab !== "quiz" && { waits: true, text: t("대결 신청이 왔어!"), act: to("quiz") },
-    friends().badge() > 0 && state.tab !== "friends" && { waits: true, text: t("친구 신청이 왔어!"), act: () => openPage("friends") },
+    friends().gifts() > 0 && { waits: true, text: t("친구가 선물을 보냈어!"), act: () => friends().collect() },
+    friends().badge() > friends().gifts() && state.tab !== "friends" && { waits: true, text: t("친구 신청이 왔어!"), act: () => openPage("friends") },
     state.suggest && !limitReached() && webHome() && { text: t("오늘의 단어 {w}, 찾아볼까?", { w: state.suggest }), act: () => search(state.suggest) },
     state.words.length > 0 && state.tab !== "quiz" && { text: t("퀴즈 한 판 어때?"), act: to("quiz") },
     state.tab !== "rank" && { text: t("이번 주 순위 볼래?"), act: to("rank") },
@@ -2942,7 +2943,8 @@ function duel() {
 let friendsModule = null;
 function friends() {
   return (friendsModule ||= initFriends({
-    h, t, state, api, render, fail, nameOf, toastText, openPage, storeUrl, logoIcon, displayName,
+    h, t, state, api, render, fail, nameOf, toastText, openPage, storeUrl, logoIcon, displayName, award, locale,
+    today: () => dayOf(new Date()),
     startDuel: (other) => duel().start({ other }),
   }));
 }
