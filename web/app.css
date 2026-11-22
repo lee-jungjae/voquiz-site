@@ -2948,3 +2948,9 @@ button.points .dot.new { min-width: 0; width: 9px; height: 9px; padding: 0; font
 .duo-li:not(.open):has(.duo-tap:hover, .duo-toggle:hover) .duo-toggle i { animation: duo-nod .7s ease-in-out infinite; }
 @keyframes duo-nod { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
 @media (prefers-reduced-motion: reduce) { .duo-li::before { transition: none; transform: none; } .duo-li .duo-toggle i { animation: none !important; } }
+/* The arrow of that button is drawn, not a letter: a letter "⌄" hangs below the line of the word beside it. */
+.duo-toggle { gap: 5px; padding: 0 10px 0 12px; }
+.duo-toggle i { flex: none; width: 11px; height: 11px; font-size: 0; line-height: 0; background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.2 4.2 6 8l3.8-3.8' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.2 4.2 6 8l3.8-3.8' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+@keyframes duo-nod { 0%, 100% { transform: translateY(-1px); } 50% { transform: translateY(2px); } }
