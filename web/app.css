@@ -2712,3 +2712,12 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
 .duel-list h3 .gift-all:not(:disabled):hover { background: #c02a5f; transform: translateY(-1px); }
 .duel-list h3 .gift-all:disabled { opacity: .6; }
 .duel-list.gifts h3 { align-items: center; min-height: 32px; }
+/* ----- the friends page in tabs; what waits is one line above them ----- */
+.friend-tabs { margin: 10px 0 14px; }
+.friend-tabs button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.friend-tabs .dot { position: static; }
+.duel-row.waits { margin-bottom: 8px; }
+.duel-row.waits .who { font-size: 14px; }
+.duel-row.waits .gift-all { flex: none; padding: 6px 14px; border-radius: 999px; background: #d6336c; color: #fff; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.friend-tabs + .duel-list { margin-top: 0; }
+.friend-tabs + .duel-list > .duel-row:first-of-type, .friend-tabs + .duel-list > .gift-hint + .duel-row { border-top: 0; }

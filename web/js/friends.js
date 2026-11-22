@@ -7,7 +7,7 @@ export function initFriends(c) {
   const { h, t, state, api } = c;
   let lastFetch = 0;
   // What the page is showing besides the data: a message, the email being typed, a row asking "really?".
-  const ui = { notice: null, email: "", code: "", confirm: null, busy: false, sharing: null };
+  const ui = { notice: null, email: "", code: "", confirm: null, busy: false, sharing: null, tab: "friends" }; // tab: friends | gifts | add
 
   const who = (other) => c.nameOf(other.nickname, other.tag);
   const all = () => state.friends || [];
@@ -169,6 +169,7 @@ export function initFriends(c) {
 
   function open() {
     ui.sharing = null;
+    if (incoming().length) ui.tab = "add"; // a request waits: straight to where it is answered
     if (state.tab !== "friends") c.openPage("friends");
   }
 
@@ -247,27 +248,63 @@ export function initFriends(c) {
     const sent = all().filter((f) => f.status === "outgoing");
     const left = unused().length;
 
-    return [
-      head,
-      ui.notice && h("div", { class: "notice" }, ui.notice),
+    const total = (list) => list.reduce((sum, g) => sum + g.points, 0);
+    const collectButton = () => h("button", { class: "gift-all", disabled: ui.busy, onclick: collect },
+      waiting().length > 1 ? t("모두 받기") : t("선물 받기"), ` +${total(waiting())}`);
+    const giftRow = (g, when) => h("div", { class: `duel-row gift${when ? "" : " hot"}` },
+      h("span", { class: "gift-mark", "aria-hidden": "true" }, "♥"),
+      h("span", { class: "who" }, who(g.from), when && h("small", null, new Date(g.at).toLocaleDateString(c.locale(), { month: "long", day: "numeric" }))),
+      h("b", { class: "gift-points" }, `+${g.points}`));
+    const tabs = [
+      ["friends", t("친구"), friends.length, 0],
+      !state.giftSetup && ["gifts", t("선물"), null, waiting().length],
+      ["add", t("추가·초대"), null, asking.length],
+    ].filter(Boolean);
+    const tab = tabs.some(([id]) => id === ui.tab) ? ui.tab : "friends";
+    const show = (id) => () => { ui.tab = id; ui.confirm = null; c.render(); };
 
-      // Gifts that wait: who each one is from, and one button that collects them all.
-      waiting().length > 0 && h("section", { class: "duel-list gifts" },
-        h("h3", null, t("받은 선물"), h("small", null, String(waiting().length)),
-          h("button", { class: "gift-all", disabled: ui.busy, onclick: collect },
-            waiting().length > 1 ? t("모두 받기") : t("선물 받기"), ` +${waiting().reduce((sum, g) => sum + g.points, 0)}`)),
-        waiting().map((g) => h("div", { class: "duel-row hot gift" },
+    // ----- the list of friends -----
+    const friendsTab = () => h("section", { class: "duel-list" },
+      !state.giftSetup && friends.length > 0 && h("p", { class: "small muted gift-hint" }, t("하루에 한 번, 친구마다 ♥ 10포인트를 선물할 수 있어요.")),
+      friends.length === 0
+        ? h("div", { class: "empty small" }, t("아직 친구가 없어요. 이메일로 신청하거나 초대 코드를 보내 보세요."),
+            h("p", { style: "margin-top:12px" }, h("button", { class: "btn", onclick: show("add") }, t("친구 추가"))))
+        : friends.map((f) => h("div", { class: "duel-row" },
+            h("span", { class: "who" }, who(f.other), h("small", null, [f.other.grade && `G${f.other.grade}`, f.other.no_duels && t("대결 안 받음")].filter(Boolean).join(" · "))),
+            ui.confirm === f.id
+              ? [h("button", { class: "mini danger", onclick: () => run(() => api.removeFriend(f.id), t("친구 목록에서 지웠어요.")) }, t("정말 삭제")),
+                 h("button", { class: "link", onclick: () => { ui.confirm = null; c.render(); } }, t("취소"))]
+              : [!state.giftSetup && h("button", { class: `gift-heart${given(f) ? " sent" : ""}`, disabled: given(f) || ui.busy,
+                   title: given(f) ? t("오늘은 이미 선물했어요. 내일 또 보낼 수 있어요.") : t("10포인트 선물하기"), "aria-label": given(f) ? t("오늘은 이미 선물했어요. 내일 또 보낼 수 있어요.") : t("10포인트 선물하기"),
+                   onclick: () => give(f) }, h("i", { "aria-hidden": "true" }, "♥"), given(f) ? t("보냄") : "+10"),
+                 h("button", { class: "mini buy", disabled: Boolean(f.other.no_duels), onclick: () => c.startDuel(f.other) }, t("대결")),
+                 h("button", { class: "link", onclick: () => { ui.confirm = f.id; c.render(); } }, t("삭제"))])));
+
+    // ----- gifts: what waits, what came in the last seven days (who and when), whom I gave to today -----
+    const givenToday = friends.filter(given);
+    const giftsTab = () => [
+      h("section", { class: "duel-list gifts" },
+        h("h3", null, t("받은 선물"), waiting().length > 0 && h("small", null, String(waiting().length)), waiting().length > 0 && collectButton()),
+        waiting().length > 0 ? waiting().map((g) => giftRow(g, false)) : h("div", { class: "empty small" }, t("받을 선물이 없어요."))),
+      h("section", { class: "duel-list" },
+        h("h3", null, t("최근 받은 선물")),
+        (gifts().got || []).length > 0 ? gifts().got.slice(0, 12).map((g) => giftRow(g, true)) : h("div", { class: "empty small" }, t("최근 7일 동안 받은 선물이 없어요."))),
+      givenToday.length > 0 && h("section", { class: "duel-list" },
+        h("h3", null, t("오늘 보낸 선물"), h("small", { class: "plain" }, String(givenToday.length))),
+        givenToday.map((f) => h("div", { class: "duel-row gift" },
           h("span", { class: "gift-mark", "aria-hidden": "true" }, "♥"),
-          h("span", { class: "who" }, who(g.from)),
-          h("b", { class: "gift-points" }, `+${g.points}`)))),
+          h("span", { class: "who" }, who(f.other)),
+          h("b", { class: "gift-points" }, "+10")))),
+    ];
 
+    // ----- adding friends: requests to answer, asking by email, requests I sent, invitations -----
+    const addTab = () => [
       asking.length > 0 && h("section", { class: "duel-list" },
         h("h3", null, t("받은 친구 신청"), h("small", null, String(asking.length))),
         asking.map((f) => h("div", { class: "duel-row hot" },
           h("span", { class: "who" }, who(f.other), f.other.grade && h("small", null, `G${f.other.grade}`)),
           h("button", { class: "mini buy", onclick: () => run(() => api.answerFriend(f.id, true), t("{name}와(과) 친구가 됐어요!", { name: who(f.other) })) }, t("수락")),
           h("button", { class: "link", onclick: () => run(() => api.answerFriend(f.id, false), t("신청을 거절했어요.")) }, t("거절"))))),
-
       h("section", { class: "duel-list" },
         h("h3", null, t("친구 추가")),
         h("form", { class: "row", onsubmit: async (e) => {
@@ -282,38 +319,12 @@ export function initFriends(c) {
         } },
           h("input", { type: "email", id: "friend-email", autocomplete: "off", value: ui.email, placeholder: t("친구의 이메일"), "aria-label": t("친구의 이메일"), style: "flex:1" }),
           h("button", { class: "btn" }, t("신청")))),
-
-      h("section", { class: "duel-list" },
-        h("h3", null, t("내 친구"), h("small", { class: "plain" }, String(friends.length))),
-        !state.giftSetup && friends.length > 0 && h("p", { class: "small muted gift-hint" }, t("하루에 한 번, 친구마다 ♥ 10포인트를 선물할 수 있어요.")),
-        friends.length === 0
-          ? h("div", { class: "empty small" }, t("아직 친구가 없어요. 이메일로 신청하거나 초대 코드를 보내 보세요."))
-          : friends.map((f) => h("div", { class: "duel-row" },
-              h("span", { class: "who" }, who(f.other), h("small", null, [f.other.grade && `G${f.other.grade}`, f.other.no_duels && t("대결 안 받음")].filter(Boolean).join(" · "))),
-              ui.confirm === f.id
-                ? [h("button", { class: "mini danger", onclick: () => run(() => api.removeFriend(f.id), t("친구 목록에서 지웠어요.")) }, t("정말 삭제")),
-                   h("button", { class: "link", onclick: () => { ui.confirm = null; c.render(); } }, t("취소"))]
-                : [!state.giftSetup && h("button", { class: `gift-heart${given(f) ? " sent" : ""}`, disabled: given(f) || ui.busy,
-                     title: given(f) ? t("오늘은 이미 선물했어요. 내일 또 보낼 수 있어요.") : t("10포인트 선물하기"), "aria-label": given(f) ? t("오늘은 이미 선물했어요. 내일 또 보낼 수 있어요.") : t("10포인트 선물하기"),
-                     onclick: () => give(f) }, h("i", { "aria-hidden": "true" }, "♥"), given(f) ? t("보냄") : "+10"),
-                   h("button", { class: "mini buy", disabled: Boolean(f.other.no_duels), onclick: () => c.startDuel(f.other) }, t("대결")),
-                   h("button", { class: "link", onclick: () => { ui.confirm = f.id; c.render(); } }, t("삭제"))]))),
-
-      // Who gave me points lately (the last seven days).
-      !state.giftSetup && (gifts().got || []).length > 0 && h("section", { class: "duel-list" },
-        h("h3", null, t("최근 받은 선물")),
-        gifts().got.slice(0, 8).map((g) => h("div", { class: "duel-row gift" },
-          h("span", { class: "gift-mark", "aria-hidden": "true" }, "♥"),
-          h("span", { class: "who" }, who(g.from), h("small", null, new Date(g.at).toLocaleDateString(c.locale(), { month: "long", day: "numeric" }))),
-          h("b", { class: "gift-points" }, `+${g.points}`)))),
-
       sent.length > 0 && h("section", { class: "duel-list" },
         h("h3", null, t("보낸 신청")),
         sent.map((f) => h("div", { class: "duel-row" },
           h("span", { class: "who" }, who(f.other)),
           h("span", { class: "tagline" }, t("초대됨")),
           h("button", { class: "link", onclick: () => run(() => api.removeFriend(f.id), t("신청을 취소했어요.")) }, t("취소"))))),
-
       h("section", { class: "duel-list invites" },
         h("h3", null, t("친구 초대")),
         h("div", { class: "invite-card" },
@@ -321,6 +332,23 @@ export function initFriends(c) {
             h("b", null, !state.invites ? "…" : t("남은 초대장 {n}장", { n: left })),
             h("small", null, t("초대 코드로 가입한 친구는 바로 내 친구가 돼요."))),
           h("button", { class: "btn", disabled: !state.invites || left === 0, onclick: () => { ui.sharing = 0; c.render(); } }, t("친구에게 공유하기")))),
+    ];
+
+    return [
+      head,
+      ui.notice && h("div", { class: "notice" }, ui.notice),
+      // What waits for an answer, on whichever tab (the tab that shows it anyway does not repeat it).
+      tab !== "gifts" && waiting().length > 0 && h("div", { class: "duel-row hot gift waits" },
+        h("span", { class: "gift-mark", "aria-hidden": "true" }, "♥"),
+        h("span", { class: "who" }, t("{name}의 선물이 왔어요", { name: who(waiting()[0].from) }), waiting().length > 1 && h("small", null, t("외 {n}명", { n: waiting().length - 1 }))),
+        collectButton()),
+      tab !== "add" && asking.length > 0 && h("div", { class: "duel-row hot waits" },
+        h("span", { class: "who" }, t("{name}의 친구 신청이 왔어요", { name: who(asking[0].other) }), asking.length > 1 && h("small", null, t("외 {n}명", { n: asking.length - 1 }))),
+        h("button", { class: "mini buy", onclick: show("add") }, t("보기"))),
+      h("div", { class: `segment${tabs.length === 3 ? " three" : ""} friend-tabs`, role: "tablist" }, tabs.map(([id, label, count, alert]) =>
+        h("button", { role: "tab", "aria-selected": String(tab === id), onclick: show(id) },
+          label, count != null && h("small", null, String(count)), alert > 0 && h("em", { class: "dot" }, String(alert))))),
+      tab === "gifts" ? giftsTab() : tab === "add" ? addTab() : friendsTab(),
     ];
   }
 
