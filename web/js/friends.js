@@ -249,8 +249,6 @@ export function initFriends(c) {
     const left = unused().length;
 
     const total = (list) => list.reduce((sum, g) => sum + g.points, 0);
-    const collectButton = () => h("button", { class: "gift-all", disabled: ui.busy, onclick: collect },
-      waiting().length > 1 ? t("모두 받기") : t("선물 받기"), ` +${total(waiting())}`);
     // The badge of an item that waits (a gift to collect, a request to answer).
     const fresh = () => h("em", { class: "row-new", title: t("새로 왔어요"), "aria-label": t("새로 왔어요") }, "N");
     const giftRow = (g, when) => h("div", { class: `duel-row gift${when ? "" : " hot"}` },
@@ -286,8 +284,18 @@ export function initFriends(c) {
     const givenToday = friends.filter(given);
     const giftsTab = () => [
       h("section", { class: "duel-list gifts" },
-        h("h3", null, t("받은 선물"), waiting().length > 0 && h("small", null, String(waiting().length)), waiting().length > 0 && collectButton()),
-        waiting().length > 0 ? waiting().map((g) => giftRow(g, false)) : h("div", { class: "empty small" }, t("받을 선물이 없어요."))),
+        h("h3", null, t("받은 선물"), waiting().length > 0 && h("small", null, String(waiting().length))),
+        // Every gift that waits is collected at once, so they are one item: who they are from, and
+        // the button that takes them (a heart, and the points that arrive).
+        waiting().length > 0
+          ? h("div", { class: "duel-row hot gift take" },
+              h("span", { class: "gift-mark", "aria-hidden": "true" }, "♥"),
+              h("span", { class: "who" },
+                h("span", null, who(waiting()[0].from), waiting().length > 1 && ` ${t("외 {n}명", { n: waiting().length - 1 })}`, fresh()),
+                waiting().length > 1 && h("small", null, waiting().map((g) => who(g.from)).join(", "))),
+              h("button", { class: "gift-take", disabled: ui.busy, onclick: collect },
+                h("i", { "aria-hidden": "true" }, "♥"), waiting().length > 1 ? t("모두 받기") : t("선물 받기"), h("b", null, `+${total(waiting())}`)))
+          : h("div", { class: "empty small" }, t("받을 선물이 없어요."))),
       h("section", { class: "duel-list" },
         h("h3", null, t("최근 받은 선물")),
         (gifts().got || []).length > 0 ? gifts().got.slice(0, 12).map((g) => giftRow(g, true)) : h("div", { class: "empty small" }, t("최근 7일 동안 받은 선물이 없어요."))),

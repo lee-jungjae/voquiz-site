@@ -2723,3 +2723,37 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
 .friend-tabs + .duel-list > .duel-row:first-of-type, .friend-tabs + .duel-list > .gift-hint + .duel-row { border-top: 0; }
 /* ----- the badge of an item that waits (a gift to collect, a friend's request) ----- */
 .row-new { display: inline-grid; place-items: center; min-width: 18px; height: 18px; margin-left: 6px; padding: 0 5px; border-radius: 999px; background: #e5484d; color: #fff; font-style: normal; font-size: 10.5px; font-weight: 800; line-height: 1; vertical-align: 2px; }
+/* ----- the button that takes the gifts: inside the item, at the right; a heart, the word, the points ----- */
+.duel-row.take { padding: 12px 12px 12px 14px; }
+.gift-take { flex: none; display: inline-flex; align-items: center; gap: 7px; padding: 10px 16px 10px 13px; border-radius: 999px; background: #d6336c; color: #fff; font-size: 14px; font-weight: 700; white-space: nowrap; box-shadow: 0 4px 12px rgba(214, 51, 108, .28); transition: transform .15s, background .15s, box-shadow .15s; }
+.gift-take i { font-style: normal; font-size: 15px; line-height: 1; animation: gift-beat 1.6s ease-in-out infinite; }
+.gift-take b { padding: 1px 8px; border-radius: 999px; background: rgba(255, 255, 255, .22); font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.gift-take:not(:disabled):hover { background: #c02a5f; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(214, 51, 108, .34); }
+.gift-take:not(:disabled):active { transform: scale(.96); }
+.gift-take:disabled { opacity: .6; box-shadow: none; }
+@media (prefers-reduced-motion: reduce) { .gift-take i { animation: none; } }
+/* ----- the web version's first screen: logo, a line, the film, then the invite code and the way in ----- */
+.web-login { align-items: stretch; text-align: center; }
+.web-login > h1.brand { margin: 10px 0 0; display: flex; justify-content: center; }
+.web-login > .web-tag { margin: 8px 0 18px; color: var(--muted); font-size: 15px; }
+.web-login .after-film { margin: 0; padding: 20px 4px 4px; gap: 14px; }
+.login-code { display: grid; gap: 6px; text-align: left; }
+.login-code label { font-size: 13px; font-weight: 600; }
+.login-code input { width: 100%; padding: 13px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); font-size: 17px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.login-code input::placeholder { font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--muted); }
+.login-code input:focus { outline: none; border-color: var(--text); box-shadow: 0 0 0 1px var(--text); }
+.login-code small { font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+.web-login .after-film .btn { padding: 15px 18px; font-size: 16px; }
+/* ----- found by the audit in three languages ----- */
+/* an invitation's link is long: it breaks inside the card instead of running out of it (every layout) */
+.ticket-link { overflow-wrap: anywhere; word-break: break-all; }
+/* the goal tiles of the phone's first screen: a long label ("This week's goal") takes a second line instead of being cut */
+.goal-text small { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.2; }
+@media (min-width: 860px) {
+  /* a screen's own action stands in the middle, under what it belongs to (the duel's time, a result) */
+  html.web .dk > main > .act { text-align: center; }
+  /* the menu's button in a quiz card: room for the choice, two lines at most */
+  .qz-slot { min-height: 56px; }
+  .qz-slot .pick { max-width: 68%; }
+  .qz-slot .pick-button span { white-space: normal; overflow: visible; text-align: right; line-height: 1.25; }
+}

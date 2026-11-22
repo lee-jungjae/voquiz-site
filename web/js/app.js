@@ -1,27 +1,27 @@
-import { api, DEMO } from "./api.js?v=0.1.24-tow5oe";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.24-tow5oe";
-import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.24-tow5oe";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.24-tow5oe";
-import { cleanEntry } from "./clean.js?v=0.1.24-tow5oe";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.24-tow5oe";
-import { CHARACTERS } from "./characters.js?v=0.1.24-tow5oe";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.24-tow5oe";
-import { film } from "./film.js?v=0.1.24-tow5oe";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.24-tow5oe";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.24-tow5oe";
-import { initDesktop } from "./desktop.js?v=0.1.24-tow5oe";
-import { BANDS, bandOf } from "./levels.js?v=0.1.24-tow5oe";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.24-tow5oe";
-import { initDuel } from "./duel.js?v=0.1.24-tow5oe";
-import { initFriends } from "./friends.js?v=0.1.24-tow5oe";
-import { MOTTOS } from "./mottos.js?v=0.1.24-tow5oe";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.24-tow5oe";
-import { SIGNATURES } from "./signatures.js?v=0.1.24-tow5oe";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.24-tow5oe";
-import { tuning, setTuning } from "./tuning.js?v=0.1.24-tow5oe";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.24-tow5oe";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.24-tow5oe";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.24-tow5oe";
+import { api, DEMO } from "./api.js?v=0.1.24-tow7ph";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.24-tow7ph";
+import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.24-tow7ph";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.24-tow7ph";
+import { cleanEntry } from "./clean.js?v=0.1.24-tow7ph";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.24-tow7ph";
+import { CHARACTERS } from "./characters.js?v=0.1.24-tow7ph";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.24-tow7ph";
+import { film } from "./film.js?v=0.1.24-tow7ph";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.24-tow7ph";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.24-tow7ph";
+import { initDesktop } from "./desktop.js?v=0.1.24-tow7ph";
+import { BANDS, bandOf } from "./levels.js?v=0.1.24-tow7ph";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.24-tow7ph";
+import { initDuel } from "./duel.js?v=0.1.24-tow7ph";
+import { initFriends } from "./friends.js?v=0.1.24-tow7ph";
+import { MOTTOS } from "./mottos.js?v=0.1.24-tow7ph";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.24-tow7ph";
+import { SIGNATURES } from "./signatures.js?v=0.1.24-tow7ph";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.24-tow7ph";
+import { tuning, setTuning } from "./tuning.js?v=0.1.24-tow7ph";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.24-tow7ph";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.24-tow7ph";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.24-tow7ph";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -302,7 +302,11 @@ async function checkMember() {
     return render();
   }
   if (state.member) localStorage.setItem(memberKey(), "1");
+  // A code typed before signing in (the web version's first screen): a new student joins with it at once.
+  const typed = typedCode();
+  localStorage.removeItem(TYPED_CODE);
   render();
+  if (!state.member && typed) await joinWithCode(typed);
 }
 
 async function joinWithCode(code) {
@@ -2684,7 +2688,7 @@ function pickMenu(id, label, options, value, onPick) {
   return h("div", { class: `pick${open ? " open" : ""}` },
     h("button", { type: "button", id, class: "pick-button", "aria-haspopup": "listbox", "aria-expanded": String(open), "aria-label": label,
       onclick: () => { state.pickOpen = open ? null : id; render(); } },
-      h("span", null, now ? now[1] : ""), h("i", { "aria-hidden": "true" }, "▾")),
+      h("span", null, now ? String(now[1]).replace(/\s*[(（].*[)）]\s*$/, "") : ""), h("i", { "aria-hidden": "true" }, "▾")),
     open && h("div", { class: "pick-menu", role: "listbox", "aria-label": label }, options.map((o) => (Array.isArray(o)
       ? h("button", { type: "button", role: "option", "aria-selected": String(same(o)), onclick: () => { state.pickOpen = null; onPick(o[0]); } },
           h("span", null, o[1]), same(o) && h("i", { "aria-hidden": "true" }, "✓"))
@@ -3483,7 +3487,25 @@ function gradePicker() {
         h("div", { class: "grades" }, band.grades.map((g) => h("button", { onclick: () => chooseGrade(g) }, `G${g}`)))))));
 }
 
+// An invite code typed on the web version's first screen, kept until the student has signed in
+// (signing in with Google leaves the page and comes back).
+const TYPED_CODE = "wb_invite_typed";
+const typedCode = () => localStorage.getItem(TYPED_CODE) || "";
 function loginView() {
+  // The web version: the logo first, the film in the middle, then the invite code and the way in.
+  if (WEB) return h("div", { class: "step splash with-film web-login" },
+    h("h1", { class: "brand" }, wordmark(46)),
+    h("p", { class: "web-tag" }, t("한국어와 영어, 두 언어로 단어를 쉽게 익혀요.")),
+    film(),
+    h("div", { class: "after-film" },
+      h("div", { class: "login-code" },
+        h("label", { htmlFor: "login-code" }, t("초대 코드가 있나요?")),
+        h("input", { type: "text", id: "login-code", maxLength: 8, autocomplete: "off", autocapitalize: "characters", spellcheck: false,
+          value: typedCode(), placeholder: t("초대 코드 6자리"), "aria-label": t("초대 코드 6자리"),
+          oninput: (e) => { const code = e.target.value.trim().toUpperCase(); if (code) localStorage.setItem(TYPED_CODE, code); else localStorage.removeItem(TYPED_CODE); } }),
+        h("small", null, t("처음이라면 친구에게 받은 초대 코드를 넣고 로그인하세요. 이미 가입했다면 비워 두면 돼요."))),
+      h("button", { class: "btn", disabled: state.busy, onclick: signIn }, DEMO ? t("데모로 시작하기") : t("Google 계정으로 로그인")),
+      noticeBox()));
   return h("div", { class: "step splash with-film" },
     film(),
     h("div", { class: "after-film" },

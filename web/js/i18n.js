@@ -844,6 +844,8 @@ const T = {
   "오늘 보낸 선물": ["Given today", "今天送出的礼物"],
   "새로 왔어요": ["New", "新"],
   "친구 목록": ["Friend list", "好友列表"],
+  "초대 코드가 있나요?": ["Have an invite code?", "有邀请码吗？"],
+  "처음이라면 친구에게 받은 초대 코드를 넣고 로그인하세요. 이미 가입했다면 비워 두면 돼요.": ["New here? Enter the invite code a friend gave you, then sign in. Already joined? Leave it empty.", "第一次来？先填好友给的邀请码再登录。已经加入的话留空即可。"],
   "알아 두기": ["Good to know", "小贴士"],
   "이렇게 써요": ["How to use it", "这样用"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],
