@@ -2506,3 +2506,10 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   .duel-record .rec-score { min-width: 104px; font-size: 28px; }
   .duel-record.lose .rec-side.me, .duel-record.win .rec-side.them { opacity: .85; }
 }
+/* ----- desktop, a narrower window (860 to 1179px): the menu and the word box do not run into each other ----- */
+@media (min-width: 860px) and (max-width: 1179px) {
+  .dk-top { grid-template-columns: auto minmax(160px, 1fr) auto; gap: 16px; }
+  .dk-left { gap: 14px; }
+  .dk-nav { gap: 12px; }
+  .dk-me { gap: 2px; }
+}
