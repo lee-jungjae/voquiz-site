@@ -2110,3 +2110,60 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   html.web .sheet { max-width: 480px; border-radius: 22px; }
 }
 @media (min-width: 860px) and (max-width: 1179px) { .dk { grid-template-columns: 250px minmax(0, 1fr); } .dk-words { padding-left: 20px; } html.web .dk > main { padding-left: 52px; padding-right: 28px; } .dk-top { padding: 14px 20px; gap: 14px; } .dk-left { gap: 16px; } .dk-nav { gap: 14px; } }
+/* ----- desktop, after the user's notes: a clear edge for the word list, one scale of sizes, characters in hiding ----- */
+@media (min-width: 860px) {
+  /* the word list is a panel of its own colour: its edge is plain to see without a rule */
+  .dk-words, .dk-unfold { background: var(--surface); }
+  .dk-words { padding: 28px 14px 108px 24px; }
+  #dk-find { background: var(--bg); }
+  .dk-word:hover, .dk-word.on { background: var(--bg); }
+  .dk-word.on { box-shadow: 0 1px 2px rgba(0, 0, 0, .06); }
+  .dk-top { position: relative; z-index: 10; }
+  /* one scale: 34 for a word, 28 for the greeting, 20 for a section, 16 to read, 14 for controls, 13 for small print */
+  .dk .hero h2 { font-size: 34px; }
+  .dk .hero .cp { font-size: 20px; }
+  .dk .hero .def p:first-child { font-size: 18px; }
+  .dk-hello { font-size: 28px; margin-bottom: 30px; }
+  .dk .block h3 { font-size: 20px; }
+  .dk .sense-head b { font-size: 19px; }
+  .dk .sense-def { font-size: 16px; }
+  .dk .sense-def.second { font-size: 15px; }
+  .dk .sense-line, .dk .use-row { font-size: 15px; }
+  .dk .sense-label, .dk .senses-sum .sense-pos { font-size: 13px; }
+  .dk .senses-sum b { font-size: 16px; }
+  .dk .level-step { padding: 7px 14px; font-size: 14px; }
+  .dk .level-chip { font-size: 14px; }
+  .dk .level-mine, .dk .level-wait { font-size: 12.5px; }
+  .dk-nav button { font-size: 15px; }
+  .dk-link { font-size: 14px; }
+  .dk-top .search.top input[type="text"] { font-size: 15px; padding: 9px 0; }
+  .dk-top .search.top .btn { padding: 10px 18px; font-size: 14px; }
+  html.web main.home .search input[type="text"] { font-size: 17px; padding: 11px 0; }
+  html.web main.home .search .btn { padding: 13px 24px; font-size: 15px; }
+  .web-actions button { padding: 11px 18px; font-size: 14.5px; }
+  .dk-words-head { font-size: 16px; }
+  .dk-open b { font-size: 15px; }
+  .dk-open span, .dk-filters button, .dk-manage { font-size: 13px; }
+  .dk-list h4 { font-size: 12.5px; }
+  #dk-find { font-size: 14px; padding: 10px 15px; }
+  .dk .quest-hint, .dk .web-today { font-size: 14px; }
+  /* in the "오늘" menu the words of today are not listed again (they are in the panel on the left) */
+  .dk-today .today-box .chips, .dk-today .today-box .link, .dk-today .today-box h3 { display: none; }
+  /* characters in hiding: every menu has a resident that pops out under it while the pointer is there */
+  .dk-nav button, .dk-link { position: relative; }
+  .dk-pop { position: absolute; left: 50%; top: calc(100% - 4px); z-index: 15; width: 46px; margin-left: -23px; pointer-events: none; opacity: 0; transform: translateY(-20px) scale(.35); transform-origin: 50% 0; transition: transform .3s cubic-bezier(.3, 1.6, .5, 1), opacity .12s; }
+  .dk-nav button:hover .dk-pop, .dk-link:hover .dk-pop { opacity: 1; transform: translateY(0) scale(1); }
+  /* and one sits behind the word box on the home; it stretches up to look when the box is entered */
+  .dk-sit { position: relative; z-index: 0; height: 0; max-width: 760px; }
+  .dk-sit .mascot.portrait { position: absolute; right: 96px; bottom: -26px; width: 72px; transition: transform .35s cubic-bezier(.3, 1.6, .5, 1); }
+  html.web main.home .search { position: relative; z-index: 1; }
+  html.web main.home:has(.search:focus-within) .dk-sit .mascot.portrait { transform: translateY(-18px); }
+  @media (prefers-reduced-motion: reduce) { .dk-pop, .dk-sit .mascot.portrait { transition: none; } }
+}
+/* ----- desktop: the page is white, whatever background was chosen in the point shop (those are made
+   for the narrow panel; stretched over a wide window they also broke the top bar's menu) ----- */
+@media (min-width: 860px) {
+  html.web body, html.web body[data-bg] { background: var(--bg) !important; }
+  html.web body .dk .dk-nav { background: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  html.web body .dk-top { background: var(--bg); }
+}

@@ -1,26 +1,26 @@
-import { api, DEMO } from "./api.js?v=0.1.23-tovy7z";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tovy7z";
-import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tovy7z";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tovy7z";
-import { cleanEntry } from "./clean.js?v=0.1.23-tovy7z";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tovy7z";
-import { CHARACTERS } from "./characters.js?v=0.1.23-tovy7z";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tovy7z";
-import { film } from "./film.js?v=0.1.23-tovy7z";
-import { showYard, leaveYard, cheerYard } from "./yard.js?v=0.1.23-tovy7z";
-import { initDesktop } from "./desktop.js?v=0.1.23-tovy7z";
-import { BANDS, bandOf } from "./levels.js?v=0.1.23-tovy7z";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tovy7z";
-import { initDuel } from "./duel.js?v=0.1.23-tovy7z";
-import { initFriends } from "./friends.js?v=0.1.23-tovy7z";
-import { MOTTOS } from "./mottos.js?v=0.1.23-tovy7z";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tovy7z";
-import { SIGNATURES } from "./signatures.js?v=0.1.23-tovy7z";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tovy7z";
-import { tuning, setTuning } from "./tuning.js?v=0.1.23-tovy7z";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tovy7z";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tovy7z";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tovy7z";
+import { api, DEMO } from "./api.js?v=0.1.23-tovyjt";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tovyjt";
+import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tovyjt";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tovyjt";
+import { cleanEntry } from "./clean.js?v=0.1.23-tovyjt";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tovyjt";
+import { CHARACTERS } from "./characters.js?v=0.1.23-tovyjt";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tovyjt";
+import { film } from "./film.js?v=0.1.23-tovyjt";
+import { showYard, leaveYard, cheerYard } from "./yard.js?v=0.1.23-tovyjt";
+import { initDesktop } from "./desktop.js?v=0.1.23-tovyjt";
+import { BANDS, bandOf } from "./levels.js?v=0.1.23-tovyjt";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tovyjt";
+import { initDuel } from "./duel.js?v=0.1.23-tovyjt";
+import { initFriends } from "./friends.js?v=0.1.23-tovyjt";
+import { MOTTOS } from "./mottos.js?v=0.1.23-tovyjt";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tovyjt";
+import { SIGNATURES } from "./signatures.js?v=0.1.23-tovyjt";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tovyjt";
+import { tuning, setTuning } from "./tuning.js?v=0.1.23-tovyjt";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tovyjt";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tovyjt";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tovyjt";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -1589,13 +1589,12 @@ function webActions() {
     h("div", { class: "web-actions" },
       // Today's present, while it waits: the first thing to do on a new day.
       (giftWaiting() || santaWaiting()) && h("button", { class: "present", onclick: () => (giftWaiting() ? openDailyGift() : takeSantaGift()) }, giftArt(), t("오늘의 선물 받기")),
-      h("button", { onclick: toQuiz }, t("퀴즈 한 판"), duel().badge() > 0 && h("em", { class: "dot" }, String(duel().badge()))),
+      h("button", { onclick: toQuiz }, t("퀴즈 한 판")),
       state.suggest && !limitReached() && h("button", { onclick: () => search(state.suggest) }, t("오늘의 단어: {w}", { w: state.suggest }))),
-    h("p", { class: "web-today" },
+    false && h("p", { class: "web-today" },
       h("button", { class: "link", onclick: searchPointsSheet }, t("오늘 {a} / {b}점", { a: searchPointsToday() + searchBonusToday(), b: SEARCH_DAILY_MAX })),
       h("span", { "aria-hidden": "true" }, " · "),
       h("button", { class: "link", onclick: weeklyGoalSheet }, t("이번 주 {a} / {b}개", { a: weekCount(), b: weekGoal() }))),
-    questHint(),
   ];
 }
 function webQuiet() {
@@ -1648,12 +1647,13 @@ function syncYard() {
   if (!inside) return showYard(null);
   const lead = myShop().character;
   const mine = ALL_CHARACTERS.filter((c) => c.id !== lead && (ownsCharacter(c) || (c.cost === 0 && !c.earn))).map((c) => c.id);
-  const many = Math.max(2, Math.min(YARD_MAX + 1, Math.floor(innerWidth / 150)));
+  const many = 3;
   // The student's own choice (yardSheet), or, until they make one, a handful picked at random.
   const picked = Array.isArray(myShop().yard) ? myShop().yard.filter((id) => mine.includes(id)) : null;
   const key = [lead, many, mine.length, picked ? picked.join(",") : "auto"].join("|");
   if (yardCast?.key !== key) {
-    yardCast = { key, ids: [lead, ...(picked || [...mine].sort(() => Math.random() - 0.5)).slice(0, many - 1)] };
+    const others = picked || [...mine].sort(() => Math.random() - 0.5);
+    yardCast = { key, ids: [lead, ...others.slice(0, many - 1)], rest: others.slice(many - 1) };
   }
   const lines = [t("퀴즈 한 판 어때?"), t("새 단어 찾으러 가자!"), t("오늘도 같이 하자!")];
   showYard({
@@ -1739,6 +1739,7 @@ function searchView() {
   const home = webHome();
   return [
     home && h("p", { class: "dk-hello" }, greeting()),
+    home && (yardCast?.rest?.[6] || yardCast?.rest?.[0]) && h("div", { class: "dk-sit", "aria-hidden": "true" }, portrait(yardCast.rest[6] || yardCast.rest[0])),
     !topSearch() && searchForm(),
     home ? webActions() : !WIDE() && dailyGoal(),
     noticeBox(),
@@ -3394,7 +3395,8 @@ function goTab(id) {
 let desktopModule;
 const desktop = () => (desktopModule ||= initDesktop({
   h, t, state, render, logoIcon, wordmark, searchForm, goHome, goTab, openShop, openSettings, openPage, webHome, star, isLearned, dayOf, dayLabel,
-  dailyGoal, todayBox, questHint, entrySide, giftArt,
+  dailyGoal, todayBox, questHint, entrySide, giftArt, portrait,
+  residents: () => yardCast?.rest || [], // the characters that are not out in the yard
   duelBadge: () => duel().badge(), friendsBadge: () => friends().badge(),
   shopMark: () => (claimable().length > 0 || (state.tab !== "shop" && newCount("character") + newCount("theme") + newCount("bg") > 0)) && h("em", { class: "dot new" }, "N"),
   presentWaiting: () => giftWaiting() || santaWaiting(), openPresent: () => (giftWaiting() ? openDailyGift() : takeSantaGift()),

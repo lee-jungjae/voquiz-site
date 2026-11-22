@@ -60,7 +60,7 @@ export function initDesktop(c) {
   function todayMenu() {
     return h("div", { class: "dk-today-wrap" },
       h("button", { class: "dk-link", "aria-expanded": String(Boolean(state.todayOpen)), onclick: () => { state.todayOpen = !state.todayOpen; render(); } },
-        t("오늘"), c.presentWaiting() && h("em", { class: "dot", "aria-hidden": "true" })),
+        t("오늘"), c.presentWaiting() && !c.webHome() && h("em", { class: "dot", "aria-hidden": "true" }), !state.todayOpen && pop(3)),
       state.todayOpen && h("div", { class: "dk-today", role: "dialog", "aria-label": t("오늘") },
         c.presentWaiting() && h("button", { class: "dk-present", onclick: () => { state.todayOpen = false; c.openPresent(); } }, c.giftArt(), t("오늘의 선물 받기")),
         c.dailyGoal(),
@@ -70,19 +70,23 @@ export function initDesktop(c) {
   document.addEventListener("click", (e) => { // a click anywhere else closes it
     if (state.todayOpen && !e.target.closest?.(".dk-today-wrap") && !e.target.closest?.("#sheet")) { state.todayOpen = false; render(); }
   });
+  const pop = (n) => {
+    const id = c.residents()[n];
+    return id ? h("span", { class: "dk-pop", "aria-hidden": "true" }, c.portrait(id)) : null;
+  };
   function top(bare) {
-    const item = (id, label) => h("button", { "aria-current": state.tab === id ? "page" : null, onclick: () => c.goTab(id) },
-      label, id === "quiz" && c.duelBadge() > 0 && h("em", { class: "dot" }, String(c.duelBadge())));
+    const item = (id, label, n) => h("button", { "aria-current": state.tab === id ? "page" : null, onclick: () => c.goTab(id) },
+      label, id === "quiz" && c.duelBadge() > 0 && h("em", { class: "dot" }, String(c.duelBadge())), pop(n));
     return h("header", { class: "dk-top" },
       h("div", { class: "dk-left" },
         h("button", { class: "dk-logo", title: t("처음 화면으로"), "aria-label": t("처음 화면으로"), onclick: c.goHome }, c.logoIcon(28), c.wordmark(24)),
-        h("nav", { class: "dk-nav" }, item("search", t("사전")), item("quiz", t("퀴즈")), item("rank", t("랭킹")))),
+        h("nav", { class: "dk-nav" }, item("search", t("사전"), 0), item("quiz", t("퀴즈"), 1), item("rank", t("랭킹"), 2))),
       bare ? h("span", { class: "dk-gap" }) : c.searchForm(true),
       h("div", { class: "dk-me" },
         todayMenu(),
         h("button", { class: "dk-link", "aria-pressed": String(state.tab === "friends"), onclick: () => c.openPage("friends") },
-          t("친구"), c.friendsBadge() > 0 && h("em", { class: "dot" }, String(c.friendsBadge()))),
-        h("button", { class: "dk-link", "aria-pressed": String(state.tab === "settings"), onclick: c.openSettings }, t("설정")),
+          t("친구"), c.friendsBadge() > 0 && h("em", { class: "dot" }, String(c.friendsBadge())), pop(4)),
+        h("button", { class: "dk-link", "aria-pressed": String(state.tab === "settings"), onclick: c.openSettings }, t("설정"), pop(5)),
         h("button", { class: "points dk-points", id: "points", title: t("포인트샵 열기"), "aria-pressed": String(state.tab === "shop"), onclick: c.openShop },
           h("i", { "aria-hidden": "true" }, "P"), h("span", null, String(state.user.points || 0)), c.shopMark())));
   }
