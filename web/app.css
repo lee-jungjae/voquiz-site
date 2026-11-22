@@ -2935,3 +2935,16 @@ button.points .dot.new { min-width: 0; width: 9px; height: 9px; padding: 0; font
   .dk > main:has(> .block.prefs) .btn-stack .btn { width: 100%; min-width: 0; padding-left: 10px; padding-right: 10px; line-height: 1.25; }
   .dk > main:has(> .block.prefs) .btn-caption { margin: 8px 0 0 2px; }
 }
+/* A quest's progress in a shop tile: a bar that is seen even when it is still empty. */
+.quest-bar { height: 9px; margin: 3px 6px 8px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 16%, var(--bg)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent); }
+.quest-bar i { border-radius: 999px; }
+.swatch.ready .quest-bar { background: color-mix(in srgb, var(--good) 16%, var(--bg)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--good) 34%, transparent); }
+/* A folded meaning in a wide window answers the pointer: a soft patch comes up behind it and its
+   arrow nods, so that it reads as something to press. */
+.duo-li { isolation: isolate; }
+.duo-li::before { content: ""; position: absolute; inset: 5px -14px; z-index: -1; border-radius: 16px; background: var(--surface); opacity: 0; transform: scale(.985); transition: opacity .18s, transform .22s cubic-bezier(.2, .8, .2, 1); pointer-events: none; }
+.duo-li:not(.open):has(.duo-tap:hover, .duo-toggle:hover)::before { opacity: 1; transform: none; }
+.duo-li:not(.open):has(.duo-tap:active, .duo-toggle:active)::before { transform: scale(.992); }
+.duo-li:not(.open):has(.duo-tap:hover, .duo-toggle:hover) .duo-toggle i { animation: duo-nod .7s ease-in-out infinite; }
+@keyframes duo-nod { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+@media (prefers-reduced-motion: reduce) { .duo-li::before { transition: none; transform: none; } .duo-li .duo-toggle i { animation: none !important; } }
