@@ -1,27 +1,27 @@
-import { api, DEMO } from "./api.js?v=0.1.24-tow8w3";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.24-tow8w3";
-import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.24-tow8w3";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.24-tow8w3";
-import { cleanEntry } from "./clean.js?v=0.1.24-tow8w3";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.24-tow8w3";
-import { CHARACTERS } from "./characters.js?v=0.1.24-tow8w3";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.24-tow8w3";
-import { film } from "./film.js?v=0.1.24-tow8w3";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.24-tow8w3";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.24-tow8w3";
-import { initDesktop } from "./desktop.js?v=0.1.24-tow8w3";
-import { BANDS, bandOf } from "./levels.js?v=0.1.24-tow8w3";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.24-tow8w3";
-import { initDuel } from "./duel.js?v=0.1.24-tow8w3";
-import { initFriends } from "./friends.js?v=0.1.24-tow8w3";
-import { MOTTOS } from "./mottos.js?v=0.1.24-tow8w3";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.24-tow8w3";
-import { SIGNATURES } from "./signatures.js?v=0.1.24-tow8w3";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.24-tow8w3";
-import { tuning, setTuning } from "./tuning.js?v=0.1.24-tow8w3";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.24-tow8w3";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.24-tow8w3";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.24-tow8w3";
+import { api, DEMO } from "./api.js?v=0.1.25-towa3f";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.25-towa3f";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.25-towa3f";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.25-towa3f";
+import { cleanEntry } from "./clean.js?v=0.1.25-towa3f";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.25-towa3f";
+import { CHARACTERS } from "./characters.js?v=0.1.25-towa3f";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.25-towa3f";
+import { film } from "./film.js?v=0.1.25-towa3f";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.25-towa3f";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.25-towa3f";
+import { initDesktop } from "./desktop.js?v=0.1.25-towa3f";
+import { BANDS, bandOf } from "./levels.js?v=0.1.25-towa3f";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.25-towa3f";
+import { initDuel } from "./duel.js?v=0.1.25-towa3f";
+import { initFriends } from "./friends.js?v=0.1.25-towa3f";
+import { MOTTOS } from "./mottos.js?v=0.1.25-towa3f";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.25-towa3f";
+import { SIGNATURES } from "./signatures.js?v=0.1.25-towa3f";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.25-towa3f";
+import { tuning, setTuning } from "./tuning.js?v=0.1.25-towa3f";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.25-towa3f";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.25-towa3f";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.25-towa3f";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -1137,7 +1137,7 @@ function star(word) {
   }, word.favorite ? "★" : "☆");
 }
 
-const title = (text, en) => h("h3", null, text, getLang() !== "en" && h("small", null, en));
+const title = (text, en, ko) => h("h3", null, text, getLang() !== "en" ? h("small", null, en) : WIDE() && ko ? h("small", null, ko) : null);
 
 // ---------- dictionary entry ----------
 
@@ -1211,32 +1211,103 @@ function useRows(c, patterns) {
     list.map((p) => h("p", { class: "use-row" },
       h("b", null, c.language === "ko" ? p.ko : p.en), h("span", null, c.language === "ko" ? p.en : p.ko))));
 }
+// ----- a wide window: a word's two languages side by side -----
+// Two dictionaries next to each other. For an English word: an English-English one (the word
+// explained in English) and an English-Korean one (the same word explained in Korean); for a
+// Korean word the same the other way round. The language of the screen stands on the left (an
+// English screen: English-English on the left; a Korean or Chinese one: English-Korean on the left).
+// Each side is whole by itself (its own word and part of speech, its own labels, its own text), so
+// either column can be read alone from top to bottom. What is being explained stands on both sides
+// as it is: the sentence the word is used in, a pattern, a similar word, the syllables of the Korean
+// word. The side of the other language adds what each of them means.
+function duoSides() {
+  const far = getLang() === "en" ? "ko" : "en";
+  return [{ lang: koFirst() ? "ko" : "en", say: (key) => t(key) }, { lang: far, say: (key) => tIn(far, key) }];
+}
+function duoSense(c, sense, whole = false) { // whole: a word's only meaning (its examples, origin and similar words have sections of their own)
+  const sides = duoSides();
+  const own = c.language === "ko" ? "ko" : "en"; // the language of the word itself
+  // One row: the same thing on the two sides. flat: the same once, for a window with no room for two columns.
+  const row = (kind, cell, flat = null) => {
+    const cells = sides.map(cell);
+    if (!cells.some(Boolean)) return null;
+    return h("div", { class: `duo d-${kind}` },
+      cells.map((content, n) => h("div", { class: n ? "duo-cell other" : "duo-cell" }, content)),
+      flat && h("div", { class: "duo-flat" }, flat));
+  };
+  const labelled = (side, key, content) => [h("span", { class: "sense-label" }, side.say(key)), content];
+  const line = (text) => h("p", { class: "sense-line" }, text);
+  const pos = String(sense.part_of_speech || "").split("·").map((part) => part.trim()); // "noun · 명사"
+  const word = (lang) => (lang === own ? c.headword : sense.counterpart || c.counterpart);
+  const patterns = (Array.isArray(sense.patterns) ? sense.patterns : []).filter((p) => p?.en && p?.ko);
+  const tiles = () => h("div", { class: "eq-rows" }, h("div", { class: "eq-row ko" }, h("div", { class: "eq" },
+    String(sense.hun_eum).split("+").map((part) => part.trim()).filter(Boolean).map((part) => syllableTile({ hun_eum: part, meaning_en: "" })),
+    h("span", { class: "sum" }, h("span", { class: "op" }, "="), h("span", { class: "result" }, word("ko"))))));
+  const kin = [["비슷한 말", sense.synonyms, "syn"], ["반대말", sense.antonyms, "ant"]]
+    .map(([key, list, kind]) => [key, (Array.isArray(list) ? list : []).filter((w) => w?.[own]), kind]).filter(([, list]) => list.length > 0);
+  return [
+    row("head", (side) => {
+      const kind = side.lang === "ko" ? pos[1] || pos[0] : pos[0], name = word(side.lang);
+      return kind || name ? [kind && h("span", { class: "sense-pos" }, kind), name && h("b", null, name)] : null;
+    }),
+    row("def", (side) => sense[`definition_${side.lang}`] && h("p", { class: "sense-def" }, sense[`definition_${side.lang}`])),
+    row("note", (side) => sense[`note_${side.lang}`] && labelled(side, "알아 두기", line(sense[`note_${side.lang}`]))),
+    // The sentence itself on both sides, and what it says on the side of the other language.
+    !whole && (sense.example_ko || sense.example_en) && row("ex", (side) => labelled(side, "예문", [
+      sense[`example_${own}`] && line(sense[`example_${own}`]),
+      side.lang !== own && sense[`example_${side.lang}`] && h("p", { class: "sense-line gloss" }, sense[`example_${side.lang}`])]),
+      h("div", { class: "sense-ex" }, h("span", { class: "sense-label" }, t("예문")),
+        (koFirst() ? [sense.example_ko, sense.example_en] : [sense.example_en, sense.example_ko]).filter(Boolean).map((text, n) => h("p", { class: n ? "sense-line second" : "sense-line" }, text)))),
+    // How the word is used: the pattern itself on both sides, and what it means on the side of the other language.
+    patterns.length > 0 && row("use", (side) => labelled(side, "이렇게 써요", patterns.map((p) =>
+      h("p", { class: "use-row" }, h("b", null, p[own]), side.lang !== own && h("span", null, p[side.lang])))), useRows(c, patterns)),
+    !whole && row("origin", (side) => (sense.hun_eum || sense[`origin_${side.lang}`])
+      && labelled(side, "어디서 온 말일까?", [sense.hun_eum && tiles(), sense[`origin_${side.lang}`] && line(sense[`origin_${side.lang}`])])),
+    // Similar and opposite words: the words themselves on both sides, each with its meaning on the side of the other language.
+    !whole && kin.length > 0 && row("kin", (side) => h("div", { class: "kin" }, kin.map(([key, list, kind]) =>
+      h("div", { class: `kin-row ${kind}` },
+        h("span", { class: "kin-label" }, side.say(key)),
+        h("div", { class: "kin-words" }, list.map((w) =>
+          h("button", { class: "kin-word", title: side.say("이 단어 찾기"), onclick: () => search(w[own]) },
+            h("b", null, w[own]), side.lang !== own && w[side.lang] && h("span", null, w[side.lang]))))))),
+      kinRows(c, sense.synonyms, sense.antonyms)),
+  ];
+}
+// A sentence of a word with one meaning, in both languages. In a wide window it is two columns
+// like the meanings: the sentence alone on the side of the word's own language, the sentence and
+// what it says on the other side.
+function exampleLines(e, c) {
+  if (!WIDE()) return h("div", null, koFirst()
+    ? [h("p", null, highlight(e.ko, c)), h("p", { class: "en" }, highlight(e.en, c))]
+    : [h("p", null, highlight(e.en, c)), h("p", { class: "en" }, highlight(e.ko, c))]);
+  const own = c.language === "ko" ? "ko" : "en";
+  return h("div", { class: "duo-ex" }, duoSides().map((side) => h("div", { class: side.lang === own ? "mono" : "" },
+    h("p", null, highlight(e[own], c)), side.lang !== own && h("p", { class: "en" }, highlight(e[side.lang], c)))));
+}
 // Do the meanings carry their own similar and opposite words? (Entries written before that do not.)
 const kinBySense = (c) => manySenses(c) && c.senses.some((sense) => Array.isArray(sense?.synonyms) || Array.isArray(sense?.antonyms));
 const WHOLE_WORD = ["story", "kin", "say"]; // order of the sections under a word with several meanings
 function entryBlocks(word) {
   const c = word.content;
   const sections = [
-    ["kin", title(t("비슷한 말 · 반대말"), "SYNONYMS · ANTONYMS"), !kinBySense(c) && kinRows(c, c.synonyms, c.antonyms)],
+    ["kin", title(t("비슷한 말 · 반대말"), "SYNONYMS · ANTONYMS", "비슷한 말 · 반대말"), !kinBySense(c) && kinRows(c, c.synonyms, c.antonyms)],
     // The word split into its parts and the story of where it comes from are one thing: both say
     // what the word is made of. (How to remember a meaning is shown with that meaning.)
-    ["story", title(t("어디서 온 말일까?"), "ORIGIN"),
+    ["story", title(t("어디서 온 말일까?"), "ORIGIN", "어디서 온 말일까?"),
       (buildBlock(c) || c.origin_ko || c.origin_en) && [
         buildBlock(c),
         (c.origin_ko || c.origin_en) && h("div", { class: "tip-box" }, inBoth(c.origin_ko, c.origin_en)),
       ]],
-    ["ex", title(t("예문"), "EXAMPLES"),
+    ["ex", title(t("예문"), "EXAMPLES", "예문"),
       c.examples?.length > 0 && h("ol", null, c.examples.map((e, i) => h("li", null,
         h("span", { class: "num" }, String(i + 1)),
-        h("div", null, koFirst()
-          ? [h("p", null, highlight(e.ko, c)), h("p", { class: "en" }, highlight(e.en, c))]
-          : [h("p", null, highlight(e.en, c)), h("p", { class: "en" }, highlight(e.ko, c))]))))],
-    ["say", title(t("속담·사자성어"), "SAYINGS"),
+        exampleLines(e, c))))],
+    ["say", title(t("속담·사자성어"), "SAYINGS", "속담·사자성어"),
       c.related?.length > 0 && h("ul", null, c.related.map((r) => h("li", null,
         h("span", { class: "tag" }, KIND()[r.kind] || ""),
         h("span", { class: "tag from" }, sayingSource(r)),
         h("p", { class: "saying" }, r.text),
-        both(r.meaning_ko, r.meaning_en))))],
+        WIDE() ? h("div", { class: "pair" }, both(r.meaning_ko, r.meaning_en)) : both(r.meaning_ko, r.meaning_en))))],
   ].filter(([name, , content]) => content && !(manySenses(c) && name === "ex"))
     .sort((a, b) => (manySenses(c) ? WHOLE_WORD.indexOf(a[0]) - WHOLE_WORD.indexOf(b[0]) : 0));
 
@@ -1288,14 +1359,17 @@ function sayButtons(c) {
 }
 
 function hero(c, word) {
+  const duo = WIDE() && !manySenses(c); // a wide window: the one meaning in two columns, each with the word in its language
   return h("section", { class: "hero" },
     word && star(word),
     word?.discovered && h("div", { class: "found-line" }, h("i", { "aria-hidden": "true" }, "✦"), t("내가 처음 발견한 단어")),
     h("h2", null, c.headword),
-    !manySenses(c) && h("div", { class: "cp" }, h("small", null, "⇄"), c.counterpart),
-    h("div", { class: "meta" }, [c.pronunciation, !manySenses(c) && c.part_of_speech].filter(Boolean).join("  ·  "), sayButtons(c)),
+    !manySenses(c) && !duo && h("div", { class: "cp" }, h("small", null, "⇄"), c.counterpart),
+    h("div", { class: "meta" }, [c.pronunciation, !manySenses(c) && !duo && c.part_of_speech].filter(Boolean).join("  ·  "), sayButtons(c)),
     word && levelBar(word), // always here: under the word, above its meanings
-    manySenses(c) ? sensesList(c, word?.term_norm || c.headword) : [
+    manySenses(c) ? sensesList(c, word?.term_norm || c.headword)
+    : duo ? h("div", { class: "duo-rows" }, duoSense(c, { ...(c.senses?.[0] || {}), definition_ko: c.definition_ko, definition_en: c.definition_en, part_of_speech: c.part_of_speech, counterpart: c.counterpart }, true))
+    : [
       h("div", { class: "def" }, koFirst()
         ? [h("p", null, c.definition_ko), h("p", null, c.definition_en)]
         : [h("p", null, c.definition_en), h("p", null, c.definition_ko)]),
@@ -1312,7 +1386,8 @@ const manySenses = (c) => Array.isArray(c.senses) && c.senses.filter((sense) => 
 const posIn = (label) => { const parts = String(label || "").split("·").map((part) => part.trim()); return (koFirst() ? parts[1] : parts[0]) || parts[0] || ""; };
 function sensesList(c, key) {
   const senses = c.senses.filter((sense) => sense?.definition_ko || sense?.definition_en);
-  const open = WIDE() ? new Set(senses.keys()) : (state.openSense[key] ??= new Set([0]));
+  const wide = WIDE(); // every meaning open, and its two languages side by side (duoSense)
+  const open = wide ? new Set(senses.keys()) : (state.openSense[key] ??= new Set([0]));
   const pair = (ko, en) => (koFirst() ? [ko, en] : [en, ko]).filter(Boolean);
   // "동사 2 · 명사 1": what kinds of word this is, at a glance.
   const kinds = new Map();
@@ -1324,6 +1399,7 @@ function sensesList(c, key) {
       h("button", { class: "link senses-all", onclick: () => { state.openSense[key] = open.size === senses.length ? new Set() : new Set(senses.keys()); render(); } },
         open.size === senses.length ? t("모두 접기") : t("모두 펼치기"))),
     h("ol", { class: "senses" }, senses.map((sense, i) => {
+      if (wide) return h("li", { class: "open duo-li" }, h("span", { class: "sense-no", "aria-hidden": "true" }, String(i + 1)), h("div", { class: "duo-rows" }, duoSense(c, sense)));
       const [first, second] = pair(sense.definition_ko, sense.definition_en);
       const shown = open.has(i);
       return h("li", { class: shown ? "open" : "" },
@@ -1502,7 +1578,7 @@ function buildLive(box, between = null) { // between: what goes under the word (
     }),
   };
   el.cp.append(el.counterpart);
-  el.def.append(el.defKo, el.defEn);
+  el.def.append(...(koFirst() ? [el.defKo, el.defEn] : [el.defEn, el.defKo]));
   box.className = "live-box";
   box.replaceChildren(h("div", { class: "live" },
     h("section", { class: "hero" }, el.headword, el.cp, el.meta, between, el.def),
@@ -1663,15 +1739,15 @@ function yardSheet() {
   const toggle = (id) => {
     if (picked.includes(id)) picked = picked.filter((x) => x !== id);
     else if (picked.length < YARD_MAX) picked = [...picked, id];
-    else return toastText(t("마당에는 내 캐릭터까지 {n}마리가 살 수 있어요.", { n: YARD_MAX + 1 }));
+    else return toastText(t("내 캐릭터까지 {n}마리가 함께 다닐 수 있어요.", { n: YARD_MAX + 1 }));
     saveShop({ ...myShop(), yard: picked }); // kept with the account, so the yard is the same on every computer
     draw();
   };
   grid.append(...mine.map((c) => h("button", { class: "yard-pick", "data-id": c.id, title: c.name, "aria-label": c.name, onclick: () => toggle(c.id) }, portrait(c.id))));
   const el = h("div", { id: "sheet", class: "sheet-wrap", onclick: (e) => { if (e.target === el) close(); } },
-    h("div", { class: "sheet yard-sheet", role: "dialog", "aria-modal": "true", "aria-label": t("마당 캐릭터 고르기") },
-      h("h2", null, t("마당 캐릭터 고르기")),
-      h("p", null, t("마당에 둘 캐릭터를 눌러서 넣거나 빼세요. 내 캐릭터는 늘 함께 있어요."), " ", count, " ", empty),
+    h("div", { class: "sheet yard-sheet", role: "dialog", "aria-modal": "true", "aria-label": t("함께 다닐 캐릭터 고르기") },
+      h("h2", null, t("함께 다닐 캐릭터 고르기")),
+      h("p", null, t("눌러서 넣거나 빼세요. 고른 캐릭터는 화면 아래에서 내 캐릭터와 함께 다녀요."), " ", count, " ", empty),
       mine.length > 0 ? grid : h("p", { class: "small" }, t("아직 다른 캐릭터가 없어요. 포인트샵에서 캐릭터를 모아 보세요.")),
       h("button", { class: "btn wide", onclick: close }, t("닫기"))));
   draw();
@@ -1736,7 +1812,7 @@ function syncYard() {
   };
   showYard({
     ids: yardCast.ids, lead, gift: gift(),
-    onEdit: yardSheet, editLabel: t("마당 캐릭터 고르기"),
+    onEdit: yardSheet, editLabel: t("함께 다닐 캐릭터 고르기"),
     label: (id) => ALL_CHARACTERS.find((c) => c.id === id)?.name || id,
     nudge: () => nextNudge(false),
     // The others come by now and then; catching one is worth a few points (a few times a day).

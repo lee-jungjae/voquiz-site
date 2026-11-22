@@ -30,7 +30,12 @@ export function tryLang(next) {
 }
 
 export function t(key, vars) {
-  let text = lang === "ko" ? key : T[key]?.[lang === "en" ? 0 : 1] ?? key;
+  return tIn(lang, key, vars);
+}
+// The same in a language named (a wide window shows a word in two languages side by side, each
+// side with its own labels).
+export function tIn(which, key, vars) {
+  let text = which === "ko" ? key : T[key]?.[which === "en" ? 0 : 1] ?? key;
   for (const [name, value] of Object.entries(vars || {})) text = text.replaceAll(`{${name}}`, value);
   return text;
 }
@@ -784,9 +789,9 @@ const T = {
   "퀴즈 한 판 어때?": ["How about a quiz?", "来一局测验怎么样？"],
   "새 단어 찾으러 가자!": ["Let's go find a new word!", "去找个新单词吧！"],
   "오늘도 같이 하자!": ["Let's do this together today!", "今天也一起加油！"],
-  "마당 캐릭터 고르기": ["Choose who lives in the yard", "选择住在院子里的角色"],
-  "마당에 둘 캐릭터를 눌러서 넣거나 빼세요. 내 캐릭터는 늘 함께 있어요.": ["Tap a character to put it in the yard or take it out. Your own character is always there.", "点一下角色就能放进院子或拿出来。你自己的角色一直都在。"],
-  "마당에는 내 캐릭터까지 {n}마리가 살 수 있어요.": ["The yard has room for {n}, your own character included.", "院子里连你自己的角色一共能住 {n} 个。"],
+  "함께 다닐 캐릭터 고르기": ["Choose who walks with you", "选择一起走的角色"],
+  "눌러서 넣거나 빼세요. 고른 캐릭터는 화면 아래에서 내 캐릭터와 함께 다녀요.": ["Tap a character to add it or take it out. The ones you pick walk along the bottom of the screen with your own character.", "点一下角色就能加入或拿出来。选中的角色会在屏幕下方和你的角色一起走。"],
+  "내 캐릭터까지 {n}마리가 함께 다닐 수 있어요.": ["Up to {n} can walk together, your own character included.", "连你自己的角色一共能有 {n} 个一起走。"],
   "아직 다른 캐릭터가 없어요. 포인트샵에서 캐릭터를 모아 보세요.": ["No other characters yet. Collect some in the point shop.", "还没有别的角色。去积分商店收集吧。"],
   "단어를 찾으면 여기에 모여요.": ["The words you look up gather here.", "查过的单词会收在这里。"],
   "오늘 찾은 단어": ["Words looked up today", "今天查过的单词"],

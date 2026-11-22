@@ -2844,3 +2844,52 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
 }
 /* one card under the tabs is as wide as the screen, whatever the width (the extension's panel can be made wide) */
 .qz-games.one { display: block; }
+/* ----- desktop: a word's two languages side by side (the language of the screen on the left) -----
+   Every thing said about a meaning (the word, what it means, what to know, an example, how it is
+   used, where it comes from, similar words) is one row of two columns, and each column has its own
+   labels, so either one can be read alone from top to bottom. A line runs between the two. It needs
+   room: the result is wider than the other screens and leaves the right end to the character; where
+   the room is too little, the two sides go back to one under the other, and nothing is said twice. */
+.duo-rows { display: grid; gap: 14px; min-width: 0; }
+.duo { display: grid; gap: 4px; min-width: 0; }
+.duo p { margin: 0; }
+.duo.d-head > .duo-cell { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; }
+.duo.d-head b { font-size: 19px; }
+.duo .eq-rows { margin: 4px 0 8px; }
+.duo .kin { margin: 0; }
+.duo-li { display: grid; grid-template-columns: 38px minmax(0, 1fr); align-items: start; }
+.duo-li > .sense-no { margin-top: 3px; }
+.duo.d-head > .duo-cell.other, .duo > .other .sense-label, .duo > .other .eq-rows, .duo.d-ex > .duo-cell, .duo.d-use > .duo-cell, .duo.d-kin > .duo-cell, .duo-ex > .mono { display: none; }
+.duo .gloss { color: var(--muted); }
+.duo > .other .sense-def, .duo > .other .sense-line { color: var(--muted); }
+@media (min-width: 860px) {
+  html.web .dk > main:has(> article.entry) > :not(.dk-back) { max-width: 1080px; }
+  html.web .dk.folded > main:has(> article.entry) > :not(.dk-back) { width: auto; margin-right: max(152px, (100% - 1080px) / 2); } /* the character's end of the yard */
+  html.web .dk article.entry { container: entry / inline-size; }
+  .dk .hero > .duo-rows { margin-top: 26px; }
+}
+@container entry (min-width: 720px) {
+  .dk .duo-rows { gap: 0; }
+  .dk .duo { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; }
+  .dk .duo > .duo-cell, .dk .duo.d-ex > .duo-cell, .dk .duo.d-use > .duo-cell, .dk .duo.d-kin > .duo-cell { display: block; padding: 0 clamp(16px, 2.8cqw, 30px) 14px 0; }
+  .dk .duo > .duo-cell.other { padding: 0 0 14px clamp(16px, 2.8cqw, 30px); border-left: 1px solid var(--line); }
+  .dk .duo.d-head > .duo-cell, .dk .duo.d-head > .duo-cell.other { display: flex; padding-bottom: 6px; }
+  .dk .senses li.duo-li { padding: 24px 0; }
+  .dk .duo .sense-def { font-size: 16.5px; }
+  .dk .duo .sense-label { margin-bottom: 2px; }
+  .dk .duo:last-child > .duo-cell { padding-bottom: 0; }
+  .dk .duo > .other .sense-label { display: block; }
+  .dk .duo > .other .eq-rows { display: grid; }
+  .dk .duo > .duo-flat { display: none; }
+  .dk .duo > .other .sense-def, .dk .duo > .other .sense-line { color: inherit; }
+  .dk .duo .sense-def, .dk .duo .sense-line { line-height: 1.6; }
+  /* the pairs outside the meanings: a word's examples, where it comes from, what a saying means, the text that is still arriving */
+  .dk .hero .def, .dk .duo-ex, .dk .say .pair, .dk .langs-2, .dk .block.story .eq-rows {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: clamp(32px, 5.6cqw, 60px); row-gap: 6px; align-items: start;
+  }
+  .dk .hero .def p, .dk .hero .def p:first-child { margin: 0; font-size: 17px; font-weight: 400; line-height: 1.6; }
+  .dk .duo-ex { flex: 1; min-width: 0; }
+  .dk .duo-ex > .mono { display: block; }
+  .dk .duo-ex p, .dk .say .pair p { margin: 0; }
+  .dk .langs-2 { column-gap: 16px; }
+}
