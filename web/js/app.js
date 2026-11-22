@@ -1410,7 +1410,7 @@ function entryCard(word, flat = false) { // flat: one column even in a wide wind
     const left = blocks.filter((el) => el.classList.contains("ex"));
     return h("article", { class: "entry wide" },
       h("div", { class: "entry-main" }, hero(content, word), left),
-      h("aside", { class: "entry-side" }, blocks.filter((el) => !left.includes(el)), todayBox(), foot));
+      h("aside", { class: "entry-side" }, blocks.filter((el) => !left.includes(el)), todayBox(), questHint(), foot));
   }
   return h("article", { class: "entry" }, hero(content, word), blocks, foot);
 }
@@ -1570,16 +1570,31 @@ function quotaLine() {
 // The word box in the middle, two things worth doing next under it, and nothing else. The
 // student's characters are in the yard at the bottom of the window instead of in the page.
 const webHome = () => WIDE() && state.tab === "search" && !state.busy && !state.entry && !state.notice;
+// One line about collecting characters: a character ready to be taken, or else the quest nearest
+// to done with how far it has come. It opens the point shop, where the quests are.
+function questHint() {
+  if (claimable().length > 0) return h("button", { class: "quest-hint ready", onclick: openShop }, t("받을 수 있는 캐릭터가 있어요"), h("i", { "aria-hidden": "true" }, " →"));
+  const next = earnedCharacters().filter((c) => !ownsCharacter(c) && QUESTS[c.earn.by])
+    .sort((a, b) => questNow(b) / b.earn.goal - questNow(a) / a.earn.goal)[0];
+  if (!next) return null;
+  return h("button", { class: "quest-hint", title: t("포인트샵 열기"), onclick: openShop },
+    h("span", { class: "quest-face", "aria-hidden": "true" }, portrait(next.id)),
+    h("span", null, t("캐릭터 퀘스트"), " · ", QUESTS[next.earn.by].text(next.earn.goal)),
+    h("b", null, `${questNow(next)} / ${next.earn.goal}`));
+}
 function webActions() {
   const toQuiz = () => { Object.assign(state, { tab: "quiz", notice: null }); render(); };
   return [
     h("div", { class: "web-actions" },
+      // Today's present, while it waits: the first thing to do on a new day.
+      (giftWaiting() || santaWaiting()) && h("button", { class: "present", onclick: () => (giftWaiting() ? openDailyGift() : takeSantaGift()) }, giftArt(), t("오늘의 선물 받기")),
       h("button", { onclick: toQuiz }, t("퀴즈 한 판"), duel().badge() > 0 && h("em", { class: "dot" }, String(duel().badge()))),
       state.suggest && !limitReached() && h("button", { onclick: () => search(state.suggest) }, t("오늘의 단어: {w}", { w: state.suggest }))),
     h("p", { class: "web-today" },
       h("button", { class: "link", onclick: searchPointsSheet }, t("오늘 {a} / {b}점", { a: searchPointsToday() + searchBonusToday(), b: SEARCH_DAILY_MAX })),
       h("span", { "aria-hidden": "true" }, " · "),
       h("button", { class: "link", onclick: weeklyGoalSheet }, t("이번 주 {a} / {b}개", { a: weekCount(), b: weekGoal() }))),
+    questHint(),
   ];
 }
 function webQuiet() {
@@ -2770,6 +2785,7 @@ function quizDone() {
           h("div", { class: "sub" }, word.content.counterpart))))),
     h("p", { class: "act" }, h("button", { class: "btn wide", onclick: () => { state.quiz = null; render(); } }, t("확인"))),
     h("p", { class: "act-note center" }, h("button", { class: "link", onclick: () => { state.quiz = null; openRankings(); } }, t("이번 주 내 순위 보기"))),
+    WIDE() && questHint(),
   ];
 }
 

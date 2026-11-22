@@ -793,6 +793,8 @@ const T = {
   "오늘 찾은 단어로 퀴즈": ["Quiz me on today's words", "用今天查的单词测验"],
   "단어장에서 모두 보기": ["See them all in My words", "在单词本里看全部"],
   "이번 주 내 순위 보기": ["See where I stand this week", "看看我本周的排名"],
+  "오늘의 선물 받기": ["Open today's present", "领取今天的礼物"],
+  "캐릭터 퀘스트": ["Character quest", "角色任务"],
   "알아 두기": ["Good to know", "小贴士"],
   "이렇게 써요": ["How to use it", "这样用"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],

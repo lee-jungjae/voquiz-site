@@ -1996,6 +1996,15 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   .web-actions button { position: relative; padding: 10px 18px; border-radius: 10px; background: var(--surface); font-size: 13.5px; font-weight: 600; transition: box-shadow .15s; }
   .web-actions button:hover { box-shadow: 0 0 0 1px var(--border); }
   .web-actions .dot { position: absolute; top: -6px; right: -6px; }
+  .web-actions .present { display: inline-flex; align-items: center; gap: 8px; background: color-mix(in srgb, #ff8fab 16%, var(--bg)); }
+  .web-actions .present .gift-art { width: 20px; }
+  .web-actions .present .gift-art svg { display: block; width: 100%; height: auto; }
+  .quest-hint { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 14px; font-size: 12.5px; color: var(--muted); }
+  .quest-hint b { color: var(--text); }
+  .quest-hint:hover span { text-decoration: underline; }
+  .quest-hint.ready { color: var(--accent-dark); font-weight: 700; }
+  .quest-face { width: 26px; flex: none; }
+  .entry-side > .quest-hint { justify-content: flex-start; margin: 14px 4px 0; }
   .web-today { margin-top: 16px; text-align: center; font-size: 12.5px; color: var(--muted); }
   .web-today .link { color: inherit; font-size: inherit; }
   .web-quiet { margin-top: 26px; text-align: center; }
@@ -2020,7 +2029,8 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   html.web #yard[hidden] { display: none; }
   /* what scrolls behind the characters fades out, so they never stand on top of sharp text */
   html.web #yard::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, var(--bg) 78%); }
-  .walker.gift::after { content: ""; position: absolute; top: 2px; right: 6px; width: 12px; height: 12px; border-radius: 50%; background: #ff8fab; box-shadow: 0 0 0 2px var(--bg); animation: twinkle-soft 1.6s ease-in-out infinite; }
+  .walker .gift-art { position: absolute; left: 50%; top: -20px; width: 30px; margin-left: -15px; animation: yard-walk 1.2s ease-in-out infinite; }
+  .walker .gift-art svg { display: block; width: 100%; height: auto; }
   .yard-say { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); margin-bottom: 4px; padding: 6px 11px; border-radius: 12px; background: var(--text); color: var(--bg); font-size: 12px; font-weight: 600; white-space: nowrap; pointer-events: none; animation: rise .25s both; }
 }
 @media (min-width: 860px) and (max-width: 1099px) { html.web header nav button span { display: none; } html.web header nav button { padding: 8px 11px; } }

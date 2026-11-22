@@ -2,7 +2,7 @@
 // They walk about, stop, hop now and then, and react when tapped. The app only says who is there
 // (showYard) and what a tap does; everything that moves is in here.
 // The page needs an element with the id "yard" (the web version's index.html has one).
-import { portrait } from "./mascot.js";
+import { portrait, giftArt } from "./mascot.js";
 
 const still = () => Boolean(globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -109,7 +109,10 @@ export function showYard(next) {
   }
   for (const [id, w] of walkers) {
     w.el.classList.toggle("lead", id === opts.lead);
-    w.el.classList.toggle("gift", id === opts.lead && Boolean(opts.gift));
+    const holds = id === opts.lead && Boolean(opts.gift);
+    w.el.classList.toggle("gift", holds);
+    if (holds && !w.el.querySelector(".gift-art")) w.el.append(giftArt()); // today's present, held up
+    if (!holds) w.el.querySelector(".gift-art")?.remove();
     w.el.setAttribute("aria-label", opts.label?.(id) || id);
   }
 }
