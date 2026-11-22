@@ -1971,6 +1971,14 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   html.web main > .entry.wide { max-width: 1040px; display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 0 36px; align-items: start; }
   .entry-side { position: sticky; top: 4px; display: grid; gap: 4px; padding-top: 6px; }
   .entry-side > .block:first-child { margin-top: 0; }
+  .entry-side { max-height: calc(100vh - 190px); overflow-y: auto; padding-right: 4px; } /* it stays in view, so it must fit the window */
+  .today-box { margin-top: 18px; padding: 16px; border-radius: 16px; background: var(--surface); display: grid; gap: 10px; }
+  .today-box h3 { margin: 0; font-size: 13px; font-weight: 700; display: flex; gap: 6px; align-items: baseline; }
+  .today-box h3 small { color: var(--muted); font-weight: 600; }
+  .today-box .chips { margin: 0; gap: 6px; }
+  .today-box .chip { padding: 5px 11px; font-size: 12.5px; }
+  .today-box .chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent-dark); }
+  .today-box .link { justify-self: center; font-size: 12.5px; }
 
   /* the home: a logo, the word box, two things to do (the small logo in the corner steps aside).
      In the middle when there is room (a little above it), an ordinary page that scrolls when not. */

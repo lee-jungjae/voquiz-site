@@ -512,6 +512,7 @@ async function search(term) {
       const firstToday = !before || dayOf(before.last_searched_at) !== dayOf(new Date());
       state.words = [result.word, ...state.words.filter((w) => w.term_norm !== result.word.term_norm)];
       state.entry = result.word;
+      state.listWord = null; // beside the word list, the newest word shows again
       if (firstToday) awardSearch(result.word.headword);
       checkWeekly();
       // Nobody had looked this word up before: it goes down as this student's discovery.
@@ -1384,6 +1385,19 @@ function levelBar(word) {
     h("button", { class: "level-step", disabled: busy || i === BANDS.length - 1, onclick: () => showLevel(word, BANDS[i + 1]) }, t("더 자세히"), h("i", { "aria-hidden": "true" }, "›")));
 }
 
+// Beside a result in a wide window: the words looked up today, each one tap away, and the next
+// step from here: a quiz on exactly these words, or the whole list.
+function todayBox() {
+  const today = state.words.filter((w) => dayOf(w.last_searched_at) === dayOf(new Date()));
+  if (!today.length) return null;
+  const open = (w) => { Object.assign(state, { entry: w, notice: null, level: null }); render(); };
+  return h("section", { class: "today-box" },
+    h("h3", null, t("오늘 찾은 단어"), h("small", null, t("{n}개", { n: today.length }))),
+    h("div", { class: "chips" }, today.slice(0, 14).map((w) =>
+      h("button", { class: "chip", "aria-pressed": String(state.entry?.term_norm === w.term_norm), onclick: () => open(w) }, w.headword))),
+    h("button", { class: "btn ghost wide", onclick: () => { Object.assign(state, { tab: "quiz", notice: null, scope: { type: "days", days: 1, custom: true } }); render(); } }, t("오늘 찾은 단어로 퀴즈")),
+    h("button", { class: "link", onclick: () => { Object.assign(state, { tab: "words", wordLang: "recent", filter: "all", listWord: null, notice: null }); render(); } }, t("단어장에서 모두 보기")));
+}
 function entryCard(word, flat = false) { // flat: one column even in a wide window (beside the word list)
   if (levelOf(word)?.busy && levelOf(word).live) return h("article", { class: "entry" }, levelLive(word));
   const content = shownContent(word);
@@ -1396,7 +1410,7 @@ function entryCard(word, flat = false) { // flat: one column even in a wide wind
     const left = blocks.filter((el) => el.classList.contains("ex"));
     return h("article", { class: "entry wide" },
       h("div", { class: "entry-main" }, hero(content, word), left),
-      h("aside", { class: "entry-side" }, blocks.filter((el) => !left.includes(el)), foot));
+      h("aside", { class: "entry-side" }, blocks.filter((el) => !left.includes(el)), todayBox(), foot));
   }
   return h("article", { class: "entry" }, hero(content, word), blocks, foot);
 }
@@ -1699,6 +1713,7 @@ function searchForm(top = false) {
     type: "text", id: "q", value: state.query, maxLength: 40, autocomplete: "off",
     placeholder: state.suggest || t("단어 입력 · Type a word"), "aria-label": t("찾을 단어"),
     oninput: (e) => (state.query = e.target.value),
+    onfocus: (e) => e.target.select(), // the next word replaces the last one
   });
   return h("form", { class: `search${top ? " top" : ""}${searchPointsToday() < SEARCH_DAILY_MAX ? " tempt" : ""}`, onsubmit: (e) => { e.preventDefault(); const typed = input.value.trim(); if (!typed) state.suggest = null; search(typed || input.placeholder); } },
     input, h("button", { class: "btn", disabled: state.busy }, t("찾기")));
@@ -2754,6 +2769,7 @@ function quizDone() {
           h("div", { class: "word" }, word.headword),
           h("div", { class: "sub" }, word.content.counterpart))))),
     h("p", { class: "act" }, h("button", { class: "btn wide", onclick: () => { state.quiz = null; render(); } }, t("확인"))),
+    h("p", { class: "act-note center" }, h("button", { class: "link", onclick: () => { state.quiz = null; openRankings(); } }, t("이번 주 내 순위 보기"))),
   ];
 }
 
@@ -3454,8 +3470,15 @@ if (globalThis.chrome?.storage?.session) {
 
 // A keyboard is at hand in a wide window: 1 to 4 pick the choice with that number.
 document.addEventListener("keydown", (e) => {
-  if (!WIDE() || e.metaKey || e.ctrlKey || e.altKey || !/^[1-4]$/.test(e.key)) return;
+  if (!WIDE() || e.metaKey || e.ctrlKey || e.altKey) return;
   if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || "") || document.getElementById("sheet")) return;
+  // "/" or a letter, with no question on screen: the word box takes it (the next word to look up).
+  if ((e.key === "/" || /^[a-zA-Z]$/.test(e.key)) && !document.querySelector("main .choices, main .search.answer")) {
+    const box = document.getElementById("q");
+    if (box) { if (e.key === "/") e.preventDefault(); box.focus(); }
+    return;
+  }
+  if (!/^[1-4]$/.test(e.key)) return;
   const choice = document.querySelectorAll("main .choices .choice")[Number(e.key) - 1];
   if (choice && !choice.disabled) { e.preventDefault(); choice.click(); }
 });
