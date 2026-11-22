@@ -2908,3 +2908,30 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   .dk .duo-li.fresh .duo-rows > .duo:not(.duo-tap) { animation: rise .25s both; }
   main.still .duo-li.fresh .duo-rows > .duo { animation: none; }
 }
+/* ----- feedback on 0.1.24 ----- */
+/* The date over each day's words no longer stays at the top while the list moves: staying there
+   needed a band behind it, which showed as a white box over the words. */
+.day h3 { position: static; background: none; backdrop-filter: none; }
+/* A face that keeps still (past results): its eyes and mouth say glad or sorry, nothing moves. */
+.mascot.still, .mascot.still * { animation: none !important; transition: none !important; }
+.mascot.still .m-tiles { display: none; }
+/* Something new in a shop: a red dot, not a word. */
+.new-mark { top: 7px; right: 7px; width: 8px; height: 8px; padding: 0; border-radius: 50%; font-size: 0; letter-spacing: 0; }
+.new-dot { min-width: 0; width: 7px; height: 7px; margin-left: 3px; padding: 0; border-radius: 50%; font-size: 0; vertical-align: 7px; }
+button.points .dot.new { min-width: 0; width: 9px; height: 9px; padding: 0; font-size: 0; top: -1px; right: -1px; }
+/* What kind of character a tile holds (a quest, a special one): a small word in the tile's corner, inside it. */
+.ribbon, .ribbon.quest { top: 5px; left: 5px; transform: none; padding: 1px 4px; border-radius: 5px; background: var(--bg); font-size: 9.5px; line-height: 1.2; letter-spacing: .01em; } /* the tile's own colour behind the word: a character that jumps does not blot it out */
+.ribbon { color: #9a7400; }
+.ribbon.quest { color: var(--accent); }
+/* A folded meaning in a wide window says that it opens: a small button with the word on it. */
+.duo-toggle { width: auto; height: 28px; top: 21px; padding: 0 9px 0 12px; gap: 3px; display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); font-size: 12.5px; font-weight: 600; color: var(--text); white-space: nowrap; }
+.duo-toggle i { font-size: 15px; }
+.duo-toggle:hover, .duo-li:has(.duo-tap:hover) .duo-toggle { border-color: var(--text); background: var(--bg); }
+.duo-li .d-head > .duo-cell:last-of-type { padding-right: 104px; }
+@media (min-width: 860px) {
+  .dk .senses li.duo-li:not(.open) .duo-toggle { top: 15px; }
+  /* settings: the buttons of one group are one width, in one row */
+  .dk > main:has(> .block.prefs) .btn-stack { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .dk > main:has(> .block.prefs) .btn-stack .btn { width: 100%; min-width: 0; padding-left: 10px; padding-right: 10px; line-height: 1.25; }
+  .dk > main:has(> .block.prefs) .btn-caption { margin: 8px 0 0 2px; }
+}

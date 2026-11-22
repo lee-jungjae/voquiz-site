@@ -337,7 +337,7 @@ const T = {
   "초대 코드를 복사했어요.": ["Invite code copied.", "邀请码已复制。"],
   "코드만 복사": ["Copy the code only", "只复制邀请码"],
   "친구 초대": ["Invite friends", "邀请朋友"],
-  "남은 초대장 {n}장": ["{n} invitations left", "剩余邀请函 {n}张"],
+  "남은 초대장 {n}장": ["Invitations left: {n}", "剩余邀请函 {n}张"],
   "초대 코드로 가입한 친구는 바로 내 친구가 돼요.": ["A friend who joins with your code becomes your friend at once.", "用你的邀请码加入的朋友会立刻成为你的朋友。"],
   "친구에게 공유하기": ["Share with a friend", "分享给朋友"],
   "친구의 대결 신청 받기": ["Accept duels from friends", "接受朋友的对决邀请"],
@@ -725,7 +725,7 @@ const T = {
   "다운로드 페이지를 열었어요. 새 파일을 받아 폴더를 바꾼 뒤 확장 프로그램을 새로 고쳐 주세요.": ["The download page is open. Get the new file, replace the folder, then reload the extension.", "已打开下载页面。请下载新文件并替换文件夹，然后重新加载扩展程序。"],
   // the story film (js/film.js) and the first screens
   "선택": ["Select", "选择"],
-  "VOQUIZ 홈페이지 열기": ["Open the VOQUIZ homepage", "打开VOQUIZ主页"],
+  "VOQUIZ 홈페이지 열기": ["VOQUIZ homepage", "打开VOQUIZ主页"],
   "VOQUIZ를 소개하는 짧은 애니메이션": ["A short animation about VOQUIZ", "介绍VOQUIZ的小动画"],
   "재생": ["Play", "播放"],
   "일시 정지": ["Pause", "暂停"],

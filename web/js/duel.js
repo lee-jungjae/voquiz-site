@@ -4,8 +4,8 @@
 //
 // This file holds the rules and the screens. It gets what it needs from app.js through `c`
 // (the element builder, translations, the shared state, points, the character drawings).
-import { WORD_LISTS } from "./wordlists.js?v=0.1.25-tosbci";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.25-tosbci";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.26-tosbv9";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.26-tosbv9";
 
 export const DUEL_LENGTHS = [60, 100, 180]; // seconds; the challenger chooses
 export const DUEL_CHARGES = 3; // challenges a student can hold
@@ -293,8 +293,8 @@ export function initDuel(c) {
           at: d.finished_at || d.created_at,
           row: (when) => h("button", { class: `play-row duel ${r}`, title: t("결과 다시 보기"), onclick: () => openDetail(d) },
             h("span", { class: "play-who" },
-              face(d.my_character || c.myShop().character, r === "lose" ? "comfort" : "cheer"),
-              h("span", { class: "them" }, face(d.their_character || "bubble", r === "win" ? "comfort" : "cheer"))),
+              face(d.my_character || c.myShop().character, r === "lose" ? "comfort" : "cheer", false, true),
+              h("span", { class: "them" }, face(d.their_character || "bubble", r === "win" ? "comfort" : "cheer", false, true))),
             h("span", { class: "play-what" }, h("b", null, t("대결"), " · ", who(d.other)), h("small", null, `${when} · ${lengthLabel(d.seconds || 180)}`)),
             h("b", { class: "play-score" }, `${d.my_score} : ${d.their_score}`),
             h("span", { class: `mark ${r}` }, word[r])),
@@ -648,8 +648,8 @@ export function initDuel(c) {
 
   // ---------- screens ----------
 
-  const face = (character, mood, mystery) =>
-    h("div", { class: `face${mystery ? " mystery" : ""}`, "aria-hidden": "true" }, c.reaction(character, mood), mystery && h("i", null, "?"));
+  const face = (character, mood, mystery, still) =>
+    h("div", { class: `face${mystery ? " mystery" : ""}`, "aria-hidden": "true" }, c.reaction(character, mood, Boolean(still)), mystery && h("i", null, "?"));
 
   function introView() {
     const d = state.duel;

@@ -1,27 +1,27 @@
-import { api, DEMO } from "./api.js?v=0.1.25-tosbci";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.25-tosbci";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.25-tosbci";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.25-tosbci";
-import { cleanEntry } from "./clean.js?v=0.1.25-tosbci";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.25-tosbci";
-import { CHARACTERS } from "./characters.js?v=0.1.25-tosbci";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.25-tosbci";
-import { film } from "./film.js?v=0.1.25-tosbci";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.25-tosbci";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.25-tosbci";
-import { initDesktop } from "./desktop.js?v=0.1.25-tosbci";
-import { BANDS, bandOf } from "./levels.js?v=0.1.25-tosbci";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.25-tosbci";
-import { initDuel } from "./duel.js?v=0.1.25-tosbci";
-import { initFriends } from "./friends.js?v=0.1.25-tosbci";
-import { MOTTOS } from "./mottos.js?v=0.1.25-tosbci";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.25-tosbci";
-import { SIGNATURES } from "./signatures.js?v=0.1.25-tosbci";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.25-tosbci";
-import { tuning, setTuning } from "./tuning.js?v=0.1.25-tosbci";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.25-tosbci";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.25-tosbci";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.25-tosbci";
+import { api, DEMO } from "./api.js?v=0.1.26-tosbv9";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.26-tosbv9";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.26-tosbv9";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.26-tosbv9";
+import { cleanEntry } from "./clean.js?v=0.1.26-tosbv9";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.26-tosbv9";
+import { CHARACTERS } from "./characters.js?v=0.1.26-tosbv9";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.26-tosbv9";
+import { film } from "./film.js?v=0.1.26-tosbv9";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.26-tosbv9";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.26-tosbv9";
+import { initDesktop } from "./desktop.js?v=0.1.26-tosbv9";
+import { BANDS, bandOf } from "./levels.js?v=0.1.26-tosbv9";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.26-tosbv9";
+import { initDuel } from "./duel.js?v=0.1.26-tosbv9";
+import { initFriends } from "./friends.js?v=0.1.26-tosbv9";
+import { MOTTOS } from "./mottos.js?v=0.1.26-tosbv9";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.26-tosbv9";
+import { SIGNATURES } from "./signatures.js?v=0.1.26-tosbv9";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.26-tosbv9";
+import { tuning, setTuning } from "./tuning.js?v=0.1.26-tosbv9";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.26-tosbv9";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.26-tosbv9";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.26-tosbv9";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -1429,7 +1429,7 @@ function sensesList(c, key) {
           h("span", { class: "sense-no", "aria-hidden": "true" }, String(i + 1)),
           h("div", { class: "duo-rows" }, top, isOpen && more),
           more.length > 0 && h("button", { class: "duo-toggle", "aria-expanded": String(isOpen), title: isOpen ? t("접기") : t("펼치기"), "aria-label": isOpen ? t("접기") : t("펼치기"), onclick: toggle },
-            h("i", { "aria-hidden": "true" }, "⌄")));
+            h("span", null, isOpen ? t("접기") : t("펼치기")), h("i", { "aria-hidden": "true" }, "⌄")));
       })));
   }
   return h("div", { class: "senses-box" },
@@ -3093,7 +3093,7 @@ function howSheet(title, steps, extra) {
 function playsList(duels, only) { // only: "q" word-list quiz, "s" streak, "d" duel; nothing = every game
   const me = myShop().character;
   const when = (at) => `${dayLabel(dayOf(at))} ${new Date(at).toLocaleTimeString(locale(), { hour: "numeric", minute: "2-digit" })}`;
-  const face = (mood) => h("span", { class: "face", "aria-hidden": "true" }, reaction(me, mood));
+  const face = (mood) => h("span", { class: "face", "aria-hidden": "true" }, reaction(me, mood, true)); // glad or sorry, and still
   const signed = (n) => `${n > 0 ? "+" : ""}${n}`;
   const mine = (Array.isArray(state.user.plays) ? state.user.plays : []).filter((p) => !only || p.k === only).map((p) => ({
     at: p.at,
@@ -3555,9 +3555,10 @@ function settingsView() {
       // one under another, each as wide as the panel: the labels differ a lot in length between languages
       h("div", { class: "btn-stack" },
         storeUrl && h("button", { class: "btn ghost", onclick: sharePrompt }, t("친구에게 공유"),
-          state.invites && h("span", { class: "btn-note" }, t("남은 초대장 {n}장", { n: friends().unusedInvites().length }))),
+          state.invites && !WIDE() && h("span", { class: "btn-note" }, t("남은 초대장 {n}장", { n: friends().unusedInvites().length }))),
         storeUrl && h("button", { class: "btn ghost", onclick: ratePrompt }, t("평가하기")),
-        HOME_URL && h("button", { class: "btn ghost", onclick: () => window.open(HOME_URL + (getLang() === "ko" ? "" : "en.html"), "_blank", "noopener") }, t("VOQUIZ 홈페이지 열기")))),
+        HOME_URL && h("button", { class: "btn ghost", onclick: () => window.open(HOME_URL + (getLang() === "ko" ? "" : "en.html"), "_blank", "noopener") }, t("VOQUIZ 홈페이지 열기"))),
+      WIDE() && storeUrl && state.invites && h("p", { class: "small muted btn-caption" }, t("남은 초대장 {n}장", { n: friends().unusedInvites().length }))),
     h("section", { class: "block" },
       h("h3", null, t("계정")),
       h("p", { class: "muted" }, state.user.email),
