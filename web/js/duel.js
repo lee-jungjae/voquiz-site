@@ -4,8 +4,8 @@
 //
 // This file holds the rules and the screens. It gets what it needs from app.js through `c`
 // (the element builder, translations, the shared state, points, the character drawings).
-import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow2l4";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow2l4";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow36j";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow36j";
 
 export const DUEL_LENGTHS = [60, 100, 180]; // seconds; the challenger chooses
 export const DUEL_CHARGES = 3; // challenges a student can hold
@@ -285,7 +285,7 @@ export function initDuel(c) {
     const word = { win: t("승"), draw: t("무"), lose: t("패") };
     return {
       fee: Math.min(FEE, state.user.points || 0), win: WIN, draw: DRAW,
-      sendsLeft: sendsLeft(), sends: sendsLine(), pick: openPicker, steps: STEPS(),
+      sendsLeft: sendsLeft(), sendsAll: DUEL_CHARGES, wait: sendsLeft() === 0 ? waitClock() : null, pick: openPicker, steps: STEPS(),
       lists: [
         waiting.length > 0 && h("section", { class: "duel-list" },
           h("h3", null, t("받은 도전"), h("small", null, String(waiting.length))),

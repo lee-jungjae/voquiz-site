@@ -1,27 +1,27 @@
-import { api, DEMO } from "./api.js?v=0.1.23-tow2l4";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tow2l4";
-import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tow2l4";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tow2l4";
-import { cleanEntry } from "./clean.js?v=0.1.23-tow2l4";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tow2l4";
-import { CHARACTERS } from "./characters.js?v=0.1.23-tow2l4";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tow2l4";
-import { film } from "./film.js?v=0.1.23-tow2l4";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.23-tow2l4";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.23-tow2l4";
-import { initDesktop } from "./desktop.js?v=0.1.23-tow2l4";
-import { BANDS, bandOf } from "./levels.js?v=0.1.23-tow2l4";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tow2l4";
-import { initDuel } from "./duel.js?v=0.1.23-tow2l4";
-import { initFriends } from "./friends.js?v=0.1.23-tow2l4";
-import { MOTTOS } from "./mottos.js?v=0.1.23-tow2l4";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tow2l4";
-import { SIGNATURES } from "./signatures.js?v=0.1.23-tow2l4";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tow2l4";
-import { tuning, setTuning } from "./tuning.js?v=0.1.23-tow2l4";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow2l4";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow2l4";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tow2l4";
+import { api, DEMO } from "./api.js?v=0.1.23-tow36j";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tow36j";
+import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tow36j";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tow36j";
+import { cleanEntry } from "./clean.js?v=0.1.23-tow36j";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tow36j";
+import { CHARACTERS } from "./characters.js?v=0.1.23-tow36j";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tow36j";
+import { film } from "./film.js?v=0.1.23-tow36j";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.23-tow36j";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.23-tow36j";
+import { initDesktop } from "./desktop.js?v=0.1.23-tow36j";
+import { BANDS, bandOf } from "./levels.js?v=0.1.23-tow36j";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tow36j";
+import { initDuel } from "./duel.js?v=0.1.23-tow36j";
+import { initFriends } from "./friends.js?v=0.1.23-tow36j";
+import { MOTTOS } from "./mottos.js?v=0.1.23-tow36j";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tow36j";
+import { SIGNATURES } from "./signatures.js?v=0.1.23-tow36j";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tow36j";
+import { tuning, setTuning } from "./tuning.js?v=0.1.23-tow36j";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow36j";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow36j";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tow36j";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -2006,9 +2006,7 @@ function wordsList() {
           state.words.length ? t("여기에 해당하는 단어가 없어요.") : t("아직 찾아본 단어가 없어요."))
       : byWeek ? [...groups].map(weekSection)
       : [...groups].map(([day, words]) => h("section", { class: "day" },
-          h("h3", null, dayLabel(day), h("small", null, t("{n}개", { n: words.length })),
-            // In the desktop frame, today's words lead straight to a quiz of them.
-            WIDE() && day === dayOf(new Date()) && h("button", { class: "day-quiz", title: t("오늘 찾은 단어로 퀴즈"), onclick: () => { Object.assign(state, { tab: "quiz", notice: null, scope: { type: "days", days: 1, custom: true } }); render(); } }, t("퀴즈"), " →")),
+          h("h3", null, dayLabel(day), h("small", null, t("{n}개", { n: words.length }))),
           h("div", { class: "list" }, words.map(wordRow)))),
   ];
 }
@@ -2666,6 +2664,29 @@ function rankView() {
 
 // ---------- quiz tab ----------
 
+// A choice from a short list in the desktop frame, drawn like the rest of the app: a button that
+// shows the choice, and a list that opens under it. (A phone and the extension keep the browser's
+// own select.) options: [value, text] pairs; a plain string is a heading between them.
+function pickMenu(id, label, options, value, onPick) {
+  const open = state.pickOpen === id;
+  const same = (o) => Array.isArray(o) && String(o[0]) === String(value);
+  const now = options.find(same);
+  return h("div", { class: `pick${open ? " open" : ""}` },
+    h("button", { type: "button", id, class: "pick-button", "aria-haspopup": "listbox", "aria-expanded": String(open), "aria-label": label,
+      onclick: () => { state.pickOpen = open ? null : id; render(); } },
+      h("span", null, now ? now[1] : ""), h("i", { "aria-hidden": "true" }, "▾")),
+    open && h("div", { class: "pick-menu", role: "listbox", "aria-label": label }, options.map((o) => (Array.isArray(o)
+      ? h("button", { type: "button", role: "option", "aria-selected": String(same(o)), onclick: () => { state.pickOpen = null; onPick(o[0]); } },
+          h("span", null, o[1]), same(o) && h("i", { "aria-hidden": "true" }, "✓"))
+      : h("h6", null, o)))));
+}
+document.addEventListener("click", (e) => { // a click anywhere else closes an open menu
+  if (state.pickOpen && !e.target.closest?.(".pick")) { state.pickOpen = null; render(); }
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && state.pickOpen) { state.pickOpen = null; render(); }
+});
+
 function quizScope() {
   const scope = state.scope;
   const setScope = (next) => { state.scope = next; render(); };
@@ -2693,6 +2714,9 @@ function quizScope() {
     h("option", { value: "learned" }, t("다 익힌 단어 다시 확인 ({d}일 지난 것)", { d: RETEST_DAYS })),
     h("option", { value: "all" }, t("전체 단어")));
   select.value = scope.type === "days" ? (scope.custom ? "days" : "7") : scope.type;
+  // The same choice as a menu of the desktop frame.
+  const picker = () => pickMenu("scope", t("시험 범위"), [...select.options].map((o) => [o.value, o.textContent]), select.value,
+    (v) => { select.value = v; select.dispatchEvent(new Event("change")); });
 
   const fields = [
     h("div", { class: "field" }, h("label", { htmlFor: "scope" }, t("시험 범위")), select),
@@ -2714,7 +2738,7 @@ function quizScope() {
   const note = cards.length === 0 ? (scope.type === "review" ? t("지금은 틀린 단어가 없어요!") : scope.type === "learned" && inRange === 0 ? t("익힌 지 {d}일이 지난 단어가 아직 없어요.", { d: RETEST_DAYS }) : t("이 범위에는 단어가 없어요. 범위를 바꿔 보세요."))
     : inRange > cards.length ? t("범위에 {n}개가 있어요. 그중 {m}개를 골라서 내요.", { n: inRange, m: cards.length })
     : review > 0 && scope.type !== "review" ? t("지난번에 틀린 복습 단어 {n}개 포함", { n: review }) : "";
-  return { scope, fields, cards, inRange, review, note };
+  return { scope, fields, picker, custom: fields.slice(1), cards, inRange, review, note };
 }
 const QUIZ_STEPS = () => [
   t("뜻을 보고 단어를 쓰거나 골라요."),
@@ -2925,35 +2949,56 @@ function howSheet(title, steps, extra) {
       h("button", { class: "btn wide", onclick: close }, t("닫기"))));
   document.body.append(el);
 }
+// The characters that host the three games on the quiz page: others the student owns first (never
+// the one that lives in the yard), then any others.
+function quizHosts() {
+  const lead = myShop().character;
+  return [...(yardCast?.rest || []), ...ALL_CHARACTERS.map((c) => c.id)].filter((id, i, all) => id !== lead && all.indexOf(id) === i).slice(0, 4);
+}
 function quizHub() {
   const quiz = quizScope();
   const versus = duel().desk();
   const grade = Math.min(12, Math.max(3, state.user.grade));
-  const game = (id, icon, name, text, body, start, steps, extra) => h("section", { class: `qz-game ${id}` },
-    h("div", { class: "qz-icon", "aria-hidden": "true" }, icon),
+  const [host1, host2, host3, host4] = quizHosts();
+  // Every card is built the same way, so the same kind of thing sits at the same height in all three:
+  // who hosts it, its name, two lines about it, one slot (a choice, or what is left today), three numbers, the start.
+  const game = (id, art, name, text, slot, numbers, more, start, steps, extra) => h("section", { class: `qz-game ${id}` },
+    h("div", { class: "qz-art", "aria-hidden": "true" }, art),
     h("h2", null, name),
     h("p", { class: "qz-text" }, text),
-    h("div", { class: "qz-body" }, body),
+    slot,
+    h("div", { class: "guide-stats qz-nums" }, numbers),
+    more,
     start,
     h("button", { class: "link qz-how", onclick: () => howSheet(name, steps, extra) }, t("하는 방법")));
-  const numbers = (...stats) => h("div", { class: "guide-stats qz-nums" }, stats);
+  const slot = (label, control) => h("div", { class: "qz-slot" }, h("span", null, label), control);
+  const pips = (left, all) => h("span", { class: "qz-pips" },
+    h("span", { class: "pips", "aria-hidden": "true" }, Array.from({ length: all }, (_, i) => h("i", { class: i < left ? "on" : "" }))),
+    h("b", null, `${left} / ${all}`));
+  const points = streakRules().points;
   return [
     h("h1", { class: "qz-title" }, t("퀴즈")),
     h("p", { class: "qz-lead" }, t("세 가지 퀴즈 중에서 골라 시작해요.")),
     h("div", { class: "qz-games" },
-      game("review", "📚", t("단어장 퀴즈"), t("내가 찾은 단어로 풀어요."),
-        [quiz.fields,
-          numbers(guideStat(t("문제 수"), t("{n}개", { n: quiz.cards.length })), guideStat(t("쓰는 포인트"), [coin(), `-${quizFee(quiz.cards.length)}`], "use"), guideStat(t("다 맞히면 최대"), [coin(), `+${quizMax(quiz.cards.length)}`], "gain")),
-          quiz.note && h("p", { class: "qz-note" }, quiz.note)],
+      game("review", [portrait(host1), h("i", { class: "qz-tile a" }, "A"), h("i", { class: "qz-tile b" }, "가")],
+        t("단어장 퀴즈"), t("내가 찾은 단어로 풀어요."),
+        slot(t("시험 범위"), quiz.picker()),
+        [guideStat(t("문제 수"), t("{n}개", { n: quiz.cards.length })), guideStat(t("쓰는 포인트"), [coin(), `-${quizFee(quiz.cards.length)}`], "use"), guideStat(t("다 맞히면 최대"), [coin(), `+${quizMax(quiz.cards.length)}`], "gain")],
+        [quiz.custom, quiz.note && h("p", { class: "qz-note" }, quiz.note)],
         h("button", { class: "btn", disabled: quiz.cards.length === 0, onclick: startQuiz }, t("퀴즈 시작")),
         QUIZ_STEPS()),
-      game("streak", "🔥", t("연속 도전"), t("틀릴 때까지 이어져요."),
-        numbers(guideStat(t("내 최고 기록"), t("{n}연속", { n: bestStreak() })), guideStat(t("오늘 남은 도전"), `${triesLeft()} / ${streakRules().tries}`), guideStat(t("단계 보너스"), [coin(), `+${stageBonus(1)}~${stageBonus(STAGES.length)}`], "gain")),
+      game("streak", [portrait(host2), h("i", { class: "qz-step s1" }), h("i", { class: "qz-step s2" }), h("i", { class: "qz-step s3" })],
+        t("연속 도전"), t("틀릴 때까지 이어져요."),
+        slot(t("오늘 남은 도전"), pips(triesLeft(), streakRules().tries)),
+        [guideStat(t("내 최고 기록"), t("{n}연속", { n: bestStreak() })), guideStat(t("정답 점수"), [coin(), `+${points[0]}~${points[points.length - 1]}`], "gain"), guideStat(t("단계 보너스"), [coin(), `+${stageBonus(1)}~${stageBonus(STAGES.length)}`], "gain")],
+        null,
         h("button", { class: "btn", disabled: triesLeft() === 0, onclick: startChallenge }, triesLeft() ? t("도전 시작") : t("오늘 도전은 끝! 내일 또 만나요")),
         challengeSteps(grade), stageLadder()),
-      game("duel", "⚔️", t("대결"), t("친구와 같은 문제로 겨뤄요."),
-        versus.setup ? h("p", { class: "qz-note" }, versus.setup)
-          : [numbers(guideStat(t("쓰는 포인트"), [coin(), `-${versus.fee}`], "use"), guideStat(t("이기면"), [coin(), `+${versus.win}`], "gain"), guideStat(t("비기면"), [coin(), `+${versus.draw}`], "gain")), versus.sends],
+      game("duel", [portrait(host3), h("i", { class: "qz-vs" }, "VS"), h("span", { class: "qz-rival" }, portrait(host4))],
+        t("대결"), t("친구와 같은 문제로 겨뤄요."),
+        versus.setup ? h("p", { class: "qz-note" }, versus.setup) : slot(t("보낼 수 있는 도전"), pips(versus.sendsLeft, versus.sendsAll)),
+        versus.setup ? null : [guideStat(t("쓰는 포인트"), [coin(), `-${versus.fee}`], "use"), guideStat(t("이기면"), [coin(), `+${versus.win}`], "gain"), guideStat(t("비기면"), [coin(), `+${versus.draw}`], "gain")],
+        versus.wait && h("p", { class: "qz-note" }, versus.wait),
         h("button", { class: "btn", disabled: Boolean(versus.setup) || versus.sendsLeft === 0, onclick: versus.pick }, versus.setup || versus.sendsLeft ? t("상대 고르기") : t("충전을 기다리는 중")),
         versus.steps)),
     versus.lists,
@@ -3273,11 +3318,14 @@ function settingsView() {
   const grade = h("select", { id: "grade-select", "aria-label": t("학년"), onchange: (e) => chooseGrade(Number(e.target.value)) },
     BANDS.map((band) => h("optgroup", { label: `${band.label} · ${t(band.name)}` }, band.grades.map((g) => h("option", { value: String(g) }, `G${g}`)))));
   grade.value = String(state.user.grade);
+  const gradeMenu = () => pickMenu("grade-select", t("학년"), BANDS.flatMap((band) => [`${band.label} · ${t(band.name)}`, ...band.grades.map((g) => [String(g), `G${g}`])]),
+    String(state.user.grade), (v) => chooseGrade(Number(v)));
   return [
     h("div", { class: "page-head" },
       h("button", { class: "back", "aria-label": t("뒤로"), title: t("뒤로"), onclick: openSettings }, "←"),
       h("h2", { class: "page-title" }, t("설정"))),
     h("section", { class: "block prefs" },
+      WIDE() && h("h3", null, t("내 정보")),
       h("form", { class: "row", onsubmit: async (e) => {
         e.preventDefault();
         state.notice = null;
@@ -3308,7 +3356,7 @@ function settingsView() {
       h("div", { class: "pref-row" },
         h("div", { class: "chips", role: "group", "aria-label": t("언어") }, LANGS.map(([id, label]) =>
           h("button", { class: "chip", "aria-pressed": String(getLang() === id), onclick: () => { setLang(id); render(); } }, label))),
-        h("label", { class: "grade-pick" }, t("학년"), grade))),
+        WIDE() ? h("div", { class: "grade-pick" }, t("학년"), gradeMenu()) : h("label", { class: "grade-pick" }, t("학년"), grade))),
     plansOn() && plusSection(),
     h("section", { class: "block" },
       h("h3", null, t("소리")),
@@ -3570,7 +3618,7 @@ function goTab(id) {
 let desktopModule;
 const desktop = () => (desktopModule ||= initDesktop({
   h, t, state, render, logoIcon, wordmark, searchForm, goHome, goTab, openShop, openSettings, openPage, webHome, star, isLearned, dayOf, dayLabel,
-  wordsList,
+  wordsList, icon,
   dailyGoal, todayBox, questHint, entrySide, giftArt, portrait,
   residents: () => yardCast?.rest || [], // the characters that are not out in the yard
   duelBadge: () => duel().badge(), friendsBadge: () => friends().badge(),

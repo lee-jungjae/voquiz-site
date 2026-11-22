@@ -10,7 +10,7 @@
 //  - leaving: when the window becomes a phone's, everybody runs to the dictionary tab (leaveYard).
 // The app only says who is there and what a tap does; everything that moves is in here.
 // The page needs an element with the id "yard" (the web version's index.html has one).
-import { portrait, giftArt } from "./mascot.js?v=0.1.23-tow2l4";
+import { portrait, giftArt } from "./mascot.js?v=0.1.23-tow36j";
 
 const still = () => Boolean(globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -28,12 +28,17 @@ function sides(w) {
   const max = room(w), width = w.el.offsetWidth || 90;
   const clear = opts.clear?.();
   if (!clear) return [[0, max]];
-  const base = root.getBoundingClientRect().left, slack = width * 0.33;
-  const leftEnd = Math.min(max, clear.left - base - width + slack), rightStart = Math.max(0, clear.right - base - slack);
-  const out = [];
-  if (leftEnd >= 0) out.push([0, leftEnd]);
-  if (rightStart <= max) out.push([rightStart, max]);
-  return out.length ? out : [[0, max]];
+  const base = root.getBoundingClientRect().left;
+  // First with hardly any of the character over the column; if no side has that much room, with a third of it.
+  for (const share of [0.1, 0.33]) {
+    const slack = width * share;
+    const leftEnd = Math.min(max, clear.left - base - width + slack), rightStart = Math.max(0, clear.right - base - slack);
+    const out = [];
+    if (leftEnd >= 0) out.push([0, leftEnd]);
+    if (rightStart <= max) out.push([rightStart, max]);
+    if (out.length) return out;
+  }
+  return [[0, max]];
 }
 function place(w, x, seconds = 0) {
   w.x = Math.round(x);
@@ -59,7 +64,8 @@ function stroll(w) {
   const clearOf = opts.stay === "right" ? opts.clear?.() : null;
   const past = clearOf ? clearOf.right - root.getBoundingClientRect().left + 8 : Infinity; // wholly to the right of the column, when there is room
   const keep = opts.stay === "right" ? (past <= room(w) ? [past, room(w)] : last[0] > 0 ? last : [Math.max(0, room(w) - 80), room(w)]) : null;
-  const outside = Boolean(keep) && (w.x < keep[0] || w.x > keep[1]); // not there yet: it goes now, briskly
+  const off = !places.some(([lo, hi]) => w.x >= lo && w.x <= hi); // the screen changed under it: it stands on the column now
+  const outside = off || (Boolean(keep) && (w.x < keep[0] || w.x > keep[1])); // not where it should be: it goes now, briskly
   const roll = Math.random();
   if (!outside && roll < 0.2) { hop(w); w.timer = setTimeout(() => stroll(w), rand(900, 2400)); return; }
   if (!outside && roll < 0.42) { w.timer = setTimeout(() => stroll(w), rand(1500, 5000)); return; }
@@ -169,6 +175,11 @@ export function showYard(next) {
   }
   for (const id of ids) if (!walkers.has(id)) add(id);
   if (asked && opts.stay) for (const w of walkers.values()) if (!w.away) stroll(w); // on their way at once
+  // The screen changed under them (the word list opened, another screen): whoever now stands on the column moves beside it.
+  for (const w of walkers.values()) {
+    if (w.away || w.el.classList.contains("walk") || w.moving) continue;
+    if (!sides(w).some(([lo, hi]) => w.x >= lo && w.x <= hi)) { w.moving = true; clearTimeout(w.timer); w.timer = setTimeout(() => { w.moving = false; stroll(w); }, 350); }
+  }
   // A small button at the end of the yard opens the choice of who lives here.
   let edit = root.querySelector(".yard-edit");
   if (opts.onEdit && ids.length && !edit) {

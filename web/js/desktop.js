@@ -32,7 +32,7 @@ export function initDesktop(c) {
     return h("aside", { class: "dk-words", "aria-label": t("단어장") },
       h("div", { class: "dk-words-head" },
         h("b", null, t("단어장")), h("small", null, String(state.words.length)),
-        h("button", { class: `dk-fold${Date.now() - cameOut < SHOW_MS ? " hint" : ""}`, title: t("단어장 접기"), "aria-label": t("단어장 접기"), onclick: () => fold(true) }, "◂")),
+        h("button", { class: `dk-fold${Date.now() - cameOut < SHOW_MS ? " hint" : ""}`, title: t("단어장 접기"), "aria-label": t("단어장 접기"), onclick: () => fold(true) }, "«")),
       h("input", { type: "search", id: "dk-find", value: state.wordsFind || "", autocomplete: "off", placeholder: t("내 단어에서 찾기"), "aria-label": t("내 단어에서 찾기"),
         oninput: (e) => { state.wordsFind = e.target.value; body.replaceChildren(...h("div", null, c.wordsList()).childNodes); } }),
       body);
@@ -42,18 +42,19 @@ export function initDesktop(c) {
   const pop = () => null; // the other characters come out by themselves now and then (yard.js, visitors), not under the pointer
   function top(bare) {
     const item = (id, label, n) => h("button", { "aria-current": state.tab === id ? "page" : null, onclick: () => c.goTab(id) },
-      label, id === "quiz" && c.duelBadge() > 0 && h("em", { class: "dot" }, String(c.duelBadge())), pop(n));
+      c.icon(id), label, id === "quiz" && c.duelBadge() > 0 && h("em", { class: "dot" }, String(c.duelBadge())), pop(n));
     return h("header", { class: "dk-top" },
       h("div", { class: "dk-left" },
         h("button", { class: "dk-logo", title: t("처음 화면으로"), "aria-label": t("처음 화면으로"), onclick: c.goHome }, c.logoIcon(28), c.wordmark(24)),
         h("nav", { class: "dk-nav" }, item("search", t("사전"), 0), item("quiz", t("퀴즈"), 1), item("rank", t("랭킹"), 2))),
       bare ? h("span", { class: "dk-gap" }) : c.searchForm(true),
+      // The student's corner, in the order of the extension: points (the shop), friends, settings.
       h("div", { class: "dk-me" },
-        h("button", { class: "dk-link", "aria-pressed": String(state.tab === "friends"), onclick: () => c.openPage("friends") },
-          t("친구"), c.friendsBadge() > 0 && h("em", { class: "dot" }, String(c.friendsBadge())), pop(4)),
-        h("button", { class: "dk-link", "aria-pressed": String(state.tab === "settings"), onclick: c.openSettings }, t("설정"), pop(5)),
         h("button", { class: "points dk-points", id: "points", title: t("포인트샵 열기"), "aria-pressed": String(state.tab === "shop"), onclick: c.openShop },
-          h("i", { "aria-hidden": "true" }, "P"), h("span", null, String(state.user.points || 0)), c.shopMark())));
+          h("i", { "aria-hidden": "true" }, "P"), h("span", null, String(state.user.points || 0)), c.shopMark()),
+        h("button", { class: "dk-link", "aria-pressed": String(state.tab === "friends"), onclick: () => c.openPage("friends") },
+          c.icon("friends"), t("친구"), c.friendsBadge() > 0 && h("em", { class: "dot" }, String(c.friendsBadge())), pop(4)),
+        h("button", { class: "dk-link", "aria-pressed": String(state.tab === "settings"), onclick: c.openSettings }, c.icon("settings"), t("설정"), pop(5))));
   }
 
   // ----- the frame -----
@@ -72,7 +73,7 @@ export function initDesktop(c) {
     return h("div", { class: `dk${state.wordsFolded ? " folded" : ""}${bare ? " bare" : ""}${focus ? " focus" : ""}${since < 700 ? " opening" : ""}`, style: since < SHOW_MS ? `--since:${since}` : null },
       top(bare),
       state.wordsFolded
-        ? h("button", { class: "dk-unfold", title: t("단어장 펼치기"), "aria-label": t("단어장 펼치기"), onclick: () => fold(false) }, h("i", { "aria-hidden": "true" }, "▸"), h("span", null, t("단어장")))
+        ? h("button", { class: "dk-unfold", title: t("단어장 펼치기"), "aria-label": t("단어장 펼치기"), onclick: () => fold(false) }, h("i", { "aria-hidden": "true" }, "»"), h("span", null, t("단어장")))
         : wordsPanel(),
       h("main", { class: mainClass },
         banners,
