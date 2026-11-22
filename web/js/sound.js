@@ -1,7 +1,7 @@
 // Sound effects, made on the spot with Web Audio: no sound files, nothing to download.
 // Every character has a sound of its own that brings the thing itself to mind (a cat mews, a
 // frog croaks, a pudding wobbles, a ball bounces), kept short, soft and bouncy.
-import { CHARACTERS, characterById } from "./characters.js?v=0.1.24-tow4d2";
+import { CHARACTERS, characterById } from "./characters.js?v=0.1.24-tow4xk";
 
 const KEY = "wb_sound";
 export const soundOn = () => localStorage.getItem(KEY) !== "off";

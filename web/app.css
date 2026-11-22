@@ -2707,3 +2707,8 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   .dk .duel-banner.gift .duel-vs { background: #ffe3ec; color: #d6336c; }
   .dk .duel-banner.gift .go { background: #d6336c; color: #fff; }
 }
+/* ----- gifts: the collect button at the right end of the section's title line ----- */
+.duel-list h3 .gift-all { margin-left: auto; padding: 6px 14px; border-radius: 999px; background: #d6336c; color: #fff; font-size: 13px; font-weight: 700; white-space: nowrap; transition: transform .15s, background .15s; }
+.duel-list h3 .gift-all:not(:disabled):hover { background: #c02a5f; transform: translateY(-1px); }
+.duel-list h3 .gift-all:disabled { opacity: .6; }
+.duel-list.gifts h3 { align-items: center; min-height: 32px; }

@@ -253,13 +253,13 @@ export function initFriends(c) {
 
       // Gifts that wait: who each one is from, and one button that collects them all.
       waiting().length > 0 && h("section", { class: "duel-list gifts" },
-        h("h3", null, t("받은 선물"), h("small", null, String(waiting().length))),
+        h("h3", null, t("받은 선물"), h("small", null, String(waiting().length)),
+          h("button", { class: "gift-all", disabled: ui.busy, onclick: collect },
+            waiting().length > 1 ? t("모두 받기") : t("선물 받기"), ` +${waiting().reduce((sum, g) => sum + g.points, 0)}`)),
         waiting().map((g) => h("div", { class: "duel-row hot gift" },
           h("span", { class: "gift-mark", "aria-hidden": "true" }, "♥"),
           h("span", { class: "who" }, who(g.from)),
-          h("b", { class: "gift-points" }, `+${g.points}`))),
-        h("p", { class: "gift-collect" },
-          h("button", { class: "btn", disabled: ui.busy, onclick: collect }, t("모두 받기"), ` +${waiting().reduce((sum, g) => sum + g.points, 0)}`))),
+          h("b", { class: "gift-points" }, `+${g.points}`)))),
 
       asking.length > 0 && h("section", { class: "duel-list" },
         h("h3", null, t("받은 친구 신청"), h("small", null, String(asking.length))),
