@@ -1154,6 +1154,25 @@ function kinRows(c, synonyms, antonyms) {
           h("button", { class: "kin-word", title: t("이 단어 찾기"), onclick: () => search(c.language === "ko" ? w.ko : w.en) },
             h("b", null, w.en), h("span", null, w.ko)))))));
 }
+// What else to know about a meaning (where it ends, how it differs from a near word). It stands apart
+// from the meaning, which stays one sentence, so the meaning is read at a glance.
+function noteBox(sense) {
+  const lines = (koFirst() ? [sense?.note_ko, sense?.note_en] : [sense?.note_en, sense?.note_ko]).filter(Boolean);
+  if (!lines.length) return null;
+  return h("div", { class: "sense-note" },
+    h("span", { class: "sense-label" }, t("알아 두기")),
+    lines.map((text, n) => h("p", { class: n ? "sense-line second" : "sense-line" }, text)));
+}
+// How the word is used in one meaning: its sentence frames and partner words (balance A on B), each
+// with what it is in the other language. The pattern itself, in the headword's language, comes first.
+function useRows(c, patterns) {
+  const list = (Array.isArray(patterns) ? patterns : []).filter((p) => p?.en && p?.ko);
+  if (!list.length) return null;
+  return h("div", { class: "sense-use" },
+    h("span", { class: "sense-label" }, t("이렇게 써요")),
+    list.map((p) => h("p", { class: "use-row" },
+      h("b", null, c.language === "ko" ? p.ko : p.en), h("span", null, c.language === "ko" ? p.en : p.ko))));
+}
 // Do the meanings carry their own similar and opposite words? (Entries written before that do not.)
 const kinBySense = (c) => manySenses(c) && c.senses.some((sense) => Array.isArray(sense?.synonyms) || Array.isArray(sense?.antonyms));
 const WHOLE_WORD = ["story", "kin", "say"]; // order of the sections under a word with several meanings
@@ -1201,6 +1220,8 @@ function hero(c, word) {
       h("div", { class: "def" }, koFirst()
         ? [h("p", null, c.definition_ko), h("p", null, c.definition_en)]
         : [h("p", null, c.definition_en), h("p", null, c.definition_ko)]),
+      noteBox(c.senses?.[0]),
+      useRows(c, c.senses?.[0]?.patterns),
     ]);
 }
 // A word with several parts of speech or meanings: each one with its own label, its equivalent in
@@ -1235,9 +1256,11 @@ function sensesList(c, key) {
           h("i", { class: "sense-chev", "aria-hidden": "true" }, "⌄")),
         shown && h("div", { class: "sense-more" },
           second && h("p", { class: "sense-def second" }, second),
+          noteBox(sense),
           (sense.example_ko || sense.example_en) && h("div", { class: "sense-ex" },
             h("span", { class: "sense-label" }, t("예문")),
             pair(sense.example_ko, sense.example_en).map((text, n) => h("p", { class: n ? "sense-line second" : "sense-line" }, text))),
+          useRows(c, sense.patterns),
           // Words that are only spelled alike (가정: a home, a supposition) each come from somewhere else.
           (sense.hun_eum || sense.origin_ko || sense.origin_en) && h("div", { class: "sense-origin" },
             h("span", { class: "sense-label" }, t("어디서 온 말일까?")),

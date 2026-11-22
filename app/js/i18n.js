@@ -772,6 +772,8 @@ const T = {
   "설명이 너무 어려워… 무슨 말인지 모르겠어.": ["This explanation is too hard… I don't get it.", "解释太难了……看不懂。"],
   "더 쉽게, 더 자세히! 설명을 내 수준에 맞게 바꿔 볼 수 있어.": ["Easier or more detailed: switch the explanation to your level!", "更简单，或更详细！可以把解释换成适合自己的难度。"],
   "너무 어려워…": ["Too hard…", "太难了……"],
+  "알아 두기": ["Good to know", "小贴士"],
+  "이렇게 써요": ["How to use it", "这样用"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],
   "테마 상점 열기": ["Open the theme shop", "打开主题商店"],
 

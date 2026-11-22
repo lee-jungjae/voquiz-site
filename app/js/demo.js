@@ -1,6 +1,8 @@
 // Demo backend: no server, no Claude. Everything stays in this browser's localStorage.
 // Used automatically while js/config.js is empty, so the UI can be tried right away.
 import { parsePartial } from "./partial.js";
+import { bandOf } from "./levels.js";
+import { FULL } from "./demo_levels.js";
 
 const USER_KEY = "wb_demo_user";
 const WORDS_KEY = "wb_demo_words";
@@ -171,8 +173,8 @@ const SAMPLES = {
 const placeholder = (term) => ({
   valid: true, suggestion: "", headword: term, language: /[가-힣]/.test(term) ? "ko" : "en",
   counterpart: "(데모)", pronunciation: "", part_of_speech: "",
-  definition_ko: "데모 모드에서는 예시 단어(photosynthesis, 노력, friend, democracy, gravity, transport)만 실제 설명이 나옵니다. Supabase를 연결하면 Claude가 설명을 만들어 줍니다.",
-  definition_en: "Demo mode only has real entries for photosynthesis, 노력, friend, democracy, gravity and transport. Connect Supabase to get entries written by Claude.",
+  definition_ko: "데모 모드에서는 예시 단어(balance, photosynthesis, 노력, friend, democracy, gravity, transport)만 실제 설명이 나옵니다. Supabase를 연결하면 Claude가 설명을 만들어 줍니다.",
+  definition_en: "Demo mode only has real entries for balance, photosynthesis, 노력, friend, democracy, gravity and transport. Connect Supabase to get entries written by Claude.",
   hanja_word: "", hanja: [], word_parts: [], origin_ko: "", origin_en: "",
   memory_tip_ko: "", memory_tip_en: "", examples: [], related: [],
 });
@@ -239,13 +241,16 @@ export async function lookup(term, onPartial) {
   if (!/^[\p{L}\p{M}' -]{1,40}$/u.test(termNorm)) {
     return { valid: false, content: { suggestion: "" }, word: null };
   }
-  const content = SAMPLES[termNorm] ?? placeholder(termNorm);
+  // A few words have a whole entry for each level (demo_levels.js): the student's own level is shown.
+  const full = FULL[termNorm];
+  const content = full?.[bandOf(getUser()?.grade).id] ?? SAMPLES[termNorm] ?? placeholder(termNorm);
   const words = read(WORDS_KEY, []);
   // A word not looked up before arrives a little at a time, like a real new word does.
   if (!words.some((w) => w.term_norm === termNorm)) {
     const text = JSON.stringify(content);
     await new Promise((done) => setTimeout(done, 700));
-    for (let i = 0; i < text.length; i += 9) {
+    const step = Math.max(9, Math.ceil(text.length / 260)); // a long entry still arrives in about five seconds
+    for (let i = 0; i < text.length; i += step) {
       onPartial?.(parsePartial(text.slice(0, i)));
       await new Promise((done) => setTimeout(done, 18));
     }
@@ -256,12 +261,13 @@ export async function lookup(term, onPartial) {
   if (word) {
     word.search_count += 1;
     word.last_searched_at = now;
+    if (full) word.content = content;
   } else {
     word = {
       term_norm: termNorm, headword: content.headword, favorite: false, search_count: 1,
       first_searched_at: now, last_searched_at: now, needs_review: false, streak: 0,
       last_reviewed_at: null, content,
-      discovered: !SAMPLES[termNorm], // in the demo, any word outside the samples counts as a first find
+      discovered: !SAMPLES[termNorm] && !full, // in the demo, any word outside the samples counts as a first find
     };
     words.push(word);
     isNew = true;
@@ -309,6 +315,7 @@ export async function lookupLevel(term, band) {
   const word = read(WORDS_KEY, []).find((w) => w.term_norm === termNorm);
   const base = word?.content ?? SAMPLES[termNorm] ?? placeholder(termNorm);
   await new Promise((done) => setTimeout(done, 700));
+  if (FULL[termNorm]?.[band]) return { valid: true, content: FULL[termNorm][band], word: null, view: band };
   const level = LEVELS[termNorm]?.[band];
   if (!level) return { valid: true, content: base, word: null, view: band };
   const [definition_ko, definition_en] = level;
