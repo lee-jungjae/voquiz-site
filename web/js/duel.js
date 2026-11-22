@@ -4,8 +4,8 @@
 //
 // This file holds the rules and the screens. It gets what it needs from app.js through `c`
 // (the element builder, translations, the shared state, points, the character drawings).
-import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tovzvy";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tovzvy";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow0fb";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow0fb";
 
 export const DUEL_LENGTHS = [60, 100, 180]; // seconds; the challenger chooses
 export const DUEL_CHARGES = 3; // challenges a student can hold
@@ -467,6 +467,7 @@ export function initDuel(c) {
     } else {
       // Wrong: the right answer is shown and everything stops for three seconds.
       c.sfx.wrong();
+      c.miss?.();
       d.picked = option;
       d.frozenUntil = Date.now() + FREEZE_MS;
       setTimeout(() => {
@@ -493,7 +494,7 @@ export function initDuel(c) {
         if (row) Object.assign(row, { my_score: d.score, my_character: character, my_marks: d.marks, status: "done" });
         d.won = reward(d.score, d.their.score);
         d.mode = "result";
-        if (d.score > d.their.score) c.sfx.grand(character); else if (d.score < d.their.score) c.sfx.aww();
+        if (d.score > d.their.score) { c.sfx.grand(character); c.win?.(); } else if (d.score < d.their.score) c.sfx.aww();
         c.render();
         await settle(true);
         if (d.befriend) {

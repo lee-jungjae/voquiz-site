@@ -814,6 +814,8 @@ const T = {
   "친구와 같은 문제로 겨뤄요.": ["Race a friend on the same questions.", "和朋友用同样的题目比一比。"],
   "받은 도전 {n}개": ["{n} challenge(s) waiting", "收到 {n} 个挑战"],
   "상대를 골라 시작해요": ["Pick someone to start", "选一个对手开始"],
+  "시작!": ["Go!", "开始！"],
+  "{name} 발견!": ["Caught {name}!", "发现了{name}！"],
   "알아 두기": ["Good to know", "小贴士"],
   "이렇게 써요": ["How to use it", "这样用"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],

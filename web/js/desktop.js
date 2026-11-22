@@ -139,10 +139,7 @@ export function initDesktop(c) {
   document.addEventListener("click", (e) => { // a click anywhere else closes it
     if (state.todayOpen && !e.target.closest?.(".dk-today-wrap") && !e.target.closest?.("#sheet")) { state.todayOpen = false; render(); }
   });
-  const pop = (n) => {
-    const id = c.residents()[n];
-    return id ? h("span", { class: "dk-pop", "aria-hidden": "true" }, c.portrait(id)) : null;
-  };
+  const pop = () => null; // the other characters come out by themselves now and then (yard.js, visitors), not under the pointer
   function top(bare) {
     const item = (id, label, n) => h("button", { "aria-current": state.tab === id ? "page" : null, onclick: () => c.goTab(id) },
       label, id === "quiz" && c.duelBadge() > 0 && h("em", { class: "dot" }, String(c.duelBadge())), pop(n));

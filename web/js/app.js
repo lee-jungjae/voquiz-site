@@ -1,26 +1,27 @@
-import { api, DEMO } from "./api.js?v=0.1.23-tovzvy";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tovzvy";
-import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tovzvy";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tovzvy";
-import { cleanEntry } from "./clean.js?v=0.1.23-tovzvy";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tovzvy";
-import { CHARACTERS } from "./characters.js?v=0.1.23-tovzvy";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tovzvy";
-import { film } from "./film.js?v=0.1.23-tovzvy";
-import { showYard, leaveYard, cheerYard } from "./yard.js?v=0.1.23-tovzvy";
-import { initDesktop } from "./desktop.js?v=0.1.23-tovzvy";
-import { BANDS, bandOf } from "./levels.js?v=0.1.23-tovzvy";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tovzvy";
-import { initDuel } from "./duel.js?v=0.1.23-tovzvy";
-import { initFriends } from "./friends.js?v=0.1.23-tovzvy";
-import { MOTTOS } from "./mottos.js?v=0.1.23-tovzvy";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tovzvy";
-import { SIGNATURES } from "./signatures.js?v=0.1.23-tovzvy";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tovzvy";
-import { tuning, setTuning } from "./tuning.js?v=0.1.23-tovzvy";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tovzvy";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tovzvy";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tovzvy";
+import { api, DEMO } from "./api.js?v=0.1.23-tow0fb";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tow0fb";
+import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tow0fb";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tow0fb";
+import { cleanEntry } from "./clean.js?v=0.1.23-tow0fb";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tow0fb";
+import { CHARACTERS } from "./characters.js?v=0.1.23-tow0fb";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tow0fb";
+import { film } from "./film.js?v=0.1.23-tow0fb";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.23-tow0fb";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.23-tow0fb";
+import { initDesktop } from "./desktop.js?v=0.1.23-tow0fb";
+import { BANDS, bandOf } from "./levels.js?v=0.1.23-tow0fb";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tow0fb";
+import { initDuel } from "./duel.js?v=0.1.23-tow0fb";
+import { initFriends } from "./friends.js?v=0.1.23-tow0fb";
+import { MOTTOS } from "./mottos.js?v=0.1.23-tow0fb";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tow0fb";
+import { SIGNATURES } from "./signatures.js?v=0.1.23-tow0fb";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tow0fb";
+import { tuning, setTuning } from "./tuning.js?v=0.1.23-tow0fb";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow0fb";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow0fb";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tow0fb";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -594,6 +595,7 @@ function startQuiz() {
   const questions = makeQuestions(cards, state.words);
   state.quiz = { cards, questions, fee, index: 0, phase: "ask", typed: "", correct: false, results: [] };
   state.focus = "answer";
+  if (WIDE()) { comboFx(0); stamp(t("시작!"), "go"); }
   startQuestionTimer();
   render();
 }
@@ -616,6 +618,7 @@ function submitAnswer(typed, picked) {
   quiz.results.push({ word, correct });
   state.focus = "next";
   if (correct) { sfx.right(myShop().character); cheerYard(); } else sfx.wrong();
+  if (WIDE()) gameFx(correct, quizRun(quiz), perfect);
   // A word that has just been learned gets the celebration to itself (the points still arrive).
   const patch = applyAnswer(word, correct, !picked);
   const learned = Boolean(patch.mastered_at);
@@ -627,6 +630,18 @@ function submitAnswer(typed, picked) {
   else state.quiz.auto = false;
   patchWord(word, patch);
   if (learned) checkWeekly();
+}
+
+// How many right answers in a row the quiz has just now.
+const quizRun = (quiz) => { let n = 0; for (let i = quiz.results.length - 1; i >= 0 && quiz.results[i].correct; i--) n += 1; return n; };
+// The desktop frame shows an answer with more than a sound: paper in the air (more of it the longer
+// the run), a stamp for the run, a glow round the window; a shake and a red flash for a miss.
+function gameFx(correct, run, grand) {
+  if (!correct) { missFx(); comboFx(0); return; }
+  confetti(26 + Math.min(run, 6) * 12, 0.8 + Math.min(run, 6) * 0.05);
+  comboFx(run);
+  if (run >= 2) stamp(`🔥 ${t("{n}연속", { n: run })}`, run >= 4 ? "combo hot" : "combo");
+  if (grand) setTimeout(() => fireworks(4), 250);
 }
 
 // After a right answer the quiz moves on by itself. Tapping the result card stops the countdown;
@@ -907,7 +922,8 @@ function celebrate(points, label, text = `+${points}`) {
     state.user && reaction(myShop().character, "cheer"));
   document.body.append(el);
   if (state.user) sfx.cheer(myShop().character);
-  setTimeout(() => el.remove(), 2000);
+  if (WEB) syncStage();
+  setTimeout(() => { el.remove(); if (WEB) syncStage(); }, 2000);
 }
 
 // The score in the header counts up to its new value instead of jumping.
@@ -1643,6 +1659,25 @@ function yardSheet() {
   draw();
   document.body.append(el);
 }
+// Where the app draws the student's own character (a result, the start of a duel, a celebration):
+// the one in the yard goes there instead of standing below as a second one (yard.js, the stage).
+const OWN_ART = ".feedback .art .mascot, .score-art .mascot, .versus .side.me .face .mascot, .lane.me .runner .mascot, .league-join-art .mascot, .celebrate .mascot";
+const syncStage = () => stageYard(WIDE() ? document.querySelector(OWN_ART) : null);
+// Catching a visitor: a few points, CATCH_DAILY times a day on this computer.
+const CATCH_POINTS = 2, CATCH_DAILY = 10, CATCH_KEY = "wb_catch";
+function catchesToday() {
+  try { const kept = JSON.parse(localStorage.getItem(CATCH_KEY) || "{}"); return kept.day === dayOf(new Date()) ? kept.n || 0 : 0; } catch { return 0; }
+}
+function catchVisitor(id) {
+  const n = catchesToday();
+  sfx.chirp(id);
+  if (n >= CATCH_DAILY) return "♥";
+  localStorage.setItem(CATCH_KEY, JSON.stringify({ day: dayOf(new Date()), n: n + 1 }));
+  award(CATCH_POINTS, t("{name} 발견!", { name: ALL_CHARACTERS.find((c) => c.id === id)?.name || "" }));
+  return `+${CATCH_POINTS}`;
+}
+if (DEMO) globalThis.voquizVisit = visitNow; // for trying a visitor out in the demo
+
 function syncYard() {
   if (yardHeld) return;
   const inside = WIDE() && state.user?.grade && state.member && hasChosenLang() && state.update !== "force" && !presentWaiting();
@@ -1683,12 +1718,16 @@ function syncYard() {
     onEdit: yardSheet, editLabel: t("마당 캐릭터 고르기"),
     label: (id) => ALL_CHARACTERS.find((c) => c.id === id)?.name || id,
     nudge: () => nextNudge(false),
+    // The others come by now and then; catching one is worth a few points (a few times a day).
+    visitors: () => (playing() || document.getElementById("sheet") || catchesToday() >= CATCH_DAILY ? [] : yardCast.rest),
+    onCatch: catchVisitor,
     onTap: (id, isLead) => {
       sfx.chirp(id);
       if (isLead && gift()) { (giftWaiting() ? openDailyGift : takeSantaGift)(); return ""; } // the present it holds
       return nextNudge(true);
     },
   });
+  syncStage();
 }
 
 function searchHome() {
@@ -1762,7 +1801,6 @@ function searchView() {
   const home = webHome();
   return [
     home && h("p", { class: "dk-hello" }, greeting()),
-    home && (yardCast?.rest?.[6] || yardCast?.rest?.[0]) && h("div", { class: "dk-sit", "aria-hidden": "true" }, portrait(yardCast.rest[6] || yardCast.rest[0])),
     !topSearch() && searchForm(),
     home ? webActions() : !WIDE() && dailyGoal(),
     noticeBox(),
@@ -2111,6 +2149,7 @@ function pickChallenge(option) {
     c.earned += points;
     c.phase = "right";
     sfx.climb(c.streak % step || step, step); // one note higher with every answer of the stage
+    if (WIDE()) { confetti(20 + Math.min(stage, 5) * 10, 0.8); comboFx(Math.min(5, 1 + Math.floor(c.streak / 3))); }
     award(points, t("{n}연속", { n: c.streak }));
     const reached = stageOf(c.streak);
     setTimeout(() => {
@@ -2121,6 +2160,7 @@ function pickChallenge(option) {
       c.bonus = stageBonus(reached);
       c.earned += c.bonus;
       sfx.cheer(myShop().character);
+      if (WIDE()) { fireworks(3); confetti(70, 1); }
       if (c.bonus) award(c.bonus, t("{n}단계 돌파!", { n: reached + 1 }));
       render();
       setTimeout(() => {
@@ -2131,6 +2171,7 @@ function pickChallenge(option) {
     }, 500);
   } else {
     sfx.wrong();
+    if (WIDE()) { missFx(); comboFx(0); }
     c.phase = "wrong"; // show the right answer for a moment before the result
     setTimeout(() => { if (state.challenge === c && c.phase === "wrong") missChallenge(); }, 1700);
   }
@@ -2225,6 +2266,7 @@ function challengeView() {
     top, lamps,
     c.phase === "ask" && h("div", { class: "timer", role: "timer", "aria-label": t("남은 시간") },
       h("i", { style: `animation-duration:${c.limit}ms;animation-delay:-${Math.max(0, c.limit - (c.deadline - Date.now()))}ms` })),
+    c.phase === "ask" && hurry(c.deadline),
     c.timedOut && h("p", { class: "center act-note timeout" }, t("시간이 다 됐어요!")),
     h("div", { class: `ch-prompt${c.question.shown.startsWith("d") ? " long" : ""}` }, c.question.prompt),
     h("div", { class: `choices act${c.question.asked.startsWith("d") ? " wide defs" : c.question.options.some((o) => o.length > 9) ? " wide" : ""}` },
@@ -2668,6 +2710,14 @@ function quizSetup() {
 function quizProgress() {
   const { cards, index, phase } = state.quiz;
   const done = index + (phase === "result" ? 1 : 0);
+  // The desktop frame shows each question as a dot (green for right, red for wrong) and the run of right answers.
+  if (WIDE()) {
+    const { results } = state.quiz, run = quizRun(state.quiz);
+    return h("div", { class: "progress dots" },
+      h("span", null, `${Math.min(index + 1, cards.length)} / ${cards.length}`),
+      h("div", { class: "qz-dots", "aria-hidden": "true" }, cards.map((_, i) => h("i", { class: results[i] ? (results[i].correct ? "ok" : "no") : i === index ? "now" : "" }))),
+      run >= 2 && h("b", { class: "qz-run" }, `🔥 ${t("{n}연속", { n: run })}`));
+  }
   return h("div", { class: "progress" },
     `${Math.min(index + 1, cards.length)} / ${cards.length}`,
     h("div", { class: "bar" }, h("i", { style: `width:${(done / cards.length) * 100}%` })));
@@ -2680,6 +2730,9 @@ function wordIn(c, lang) {
   const headIsKorean = /[가-힣]/.test(c.headword);
   return (lang === "ko") === headIsKorean ? c.headword : c.counterpart || c.headword;
 }
+
+// The last three seconds of a question in the desktop frame: the edges of the window beat red.
+const hurry = (deadline) => WIDE() && h("i", { class: "fx-hurry", "aria-hidden": "true", style: `animation-delay:${Math.max(0, deadline - Date.now() - 3000)}ms` });
 
 function quizAsk() {
   const quiz = state.quiz;
@@ -2694,6 +2747,7 @@ function quizAsk() {
   });
   return [
     quizProgress(),
+    hurry(quiz.deadline),
     h("div", { class: "timer", role: "timer", "aria-label": t("남은 시간") },
       h("i", { style: `animation-duration:${quiz.limit}ms;animation-delay:-${Math.max(0, quiz.limit - (quiz.deadline - Date.now()))}ms` })),
     h("div", { class: `question${(first || "").length > (main === "ko" ? 55 : 95) ? " long" : ""}` },
@@ -2779,6 +2833,11 @@ function quizDone() {
   const { results } = state.quiz;
   const wrong = results.filter((r) => !r.correct);
   const ratio = (results.length - wrong.length) / results.length;
+  if (WIDE() && !state.quiz.cheered) { // once, as the result appears
+    state.quiz.cheered = true;
+    comboFx(0);
+    if (ratio >= 0.6) { confetti(ratio === 1 ? 110 : 60, 1); setTimeout(() => fireworks(ratio === 1 ? 5 : 2), 200); }
+  }
   return [
     h("div", { class: "card center" },
       h("div", { class: "score-art", "aria-hidden": "true" }, reaction(myShop().character, ratio >= 0.6 ? "cheer" : "comfort")),
@@ -2801,7 +2860,10 @@ let duelModule = null;
 function duel() {
   return (duelModule ||= initDuel({
     h, t, state, api, render, award, fail, reaction, portrait, myShop, displayName, nameOf,
-    guideHero, guideSteps, guideStat, coin, toastText, locale, sfx, cheer: cheerYard,
+    guideHero, guideSteps, guideStat, coin, toastText, locale, sfx,
+    cheer: () => { cheerYard(); if (WIDE()) confetti(16, 0.7); },
+    miss: () => { if (WIDE()) missFx(); },
+    win: () => { if (WIDE()) { fireworks(4); confetti(90, 1); } },
     winBonus: () => (using("lion") ? LION_BONUS : 0),
     askFriend: (email) => friends().ask(email),
     refreshFriends: (force) => friends().refresh(force),
@@ -3544,7 +3606,7 @@ function render() {
   }
   if (keepFocus) document.getElementById(keepFocus)?.focus();
   animateLoading();
-  if (WEB) syncYard();
+  if (WEB) { if (!playing()) comboFx(0); syncYard(); }
 }
 
 // A word picked with right-click → "VOQUIZ" arrives through session storage.
