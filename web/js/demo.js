@@ -1,8 +1,8 @@
 // Demo backend: no server, no Claude. Everything stays in this browser's localStorage.
 // Used automatically while js/config.js is empty, so the UI can be tried right away.
-import { parsePartial } from "./partial.js?v=0.1.24-tow7ph";
-import { bandOf } from "./levels.js?v=0.1.24-tow7ph";
-import { FULL } from "./demo_levels.js?v=0.1.24-tow7ph";
+import { parsePartial } from "./partial.js?v=0.1.24-tow81x";
+import { bandOf } from "./levels.js?v=0.1.24-tow81x";
+import { FULL } from "./demo_levels.js?v=0.1.24-tow81x";
 
 const USER_KEY = "wb_demo_user";
 const WORDS_KEY = "wb_demo_words";

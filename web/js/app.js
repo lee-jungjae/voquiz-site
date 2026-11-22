@@ -1,27 +1,27 @@
-import { api, DEMO } from "./api.js?v=0.1.24-tow7ph";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.24-tow7ph";
-import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.24-tow7ph";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.24-tow7ph";
-import { cleanEntry } from "./clean.js?v=0.1.24-tow7ph";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.24-tow7ph";
-import { CHARACTERS } from "./characters.js?v=0.1.24-tow7ph";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.24-tow7ph";
-import { film } from "./film.js?v=0.1.24-tow7ph";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.24-tow7ph";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.24-tow7ph";
-import { initDesktop } from "./desktop.js?v=0.1.24-tow7ph";
-import { BANDS, bandOf } from "./levels.js?v=0.1.24-tow7ph";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.24-tow7ph";
-import { initDuel } from "./duel.js?v=0.1.24-tow7ph";
-import { initFriends } from "./friends.js?v=0.1.24-tow7ph";
-import { MOTTOS } from "./mottos.js?v=0.1.24-tow7ph";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.24-tow7ph";
-import { SIGNATURES } from "./signatures.js?v=0.1.24-tow7ph";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.24-tow7ph";
-import { tuning, setTuning } from "./tuning.js?v=0.1.24-tow7ph";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.24-tow7ph";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.24-tow7ph";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.24-tow7ph";
+import { api, DEMO } from "./api.js?v=0.1.24-tow81x";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.24-tow81x";
+import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.24-tow81x";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.24-tow81x";
+import { cleanEntry } from "./clean.js?v=0.1.24-tow81x";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.24-tow81x";
+import { CHARACTERS } from "./characters.js?v=0.1.24-tow81x";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.24-tow81x";
+import { film } from "./film.js?v=0.1.24-tow81x";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.24-tow81x";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.24-tow81x";
+import { initDesktop } from "./desktop.js?v=0.1.24-tow81x";
+import { BANDS, bandOf } from "./levels.js?v=0.1.24-tow81x";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.24-tow81x";
+import { initDuel } from "./duel.js?v=0.1.24-tow81x";
+import { initFriends } from "./friends.js?v=0.1.24-tow81x";
+import { MOTTOS } from "./mottos.js?v=0.1.24-tow81x";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.24-tow81x";
+import { SIGNATURES } from "./signatures.js?v=0.1.24-tow81x";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.24-tow81x";
+import { tuning, setTuning } from "./tuning.js?v=0.1.24-tow81x";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.24-tow81x";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.24-tow81x";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.24-tow81x";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -289,7 +289,7 @@ function plusSection() {
 const memberKey = () => `wb_member_${state.user.id}`;
 async function checkMember() {
   if (!state.user) return;
-  if (localStorage.getItem(memberKey())) { state.member = true; return; }
+  if (localStorage.getItem(memberKey())) { state.member = true; localStorage.removeItem(TYPED_CODE); return; }
   state.member = undefined;
   try {
     state.member = Boolean(await api.isMember());
@@ -299,6 +299,7 @@ async function checkMember() {
     console.error(err);
     if (err?.status === 401) return fail(err).then(render);
     state.member = true;
+    localStorage.removeItem(TYPED_CODE);
     return render();
   }
   if (state.member) localStorage.setItem(memberKey(), "1");
@@ -3498,14 +3499,24 @@ function loginView() {
     h("p", { class: "web-tag" }, t("한국어와 영어, 두 언어로 단어를 쉽게 익혀요.")),
     film(),
     h("div", { class: "after-film" },
-      h("div", { class: "login-code" },
-        h("label", { htmlFor: "login-code" }, t("초대 코드가 있나요?")),
-        h("input", { type: "text", id: "login-code", maxLength: 8, autocomplete: "off", autocapitalize: "characters", spellcheck: false,
-          value: typedCode(), placeholder: t("초대 코드 6자리"), "aria-label": t("초대 코드 6자리"),
-          oninput: (e) => { const code = e.target.value.trim().toUpperCase(); if (code) localStorage.setItem(TYPED_CODE, code); else localStorage.removeItem(TYPED_CODE); } }),
-        h("small", null, t("처음이라면 친구에게 받은 초대 코드를 넣고 로그인하세요. 이미 가입했다면 비워 두면 돼요."))),
-      h("button", { class: "btn", disabled: state.busy, onclick: signIn }, DEMO ? t("데모로 시작하기") : t("Google 계정으로 로그인")),
-      noticeBox()));
+      // The way in for everyone who has joined already: no code is asked for.
+      h("button", { class: "btn", disabled: state.busy, onclick: () => { localStorage.removeItem(TYPED_CODE); signIn(); } }, DEMO ? t("데모로 시작하기") : t("Google 계정으로 로그인")),
+      noticeBox(),
+      // A first visit: VOQUIZ is invite-only, so the code a friend gave goes here. It is kept while
+      // Google's page is open and used as soon as the student is back, signed in.
+      h("form", { class: "login-code", onsubmit: (e) => {
+        e.preventDefault();
+        const box = document.getElementById("login-code"), code = box.value.trim().toUpperCase();
+        if (!code) return box.focus();
+        localStorage.setItem(TYPED_CODE, code);
+        signIn();
+      } },
+        h("label", { htmlFor: "login-code" }, t("처음이신가요?")),
+        h("div", { class: "row" },
+          h("input", { type: "text", id: "login-code", maxLength: 8, autocomplete: "off", autocapitalize: "characters", spellcheck: false,
+            value: typedCode(), placeholder: t("초대 코드 6자리"), "aria-label": t("초대 코드 6자리") }),
+          h("button", { class: "btn ghost", disabled: state.busy }, t("초대 코드로 가입하기"))),
+        h("small", null, t("친구에게 받은 초대 코드를 넣으면 Google 로그인 뒤에 바로 가입돼요.")))));
   return h("div", { class: "step splash with-film" },
     film(),
     h("div", { class: "after-film" },

@@ -2757,3 +2757,10 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   .qz-slot .pick { max-width: 68%; }
   .qz-slot .pick-button span { white-space: normal; overflow: visible; text-align: right; line-height: 1.25; }
 }
+/* ----- the web version's first screen: sign in (everyone who joined), or a first visit with an invite code ----- */
+.web-login .after-film { gap: 12px; }
+.web-login .login-code { margin-top: 14px; padding-top: 18px; border-top: 1px solid var(--line); gap: 8px; }
+.web-login .login-code label { font-size: 14px; font-weight: 700; }
+.web-login .login-code .row { display: flex; gap: 8px; align-items: stretch; }
+.web-login .login-code input { flex: 1; min-width: 0; padding: 11px 12px; font-size: 16px; text-align: left; }
+.web-login .after-film .login-code .btn { flex: none; padding: 11px 14px; font-size: 14px; white-space: nowrap; }
