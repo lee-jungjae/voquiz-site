@@ -1,6 +1,7 @@
 // Minimal Supabase client over fetch (no build step, no bundled library).
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js?v=0.1.26-tosc5l";
-import { parsePartial } from "./partial.js?v=0.1.26-tosc5l";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js?v=0.1.27-towj9f";
+import { parsePartial } from "./partial.js?v=0.1.27-towj9f";
+import { syncClock } from "./clock.js?v=0.1.27-towj9f";
 
 const SESSION_KEY = "wb_session";
 let session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
@@ -31,6 +32,7 @@ async function request(path, { method = "GET", body, token, headers = {} } = {})
     },
     body: body ? JSON.stringify(body) : undefined,
   });
+  syncClock(res.headers.get("date")); // the server's time (clock.js)
   const text = await res.text();
   const data = text ? JSON.parse(text) : null;
   // A database function that refuses (raise exception 'duel_off') answers with code P0001 and the reason as its message.
@@ -184,6 +186,7 @@ export async function lookup(term, onPartial, view) { // view: another group's e
     headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${await accessToken()}`, "Content-Type": "application/json" },
     body: JSON.stringify({ term, grade: getUser().grade, ...(view ? { view } : {}) }),
   });
+  syncClock(res.headers.get("date"));
   const toResult = (data) => ({
     valid: data.valid,
     content: data.content,

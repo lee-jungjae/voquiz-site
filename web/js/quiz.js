@@ -1,3 +1,4 @@
+import { clockNow } from "./clock.js?v=0.1.27-towj9f";
 // Quiz rules (no UI, no network).
 // - A quiz covers the words in the chosen range PLUS every word still marked "needs review".
 // - A wrong answer marks the word "needs review" and resets its streak.
@@ -8,9 +9,9 @@ export const MASTER_STREAK = 3;
 export const RETEST_DAYS = 3;
 const DAY = 24 * 60 * 60 * 1000;
 export const isLearned = (word) => Boolean(word.mastered_at);
-export const canRetest = (word, now = Date.now()) => isLearned(word) && now - new Date(word.mastered_at).getTime() >= RETEST_DAYS * DAY;
+export const canRetest = (word, now = clockNow()) => isLearned(word) && now - new Date(word.mastered_at).getTime() >= RETEST_DAYS * DAY;
 // Learned, and neither learned nor asked again in the last RETEST_DAYS: ready for a check-up quiz.
-export const isRested = (word, now = Date.now()) => isLearned(word) &&
+export const isRested = (word, now = clockNow()) => isLearned(word) &&
   now - Math.max(new Date(word.mastered_at).getTime(), new Date(word.last_reviewed_at || 0).getTime()) >= RETEST_DAYS * DAY;
 // What to save to put a learned word back into the quizzes.
 export const retestPatch = () => ({ mastered_at: null, streak: 0, typed_ok: false });
@@ -18,7 +19,7 @@ export const retestPatch = () => ({ mastered_at: null, streak: 0, typed_ok: fals
 // scope: {type:'days', days} | {type:'range', from:'YYYY-MM-DD', to:'YYYY-MM-DD'} | {type:'favorites'} | {type:'all'}
 //        | {type:'review'} = only the words answered wrong and not yet cleared
 //        | {type:'learned'} = a check-up: only learned words that have rested (see isRested)
-export function inScope(word, scope, now = Date.now()) {
+export function inScope(word, scope, now = clockNow()) {
   const t = new Date(word.last_searched_at).getTime();
   switch (scope.type) {
     case "days":
@@ -38,13 +39,13 @@ export function inScope(word, scope, now = Date.now()) {
 }
 
 // Every word the range covers. Learned words are left out, except in the check-up of learned words.
-export function quizPool(words, scope, now = Date.now()) {
+export function quizPool(words, scope, now = clockNow()) {
   if (scope.type === "learned") return words.filter((w) => isRested(w, now));
   return words.filter((w) => !isLearned(w) && (w.needs_review || inScope(w, scope, now)));
 }
 
 // The words of one quiz: the range in random order, cut down to `max` when it holds more.
-export function buildQuizSet(words, scope, now = Date.now(), max = Infinity) {
+export function buildQuizSet(words, scope, now = clockNow(), max = Infinity) {
   const picked = quizPool(words, scope, now);
   for (let i = picked.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -54,7 +55,7 @@ export function buildQuizSet(words, scope, now = Date.now(), max = Infinity) {
 }
 
 // Returns the fields to save after one answer.
-export function applyAnswer(word, correct, typed = false, now = new Date()) {
+export function applyAnswer(word, correct, typed = false, now = new Date(clockNow())) {
   const last_reviewed_at = now.toISOString();
   if (!correct) return { streak: 0, needs_review: true, typed_ok: false, mastered_at: null, last_reviewed_at };
   const streak = word.streak + 1;

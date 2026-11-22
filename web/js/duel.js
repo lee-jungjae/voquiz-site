@@ -4,8 +4,9 @@
 //
 // This file holds the rules and the screens. It gets what it needs from app.js through `c`
 // (the element builder, translations, the shared state, points, the character drawings).
-import { WORD_LISTS } from "./wordlists.js?v=0.1.26-tosc5l";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.26-tosc5l";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.27-towj9f";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.27-towj9f";
+import { clockNow } from "./clock.js?v=0.1.27-towj9f";
 
 export const DUEL_LENGTHS = [60, 100, 180]; // seconds; the challenger chooses
 export const DUEL_CHARGES = 3; // challenges a student can hold
@@ -14,7 +15,7 @@ export const DUEL_REFILL_MS = 60 * 60 * 1000; // one comes back every hour
 // How many challenges are left, worked out from the times the earlier ones were sent: every
 // challenge uses a charge, and while fewer than DUEL_CHARGES are held one returns each hour.
 // (create_duel in 0016_duel_charges.sql counts the same way.)  -> { left, nextAt }
-export function duelCharges(sentTimes, now = Date.now()) {
+export function duelCharges(sentTimes, now = clockNow()) {
   let left = DUEL_CHARGES;
   let since = 0; // when the hour that is running began
   const refill = (at) => {
@@ -99,12 +100,12 @@ export function initDuel(c) {
   const seconds = () => (DUEL_LENGTHS.includes(state.duelSeconds) ? state.duelSeconds : 60);
   // Challenges sent in the last 24 hours, and how many are left (the database counts the same way).
   const charges = () => duelCharges((state.duels || []).filter((d) => d.role === "challenger").map((d) => new Date(d.created_at).getTime())
-    .filter((at) => Date.now() - at < 24 * 60 * 60 * 1000));
+    .filter((at) => clockNow() - at < 24 * 60 * 60 * 1000));
   const sendsLeft = () => charges().left;
   // Until the next charge: a clock that counts down every second. It changes only its own text,
   // and the screen is drawn again when the charge arrives.
   let chargeTicker = 0;
-  const waitLeft = () => Math.max(0, Math.ceil((charges().nextAt - Date.now()) / 1000));
+  const waitLeft = () => Math.max(0, Math.ceil((charges().nextAt - clockNow()) / 1000));
   const waitLabel = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
   function waitClock() {
     if (!charges().nextAt) return null;

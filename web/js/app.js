@@ -1,27 +1,28 @@
-import { api, DEMO } from "./api.js?v=0.1.26-tosc5l";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.26-tosc5l";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.26-tosc5l";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.26-tosc5l";
-import { cleanEntry } from "./clean.js?v=0.1.26-tosc5l";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.26-tosc5l";
-import { CHARACTERS } from "./characters.js?v=0.1.26-tosc5l";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.26-tosc5l";
-import { film } from "./film.js?v=0.1.26-tosc5l";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.26-tosc5l";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.26-tosc5l";
-import { initDesktop } from "./desktop.js?v=0.1.26-tosc5l";
-import { BANDS, bandOf } from "./levels.js?v=0.1.26-tosc5l";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.26-tosc5l";
-import { initDuel } from "./duel.js?v=0.1.26-tosc5l";
-import { initFriends } from "./friends.js?v=0.1.26-tosc5l";
-import { MOTTOS } from "./mottos.js?v=0.1.26-tosc5l";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.26-tosc5l";
-import { SIGNATURES } from "./signatures.js?v=0.1.26-tosc5l";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.26-tosc5l";
-import { tuning, setTuning } from "./tuning.js?v=0.1.26-tosc5l";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.26-tosc5l";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.26-tosc5l";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.26-tosc5l";
+import { api, DEMO } from "./api.js?v=0.1.27-towj9f";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.27-towj9f";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.27-towj9f";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.27-towj9f";
+import { cleanEntry } from "./clean.js?v=0.1.27-towj9f";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.27-towj9f";
+import { CHARACTERS } from "./characters.js?v=0.1.27-towj9f";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.27-towj9f";
+import { film } from "./film.js?v=0.1.27-towj9f";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.27-towj9f";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.27-towj9f";
+import { initDesktop } from "./desktop.js?v=0.1.27-towj9f";
+import { clockNow } from "./clock.js?v=0.1.27-towj9f";
+import { BANDS, bandOf } from "./levels.js?v=0.1.27-towj9f";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.27-towj9f";
+import { initDuel } from "./duel.js?v=0.1.27-towj9f";
+import { initFriends } from "./friends.js?v=0.1.27-towj9f";
+import { MOTTOS } from "./mottos.js?v=0.1.27-towj9f";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.27-towj9f";
+import { SIGNATURES } from "./signatures.js?v=0.1.27-towj9f";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.27-towj9f";
+import { tuning, setTuning } from "./tuning.js?v=0.1.27-towj9f";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.27-towj9f";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.27-towj9f";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.27-towj9f";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -141,7 +142,7 @@ async function loadWords() {
 // database part (0007_plus.sql) is not installed, so there is no limit and no Plus to show.
 const FREE_SEARCHES = 20; // keep in step with FREE_DAILY_SEARCHES of the lookup function
 const planKey = () => `wb_plan_${state.user.id}`;
-const isPlus = () => Boolean(state.plan?.plus && state.plan.until && new Date(state.plan.until) > new Date());
+const isPlus = () => Boolean(state.plan?.plus && state.plan.until && new Date(state.plan.until) > nowDate());
 const plansOn = () => Boolean(state.plan && !state.plan.off);
 async function loadPlan() {
   if (!state.user) return;
@@ -156,7 +157,7 @@ async function loadPlan() {
   render();
 }
 // Different words searched today, and whether a free student has used them all.
-const searchedToday = () => state.words.filter((w) => dayOf(w.last_searched_at) === dayOf(new Date())).length;
+const searchedToday = () => state.words.filter((w) => dayOf(w.last_searched_at) === todayKey()).length;
 const searchesLeft = () => Math.max(0, FREE_SEARCHES - searchedToday());
 const limitReached = () => plansOn() && !isPlus() && searchesLeft() === 0;
 
@@ -167,7 +168,7 @@ const limitReached = () => plansOn() && !isPlus() && searchesLeft() === 0;
 // The day and how many were picked are kept with the account ({ day, picks }). It is the field
 // older versions use for the Plus present ({ day }), which counts here as one pick, so no present
 // is given twice whichever version is open.
-const giftPicks = () => (state.user.gift?.day === dayOf(new Date()) ? state.user.gift.picks ?? 1 : 0);
+const giftPicks = () => (isToday(state.user.gift?.day) ? state.user.gift.picks ?? 1 : 0);
 const giftAllowed = () => (isPlus() ? tuning("gift").plusPicks : tuning("gift").picks);
 const giftWaiting = () => giftPicks() < giftAllowed();
 function drawPrize() {
@@ -196,10 +197,10 @@ function openDailyGift() {
       if (taken) return;
       taken = true;
       // run: days in a row with a present taken; best: the longest such run (it earns a character).
+      if (!giftWaiting()) return close(); // today's present was taken meanwhile (in another window)
       const before = state.user.gift || {};
-      const today = dayOf(new Date());
-      const run = before.day === today ? before.run || 1 : before.day === dayOf(new Date(Date.now() - 86400000)) ? (before.run || 1) + 1 : 1;
-      state.user.gift = { day: today, picks: giftPicks() + 1, run, best: Math.max(before.best || 0, run) };
+      const run = isToday(before.day) ? before.run || 1 : before.day === dayOf(clockNow() - 86400000) ? (before.run || 1) + 1 : 1;
+      state.user.gift = { day: keepDay(before.day), picks: giftPicks() + 1, run, best: Math.max(before.best || 0, run) };
       api.saveProfile({ gift: state.user.gift }).catch(console.error);
       award(prize, t("오늘의 선물")); // paid at once, so closing the panel now loses nothing
       if (prize >= 100) sfx.cheer(myShop().character); else sfx.chirp(myShop().character);
@@ -227,11 +228,11 @@ function openDailyGift() {
 // the 25th. Like the Plus present, the character on the home screen holds it until it is tapped.
 const SANTA_DAILY = 200;
 const SANTA_BIG = 1000;
-const santaDay = (now = new Date()) => (now.getMonth() === 11 && now.getDate() <= 25 ? now.getDate() : 0);
-const santaWaiting = () => santaDay() > 0 && myShop().owned.includes("character:santa") && state.user.santa?.day !== dayOf(new Date());
+const santaDay = (now = nowDate()) => (now.getMonth() === 11 && now.getDate() <= 25 ? now.getDate() : 0);
+const santaWaiting = () => santaDay() > 0 && myShop().owned.includes("character:santa") && !isToday(state.user.santa?.day);
 function takeSantaGift() {
   const big = santaDay() === 25;
-  state.user.santa = { day: dayOf(new Date()) };
+  state.user.santa = { day: keepDay(state.user.santa?.day) };
   api.saveProfile({ santa: state.user.santa }).catch(console.error);
   award(big ? SANTA_BIG : SANTA_DAILY, big ? t("메리 크리스마스!") : t("산타의 선물"), true);
   return big ? t("메리 크리스마스! 내년 12월에 또 만나") : t("산타의 선물이야! 내일 또 올게");
@@ -504,7 +505,7 @@ async function search(term) {
   if (!term || state.busy) return;
   state.level = null; // a new search shows the student's own level again
   if (limitReached()) {
-    const again = state.words.find((w) => dayOf(w.last_searched_at) === dayOf(new Date()) && [w.headword, w.term_norm, w.content?.counterpart].some((x) => (x || "").toLowerCase() === term.toLowerCase()));
+    const again = state.words.find((w) => dayOf(w.last_searched_at) === todayKey() && [w.headword, w.term_norm, w.content?.counterpart].some((x) => (x || "").toLowerCase() === term.toLowerCase()));
     Object.assign(state, { tab: "search", query: term, entry: again || null, notice: again ? null : { text: ERRORS().search_limit } });
     return render();
   }
@@ -516,7 +517,7 @@ async function search(term) {
     if (result.word) result.word.content = cleanEntry(result.word.content);
     if (result.valid) {
       const before = state.words.find((w) => w.term_norm === result.word.term_norm);
-      const firstToday = !before || dayOf(before.last_searched_at) !== dayOf(new Date());
+      const firstToday = !before || dayOf(before.last_searched_at) !== todayKey();
       state.words = [result.word, ...state.words.filter((w) => w.term_norm !== result.word.term_norm)];
       state.entry = result.word;
       state.listWord = null; // beside the word list, the newest word shows again
@@ -592,7 +593,7 @@ function startQuestionTimer() {
 }
 
 function startQuiz() {
-  const cards = buildQuizSet(state.words, state.scope, Date.now(), tuning("quiz").max);
+  const cards = buildQuizSet(state.words, state.scope, clockNow(), tuning("quiz").max);
   if (!cards.length) return;
   const fee = quizFee(cards.length);
   award(-fee, t("퀴즈에 사용"));
@@ -699,7 +700,7 @@ function award(points, label, big, { league = true } = {}) {
 // { k: "q", at, r: right answers, n: questions, p: points won less points used }, a streak run is
 // { k: "s", at, n: answers in a row, p: points won, rec: 1 for a new record }. Duels have their own record on the server.
 function recordPlay(play) {
-  state.user.plays = [{ ...play, at: new Date().toISOString() }, ...(Array.isArray(state.user.plays) ? state.user.plays : [])].slice(0, 20);
+  state.user.plays = [{ ...play, at: nowDate().toISOString() }, ...(Array.isArray(state.user.plays) ? state.user.plays : [])].slice(0, 20);
   saveSoon();
 }
 function saveSoon() {
@@ -731,23 +732,32 @@ const DISCOVERY_POINTS = 10;
 const SEARCH_POINTS = 5;
 const SEARCH_DAILY_MAX = 100;
 const dayOf = (when) => new Date(when).toLocaleDateString("sv"); // local date as YYYY-MM-DD
+// "Today" is the server's day, not the computer's (clock.js): the day's limits do not start again
+// when the clock of the computer is moved.
+const nowDate = () => new Date(clockNow());
+const todayKey = () => dayOf(clockNow());
+// A day kept with the account (or on this computer) counts as today when it is today, or tomorrow:
+// a time zone can put a computer a day ahead, and setting it back must not open the day again.
+// A day further ahead than that was written by a wrong clock and counts as past.
+const isToday = (day) => Boolean(day) && (day === todayKey() || day === dayOf(clockNow() + 86400000));
+const keepDay = (day) => (isToday(day) ? day : todayKey()); // what to write: never an earlier day over a later one
 
 function searchPointsToday() {
   const search = state.user?.search;
-  return search?.day === dayOf(new Date()) ? search.points : 0;
+  return isToday(search?.day) ? search.points : 0;
 }
 
 // What the Golden sunshine background has added to today's search points (it comes on top of
 // the day's limit), and today's words with what each paid: [[word, points, bonus], ...].
-const searchBonusToday = () => (state.user.search?.day === dayOf(new Date()) ? state.user.search.bonus || 0 : 0);
-const searchLogToday = () => (state.user.search?.day === dayOf(new Date()) && Array.isArray(state.user.search.log) ? state.user.search.log : []);
+const searchBonusToday = () => (isToday(state.user.search?.day) ? state.user.search.bonus || 0 : 0);
+const searchLogToday = () => (isToday(state.user.search?.day) && Array.isArray(state.user.search.log) ? state.user.search.log : []);
 function awardSearch(word) {
   const sofar = searchPointsToday();
   const add = Math.min(SEARCH_POINTS, SEARCH_DAILY_MAX - sofar);
   if (add <= 0) return;
   const bonus = sunriseOn() ? SUNRISE_BONUS : 0;
   state.user.search = {
-    day: dayOf(new Date()), points: sofar + add, bonus: searchBonusToday() + bonus,
+    day: keepDay(state.user.search?.day), points: sofar + add, bonus: searchBonusToday() + bonus,
     log: [...searchLogToday(), [String(word || "").slice(0, 24), add, bonus]].slice(-40),
   };
   const total = sofar + add;
@@ -787,7 +797,7 @@ function searchPointsSheet() {
 // in proportion to the goal, once a week. Kept with the account: { goal, claimed: <week> }.
 const WEEK_GOALS = [10, 20, 35, 50, 70];
 const WEEK_DEFAULT = 35;
-function weekStart(when = new Date()) {
+function weekStart(when = nowDate()) {
   const d = new Date(when.getFullYear(), when.getMonth(), when.getDate());
   d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); // back to Monday
   return d;
@@ -1533,7 +1543,7 @@ function levelBar(word) {
 // Beside a result in a wide window: the words looked up today, each one tap away, and the next
 // step from here: a quiz on exactly these words, or the whole list.
 function todayBox() {
-  const today = state.words.filter((w) => dayOf(w.last_searched_at) === dayOf(new Date()));
+  const today = state.words.filter((w) => dayOf(w.last_searched_at) === todayKey());
   if (!today.length) return null;
   const open = (w) => { Object.assign(state, { entry: w, notice: null, level: null }); render(); };
   return h("section", { class: "today-box" },
@@ -1686,16 +1696,15 @@ const GIFT_DAILY_MAX = 20;
 function mascotGift() {
   const key = `wb_gift_${state.user.id}`;
   const saved = JSON.parse(localStorage.getItem(key) || "null");
-  const today = dayOf(new Date());
-  const given = saved?.day === today ? saved.points : 0;
+  const given = isToday(saved?.day) ? saved.points : 0;
   if (given >= GIFT_DAILY_MAX || Math.random() >= GIFT_CHANCE) return null;
   const gift = Math.min(randomInt(1, 3), GIFT_DAILY_MAX - given);
-  localStorage.setItem(key, JSON.stringify({ day: today, points: given + gift }));
+  localStorage.setItem(key, JSON.stringify({ day: keepDay(saved?.day), points: given + gift }));
   award(gift, t("캐릭터가 준 선물!"));
   return t("선물이야!");
 }
 
-const quotaKey = () => `${dayOf(new Date())}:${searchesLeft()}:${weekCount()}`;
+const quotaKey = () => `${todayKey()}:${searchesLeft()}:${weekCount()}`;
 // How many searches are left today, in the character's own words. It says so when the home
 // screen opens and again whenever the number has changed, not on every redraw.
 function quotaLine() {
@@ -1798,14 +1807,16 @@ const OWN_ART = ".feedback .art .mascot, .score-art .mascot, .versus .side.me .f
 const syncStage = () => stageYard(WIDE() ? document.querySelector(OWN_ART) : null);
 // Catching a visitor: a few points, CATCH_DAILY times a day on this computer.
 const CATCH_POINTS = 2, CATCH_DAILY = 10, CATCH_KEY = "wb_catch";
+const catchKept = () => { try { return JSON.parse(localStorage.getItem(CATCH_KEY) || "{}") || {}; } catch { return {}; } };
 function catchesToday() {
-  try { const kept = JSON.parse(localStorage.getItem(CATCH_KEY) || "{}"); return kept.day === dayOf(new Date()) ? kept.n || 0 : 0; } catch { return 0; }
+  const kept = catchKept();
+  return isToday(kept.day) ? kept.n || 0 : 0;
 }
 function catchVisitor(id) {
   const n = catchesToday();
   sfx.chirp(id);
   if (n >= CATCH_DAILY) return "♥";
-  localStorage.setItem(CATCH_KEY, JSON.stringify({ day: dayOf(new Date()), n: n + 1 }));
+  localStorage.setItem(CATCH_KEY, JSON.stringify({ day: keepDay(catchKept().day), n: n + 1 }));
   award(CATCH_POINTS, t("{name} 발견!", { name: ALL_CHARACTERS.find((c) => c.id === id)?.name || "" }));
   return `+${CATCH_POINTS}`;
 }
@@ -1956,7 +1967,7 @@ function searchView() {
 // ---------- word list tab ----------
 
 function dayLabel(day) {
-  const today = new Date();
+  const today = nowDate();
   if (day === dayOf(today)) return t("오늘");
   if (day === dayOf(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1))) return t("어제");
   return new Date(day + "T12:00:00").toLocaleDateString(locale(), { month: "long", day: "numeric", weekday: "short" });
@@ -2143,7 +2154,7 @@ function wordsList() {
 function weekLabel(key) {
   const start = new Date(key + "T12:00:00");
   if (key === weekKey()) return t("이번 주");
-  const lastWeek = new Date(); lastWeek.setDate(lastWeek.getDate() - 7);
+  const lastWeek = nowDate(); lastWeek.setDate(lastWeek.getDate() - 7);
   if (key === weekKey(lastWeek)) return t("지난주");
   const end = new Date(start); end.setDate(end.getDate() + 6);
   const show = (d) => d.toLocaleDateString(locale(), { month: "long", day: "numeric" });
@@ -2175,7 +2186,7 @@ const shuffle = (list) => [...list].sort(() => Math.random() - 0.5);
 const gradeList = (grade) => WORD_LISTS[grade] || [];
 const bestStreak = () => state.user.challenge?.best || 0;
 // Runs left today. The profile keeps the day and how many runs were started on it.
-const triesUsed = () => (state.user.challenge?.day === dayOf(new Date()) ? state.user.challenge.tries || 0 : 0);
+const triesUsed = () => (isToday(state.user.challenge?.day) ? state.user.challenge.tries || 0 : 0);
 const triesLeft = () => Math.max(0, streakRules().tries - triesUsed());
 
 // ----- the start screens of the two games: the character explains, three steps, the numbers -----
@@ -2220,7 +2231,7 @@ function challengeCard() {
 function startChallenge() {
   if (triesLeft() === 0) return;
   const grade = Math.min(12, Math.max(3, state.user.grade));
-  state.user.challenge = { best: bestStreak(), day: dayOf(new Date()), tries: triesUsed() + 1 };
+  state.user.challenge = { best: bestStreak(), day: keepDay(state.user.challenge?.day), tries: triesUsed() + 1 };
   api.saveProfile({ challenge: state.user.challenge }).catch(console.error); // at once, so that closing the panel does not give the run back
   state.challenge = { grade, queue: shuffle(gradeList(grade)), streak: 0, levels: 0, earned: 0, phase: "ask" };
   nextChallengeWord();
@@ -2601,7 +2612,7 @@ function leagueCard(rows) {
   const tier = myTier(), league = TIERS[tier];
   const index = rows.findIndex((row) => row.me), me = rows[index];
   const ahead = [...rows].reverse().find((row) => row.score > me.score);
-  const left = 7 - ((new Date().getDay() + 6) % 7);
+  const left = 7 - ((nowDate().getDay() + 6) % 7);
   const up = state.leagueUp > 0;
   const friendsOnly = state.rankScope === "friends";
   const safe = rows[rows.length - MOVE - 1]; // the last place that stays
@@ -2625,7 +2636,7 @@ function leagueCard(rows) {
 function leagueInfoView() {
   const from = weekStart(), to = new Date(from.getTime() + 6 * 86400000);
   const date = (d) => d.toLocaleDateString(locale(), { month: "short", day: "numeric", weekday: "short" });
-  const left = 7 - ((new Date().getDay() + 6) % 7);
+  const left = 7 - ((nowDate().getDay() + 6) % 7);
   const tier = myTier(), league = TIERS[tier];
   const rows = leagueRows();
   const me = rows.find((row) => row.me);
@@ -2821,9 +2832,9 @@ function quizScope() {
   const scope = state.scope;
   const setScope = (next) => { state.scope = next; render(); };
   const inRange = quizPool(state.words, scope).length; // a quiz asks at most tuning("quiz").max of them
-  const cards = buildQuizSet(state.words, scope, Date.now(), tuning("quiz").max);
+  const cards = buildQuizSet(state.words, scope, clockNow(), tuning("quiz").max);
   const review = cards.filter((w) => w.needs_review).length;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = nowDate().toISOString().slice(0, 10);
   const select = h("select", {
     id: "scope", "aria-label": t("시험 범위"),
     onchange: (e) => setScope({
@@ -3070,7 +3081,7 @@ let friendsModule = null;
 function friends() {
   return (friendsModule ||= initFriends({
     h, t, state, api, render, fail, nameOf, toastText, openPage, storeUrl, logoIcon, displayName, award, locale,
-    today: () => dayOf(new Date()),
+    today: todayKey,
     startDuel: (other) => duel().start({ other }),
   }));
 }
@@ -3955,6 +3966,18 @@ document.addEventListener("keydown", (e) => {
   if (choice && !choice.disabled) { e.preventDefault(); choice.click(); }
 });
 document.addEventListener("visibilitychange", refreshAlerts);
+// The server's time comes with its answers (clock.js). When the window is looked at again after a
+// while (the computer slept, or its clock was moved meanwhile), one small question is asked, so
+// that the day is right before anything is pressed; the screen is drawn again if the day changed.
+let clockAsked = 0;
+function refreshClock() {
+  if (DEMO || document.hidden || !state.user?.grade || performance.now() - clockAsked < 60_000) return;
+  clockAsked = performance.now();
+  const before = todayKey();
+  api.myPlan().then((plan) => { state.plan = plan; }).catch(() => {}).finally(() => { if (todayKey() !== before) render(); });
+}
+document.addEventListener("visibilitychange", refreshClock);
+window.addEventListener("focus", refreshClock);
 setInterval(refreshAlerts, 3 * 60 * 1000);
 setTimeout(loadNotices, 3500); // after the first screen (and last week's league result) has settled
 setInterval(loadNotices, 15 * 60 * 1000);
