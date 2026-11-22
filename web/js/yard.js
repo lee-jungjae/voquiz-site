@@ -2,7 +2,7 @@
 // They walk about, stop, hop now and then, and react when tapped. The app only says who is there
 // (showYard) and what a tap does; everything that moves is in here.
 // The page needs an element with the id "yard" (the web version's index.html has one).
-import { portrait, giftArt } from "./mascot.js?v=0.1.23-tovzgi";
+import { portrait, giftArt } from "./mascot.js?v=0.1.23-tovzvy";
 
 const still = () => Boolean(globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
 const rand = (a, b) => a + Math.random() * (b - a);

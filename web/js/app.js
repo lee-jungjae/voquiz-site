@@ -1,26 +1,26 @@
-import { api, DEMO } from "./api.js?v=0.1.23-tovzgi";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tovzgi";
-import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tovzgi";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tovzgi";
-import { cleanEntry } from "./clean.js?v=0.1.23-tovzgi";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tovzgi";
-import { CHARACTERS } from "./characters.js?v=0.1.23-tovzgi";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tovzgi";
-import { film } from "./film.js?v=0.1.23-tovzgi";
-import { showYard, leaveYard, cheerYard } from "./yard.js?v=0.1.23-tovzgi";
-import { initDesktop } from "./desktop.js?v=0.1.23-tovzgi";
-import { BANDS, bandOf } from "./levels.js?v=0.1.23-tovzgi";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tovzgi";
-import { initDuel } from "./duel.js?v=0.1.23-tovzgi";
-import { initFriends } from "./friends.js?v=0.1.23-tovzgi";
-import { MOTTOS } from "./mottos.js?v=0.1.23-tovzgi";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tovzgi";
-import { SIGNATURES } from "./signatures.js?v=0.1.23-tovzgi";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tovzgi";
-import { tuning, setTuning } from "./tuning.js?v=0.1.23-tovzgi";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tovzgi";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tovzgi";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tovzgi";
+import { api, DEMO } from "./api.js?v=0.1.23-tovzvy";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tovzvy";
+import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tovzvy";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tovzvy";
+import { cleanEntry } from "./clean.js?v=0.1.23-tovzvy";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tovzvy";
+import { CHARACTERS } from "./characters.js?v=0.1.23-tovzvy";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tovzvy";
+import { film } from "./film.js?v=0.1.23-tovzvy";
+import { showYard, leaveYard, cheerYard } from "./yard.js?v=0.1.23-tovzvy";
+import { initDesktop } from "./desktop.js?v=0.1.23-tovzvy";
+import { BANDS, bandOf } from "./levels.js?v=0.1.23-tovzvy";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tovzvy";
+import { initDuel } from "./duel.js?v=0.1.23-tovzvy";
+import { initFriends } from "./friends.js?v=0.1.23-tovzvy";
+import { MOTTOS } from "./mottos.js?v=0.1.23-tovzvy";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tovzvy";
+import { SIGNATURES } from "./signatures.js?v=0.1.23-tovzvy";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tovzvy";
+import { tuning, setTuning } from "./tuning.js?v=0.1.23-tovzvy";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tovzvy";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tovzvy";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tovzvy";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -3445,6 +3445,8 @@ function goTab(id) {
 let desktopModule;
 const desktop = () => (desktopModule ||= initDesktop({
   h, t, state, render, logoIcon, wordmark, searchForm, goHome, goTab, openShop, openSettings, openPage, webHome, star, isLearned, dayOf, dayLabel,
+  weekKey, weekLabel, canGroup, folders, folderSheet, canRetest, retest, removeWord, meanings, locale, icon, MASTER_STREAK, RETEST_DAYS,
+  openPlus: () => { state.plusOpen = true; openSettings(); },
   dailyGoal, todayBox, questHint, entrySide, giftArt, portrait,
   residents: () => yardCast?.rest || [], // the characters that are not out in the yard
   duelBadge: () => duel().badge(), friendsBadge: () => friends().badge(),
@@ -3500,6 +3502,8 @@ function render() {
   else if (!state.user.grade) app.replaceChildren(...[banner, gradePicker()].filter(Boolean));
   else if (presentWaiting()) app.replaceChildren(...[banner, giftPicker()].filter(Boolean));
   else {
+    // A wide window has no word list screen of its own: the list on the left of the frame is the whole word list.
+    if (WIDE() && state.tab === "words") { state.tab = "search"; desktop().showWords(); }
     const tabs = [["search", t("사전")], ["words", t("단어장")], ["quiz", t("퀴즈")], ["rank", t("랭킹")]];
     const view = { search: searchView, words: wordsView, quiz: quizView, rank: rankView, settings: settingsView, shop: shopView, friends: () => friends().view() }[state.tab]();
     const wide = WIDE();
