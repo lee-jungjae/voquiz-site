@@ -776,6 +776,8 @@ const T = {
   "영국식 발음 듣기": ["Hear it the British way", "听英式发音"],
   "발음 듣기": ["Hear the word", "听发音"],
   "이 기기에는 이 발음을 들려줄 음성이 없어요.": ["This device has no voice for that pronunciation.", "这台设备没有这种发音的语音。"],
+  "내 학년": ["My grade", "我的年级"],
+  "준비 중…": ["Writing…", "准备中…"],
   "알아 두기": ["Good to know", "小贴士"],
   "이렇게 써요": ["How to use it", "这样用"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],

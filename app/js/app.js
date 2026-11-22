@@ -1379,9 +1379,10 @@ function levelBar(word) {
   const own = bandOf(state.user.grade), at = shownBand(word), i = BANDS.indexOf(at), busy = Boolean(levelOf(word)?.busy);
   return h("div", { class: `level-bar${busy ? " busy" : ""}` },
     h("button", { class: "level-step", disabled: busy || i === 0, onclick: () => showLevel(word, BANDS[i - 1]) }, h("i", { "aria-hidden": "true" }, "‹"), t("더 쉽게")),
-    h("div", { class: "level-now", role: "status" },
-      h("b", null, at.label),
-      h("small", null, busy ? t("설명을 준비하는 중…") : at === own ? t("내 학년 설명") : t(at.name))),
+    h("div", { class: "level-now", role: "status", title: t(at.name) },
+      h("span", { class: "level-meter", "aria-hidden": "true" }, BANDS.map((_, n) => h("i", { class: n <= i ? "on" : "" }))),
+      h("b", { class: "level-chip" }, at.label),
+      busy ? h("small", { class: "level-wait" }, t("준비 중…")) : at === own ? h("small", { class: "level-mine" }, t("내 학년")) : h("span", { class: "sr-only" }, t(at.name))),
     h("button", { class: "level-step", disabled: busy || i === BANDS.length - 1, onclick: () => showLevel(word, BANDS[i + 1]) }, t("더 자세히"), h("i", { "aria-hidden": "true" }, "›")));
 }
 

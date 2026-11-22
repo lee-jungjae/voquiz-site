@@ -1902,10 +1902,18 @@ button.points .dot { position: absolute; top: -4px; right: -4px; min-width: 16px
 .level-step { display: inline-flex; align-items: center; gap: 3px; padding: 5px 11px; border-radius: 999px; background: var(--bg); font-size: 12.5px; font-weight: 700; color: var(--accent-dark); box-shadow: 0 0 0 1px var(--border); white-space: nowrap; }
 .level-step i { font-style: normal; font-size: 14px; line-height: 1; }
 .level-step:disabled { opacity: .35; box-shadow: none; cursor: default; }
-.level-now { display: flex; align-items: baseline; justify-content: center; gap: 6px; min-width: 0; line-height: 1.25; }
-.level-now b { font-size: 12.5px; color: var(--accent); white-space: nowrap; }
-.level-now small { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.level-bar.busy .level-now small { animation: level-wait 1s ease-in-out infinite; }
+.level-now { display: flex; align-items: center; justify-content: center; gap: 7px; min-width: 0; line-height: 1; }
+/* three steps, filled up to the level shown: how deep this explanation is, at a glance */
+.level-meter { display: inline-flex; align-items: flex-end; gap: 2px; height: 13px; flex: none; }
+.level-meter i { width: 4px; border-radius: 2px; background: color-mix(in srgb, var(--accent) 22%, transparent); transition: background .2s; }
+.level-meter i:nth-child(1) { height: 5px; }
+.level-meter i:nth-child(2) { height: 9px; }
+.level-meter i:nth-child(3) { height: 13px; }
+.level-meter i.on { background: var(--accent); }
+.level-chip { font-size: 13px; font-weight: 800; color: var(--accent-dark); white-space: nowrap; }
+.level-mine, .level-wait { flex: none; padding: 3px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; white-space: nowrap; }
+.level-mine { background: color-mix(in srgb, var(--lime) 45%, transparent); color: var(--text); }
+.level-wait { background: var(--bg); color: var(--muted); animation: level-wait 1s ease-in-out infinite; }
 @keyframes level-wait { 50% { opacity: .35; } }
 /* choosing a grade: the three groups, each with its own level of explanation */
 .grade-bands { display: grid; gap: 10px; margin-top: 8px; text-align: left; }
@@ -1914,3 +1922,6 @@ button.points .dot { position: absolute; top: -4px; right: -4px; min-width: 16px
 .band-name b { font-size: 15px; color: var(--accent); }
 .band-name span { font-size: 13px; color: var(--muted); }
 .grade-band .grades { margin-top: 0; grid-template-columns: repeat(4, 1fr); }
+
+/* read aloud by a screen reader, not shown */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
