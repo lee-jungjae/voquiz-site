@@ -1209,13 +1209,63 @@ function entryBlocks(word) {
   return sections.map(([name, heading, content]) => block(word, name, heading, content));
 }
 
+// ----- hearing the word -----
+// The device's own voices read it (the browser's speech synthesis): nothing is sent anywhere, it
+// costs nothing and it works for every word. An English word can be heard the American and the
+// British way; a Korean word in standard Korean. Which voices exist depends on the device.
+const SAY = { en: [["en-US", "us", "미국식 발음 듣기"], ["en-GB", "gb", "영국식 발음 듣기"]], ko: [["ko-KR", "", "발음 듣기"]] };
+// Small flags, drawn (Windows has no flag emoji). Fixed markup, no user data.
+const FLAGS = {
+  us: `<svg viewBox="0 0 20 14"><rect width="20" height="14" fill="#fff"/><path d="M0 1h20M0 5h20M0 9h20M0 13h20" stroke="#b22234" stroke-width="2"/><rect width="9" height="8" fill="#3c3b6e"/></svg>`,
+  gb: `<svg viewBox="0 0 20 14"><rect width="20" height="14" fill="#012169"/><path d="M0 0l20 14M20 0L0 14" stroke="#fff" stroke-width="2.8"/><path d="M0 0l20 14M20 0L0 14" stroke="#c8102e" stroke-width="1"/><path d="M10 0v14M0 7h20" stroke="#fff" stroke-width="4.6"/><path d="M10 0v14M0 7h20" stroke="#c8102e" stroke-width="2.6"/></svg>`,
+};
+function flag(code) {
+  const el = h("span", { class: "flag", "aria-hidden": "true" });
+  el.innerHTML = FLAGS[code];
+  return el;
+}
+const canSay = () => "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+if (canSay()) speechSynthesis.getVoices(); // asks the browser to load its list early
+function voiceFor(lang) {
+  const all = speechSynthesis.getVoices();
+  const fit = all.filter((v) => String(v.lang).replace("_", "-").toLowerCase() === lang.toLowerCase());
+  // A device lists many voices for one language, some of them toys. The natural ones first:
+  // Chrome's "Google" voices and the systems' newer ones, then each system's standard voice.
+  const score = (v) => (/Google|Natural|Premium|Enhanced|Siri/i.test(v.name) ? 4 : 0)
+    + (/Samantha|Ava|Allison|Daniel|Kate|Serena|Yuna|Zira|Aria|Jenny|Hazel|Sonia|Libby|Heami|SunHi/i.test(v.name) ? 2 : 0)
+    + (v.default ? 1 : 0)
+    - (/Eddy|Flo|Grandma|Grandpa|Reed|Rocko|Sandy|Shelley|Albert|Bad News|Good News|Bahh|Bells|Boing|Bubbles|Cellos|Jester|Junior|Kathy|Organ|Ralph|Fred|Superstar|Trinoids|Whisper|Wobble|Zarvox/i.test(v.name) ? 6 : 0);
+  const voice = fit.reduce((best, v) => (!best || score(v) > score(best) ? v : best), null);
+  return { loaded: all.length > 0, voice };
+}
+function sayWord(text, lang, button) {
+  const { loaded, voice } = voiceFor(lang);
+  if (loaded && !voice) return toastText(t("이 기기에는 이 발음을 들려줄 음성이 없어요."));
+  speechSynthesis.cancel();
+  const say = new SpeechSynthesisUtterance(text);
+  say.lang = voice?.lang || lang;
+  if (voice) say.voice = voice;
+  say.rate = 0.9; // a little slower than talk, so each sound is heard
+  document.querySelectorAll(".speak.on").forEach((el) => el.classList.remove("on"));
+  button?.classList.add("on");
+  say.onend = say.onerror = () => button?.classList.remove("on");
+  speechSynthesis.speak(say);
+}
+function sayButtons(c) {
+  if (!canSay() || !c?.headword || !SAY[c.language]) return null;
+  return h("span", { class: "speak-set" }, SAY[c.language].map(([lang, country, title]) =>
+    h("button", { class: "speak", title: t(title), "aria-label": t(title), onclick: (e) => sayWord(c.headword, lang, e.currentTarget) },
+      h("i", { "aria-hidden": "true" }, "▶"), country && flag(country))));
+}
+
 function hero(c, word) {
   return h("section", { class: "hero" },
     word && star(word),
     word?.discovered && h("div", { class: "found-line" }, h("i", { "aria-hidden": "true" }, "✦"), t("내가 처음 발견한 단어")),
     h("h2", null, c.headword),
     !manySenses(c) && h("div", { class: "cp" }, h("small", null, "⇄"), c.counterpart),
-    h("div", { class: "meta" }, [c.pronunciation, !manySenses(c) && c.part_of_speech].filter(Boolean).join("  ·  ")),
+    h("div", { class: "meta" }, [c.pronunciation, !manySenses(c) && c.part_of_speech].filter(Boolean).join("  ·  "), sayButtons(c)),
+    word && levelBar(word), // always here: under the word, above its meanings
     manySenses(c) ? sensesList(c, word?.term_norm || c.headword) : [
       h("div", { class: "def" }, koFirst()
         ? [h("p", null, c.definition_ko), h("p", null, c.definition_en)]
@@ -1321,6 +1371,7 @@ function showLevelPartial(word, band, partial) {
 function levelLive(word) {
   const box = h("div", { id: "level-live", role: "status", "aria-live": "polite" });
   box.liveParts = buildLive(box, levelBar(word));
+  if (manySenses(word.content)) box.liveParts.cp.remove(); // as in the finished card, so the switch does not move
   updateLive(box.liveParts, levelOf(word).live);
   return box;
 }
@@ -1339,7 +1390,6 @@ function entryCard(word) {
   const content = shownContent(word);
   return h("article", { class: "entry" },
     hero(content, word),
-    levelBar(word),
     entryBlocks(content === word.content ? word : { ...word, content }),
     h("div", { class: "card-foot" },
       h("button", { class: "link", onclick: () => removeWord(word) }, t("단어장에서 삭제"))));
@@ -1387,7 +1437,7 @@ const LIVE_STEPS = () => [
 
 // The live view is built once and then only its text and marks are changed. Rebuilding it for every
 // piece that arrives restarted every animation, which made the checklist flash.
-function buildLive(box, between = null) {
+function buildLive(box, between = null) { // between: what goes under the word (the level switch)
   const el = {
     headword: h("h2", null, state.query),
     counterpart: h("span"),
@@ -1405,8 +1455,7 @@ function buildLive(box, between = null) {
   el.def.append(el.defKo, el.defEn);
   box.className = "live-box";
   box.replaceChildren(h("div", { class: "live" },
-    h("section", { class: "hero" }, el.headword, el.cp, el.meta, el.def),
-    between,
+    h("section", { class: "hero" }, el.headword, el.cp, el.meta, between, el.def),
     h("ul", { class: "steps" }, el.steps.map((step) => step.row)),
     h("div", { class: "bar", "aria-hidden": "true" }, h("i"))));
   return el;
