@@ -447,6 +447,8 @@ header h1 .home:hover { opacity: .7; }
 
 /* ---------- a new word, shown while it is being written ---------- */
 .live-box { margin-top: 24px; }
+.entry > .live-box { margin-top: 0; }
+.entry > .live-box .level-bar { margin: 0 0 14px; }
 .live .hero { padding-bottom: 16px; }
 .live .typing p:last-child::after { content: ""; display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -2px; background: var(--accent); animation: blink .9s steps(1) infinite; }
 .steps { list-style: none; margin: 4px 0 0; padding: 16px 0 0; border-top: 1px solid var(--line); display: grid; gap: 8px; }

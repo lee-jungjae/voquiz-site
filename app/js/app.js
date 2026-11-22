@@ -1289,7 +1289,7 @@ async function showLevel(word, band) {
   state.level = { ...settle(before?.content || null), busy: true };
   render();
   try {
-    const result = await api.lookupLevel(word.term_norm, band.id);
+    const result = await api.lookupLevel(word.term_norm, band.id, (partial) => showLevelPartial(word, band, partial));
     if (!result.valid) throw new Error("level_unavailable");
     levelCache.set(key, cleanEntry(result.content));
     if (mine()) state.level = settle(levelCache.get(key));
@@ -1299,6 +1299,30 @@ async function showLevel(word, band) {
     toastText(t("이 수준의 설명을 가져오지 못했어요. 잠시 뒤에 다시 눌러 주세요."));
   }
   render();
+}
+// A level nobody has opened yet is written on the spot, which takes a while: its text is shown as
+// it arrives, the way a new word is. (A level that is already stored comes at once, and nothing of
+// this is seen.) The first piece switches the card to the live view; later pieces only change it.
+let levelFrame = 0;
+function showLevelPartial(word, band, partial) {
+  const level = state.level;
+  if (!level?.busy || level.term !== word.term_norm || level.band !== band.id) return; // not the one asked for any more
+  if (!partial || partial.valid === false || !partial.headword) return;
+  const first = !level.live;
+  level.live = cleanEntry(partial);
+  if (first) return render();
+  if (levelFrame) return;
+  levelFrame = setTimeout(() => {
+    levelFrame = 0;
+    const box = document.getElementById("level-live");
+    if (box?.liveParts && state.level?.live) updateLive(box.liveParts, state.level.live);
+  }, 60);
+}
+function levelLive(word) {
+  const box = h("div", { id: "level-live", role: "status", "aria-live": "polite" });
+  box.liveParts = buildLive(box, levelBar(word));
+  updateLive(box.liveParts, levelOf(word).live);
+  return box;
 }
 function levelBar(word) {
   const own = bandOf(state.user.grade), at = shownBand(word), i = BANDS.indexOf(at), busy = Boolean(levelOf(word)?.busy);
@@ -1311,6 +1335,7 @@ function levelBar(word) {
 }
 
 function entryCard(word) {
+  if (levelOf(word)?.busy && levelOf(word).live) return h("article", { class: "entry" }, levelLive(word));
   const content = shownContent(word);
   return h("article", { class: "entry" },
     hero(content, word),
@@ -1362,7 +1387,7 @@ const LIVE_STEPS = () => [
 
 // The live view is built once and then only its text and marks are changed. Rebuilding it for every
 // piece that arrives restarted every animation, which made the checklist flash.
-function buildLive(box) {
+function buildLive(box, between = null) {
   const el = {
     headword: h("h2", null, state.query),
     counterpart: h("span"),
@@ -1381,6 +1406,7 @@ function buildLive(box) {
   box.className = "live-box";
   box.replaceChildren(h("div", { class: "live" },
     h("section", { class: "hero" }, el.headword, el.cp, el.meta, el.def),
+    between,
     h("ul", { class: "steps" }, el.steps.map((step) => step.row)),
     h("div", { class: "bar", "aria-hidden": "true" }, h("i"))));
   return el;

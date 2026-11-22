@@ -310,12 +310,25 @@ const LEVELS = {
     g9_12: ["사람이나 화물을 한 지점에서 다른 지점으로 이동시키는 일, 또는 그 수단과 체계.", "The movement of people or goods from one point to another, or the means and system by which this is done."],
   },
 };
-export async function lookupLevel(term, band) {
+const levelSeen = new Set(); // "term|band" already shown once in this visit
+export async function lookupLevel(term, band, onPartial) {
   const termNorm = term.normalize("NFC").trim().toLowerCase().replace(/\s+/g, " ");
   const word = read(WORDS_KEY, []).find((w) => w.term_norm === termNorm);
   const base = word?.content ?? SAMPLES[termNorm] ?? placeholder(termNorm);
   await new Promise((done) => setTimeout(done, 700));
-  if (FULL[termNorm]?.[band]) return { valid: true, content: FULL[termNorm][band], word: null, view: band };
+  if (FULL[termNorm]?.[band]) {
+    const key = `${termNorm}|${band}`;
+    if (!levelSeen.has(key)) {
+      levelSeen.add(key);
+      const text = JSON.stringify(FULL[termNorm][band]);
+      const step = Math.max(9, Math.ceil(text.length / 260));
+      for (let i = 0; i < text.length; i += step) {
+        onPartial?.(parsePartial(text.slice(0, i)));
+        await new Promise((done) => setTimeout(done, 18));
+      }
+    }
+    return { valid: true, content: FULL[termNorm][band], word: null, view: band };
+  }
   const level = LEVELS[termNorm]?.[band];
   if (!level) return { valid: true, content: base, word: null, view: band };
   const [definition_ko, definition_en] = level;
