@@ -1,8 +1,8 @@
 // Demo backend: no server, no Claude. Everything stays in this browser's localStorage.
 // Used automatically while js/config.js is empty, so the UI can be tried right away.
-import { parsePartial } from "./partial.js?v=0.1.27-tos8ut";
-import { bandOf } from "./levels.js?v=0.1.27-tos8ut";
-import { FULL } from "./demo_levels.js?v=0.1.27-tos8ut";
+import { parsePartial } from "./partial.js?v=0.1.27-townt1";
+import { bandOf } from "./levels.js?v=0.1.27-townt1";
+import { FULL } from "./demo_levels.js?v=0.1.27-townt1";
 
 const USER_KEY = "wb_demo_user";
 const WORDS_KEY = "wb_demo_words";
@@ -548,10 +548,12 @@ export function seed(grade = 5) {
   const day = 24 * 60 * 60 * 1000;
   const words = ["gravity", "transport", "democracy", "friend", "노력", "photosynthesis"].map((term, i) => {
     const when = new Date(Date.now() - (i < 3 ? day : 0) - (6 - i) * 60 * 1000).toISOString();
+    // The same entry a search for the word gives: the whole one of the student's level where there is one.
+    const content = FULL[term]?.[bandOf(grade).id] ?? SAMPLES[term];
     return {
-      term_norm: term, headword: SAMPLES[term].headword, favorite: term === "friend", search_count: 1,
+      term_norm: term, headword: content.headword, favorite: term === "friend", search_count: 1,
       first_searched_at: when, last_searched_at: when, needs_review: term === "gravity", streak: 0,
-      last_reviewed_at: null, content: SAMPLES[term], discovered: term === "photosynthesis",
+      last_reviewed_at: null, content, discovered: term === "photosynthesis",
     };
   });
   write(WORDS_KEY, words);
