@@ -2522,3 +2522,19 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   .today-meter:hover::before, .today-meter:hover + .today-meter::before { opacity: 0; }
   .today-meter .goal-ring { width: 18px; height: 18px; -webkit-mask: radial-gradient(circle, transparent 5px, #000 5.5px); mask: radial-gradient(circle, transparent 5px, #000 5.5px); }
 }
+/* ----- desktop: a duel challenge or a friend's request is a small quiet notice, not a band of solid colour ----- */
+@media (min-width: 860px) {
+  .web-quiet { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 10px; margin-top: 20px; }
+  .web-quiet > p { flex-basis: 100%; margin: 0; }
+  .dk .duel-banners { display: contents; }
+  .dk .duel-banner { width: auto; max-width: 100%; gap: 8px; padding: 5px 6px 5px 5px; border-radius: 999px; background: var(--bg); color: var(--text); box-shadow: inset 0 0 0 1px var(--border); transition: box-shadow .15s, transform .15s; }
+  .dk .duel-banner:hover { box-shadow: inset 0 0 0 1px var(--text); transform: translateY(-1px); }
+  .dk .duel-banner.news, .dk .duel-banner.friend { background: var(--bg); box-shadow: inset 0 0 0 1px var(--border); }
+  .dk .duel-vs { width: 28px; height: 28px; font-size: 11px; animation: none; background: color-mix(in srgb, var(--accent) 16%, var(--bg)); color: var(--accent-dark, var(--accent)); }
+  .dk .duel-banner.friend .duel-vs { background: color-mix(in srgb, var(--good) 16%, var(--bg)); color: var(--good); font-size: 15px; }
+  .dk .duel-banner.news .duel-vs { background: var(--surface); color: var(--text); }
+  .dk .duel-banner .duel-text { flex: 0 1 auto; display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+  .dk .duel-banner .duel-text b { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dk .duel-banner .duel-text small { flex: none; font-size: 12.5px; color: var(--muted); opacity: 1; white-space: nowrap; }
+  .dk .duel-banner .go { margin-left: 4px; padding: 5px 12px; background: var(--text); color: var(--bg); font-size: 12px; font-weight: 700; }
+}
