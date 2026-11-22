@@ -10,7 +10,7 @@
 //  - leaving: when the window becomes a phone's, everybody runs to the dictionary tab (leaveYard).
 // The app only says who is there and what a tap does; everything that moves is in here.
 // The page needs an element with the id "yard" (the web version's index.html has one).
-import { portrait, giftArt } from "./mascot.js?v=0.1.23-tow0jl";
+import { portrait, giftArt } from "./mascot.js?v=0.1.23-tow19a";
 
 const still = () => Boolean(globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -21,6 +21,20 @@ let opts = {};
 let leaving = false; // on their way out (leaveYard): nothing else touches them until they are gone
 
 const room = (w) => Math.max(0, root.clientWidth - (w?.el.offsetWidth || 90) - 44); // how far right a character may stand (the button at the end stays free)
+// Where a character likes to stand: beside the column of the screen, not on it. opts.clear() gives
+// the column (its left and right edge in the window). A side is used when the character fits there
+// with at most a third of itself over the column; with no such side, the whole yard is used.
+function sides(w) {
+  const max = room(w), width = w.el.offsetWidth || 90;
+  const clear = opts.clear?.();
+  if (!clear) return [[0, max]];
+  const base = root.getBoundingClientRect().left, slack = width * 0.33;
+  const leftEnd = Math.min(max, clear.left - base - width + slack), rightStart = Math.max(0, clear.right - base - slack);
+  const out = [];
+  if (leftEnd >= 0) out.push([0, leftEnd]);
+  if (rightStart <= max) out.push([rightStart, max]);
+  return out.length ? out : [[0, max]];
+}
 function place(w, x, seconds = 0) {
   w.x = Math.round(x);
   w.el.style.transitionDuration = `${seconds}s`;
@@ -38,11 +52,22 @@ function stroll(w) {
   clearTimeout(w.timer);
   if (w.away) return; // on the stage: it comes back by itself (jumpBack)
   if (still() || document.hidden) { w.timer = setTimeout(() => stroll(w), 4000); return; }
+  const places = sides(w);
+  // Told to keep out of the way (opts.stay "right": a screen that needs its whole width, like the
+  // shop): the right side of the column, or the far right end of the yard when there is no such side.
+  const last = places[places.length - 1];
+  const clearOf = opts.stay === "right" ? opts.clear?.() : null;
+  const past = clearOf ? clearOf.right - root.getBoundingClientRect().left + 8 : Infinity; // wholly to the right of the column, when there is room
+  const keep = opts.stay === "right" ? (past <= room(w) ? [past, room(w)] : last[0] > 0 ? last : [Math.max(0, room(w) - 80), room(w)]) : null;
+  const outside = Boolean(keep) && (w.x < keep[0] || w.x > keep[1]); // not there yet: it goes now, briskly
   const roll = Math.random();
-  if (roll < 0.2) { hop(w); w.timer = setTimeout(() => stroll(w), rand(900, 2400)); return; }
-  if (roll < 0.42) { w.timer = setTimeout(() => stroll(w), rand(1500, 5000)); return; }
-  const to = between(w.x + rand(-280, 280), 0, room(w));
-  const seconds = Math.max(0.6, Math.abs(to - w.x) / rand(26, 44)); // pixels a second: an unhurried walk
+  if (!outside && roll < 0.2) { hop(w); w.timer = setTimeout(() => stroll(w), rand(900, 2400)); return; }
+  if (!outside && roll < 0.42) { w.timer = setTimeout(() => stroll(w), rand(1500, 5000)); return; }
+  // Otherwise it mostly keeps to a side of the column (the nearer one); now and then it walks across to anywhere.
+  const near = places.reduce((best, p) => (Math.abs(between(w.x, p[0], p[1]) - w.x) < Math.abs(between(w.x, best[0], best[1]) - w.x) ? p : best));
+  const [lo, hi] = keep || (Math.random() < 0.22 ? places[Math.floor(Math.random() * places.length)] : near);
+  const to = w.x < lo || w.x > hi ? rand(lo, hi) : between(w.x + rand(-280, 280), lo, hi);
+  const seconds = Math.max(0.6, Math.abs(to - w.x) / (outside ? rand(170, 210) : rand(26, 44))); // pixels a second: an unhurried walk
   w.el.classList.toggle("left", to < w.x);
   w.el.classList.add("walk");
   place(w, to, seconds);
@@ -99,7 +124,8 @@ function add(id) {
     if (said && typeof said === "object") say(w, said.text, said.act); else say(w, said || "");
   });
   root.append(el);
-  place(w, rand(0, room(w)));
+  const [lo, hi] = (() => { const places = sides(w); return places[Math.floor(Math.random() * places.length)]; })();
+  place(w, rand(lo, hi));
   walkers.set(id, w);
   w.timer = setTimeout(() => stroll(w), rand(300, 2600));
 }
@@ -110,11 +136,14 @@ function add(id) {
 //         readers, onTap(id, isLead): called on a tap; what it returns is said in a bubble (a
 //         { text, act } is a bubble that can be pressed), nudge(): the same, asked for now and then,
 //         visitors(): the characters that may come by, onCatch(id): one was caught; what it
-//         returns is shown where it was caught ("+2") }.
+//         returns is shown where it was caught ("+2"), clear(): the column of the screen
+//         ({ left, right } in the window) that the characters keep beside,
+//         stay: "right" when they should keep to the right, out of the way of the screen }.
 // An empty list (or nothing) empties the yard.
 export function showYard(next) {
   root ??= document.getElementById("yard");
   if (!root || leaving) return;
+  const asked = (next?.stay || null) !== (opts.stay || null); // asked to move over, or free again
   opts = next || {};
   const ids = opts.ids || [];
   root.hidden = ids.length === 0;
@@ -136,6 +165,7 @@ export function showYard(next) {
     if (id === stageOf) offStage();
   }
   for (const id of ids) if (!walkers.has(id)) add(id);
+  if (asked && opts.stay) for (const w of walkers.values()) if (!w.away) stroll(w); // on their way at once
   // A small button at the end of the yard opens the choice of who lives here.
   let edit = root.querySelector(".yard-edit");
   if (opts.onEdit && ids.length && !edit) {

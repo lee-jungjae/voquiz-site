@@ -39,22 +39,6 @@ export function initDesktop(c) {
   }
 
   // ----- the top: logo and menu on the left, the word box in the middle, the student's corner on the right -----
-  // "오늘" opens what the day holds (the present, today's points, the week's goal, today's words
-  // with the way on to a quiz, the character quest): it is one click away from every screen
-  // without taking a column of its own.
-  function todayMenu() {
-    return h("div", { class: "dk-today-wrap" },
-      h("button", { class: "dk-link", "aria-expanded": String(Boolean(state.todayOpen)), onclick: () => { state.todayOpen = !state.todayOpen; render(); } },
-        t("오늘"), c.presentWaiting() && !c.webHome() && h("em", { class: "dot", "aria-hidden": "true" }), !state.todayOpen && pop(3)),
-      state.todayOpen && h("div", { class: "dk-today", role: "dialog", "aria-label": t("오늘") },
-        c.presentWaiting() && h("button", { class: "dk-present", onclick: () => { state.todayOpen = false; c.openPresent(); } }, c.giftArt(), t("오늘의 선물 받기")),
-        c.dailyGoal(),
-        c.todayBox(),
-        c.questHint()));
-  }
-  document.addEventListener("click", (e) => { // a click anywhere else closes it
-    if (state.todayOpen && !e.target.closest?.(".dk-today-wrap") && !e.target.closest?.("#sheet")) { state.todayOpen = false; render(); }
-  });
   const pop = () => null; // the other characters come out by themselves now and then (yard.js, visitors), not under the pointer
   function top(bare) {
     const item = (id, label, n) => h("button", { "aria-current": state.tab === id ? "page" : null, onclick: () => c.goTab(id) },
@@ -65,7 +49,6 @@ export function initDesktop(c) {
         h("nav", { class: "dk-nav" }, item("search", t("사전"), 0), item("quiz", t("퀴즈"), 1), item("rank", t("랭킹"), 2))),
       bare ? h("span", { class: "dk-gap" }) : c.searchForm(true),
       h("div", { class: "dk-me" },
-        todayMenu(),
         h("button", { class: "dk-link", "aria-pressed": String(state.tab === "friends"), onclick: () => c.openPage("friends") },
           t("친구"), c.friendsBadge() > 0 && h("em", { class: "dot" }, String(c.friendsBadge())), pop(4)),
         h("button", { class: "dk-link", "aria-pressed": String(state.tab === "settings"), onclick: c.openSettings }, t("설정"), pop(5)),
@@ -94,7 +77,7 @@ export function initDesktop(c) {
       h("main", { class: mainClass },
         banners,
         // Back is the browser's own button; this arrow, at the top left of the screen, does the same.
-        !bare && !focus && h("button", { class: "dk-back", title: t("뒤로"), "aria-label": t("뒤로"), onclick: () => history.back() }, "←"),
+        !bare && !focus && state.tab === "search" && h("button", { class: "dk-back", title: t("뒤로"), "aria-label": t("뒤로"), onclick: () => history.back() }, "←"),
         view));
   }
   // A wide window has no separate word list screen: the list on the left is it, so it is unfolded when asked for.

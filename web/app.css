@@ -2413,3 +2413,96 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   .dk { grid-template-columns: 300px minmax(0, 1fr); }
   html.web #app:has(.dk-words) ~ #yard:not(.leaving) { left: 300px; }
 }
+/* ----- desktop: room beside the column for the character; calmer shop, settings and friends ----- */
+@media (min-width: 860px) {
+  .qz-title { font-size: 28px; }
+  /* the shop: tiles without frames, four to a row */
+  .dk .shelf, .dk .shelf:has(.portrait) { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; row-gap: 18px; }
+  .dk .swatch:not(.special) { border-color: transparent; background: var(--surface); border-radius: 18px; }
+  .dk .swatch { padding: 12px 10px 12px; transition: transform .15s, box-shadow .15s, border-color .15s; }
+  .dk .swatch:hover { box-shadow: 0 8px 20px rgba(0, 0, 0, .08); }
+  .dk .swatch.active:not(.special) { border-color: var(--text); box-shadow: 0 0 0 1px var(--text); background: var(--bg); }
+  /* buttons as wide as what they say, not as the page */
+  .dk > main > section.block .btn.wide, .dk > main > section.block .btn.ghost { width: auto; min-width: 220px; }
+  .dk > main > .act .btn.wide { width: auto; min-width: 260px; }
+}
+/* a window too narrow for the column and the character side by side: the column moves over a little */
+@media (min-width: 1180px) and (max-width: 1519px) {
+  html.web .dk:not(.folded):not(.focus):not(.bare) > main { padding-left: 56px; padding-right: 216px; }
+}
+@media (min-width: 860px) and (max-width: 1179px) {
+  .walker.lead { width: 136px; }
+  .walker { width: 104px; }
+}
+/* ----- desktop: the quiz page is three cards (three games to choose from), each with its own start ----- */
+@media (min-width: 860px) {
+  .qz-lead { margin: -14px 0 22px; font-size: 15px; color: var(--muted); }
+  .qz-games { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .qz-game { display: flex; flex-direction: column; min-width: 0; padding: 22px 20px 14px; border-radius: 24px; background: var(--surface); transition: transform .18s, box-shadow .18s; }
+  .qz-game:hover { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(0, 0, 0, .08); }
+  .qz-game.review { background: color-mix(in srgb, var(--accent) 10%, var(--bg)); }
+  .qz-game.streak { background: color-mix(in srgb, #ff9f43 15%, var(--bg)); }
+  .qz-game.duel { background: color-mix(in srgb, #7fae4a 17%, var(--bg)); }
+  .qz-icon { display: grid; place-items: center; width: 54px; height: 54px; margin-bottom: 14px; border-radius: 18px; background: var(--bg); font-size: 27px; box-shadow: 0 1px 2px rgba(0, 0, 0, .06); }
+  .qz-game h2 { margin: 0; font-size: 21px; letter-spacing: -.01em; }
+  .qz-text { margin: 4px 0 16px; font-size: 13.5px; color: var(--muted); }
+  .qz-body { flex: 1; display: grid; gap: 12px; align-content: start; min-width: 0; }
+  .qz-body .field { margin: 0; }
+  .qz-body .field label { font-size: 12px; color: var(--muted); }
+  .qz-body select, .qz-body input { width: 100%; min-width: 0; background: var(--bg); }
+  .qz-body .field .row { flex-wrap: wrap; gap: 6px; }
+  .qz-game .qz-nums { display: grid; grid-auto-flow: row; grid-auto-columns: auto; gap: 7px; margin: 0; }
+  .qz-game .qz-nums .stat { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 0; border: 0; border-radius: 0; background: none; text-align: left; overflow: visible; }
+  .qz-game .qz-nums .stat span { order: -1; font-size: 13px; color: var(--muted); }
+  .qz-game .qz-nums .stat b { font-size: 14.5px; }
+  .qz-note { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+  .qz-game .duel-left { margin: 0; padding: 8px 10px; background: var(--bg); font-size: 12.5px; }
+  .qz-game > .btn { width: 100%; margin-top: 18px; padding: 14px 10px; border-radius: 14px; font-size: 15.5px; }
+  .qz-how { align-self: center; margin-top: 6px; padding: 6px 10px; font-size: 12.5px; font-weight: 500; color: var(--muted); text-decoration: none; }
+  .qz-how:hover { color: var(--text); text-decoration: underline; }
+  .how-sheet .guide-steps { margin: 6px 0 4px; text-align: left; }
+  .how-sheet .stage-ladder { margin: 12px 0 4px; }
+  .how-sheet .btn { margin-top: 16px; }
+  .qz-games ~ .duel-list { margin-top: 38px; }
+  .qz-games ~ .duel-list ~ .duel-list { margin-top: 30px; }
+  .qz-games ~ .duel-list h3 { margin-bottom: 10px; font-size: 20px; }
+  /* a past duel: both characters, glad or sad, the score between them */
+  .duel-record { display: flex; align-items: center; gap: 14px; width: 100%; padding: 8px 12px; border-radius: 18px; text-align: left; transition: background .15s; }
+  .duel-record:hover { background: var(--surface); }
+  .duel-record .rec-side { flex: none; width: 58px; }
+  .duel-record .face { position: relative; width: 58px; font-size: 0; line-height: 0; }
+  .duel-record .face .mascot { display: block; width: 100%; }
+  .duel-record .rec-score { flex: none; display: flex; align-items: baseline; justify-content: center; gap: 8px; min-width: 96px; font-size: 26px; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .duel-record .rec-score i { font-style: normal; color: var(--muted); font-weight: 600; }
+  .duel-record .rec-score em { font-style: normal; font-size: 18px; color: var(--muted); font-weight: 500; }
+  .duel-record.win .rec-score i:first-child, .duel-record.lose .rec-score i:last-child, .duel-record.draw .rec-score i { color: var(--text); font-weight: 800; }
+  .duel-record.lose .rec-side.me, .duel-record.win .rec-side.them { opacity: .78; }
+  .duel-record .who { flex: 1; min-width: 0; display: grid; font-size: 15px; font-weight: 600; }
+  .duel-record .who small { font-size: 12.5px; font-weight: 500; color: var(--muted); }
+  .duel-record .mark { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 800; background: var(--surface); color: var(--muted); }
+  .duel-record .mark.win { background: var(--good); color: var(--lime); }
+  .duel-record .mark.lose { background: #fde8e6; color: #b93a2b; }
+  .duel-record .chev { flex: none; font-size: 18px; color: var(--muted); }
+}
+/* ----- desktop: the day at a glance on the first screen (no "today" menu in the top bar) ----- */
+@media (min-width: 860px) {
+  .web-today { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 10px; margin-top: 26px; text-align: left; }
+  .today-meter { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; padding: 7px 14px 7px 9px; border-radius: 999px; font-size: 13px; color: var(--muted); transition: background .15s, color .15s; }
+  .today-meter:hover { background: var(--surface); color: var(--text); }
+  .today-meter .goal-ring { flex: none; width: 20px; height: 20px; border-radius: 50%; background: conic-gradient(var(--accent) var(--p), color-mix(in srgb, var(--accent) 18%, transparent) 0); -webkit-mask: radial-gradient(circle, transparent 5.5px, #000 6px); mask: radial-gradient(circle, transparent 5.5px, #000 6px); }
+  .today-meter.done .goal-ring { background: var(--good); }
+  .today-meter span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .today-meter b { flex: none; color: var(--text); font-variant-numeric: tabular-nums; }
+  .today-meter.done b { color: var(--good); }
+  .dk-wl .day h3 .day-quiz { margin-left: auto; padding: 3px 10px; border-radius: 999px; background: var(--bg); font-size: 12px; font-weight: 600; color: var(--text); }
+  .dk-wl .day h3 .day-quiz:hover { box-shadow: inset 0 0 0 1px var(--text); }
+}
+/* ----- desktop: quiz cards and duel records, small fixes ----- */
+@media (min-width: 860px) {
+  .qz-game .qz-nums .stat { align-items: center; }
+  .qz-game .duel-left:not(.none) .charge-clock, .qz-game .duel-left:not(.none) span:first-child small { display: none; }
+  .duel-record { gap: 16px; padding: 10px 14px; }
+  .duel-record .rec-side, .duel-record .face { width: 72px; }
+  .duel-record .rec-score { min-width: 104px; font-size: 28px; }
+  .duel-record.lose .rec-side.me, .duel-record.win .rec-side.them { opacity: .85; }
+}

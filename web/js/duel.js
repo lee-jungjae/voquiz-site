@@ -4,8 +4,8 @@
 //
 // This file holds the rules and the screens. It gets what it needs from app.js through `c`
 // (the element builder, translations, the shared state, points, the character drawings).
-import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow0jl";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow0jl";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow19a";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow19a";
 
 export const DUEL_LENGTHS = [60, 100, 180]; // seconds; the challenger chooses
 export const DUEL_CHARGES = 3; // challenges a student can hold
@@ -265,6 +265,52 @@ export function initDuel(c) {
         sendsLeft() ? t("상대 고르기") : t("충전을 기다리는 중"))),
       sendsLeft() === 0 && h("p", { class: "small muted center" }, t("받은 도전은 횟수와 상관없이 받을 수 있어요.")),
     ];
+  }
+
+  // The duel on the quiz page of the desktop frame: what its card shows, and the lists under the
+  // cards. A past duel shows both characters, glad or sad, so who won is plain at a glance.
+  const STEPS = () => [
+    t("상대와 시간을 고르고 문제를 풀어 기록을 세워요."),
+    t("상대가 같은 문제로 내 기록에 도전해요. 틀리면 3초 동안 멈춰요."),
+    t("더 많이 맞힌 쪽이 이겨요. 도전은 7일 동안 기다려요."),
+  ];
+  function desk() {
+    if (state.duelSetup) return { setup: t("대결을 쓰려면 Supabase SQL Editor에서 0004_duels.sql을 한 번 실행해야 해요."), steps: STEPS(), lists: [] };
+    refresh(false);
+    const list = state.duels || [];
+    const waiting = incoming();
+    const sent = list.filter((d) => d.role === "challenger" && d.status === "open");
+    const done = list.filter((d) => d.status === "done").slice(0, 6);
+    const how = (d) => (d.my_score > d.their_score ? "win" : d.my_score === d.their_score ? "draw" : "lose");
+    const word = { win: t("승"), draw: t("무"), lose: t("패") };
+    return {
+      fee: Math.min(FEE, state.user.points || 0), win: WIN, draw: DRAW,
+      sendsLeft: sendsLeft(), sends: sendsLine(), pick: openPicker, steps: STEPS(),
+      lists: [
+        waiting.length > 0 && h("section", { class: "duel-list" },
+          h("h3", null, t("받은 도전"), h("small", null, String(waiting.length))),
+          waiting.map((d) => h("div", { class: "duel-row hot" },
+            h("span", { class: "who" }, who(d.other), h("small", null, t("{n}개를 넘으면 승리", { n: d.their_score }))),
+            h("button", { class: "mini buy", onclick: () => start(d) }, t("받기"))))),
+        done.length > 0 && h("section", { class: "duel-list records" },
+          h("h3", null, t("최근 결과")),
+          done.map((d) => {
+            const r = how(d);
+            return h("button", { class: `duel-record ${r}`, title: t("결과 다시 보기"), onclick: () => openDetail(d) },
+              h("span", { class: "rec-side me" }, face(d.my_character || c.myShop().character, r === "lose" ? "comfort" : "cheer")),
+              h("b", { class: "rec-score" }, h("i", null, String(d.my_score)), h("em", null, ":"), h("i", null, String(d.their_score))),
+              h("span", { class: "rec-side them" }, face(d.their_character || "bubble", r === "win" ? "comfort" : "cheer")),
+              h("span", { class: "who" }, who(d.other), h("small", null, lengthLabel(d.seconds || 180))),
+              h("span", { class: `mark ${r}` }, word[r]),
+              h("span", { class: "chev", "aria-hidden": "true" }, "›"));
+          })),
+        sent.length > 0 && h("section", { class: "duel-list" },
+          h("h3", null, t("답을 기다리는 중")),
+          sent.map((d) => h("div", { class: "duel-row" },
+            h("span", { class: "who" }, who(d.other), h("small", null, t("내 기록 {n}개", { n: d.my_score }))),
+            h("span", { class: "tagline" }, t("대기 중"))))),
+      ],
+    };
   }
 
   function openPicker() {
@@ -701,5 +747,5 @@ export function initDuel(c) {
     return resultView();
   }
 
-  return { refresh, badge, banner, home, view, stop, openTab, start };
+  return { refresh, badge, banner, home, view, stop, openTab, start, desk };
 }

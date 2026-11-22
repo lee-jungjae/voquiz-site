@@ -816,6 +816,8 @@ const T = {
   "상대를 골라 시작해요": ["Pick someone to start", "选一个对手开始"],
   "시작!": ["Go!", "开始！"],
   "{name} 발견!": ["Caught {name}!", "发现了{name}！"],
+  "세 가지 퀴즈 중에서 골라 시작해요.": ["Pick one of three quizzes and start.", "从三种测验中选一个开始吧。"],
+  "하는 방법": ["How it works", "玩法"],
   "알아 두기": ["Good to know", "小贴士"],
   "이렇게 써요": ["How to use it", "这样用"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],

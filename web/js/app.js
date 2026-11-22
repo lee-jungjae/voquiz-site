@@ -1,27 +1,27 @@
-import { api, DEMO } from "./api.js?v=0.1.23-tow0jl";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tow0jl";
-import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tow0jl";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tow0jl";
-import { cleanEntry } from "./clean.js?v=0.1.23-tow0jl";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tow0jl";
-import { CHARACTERS } from "./characters.js?v=0.1.23-tow0jl";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tow0jl";
-import { film } from "./film.js?v=0.1.23-tow0jl";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.23-tow0jl";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.23-tow0jl";
-import { initDesktop } from "./desktop.js?v=0.1.23-tow0jl";
-import { BANDS, bandOf } from "./levels.js?v=0.1.23-tow0jl";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tow0jl";
-import { initDuel } from "./duel.js?v=0.1.23-tow0jl";
-import { initFriends } from "./friends.js?v=0.1.23-tow0jl";
-import { MOTTOS } from "./mottos.js?v=0.1.23-tow0jl";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tow0jl";
-import { SIGNATURES } from "./signatures.js?v=0.1.23-tow0jl";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tow0jl";
-import { tuning, setTuning } from "./tuning.js?v=0.1.23-tow0jl";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow0jl";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow0jl";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tow0jl";
+import { api, DEMO } from "./api.js?v=0.1.23-tow19a";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tow19a";
+import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tow19a";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tow19a";
+import { cleanEntry } from "./clean.js?v=0.1.23-tow19a";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tow19a";
+import { CHARACTERS } from "./characters.js?v=0.1.23-tow19a";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tow19a";
+import { film } from "./film.js?v=0.1.23-tow19a";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.23-tow19a";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.23-tow19a";
+import { initDesktop } from "./desktop.js?v=0.1.23-tow19a";
+import { BANDS, bandOf } from "./levels.js?v=0.1.23-tow19a";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tow19a";
+import { initDuel } from "./duel.js?v=0.1.23-tow19a";
+import { initFriends } from "./friends.js?v=0.1.23-tow19a";
+import { MOTTOS } from "./mottos.js?v=0.1.23-tow19a";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tow19a";
+import { SIGNATURES } from "./signatures.js?v=0.1.23-tow19a";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tow19a";
+import { tuning, setTuning } from "./tuning.js?v=0.1.23-tow19a";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tow19a";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tow19a";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tow19a";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -1599,6 +1599,21 @@ function questHint() {
     h("span", null, t("캐릭터 퀘스트"), " · ", QUESTS[next.earn.by].text(next.earn.goal)),
     h("b", null, `${questNow(next)} / ${next.earn.goal}`));
 }
+// The day at a glance, on the first screen of the desktop frame: what searching has paid today, how
+// far the week's goal is, and the character quest that is nearest. Each opens its own detail.
+function todayRow() {
+  const got = searchPointsToday(), count = weekCount(), goal = weekGoal();
+  const meter = (ratio, label, value, act, title) => h("button", { class: `today-meter${ratio >= 1 ? " done" : ""}`, title, onclick: act },
+    h("i", { class: "goal-ring", style: `--p:${Math.min(1, Math.max(0, ratio)) * 360}deg`, "aria-hidden": "true" }),
+    h("span", null, label), h("b", null, value));
+  const quest = earnedCharacters().filter((c) => !ownsCharacter(c) && QUESTS[c.earn.by])
+    .sort((a, b) => questNow(b) / b.earn.goal - questNow(a) / a.earn.goal)[0];
+  return h("div", { class: "web-today", role: "group", "aria-label": t("오늘") },
+    meter(got / SEARCH_DAILY_MAX, t("오늘 검색 포인트"), `${got + searchBonusToday()} / ${SEARCH_DAILY_MAX}`, searchPointsSheet, t("단어를 찾을 때마다 +{p}점", { p: SEARCH_POINTS })),
+    meter(count / goal, weekLocked() ? t("이번 주 익힌 단어") : t("이번 주 목표"), `${count} / ${goal}`, weeklyGoalSheet, weekLocked() ? t("이번 주 목표") : t("이번 주 목표 정하기")),
+    claimable().length > 0 ? meter(1, t("받을 수 있는 캐릭터가 있어요"), "→", openShop, t("포인트샵 열기"))
+      : quest && meter(questNow(quest) / quest.earn.goal, `${t("캐릭터 퀘스트")} · ${QUESTS[quest.earn.by].text(quest.earn.goal)}`, `${questNow(quest)} / ${quest.earn.goal}`, openShop, t("포인트샵 열기")));
+}
 function webActions() {
   const toQuiz = () => { Object.assign(state, { tab: "quiz", notice: null }); render(); };
   return [
@@ -1607,10 +1622,7 @@ function webActions() {
       (giftWaiting() || santaWaiting()) && h("button", { class: "present", onclick: () => (giftWaiting() ? openDailyGift() : takeSantaGift()) }, giftArt(), t("오늘의 선물 받기")),
       h("button", { onclick: toQuiz }, t("퀴즈 한 판")),
       state.suggest && !limitReached() && h("button", { onclick: () => search(state.suggest) }, t("오늘의 단어: {w}", { w: state.suggest }))),
-    false && h("p", { class: "web-today" },
-      h("button", { class: "link", onclick: searchPointsSheet }, t("오늘 {a} / {b}점", { a: searchPointsToday() + searchBonusToday(), b: SEARCH_DAILY_MAX })),
-      h("span", { "aria-hidden": "true" }, " · "),
-      h("button", { class: "link", onclick: weeklyGoalSheet }, t("이번 주 {a} / {b}개", { a: weekCount(), b: weekGoal() }))),
+    todayRow(),
   ];
 }
 function webQuiet() {
@@ -1721,6 +1733,12 @@ function syncYard() {
     // The others come by now and then; catching one is worth a few points (a few times a day).
     visitors: () => (playing() || document.getElementById("sheet") || catchesToday() >= CATCH_DAILY ? [] : yardCast.rest),
     onCatch: catchVisitor,
+    stay: state.tab === "shop" ? "right" : null, // the shop is looked at tile by tile: nobody stands on it
+    // The column of the screen (what is read and pressed): the characters stand beside it.
+    clear: () => {
+      const boxes = [...document.querySelectorAll(".dk > main > *")].filter((el) => !el.matches(".dk-back, .fx-hurry") && el.offsetWidth > 0).map((el) => el.getBoundingClientRect());
+      return boxes.length ? { left: Math.min(...boxes.map((b) => b.left)), right: Math.max(...boxes.map((b) => b.right)) } : null;
+    },
     onTap: (id, isLead) => {
       sfx.chirp(id);
       if (isLead && gift()) { (giftWaiting() ? openDailyGift : takeSantaGift)(); return ""; } // the present it holds
@@ -1992,7 +2010,9 @@ function wordsList() {
           state.words.length ? t("여기에 해당하는 단어가 없어요.") : t("아직 찾아본 단어가 없어요."))
       : byWeek ? [...groups].map(weekSection)
       : [...groups].map(([day, words]) => h("section", { class: "day" },
-          h("h3", null, dayLabel(day), h("small", null, t("{n}개", { n: words.length }))),
+          h("h3", null, dayLabel(day), h("small", null, t("{n}개", { n: words.length })),
+            // In the desktop frame, today's words lead straight to a quiz of them.
+            WIDE() && day === dayOf(new Date()) && h("button", { class: "day-quiz", title: t("오늘 찾은 단어로 퀴즈"), onclick: () => { Object.assign(state, { tab: "quiz", notice: null, scope: { type: "days", days: 1, custom: true } }); render(); } }, t("퀴즈"), " →")),
           h("div", { class: "list" }, words.map(wordRow)))),
   ];
 }
@@ -2045,6 +2065,16 @@ const guideSteps = (steps) => h("ol", { class: "guide-steps" }, steps.map((step)
 const coin = () => h("i", { "aria-hidden": "true" }, "P");
 const guideStat = (label, value, kind) => h("div", { class: `stat${kind ? ` ${kind}` : ""}` }, h("b", null, value), h("span", null, label));
 
+const challengeSteps = (grade) => [
+  t("G{g} 권장 단어 {n}개에서 문제가 나와요. 알맞은 답을 골라요.", { g: grade, n: gradeList(grade).length }),
+  t("{n}개를 맞힐 때마다 단계가 올라가고, 정답 점수도 커져요.", { n: streakRules().step }),
+  t("단계가 오르면 보너스를 받아요. 한 번 틀리면 끝나요."),
+];
+// The stages ahead, with what a right answer pays in each.
+const stageLadder = () => h("div", { class: "stage-ladder", role: "list", "aria-label": t("단계") }, STAGES.map((look, i) =>
+  h("div", { class: "stage-rung", role: "listitem", "data-stage": look.id },
+    h("i", { "aria-hidden": "true" }, look.icon), h("b", null, t(look.name)), h("small", null, `+${stagePoints(i)}`))));
+
 function challengeCard() {
   const grade = Math.min(12, Math.max(3, state.user.grade));
   return [
@@ -2054,15 +2084,8 @@ function challengeCard() {
       h("span", { class: "record-label" }, t("내 최고 기록")),
       h("div", { class: "record-number" }, h("b", null, String(bestStreak())), h("span", null, t("연속"))),
       h("p", null, bestStreak() > 0 ? t("{n}연속을 넘으면 새 기록!", { n: bestStreak() }) : t("첫 기록을 세워 봐요!"))),
-    guideSteps([
-      t("G{g} 권장 단어 {n}개에서 문제가 나와요. 알맞은 답을 골라요.", { g: grade, n: gradeList(grade).length }),
-      t("{n}개를 맞힐 때마다 단계가 올라가고, 정답 점수도 커져요.", { n: streakRules().step }),
-      t("단계가 오르면 보너스를 받아요. 한 번 틀리면 끝나요."),
-    ]),
-    // The stages ahead, with what a right answer pays in each.
-    h("div", { class: "stage-ladder", role: "list", "aria-label": t("단계") }, STAGES.map((look, i) =>
-      h("div", { class: "stage-rung", role: "listitem", "data-stage": look.id },
-        h("i", { "aria-hidden": "true" }, look.icon), h("b", null, t(look.name)), h("small", null, `+${stagePoints(i)}`)))),
+    guideSteps(challengeSteps(grade)),
+    stageLadder(),
     h("p", { class: "streak-note" },
       h("span", null, t("오늘 남은 도전"), " ", h("b", null, `${triesLeft()} / ${streakRules().tries}`)),
       h("span", null, t("단계 보너스"), " ", h("b", null, `+${stageBonus(1)}~${stageBonus(STAGES.length)}`))),
@@ -2647,7 +2670,7 @@ function rankView() {
 
 // ---------- quiz tab ----------
 
-function quizSetup() {
+function quizScope() {
   const scope = state.scope;
   const setScope = (next) => { state.scope = next; render(); };
   const inRange = quizPool(state.words, scope).length; // a quiz asks at most tuning("quiz").max of them
@@ -2675,28 +2698,40 @@ function quizSetup() {
     h("option", { value: "all" }, t("전체 단어")));
   select.value = scope.type === "days" ? (scope.custom ? "days" : "7") : scope.type;
 
+  const fields = [
+    h("div", { class: "field" }, h("label", { htmlFor: "scope" }, t("시험 범위")), select),
+    scope.custom && h("div", { class: "field" },
+      h("label", { htmlFor: "days" }, t("최근 며칠 동안 찾은 단어")),
+      h("div", { class: "row" },
+        h("input", {
+          type: "number", id: "days", min: 1, max: 365, value: scope.days,
+          onchange: (e) => setScope({ ...scope, days: Math.max(1, Math.min(365, Number(e.target.value) || 1)) }),
+        }), t("일"))),
+    scope.type === "range" && h("div", { class: "field" },
+      h("label", null, t("찾은 날짜")),
+      h("div", { class: "row" },
+        h("input", { type: "date", "aria-label": t("시작일"), value: scope.from, max: today, onchange: (e) => setScope({ ...scope, from: e.target.value }) }),
+        "~",
+        h("input", { type: "date", "aria-label": t("종료일"), value: scope.to, max: today, onchange: (e) => setScope({ ...scope, to: e.target.value }) }))),
+  ];
+  // One line under the numbers: why the count is what it is.
+  const note = cards.length === 0 ? (scope.type === "review" ? t("지금은 틀린 단어가 없어요!") : scope.type === "learned" && inRange === 0 ? t("익힌 지 {d}일이 지난 단어가 아직 없어요.", { d: RETEST_DAYS }) : t("이 범위에는 단어가 없어요. 범위를 바꿔 보세요."))
+    : inRange > cards.length ? t("범위에 {n}개가 있어요. 그중 {m}개를 골라서 내요.", { n: inRange, m: cards.length })
+    : review > 0 && scope.type !== "review" ? t("지난번에 틀린 복습 단어 {n}개 포함", { n: review }) : "";
+  return { scope, fields, cards, inRange, review, note };
+}
+const QUIZ_STEPS = () => [
+  t("뜻을 보고 단어를 쓰거나 골라요."),
+  t("고르는 문제는 {a}초, 쓰는 문제는 {b}초예요.", { a: QUESTION_MS / 1000, b: TYPED_MS / 1000 }),
+  t("{n}번 연속(쓰기 1번 포함) 맞히면 다 익힌 단어가 되어 퀴즈에서 빠져요.", { n: MASTER_STREAK }),
+];
+function quizSetup() {
+  const { scope, fields, cards, inRange, review } = quizScope();
+
   return [
     guideHero(t("오늘 찾은 단어, 기억나?"), t("내 단어장에서 문제를 낼게. 틀려도 괜찮아, 다시 나오니까!")),
-    guideSteps([
-      t("뜻을 보고 단어를 쓰거나 골라요."),
-      t("고르는 문제는 {a}초, 쓰는 문제는 {b}초예요.", { a: QUESTION_MS / 1000, b: TYPED_MS / 1000 }),
-      t("{n}번 연속(쓰기 1번 포함) 맞히면 다 익힌 단어가 되어 퀴즈에서 빠져요.", { n: MASTER_STREAK }),
-    ]),
-    h("div", { class: "guide-form" },
-      h("div", { class: "field" }, h("label", { htmlFor: "scope" }, t("시험 범위")), select),
-      scope.custom && h("div", { class: "field" },
-        h("label", { htmlFor: "days" }, t("최근 며칠 동안 찾은 단어")),
-        h("div", { class: "row" },
-          h("input", {
-            type: "number", id: "days", min: 1, max: 365, value: scope.days,
-            onchange: (e) => setScope({ ...scope, days: Math.max(1, Math.min(365, Number(e.target.value) || 1)) }),
-          }), t("일"))),
-      scope.type === "range" && h("div", { class: "field" },
-        h("label", null, t("찾은 날짜")),
-        h("div", { class: "row" },
-          h("input", { type: "date", "aria-label": t("시작일"), value: scope.from, max: today, onchange: (e) => setScope({ ...scope, from: e.target.value }) }),
-          "~",
-          h("input", { type: "date", "aria-label": t("종료일"), value: scope.to, max: today, onchange: (e) => setScope({ ...scope, to: e.target.value }) })))),
+    guideSteps(QUIZ_STEPS()),
+    h("div", { class: "guide-form" }, fields),
     inRange > cards.length && h("p", { class: "small muted quiz-cut" }, t("범위에 {n}개가 있어요. 그중 {m}개를 골라서 내요.", { n: inRange, m: cards.length })),
     scope.type === "learned" && inRange === 0 && h("p", { class: "small muted quiz-cut" }, t("익힌 지 {d}일이 지난 단어가 아직 없어요.", { d: RETEST_DAYS })),
     h("div", { class: "guide-stats" },
@@ -2881,22 +2916,51 @@ function friends() {
   }));
 }
 
-// The quiz page of the desktop frame: the three games side by side to choose from (what each is,
-// and where the student stands in it), then the chosen one: its options, its numbers, its start.
-function quizHub(mode, waiting, choose, chosen) {
-  const ready = buildQuizSet(state.words, state.scope, Date.now(), tuning("quiz").max).length;
-  const games = [
-    ["review", t("단어장 퀴즈"), t("내가 찾은 단어로 풀어요."), ready ? t("{n}문제 준비됨", { n: ready }) : t("단어를 먼저 찾아보세요")],
-    ["streak", t("연속 도전"), t("틀릴 때까지 이어져요."), bestStreak() > 0 ? t("내 최고 기록 {n}연속", { n: bestStreak() }) : t("첫 기록을 세워 봐요!")],
-    ["duel", t("대결"), t("친구와 같은 문제로 겨뤄요."), waiting > 0 ? t("받은 도전 {n}개", { n: waiting }) : t("상대를 골라 시작해요")],
-  ];
+// The quiz page of the desktop frame: three cards side by side, one for each game, so it is plain
+// that there are three to choose from. Each card says what the game is, shows its numbers, and has
+// its own start button (all three on one line). How a game works is one click away. Under the
+// cards: the duels that wait for an answer, and the past ones.
+function howSheet(title, steps, extra) {
+  document.getElementById("sheet")?.remove();
+  const close = () => el.remove();
+  const el = h("div", { id: "sheet", class: "sheet-wrap", onclick: (e) => { if (e.target === el) close(); } },
+    h("div", { class: "sheet how-sheet", role: "dialog", "aria-modal": "true", "aria-label": title },
+      h("h2", null, title), guideSteps(steps), extra,
+      h("button", { class: "btn wide", onclick: close }, t("닫기"))));
+  document.body.append(el);
+}
+function quizHub() {
+  const quiz = quizScope();
+  const versus = duel().desk();
+  const grade = Math.min(12, Math.max(3, state.user.grade));
+  const game = (id, icon, name, text, body, start, steps, extra) => h("section", { class: `qz-game ${id}` },
+    h("div", { class: "qz-icon", "aria-hidden": "true" }, icon),
+    h("h2", null, name),
+    h("p", { class: "qz-text" }, text),
+    h("div", { class: "qz-body" }, body),
+    start,
+    h("button", { class: "link qz-how", onclick: () => howSheet(name, steps, extra) }, t("하는 방법")));
+  const numbers = (...stats) => h("div", { class: "guide-stats qz-nums" }, stats);
   return [
     h("h1", { class: "qz-title" }, t("퀴즈")),
-    h("div", { class: "qz-modes", role: "tablist" }, games.map(([id, name, text, now]) =>
-      h("button", { class: "qz-mode", role: "tab", "aria-selected": String(mode === id), onclick: choose(id) },
-        h("b", null, name, id === "duel" && waiting > 0 && h("em", { class: "dot" }, String(waiting))),
-        h("span", null, text), h("small", null, now)))),
-    h("div", { class: `qz-panel ${mode}`, role: "tabpanel" }, chosen),
+    h("p", { class: "qz-lead" }, t("세 가지 퀴즈 중에서 골라 시작해요.")),
+    h("div", { class: "qz-games" },
+      game("review", "📚", t("단어장 퀴즈"), t("내가 찾은 단어로 풀어요."),
+        [quiz.fields,
+          numbers(guideStat(t("문제 수"), t("{n}개", { n: quiz.cards.length })), guideStat(t("쓰는 포인트"), [coin(), `-${quizFee(quiz.cards.length)}`], "use"), guideStat(t("다 맞히면 최대"), [coin(), `+${quizMax(quiz.cards.length)}`], "gain")),
+          quiz.note && h("p", { class: "qz-note" }, quiz.note)],
+        h("button", { class: "btn", disabled: quiz.cards.length === 0, onclick: startQuiz }, t("퀴즈 시작")),
+        QUIZ_STEPS()),
+      game("streak", "🔥", t("연속 도전"), t("틀릴 때까지 이어져요."),
+        numbers(guideStat(t("내 최고 기록"), t("{n}연속", { n: bestStreak() })), guideStat(t("오늘 남은 도전"), `${triesLeft()} / ${streakRules().tries}`), guideStat(t("단계 보너스"), [coin(), `+${stageBonus(1)}~${stageBonus(STAGES.length)}`], "gain")),
+        h("button", { class: "btn", disabled: triesLeft() === 0, onclick: startChallenge }, triesLeft() ? t("도전 시작") : t("오늘 도전은 끝! 내일 또 만나요")),
+        challengeSteps(grade), stageLadder()),
+      game("duel", "⚔️", t("대결"), t("친구와 같은 문제로 겨뤄요."),
+        versus.setup ? h("p", { class: "qz-note" }, versus.setup)
+          : [numbers(guideStat(t("쓰는 포인트"), [coin(), `-${versus.fee}`], "use"), guideStat(t("이기면"), [coin(), `+${versus.win}`], "gain"), guideStat(t("비기면"), [coin(), `+${versus.draw}`], "gain")), versus.sends],
+        h("button", { class: "btn", disabled: Boolean(versus.setup) || versus.sendsLeft === 0, onclick: versus.pick }, versus.setup || versus.sendsLeft ? t("상대 고르기") : t("충전을 기다리는 중")),
+        versus.steps)),
+    versus.lists,
   ];
 }
 // A game is being played (not its start screen, not its result): the desktop frame shows nothing else.
@@ -2915,8 +2979,8 @@ function quizView() {
     const waiting = duel().badge();
     const mode = state.quizMode || "review";
     const choose = (id) => () => { state.quizMode = id; if (id === "duel") state.duelNews = []; render(); };
+    if (WIDE()) return quizHub();
     const chosen = mode === "duel" ? duel().home() : mode === "streak" ? challengeCard() : quizSetup();
-    if (WIDE()) return quizHub(mode, waiting, choose, chosen);
     return [
       h("div", { class: "segment three", role: "tablist" }, modes.map(([id, label]) =>
         h("button", { role: "tab", "aria-selected": String(mode === id), onclick: choose(id) },
