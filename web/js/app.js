@@ -1,26 +1,26 @@
-import { api, DEMO } from "./api.js?v=0.1.23-tovz0f";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tovz0f";
-import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tovz0f";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tovz0f";
-import { cleanEntry } from "./clean.js?v=0.1.23-tovz0f";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tovz0f";
-import { CHARACTERS } from "./characters.js?v=0.1.23-tovz0f";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tovz0f";
-import { film } from "./film.js?v=0.1.23-tovz0f";
-import { showYard, leaveYard, cheerYard } from "./yard.js?v=0.1.23-tovz0f";
-import { initDesktop } from "./desktop.js?v=0.1.23-tovz0f";
-import { BANDS, bandOf } from "./levels.js?v=0.1.23-tovz0f";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tovz0f";
-import { initDuel } from "./duel.js?v=0.1.23-tovz0f";
-import { initFriends } from "./friends.js?v=0.1.23-tovz0f";
-import { MOTTOS } from "./mottos.js?v=0.1.23-tovz0f";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tovz0f";
-import { SIGNATURES } from "./signatures.js?v=0.1.23-tovz0f";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tovz0f";
-import { tuning, setTuning } from "./tuning.js?v=0.1.23-tovz0f";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tovz0f";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tovz0f";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tovz0f";
+import { api, DEMO } from "./api.js?v=0.1.23-tovzgi";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.23-tovzgi";
+import { t, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.23-tovzgi";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.23-tovzgi";
+import { cleanEntry } from "./clean.js?v=0.1.23-tovzgi";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.23-tovzgi";
+import { CHARACTERS } from "./characters.js?v=0.1.23-tovzgi";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.23-tovzgi";
+import { film } from "./film.js?v=0.1.23-tovzgi";
+import { showYard, leaveYard, cheerYard } from "./yard.js?v=0.1.23-tovzgi";
+import { initDesktop } from "./desktop.js?v=0.1.23-tovzgi";
+import { BANDS, bandOf } from "./levels.js?v=0.1.23-tovzgi";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.23-tovzgi";
+import { initDuel } from "./duel.js?v=0.1.23-tovzgi";
+import { initFriends } from "./friends.js?v=0.1.23-tovzgi";
+import { MOTTOS } from "./mottos.js?v=0.1.23-tovzgi";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.23-tovzgi";
+import { SIGNATURES } from "./signatures.js?v=0.1.23-tovzgi";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.23-tovzgi";
+import { tuning, setTuning } from "./tuning.js?v=0.1.23-tovzgi";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.23-tovzgi";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.23-tovzgi";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.23-tovzgi";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -1670,7 +1670,7 @@ function syncYard() {
   ].filter(Boolean);
   const nextNudge = (asked) => {
     // Not in the middle of a question or a sheet, and (unless the student asked by tapping) not while they type.
-    if (document.querySelector("main .choices, main .search.answer") || document.getElementById("sheet")) return null;
+    if (playing() || document.querySelector("main .choices, main .search.answer") || document.getElementById("sheet")) return null;
     if (!asked && document.activeElement?.matches?.("input, textarea")) return null;
     const list = nudges(), waiting = list.filter((n) => n.waits), rest = list.filter((n) => !n.waits);
     yardTurn += 1;
@@ -2816,6 +2816,30 @@ function friends() {
   }));
 }
 
+// The quiz page of the desktop frame: the three games side by side to choose from (what each is,
+// and where the student stands in it), then the chosen one: its options, its numbers, its start.
+function quizHub(mode, waiting, choose, chosen) {
+  const ready = buildQuizSet(state.words, state.scope, Date.now(), tuning("quiz").max).length;
+  const games = [
+    ["review", t("단어장 퀴즈"), t("내가 찾은 단어로 풀어요."), ready ? t("{n}문제 준비됨", { n: ready }) : t("단어를 먼저 찾아보세요")],
+    ["streak", t("연속 도전"), t("틀릴 때까지 이어져요."), bestStreak() > 0 ? t("내 최고 기록 {n}연속", { n: bestStreak() }) : t("첫 기록을 세워 봐요!")],
+    ["duel", t("대결"), t("친구와 같은 문제로 겨뤄요."), waiting > 0 ? t("받은 도전 {n}개", { n: waiting }) : t("상대를 골라 시작해요")],
+  ];
+  return [
+    h("h1", { class: "qz-title" }, t("퀴즈")),
+    h("div", { class: "qz-modes", role: "tablist" }, games.map(([id, name, text, now]) =>
+      h("button", { class: "qz-mode", role: "tab", "aria-selected": String(mode === id), onclick: choose(id) },
+        h("b", null, name, id === "duel" && waiting > 0 && h("em", { class: "dot" }, String(waiting))),
+        h("span", null, text), h("small", null, now)))),
+    h("div", { class: `qz-panel ${mode}`, role: "tabpanel" }, chosen),
+  ];
+}
+// A game is being played (not its start screen, not its result): the desktop frame shows nothing else.
+const playing = () => state.tab === "quiz" && Boolean(
+  (state.challenge && state.challenge.phase !== "over")
+  || (!state.challenge && state.duel && ["intro", "play", "saving"].includes(state.duel.mode))
+  || (!state.challenge && !state.duel && state.quiz && state.quiz.index < state.quiz.cards.length));
+
 function quizView() {
   if (state.challenge) return challengeView();
   if (state.duel) return duel().view();
@@ -2825,11 +2849,14 @@ function quizView() {
     const modes = [["review", t("단어장 퀴즈")], ["streak", t("연속 도전")], ["duel", t("대결")]];
     const waiting = duel().badge();
     const mode = state.quizMode || "review";
+    const choose = (id) => () => { state.quizMode = id; if (id === "duel") state.duelNews = []; render(); };
+    const chosen = mode === "duel" ? duel().home() : mode === "streak" ? challengeCard() : quizSetup();
+    if (WIDE()) return quizHub(mode, waiting, choose, chosen);
     return [
       h("div", { class: "segment three", role: "tablist" }, modes.map(([id, label]) =>
-        h("button", { role: "tab", "aria-selected": String(mode === id), onclick: () => { state.quizMode = id; if (id === "duel") state.duelNews = []; render(); } },
+        h("button", { role: "tab", "aria-selected": String(mode === id), onclick: choose(id) },
           label, id === "duel" && waiting > 0 && h("em", { class: "dot" }, String(waiting))))),
-      mode === "duel" ? duel().home() : mode === "streak" ? challengeCard() : quizSetup(),
+      chosen,
     ];
   }
   if (quiz.index >= quiz.cards.length) return quizDone();
@@ -3481,7 +3508,7 @@ function render() {
       onclick: () => goTab(id),
     }, icon(id), h("span", null, label), id === "quiz" && duel().badge() > 0 && h("em", { class: "dot" }, String(duel().badge())))));
     if (wide) {
-      app.replaceChildren(desktop().frame({ banners: [banner, urgentBand(), updateBanner()].filter(Boolean), view, mainClass: [sameScreen && "still", webHome() && "home"].filter(Boolean).join(" ") || null }));
+      app.replaceChildren(desktop().frame({ banners: [banner, urgentBand(), updateBanner()].filter(Boolean), view, focus: playing(), mainClass: [sameScreen && "still", webHome() && "home"].filter(Boolean).join(" ") || null }));
       trackNav();
     } else {
       app.replaceChildren(...[
@@ -3539,6 +3566,7 @@ document.addEventListener("keydown", (e) => {
     if (box) { if (e.key === "/") e.preventDefault(); box.focus(); }
     return;
   }
+  if (e.key === "Enter" && document.activeElement === document.body) return void document.querySelector("main #next")?.click(); // on to the next question
   if (!/^[1-4]$/.test(e.key)) return;
   const choice = document.querySelectorAll("main .choices .choice")[Number(e.key) - 1];
   if (choice && !choice.disabled) { e.preventDefault(); choice.click(); }

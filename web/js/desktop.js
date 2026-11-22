@@ -93,9 +93,10 @@ export function initDesktop(c) {
 
   // ----- the frame -----
   // banners: the lines the app shows above a screen (demo, urgent, update). view: the chosen screen.
-  function frame({ banners, view, mainClass }) {
+  // focus: a game is in play; the frame steps back (no word list, no menu, no way back but the game's own).
+  function frame({ banners, view, mainClass, focus }) {
     const bare = c.webHome();
-    return h("div", { class: `dk${state.wordsFolded ? " folded" : ""}${bare ? " bare" : ""}` },
+    return h("div", { class: `dk${state.wordsFolded ? " folded" : ""}${bare ? " bare" : ""}${focus ? " focus" : ""}` },
       top(bare),
       state.wordsFolded
         ? h("button", { class: "dk-unfold", title: t("단어장 펼치기"), "aria-label": t("단어장 펼치기"), onclick: () => fold(false) }, h("i", { "aria-hidden": "true" }, "▸"), h("span", null, t("단어장")))
@@ -103,7 +104,7 @@ export function initDesktop(c) {
       h("main", { class: mainClass },
         banners,
         // Back is the browser's own button; this arrow, at the top left of the screen, does the same.
-        !bare && h("button", { class: "dk-back", title: t("뒤로"), "aria-label": t("뒤로"), onclick: () => history.back() }, "←"),
+        !bare && !focus && h("button", { class: "dk-back", title: t("뒤로"), "aria-label": t("뒤로"), onclick: () => history.back() }, "←"),
         view));
   }
   return { frame };

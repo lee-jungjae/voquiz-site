@@ -2102,9 +2102,6 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   .dk .entry .block { margin-top: 0; padding: 32px 0 6px; border: 0; border-top: 1px solid var(--line); }
   .dk .entry .card-foot { margin-top: 30px; }
   /* a quiz in play: only the question, the points and the way out */
-  .dk:has(main .choices.act, main .search.answer) { grid-template-columns: 0 minmax(0, 1fr); }
-  .dk:has(main .choices.act, main .search.answer) :is(.dk-words, .dk-unfold) { display: none; }
-  .dk:has(main .choices.act, main .search.answer) :is(.dk-nav, .search.top, .dk-link) { visibility: hidden; }
   /* what slides up from the bottom on a phone is a dialog in the middle here */
   html.web .sheet-wrap { align-items: center; }
   html.web .sheet { max-width: 480px; border-radius: 22px; }
@@ -2183,3 +2180,74 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   .walker { width: 100px; }
 }
 @media (min-width: 860px) and (max-width: 1179px) { html.web #app:has(.dk-words) ~ #yard:not(.leaving) { left: 250px; } }
+/* ----- desktop: the quiz ----- */
+@media (min-width: 860px) {
+  /* a game in play: only the logo and the points on top, the game in the middle of the window */
+  .dk.focus { grid-template-columns: minmax(0, 1fr); }
+  .dk.focus :is(.dk-words, .dk-unfold) { display: none; }
+  .dk.focus :is(.dk-nav, .search.top, .dk-today-wrap, .dk-link) { visibility: hidden; }
+  html.web .dk.focus > main { padding-top: 5vh; }
+  html.web .dk.focus > main > * { max-width: 640px; }
+  html.web #app:has(.dk.focus) ~ #yard:not(.leaving) { left: 0; }
+  .dk.focus .question { padding: 34px 0 26px; text-align: center; }
+  .dk.focus .q-label { margin-bottom: 14px; font-size: 13px; }
+  .dk.focus .q-ko { font-size: 26px; line-height: 1.4; }
+  .dk.focus .q-en { margin-top: 10px; font-size: 17px; line-height: 1.5; }
+  .dk.focus .question.long .q-ko { font-size: 21px; }
+  .dk.focus .question.long .q-en { font-size: 15.5px; }
+  .dk.focus .choices { gap: 12px; }
+  .dk.focus .search.answer { max-width: 520px; padding: 8px 8px 8px 24px; }
+  .dk.focus .search.answer input { font-size: 18px; padding: 10px 0; }
+  .dk.focus .feedback { margin-top: 26px; padding: 34px 24px 30px; border-radius: 20px; }
+  .dk.focus main > .act .btn.wide { width: auto; min-width: 260px; padding: 15px 30px; }
+  html.web .dk.focus main > .act { text-align: center; }
+  .dk.focus .ch-prompt { padding: 40px 0 30px; font-size: 34px; }
+  .dk.focus .ch-prompt.long { font-size: 20px; text-align: center; padding: 26px 0 22px; }
+  .dk.focus .choices.defs .choice { font-size: 15px; }
+
+  /* the quiz page: the three games to choose from, then the chosen one */
+  .qz-title { margin: 0 0 22px; font-size: 34px; font-weight: 700; letter-spacing: -.02em; }
+  .qz-modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 34px; }
+  .qz-mode { display: grid; gap: 4px; align-content: start; padding: 18px 20px 16px; border-radius: 18px; background: var(--surface); text-align: left; box-shadow: inset 0 0 0 2px transparent; transition: box-shadow .15s, background .15s; }
+  .qz-mode:hover { box-shadow: inset 0 0 0 1px var(--border); }
+  .qz-mode[aria-selected="true"] { background: var(--bg); box-shadow: inset 0 0 0 2px var(--text); }
+  .qz-mode b { display: flex; align-items: center; gap: 8px; font-size: 16px; }
+  .qz-mode span { font-size: 13px; color: var(--muted); }
+  .qz-mode small { margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--text); }
+  .qz-panel { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 28px; align-items: center; }
+  .qz-panel > * { grid-column: 1 / -1; margin: 0; }
+  .qz-panel > .guide { display: none; } /* the chosen game's tile already says it */
+  .qz-panel > .guide-form { order: 1; max-width: 380px; }
+  .qz-panel > .quiz-cut { order: 2; margin-top: 10px; }
+  .qz-panel > .guide-stats { order: 3; grid-column: 1; display: flex; gap: 40px; margin-top: 26px; }
+  .qz-panel > .act { order: 3; grid-column: 2; margin-top: 26px; }
+  .qz-panel > #quiz-count { order: 4; margin-top: 10px; text-align: left; }
+  .qz-panel > .guide-steps { order: 9; margin-top: 38px; padding-top: 24px; border-top: 1px solid var(--line); }
+  .qz-panel .guide-stats .stat { padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; text-align: left; }
+  .qz-panel .guide-stats .stat b { font-size: 22px; }
+  .qz-panel .guide-stats .stat span { font-size: 13px; color: var(--muted); }
+  .qz-panel .btn.wide { width: auto; min-width: 200px; padding: 15px 30px; font-size: 16px; }
+  .qz-panel .guide-steps li { font-size: 14px; color: var(--muted); }
+  /* the streak challenge: the record, the stages ahead, then the start */
+  .qz-panel.streak > .record { order: 1; }
+  .qz-panel.streak > .stage-ladder { order: 2; margin-top: 22px; }
+  .qz-panel.streak > .streak-note { order: 3; grid-column: 1; margin-top: 26px; justify-content: flex-start; gap: 28px; }
+  /* the duel: what waits for an answer first, then the start, then what was sent and how it went */
+  .qz-panel.duel > .duel-list { order: 5; margin-top: 30px; }
+  .qz-panel.duel > .duel-list:has(.hot) { order: 0; margin-top: 0; }
+  .qz-panel.duel > .duel-left { order: 4; margin-top: 10px; text-align: left; }
+  .qz-panel.duel > p.small.center { order: 4; margin-top: 6px; text-align: left; }
+}
+/* ----- desktop: results of a game, and one arrow back (a screen's own arrow takes the frame's place) ----- */
+@media (min-width: 860px) {
+  html.web .dk > main > .card.center { max-width: 520px; padding: 8px 0 0; border: 0; border-radius: 0; box-shadow: none; background: none; }
+  html.web .dk > main:has(> .card.center) > .act { text-align: center; }
+  html.web .dk > main:has(> .card.center) > .act .btn.wide { width: auto; min-width: 260px; padding: 15px 30px; }
+  html.web .dk > main:has(> .card.center) > .list { order: 5; max-width: 520px; margin-top: 34px !important; }
+  html.web .dk > main:has(> .card.center) > .quest-hint { order: 6; }
+  .dk.focus main #next::after { content: "↵"; margin-left: 10px; font-weight: 500; opacity: .65; }
+  html.web .dk > main:has(> .page-head .back) > .dk-back { display: none; }
+  html.web .dk > main > .page-head .back { position: absolute; left: 14px; top: 32px; margin: 0; font-size: 17px; }
+  html.web .dk > main > .page-head { margin-top: 0; }
+  html.web .dk > main > .page-head .page-title { font-size: 28px; }
+}
