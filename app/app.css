@@ -1912,8 +1912,8 @@ button.points .dot { position: absolute; top: -4px; right: -4px; min-width: 16px
 .level-meter i.on { background: var(--accent); }
 .level-chip { font-size: 13px; font-weight: 800; color: var(--accent-dark); white-space: nowrap; }
 .level-mine, .level-wait { flex: none; padding: 3px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; white-space: nowrap; }
-.level-mine { background: color-mix(in srgb, var(--lime) 45%, transparent); color: var(--text); }
-.level-wait { background: var(--bg); color: var(--muted); animation: level-wait 1s ease-in-out infinite; }
+.level-mine, .level-wait { background: var(--bg); color: var(--muted); }
+.level-wait { animation: level-wait 1s ease-in-out infinite; }
 @keyframes level-wait { 50% { opacity: .35; } }
 /* choosing a grade: the three groups, each with its own level of explanation */
 .grade-bands { display: grid; gap: 10px; margin-top: 8px; text-align: left; }
