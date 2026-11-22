@@ -1947,7 +1947,6 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
 @keyframes tab-gulp { 35% { transform: scale(1.35) translateY(-2px); } 70% { transform: scale(.92); } }
 @media (min-width: 860px) {
   html.web #app { max-width: none; }
-  html.web header { width: 100%; max-width: 1240px; margin: 0 auto; padding: 14px 24px 10px; }
   html.web .banner, html.web .update-banner { width: calc(100% - 40px); max-width: 680px; margin-left: auto; margin-right: auto; }
   html.web main { padding: 6px 20px 130px; } /* the yard stands in front of the last 100px */
   html.web main > * { width: 100%; max-width: 680px; margin-left: auto; margin-right: auto; }
@@ -1955,23 +1954,7 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   html.web #app > .step, html.web #app > .banner { width: 100%; max-width: 560px; margin-left: auto; margin-right: auto; }
 
   /* the top bar: logo, tabs, the word box (everywhere but on the bare home), then points, friends, settings */
-  html.web header { gap: 10px; }
-  html.web header h1 { flex: none; margin-right: 6px; }
-  html.web header nav { flex: none; gap: 2px; padding: 0; border: 0; background: none; backdrop-filter: none; }
-  html.web header nav button { flex: none; display: inline-flex; align-items: center; gap: 7px; padding: 8px 13px; border-radius: 999px; font-size: 13px; }
-  html.web header nav button svg { width: 18px; height: 18px; }
-  html.web header nav button[aria-current="page"] { background: var(--accent-soft); }
-  html.web header nav button .dot { position: static; margin-left: -2px; }
-  html.web header .search.top { flex: 1; min-width: 150px; max-width: 420px; margin: 0 4px; padding: 3px 3px 3px 16px; box-shadow: none; background: var(--surface); border-color: transparent; }
-  html.web header .search.top:focus-within { background: var(--bg); border-color: var(--border); }
-  html.web header .search.top input[type="text"] { padding: 6px 0; font-size: 14px; }
-  html.web header .search.top .btn { padding: 7px 14px; font-size: 13px; }
-  html.web header .points { margin-left: auto; }
   /* a result: the meanings on the left, the word's origin and sayings beside them, staying in view */
-  html.web main > .entry.wide { max-width: 1040px; display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 0 36px; align-items: start; }
-  .entry-side { position: sticky; top: 4px; display: grid; gap: 4px; padding-top: 6px; }
-  .entry-side > .block:first-child { margin-top: 0; }
-  .entry-side { max-height: calc(100vh - 190px); overflow-y: auto; padding-right: 4px; } /* it stays in view, so it must fit the window */
   .today-box { margin-top: 18px; padding: 16px; border-radius: 16px; background: var(--surface); display: grid; gap: 10px; }
   .today-box h3 { margin: 0; font-size: 13px; font-weight: 700; display: flex; gap: 6px; align-items: baseline; }
   .today-box h3 small { color: var(--muted); font-weight: 600; }
@@ -1986,7 +1969,6 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   html.web main.home > :first-child { margin-top: auto; }
   html.web main.home > :last-child { margin-bottom: auto; }
   html.web main.home::after { content: ""; flex: 0 1 16vh; }
-  html.web #app:has(main.home) header h1 { visibility: hidden; }
   .web-logo { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 28px; animation: rise .4s both; }
   main.still .web-logo { animation: none; }
   html.web main.home .search { padding: 8px 8px 8px 24px; }
@@ -2004,21 +1986,13 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   .quest-hint:hover span { text-decoration: underline; }
   .quest-hint.ready { color: var(--accent-dark); font-weight: 700; }
   .quest-face { width: 26px; flex: none; }
-  .entry-side > .quest-hint { justify-content: flex-start; margin: 14px 4px 0; }
   .web-today { margin-top: 16px; text-align: center; font-size: 12.5px; color: var(--muted); }
   .web-today .link { color: inherit; font-size: inherit; }
   .web-quiet { margin-top: 26px; text-align: center; }
   .web-quiet .chips { margin-bottom: 0; }
 
   /* the word list: the list on the left, the chosen word beside it; each side scrolls by itself */
-  html.web main:has(> .words-wide) { overflow: hidden; padding-bottom: 0; }
-  html.web main > .words-wide { max-width: 1120px; height: 100%; display: grid; grid-template-columns: minmax(300px, 400px) minmax(0, 1fr); gap: 0 34px; }
-  .words-list, .words-detail { min-height: 0; overflow-y: auto; padding: 0 6px 130px; }
-  .words-list .item { padding-left: 8px; padding-right: 4px; border-radius: 14px; }
-  .words-list .item.on { background: var(--accent-soft); border-bottom-color: transparent; }
-  .words-detail > .entry { animation: none; }
   /* a quiz in play: nothing in the top bar but the logo and the points, and a bigger question */
-  html.web #app:has(main .choices.act, main .search.answer) header nav, html.web #app:has(main .choices.act, main .search.answer) header .search.top { visibility: hidden; }
   html.web main .choices.act .choice { padding: 18px 20px; font-size: 17px; }
   /* on a phone the answers are docked at the bottom, in reach of a thumb; here they follow the question */
   html.web main:has(> .act) { padding-top: 5vh; padding-bottom: 130px; }
@@ -2033,7 +2007,80 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
   .walker .gift-art svg { display: block; width: 100%; height: auto; }
   .yard-say { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); margin-bottom: 4px; padding: 6px 11px; border-radius: 12px; background: var(--text); color: var(--bg); font-size: 12px; font-weight: 600; white-space: nowrap; pointer-events: none; animation: rise .25s both; }
 }
-@media (min-width: 860px) and (max-width: 1099px) { html.web header nav button span { display: none; } html.web header nav button { padding: 8px 11px; } }
 @keyframes yard-walk { 50% { transform: translateY(-3px) rotate(-2.5deg); } }
 @keyframes yard-hop { 30% { transform: translateY(-18px); } 58% { transform: translateY(0); } 78% { transform: translateY(-5px); } }
 @media (prefers-reduced-motion: reduce) { .walker.walk .walker-bob, .walker.hop .walker-bob { animation: none; } }
+
+/* ===== the desktop frame of the web version (desktop.js): a layout of its own for a wide window ===== */
+@media (min-width: 860px) {
+  .dk { height: 100%; display: grid; grid-template-columns: 290px minmax(0, 1fr) 320px; grid-template-rows: auto minmax(0, 1fr); }
+  .dk.folded { grid-template-columns: 46px minmax(0, 1fr) 320px; }
+  /* the top: logo, menu, the word box, the student's corner */
+  .dk-top { grid-column: 1 / -1; display: flex; align-items: center; gap: 14px; padding: 10px 20px; border-bottom: 1px solid var(--line); }
+  .dk-logo { display: inline-flex; align-items: center; gap: 6px; flex: none; border-radius: 8px; }
+  .dk-logo:hover { opacity: .75; }
+  .dk-nav { display: flex; gap: 2px; padding: 0; border: 0; background: none; }
+  .dk-nav button, .dk-link { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--muted); position: relative; }
+  .dk-link { font-size: 13px; padding: 7px 12px; }
+  .dk-nav button:hover, .dk-link:hover { color: var(--text); background: var(--surface); }
+  .dk-nav button[aria-current="page"], .dk-link[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-dark); }
+  .dk-nav button .dot, .dk-link .dot { position: static; margin-left: 2px; }
+  .dk-top .search.top { flex: 1; max-width: 460px; margin: 0 8px; padding: 3px 3px 3px 16px; box-shadow: none; background: var(--surface); border-color: transparent; }
+  .dk-top .search.top:focus-within { background: var(--bg); border-color: var(--border); }
+  .dk-top .search.top input[type="text"] { padding: 6px 0; font-size: 14px; }
+  .dk-top .search.top .btn { padding: 7px 14px; font-size: 13px; }
+  .dk-gap { flex: 1; }
+  .dk-me { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+  .dk-points small { margin-left: 4px; font-size: 11px; font-weight: 600; color: var(--muted); }
+  /* the words on the left */
+  .dk-words { grid-row: 2; display: flex; flex-direction: column; gap: 10px; min-height: 0; padding: 14px 10px 108px 14px; border-right: 1px solid var(--line); }
+  .dk-words-head { display: flex; align-items: baseline; gap: 6px; font-size: 14px; }
+  .dk-words-head small { color: var(--muted); }
+  .dk-fold { margin-left: auto; width: 26px; height: 26px; border-radius: 8px; color: var(--muted); }
+  .dk-fold:hover, .dk-unfold:hover, .dk-back:hover { background: var(--surface); color: var(--text); }
+  #dk-find { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 7px 10px; font-size: 13px; background: var(--bg); }
+  .dk-filters { display: flex; gap: 4px; }
+  .dk-filters button { flex: 1; padding: 5px 0; border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--muted); background: var(--surface); }
+  .dk-filters button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-dark); }
+  .dk-list { flex: 1; min-height: 0; overflow-y: auto; margin-right: -6px; padding-right: 6px; }
+  .dk-list h4 { display: flex; gap: 6px; margin: 12px 4px 4px; font-size: 11px; font-weight: 700; color: var(--muted); }
+  .dk-list section:first-child h4 { margin-top: 2px; }
+  .dk-word { display: flex; align-items: center; gap: 4px; padding: 0 4px 0 8px; border-radius: 10px; }
+  .dk-word:hover { background: var(--surface); }
+  .dk-word.on { background: var(--accent-soft); }
+  .dk-open { flex: 1; min-width: 0; display: grid; padding: 7px 0; text-align: left; }
+  .dk-open b { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dk-open span { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dk-mark { font-style: normal; font-size: 11px; color: var(--muted); }
+  .dk-word .star { position: static; width: 26px; height: 26px; border: 0; font-size: 14px; opacity: 0; }
+  .dk-word:hover .star, .dk-word .star[aria-pressed="true"] { opacity: 1; }
+  .dk-none { padding: 14px 6px; font-size: 13px; color: var(--muted); }
+  .dk-manage { padding: 8px; border-radius: 10px; font-size: 12.5px; font-weight: 600; color: var(--muted); background: var(--surface); }
+  .dk-manage[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-dark); }
+  .dk-unfold { grid-row: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border-right: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  .dk-unfold i { font-style: normal; }
+  .dk-unfold span { writing-mode: vertical-rl; letter-spacing: .12em; }
+  /* the middle: the chosen screen; the arrow at its top left goes back */
+  html.web .dk > main { grid-row: 2; position: relative; min-width: 0; padding: 18px 40px 130px; }
+  html.web .dk > main > * { width: 100%; max-width: 720px; margin-left: auto; margin-right: auto; }
+  html.web .dk > main > .dk-back { position: absolute; left: 12px; top: 14px; width: 34px; max-width: 34px; height: 34px; margin: 0; border-radius: 50%; font-size: 17px; color: var(--muted); }
+  html.web .dk > main > .banner { margin-bottom: 10px; }
+  .dk-hello { margin-bottom: 22px; text-align: center; font-size: 26px; font-weight: 700; letter-spacing: -.02em; line-height: 1.35; white-space: pre-line; }
+  /* the right: what matters now */
+  .dk-side { grid-row: 2; display: grid; gap: 14px; align-content: start; min-height: 0; overflow-y: auto; padding: 18px 18px 118px; border-left: 1px solid var(--line); }
+  .dk-side .goals { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 0; }
+  .dk-side .today-box, .dk-side .quest-hint { margin-top: 0; }
+  .dk-side .quest-hint { justify-content: flex-start; }
+  .dk-side > .block { margin-top: 0; }
+  .dk-present { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 14px; background: color-mix(in srgb, #ff8fab 16%, var(--bg)); font-size: 13.5px; font-weight: 700; }
+  .dk-present .gift-art { width: 22px; }
+  .dk-present .gift-art svg { display: block; width: 100%; height: auto; }
+  /* a quiz in play: only the question, the points and the way out */
+  .dk:has(main .choices.act, main .search.answer) { grid-template-columns: 0 minmax(0, 1fr) 0; }
+  .dk:has(main .choices.act, main .search.answer) :is(.dk-words, .dk-unfold, .dk-side) { display: none; }
+  .dk:has(main .choices.act, main .search.answer) :is(.dk-nav, .search.top, .dk-link) { visibility: hidden; }
+  /* what slides up from the bottom on a phone is a dialog in the middle here */
+  html.web .sheet-wrap { align-items: center; }
+  html.web .sheet { max-width: 480px; border-radius: 22px; }
+}
+@media (min-width: 860px) and (max-width: 1179px) { .dk, .dk.folded { grid-template-columns: 250px minmax(0, 1fr) 0; } .dk.folded { grid-template-columns: 46px minmax(0, 1fr) 0; } .dk-side { display: none; } .dk-points small { display: none; } }
