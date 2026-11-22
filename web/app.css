@@ -2011,76 +2011,102 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
 @keyframes yard-hop { 30% { transform: translateY(-18px); } 58% { transform: translateY(0); } 78% { transform: translateY(-5px); } }
 @media (prefers-reduced-motion: reduce) { .walker.walk .walker-bob, .walker.hop .walker-bob { animation: none; } }
 
-/* ===== the desktop frame of the web version (desktop.js): a layout of its own for a wide window ===== */
+/* ===== the desktop frame of the web version (desktop.js): a layout of its own for a wide window =====
+   Two columns only: the word list (it folds away) and the page. The look is calm: much white space,
+   very few hairlines, text straight on the page instead of boxes, the word box a pill with a soft shadow. */
 @media (min-width: 860px) {
-  .dk { height: 100%; display: grid; grid-template-columns: 290px minmax(0, 1fr) 320px; grid-template-rows: auto minmax(0, 1fr); }
-  .dk.folded { grid-template-columns: 46px minmax(0, 1fr) 320px; }
-  /* the top: logo, menu, the word box, the student's corner */
-  .dk-top { grid-column: 1 / -1; display: flex; align-items: center; gap: 14px; padding: 10px 20px; border-bottom: 1px solid var(--line); }
-  .dk-logo { display: inline-flex; align-items: center; gap: 6px; flex: none; border-radius: 8px; }
+  .dk { height: 100%; display: grid; grid-template-columns: 300px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .dk.folded { grid-template-columns: 56px minmax(0, 1fr); }
+  /* the top */
+  .dk-top { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 520px) minmax(0, 1fr); align-items: center; gap: 24px; padding: 16px 32px; border-bottom: 1px solid var(--line); }
+  .dk-left { display: flex; align-items: center; gap: 26px; min-width: 0; }
+  .dk-logo { display: inline-flex; align-items: center; gap: 7px; flex: none; }
   .dk-logo:hover { opacity: .75; }
-  .dk-nav { display: flex; gap: 2px; padding: 0; border: 0; background: none; }
-  .dk-nav button, .dk-link { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--muted); position: relative; }
-  .dk-link { font-size: 13px; padding: 7px 12px; }
-  .dk-nav button:hover, .dk-link:hover { color: var(--text); background: var(--surface); }
-  .dk-nav button[aria-current="page"], .dk-link[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-dark); }
+  .dk-nav { display: flex; gap: 22px; padding: 0; border: 0; background: none; }
+  .dk-nav button { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 10px 0; font-size: 15px; font-weight: 600; color: var(--muted); border-radius: 0; }
+  .dk-nav button:hover { color: var(--text); }
+  .dk-nav button[aria-current="page"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--text); }
   .dk-nav button .dot, .dk-link .dot { position: static; margin-left: 2px; }
-  .dk-top .search.top { flex: 1; max-width: 460px; margin: 0 8px; padding: 3px 3px 3px 16px; box-shadow: none; background: var(--surface); border-color: transparent; }
-  .dk-top .search.top:focus-within { background: var(--bg); border-color: var(--border); }
-  .dk-top .search.top input[type="text"] { padding: 6px 0; font-size: 14px; }
-  .dk-top .search.top .btn { padding: 7px 14px; font-size: 13px; }
-  .dk-gap { flex: 1; }
-  .dk-me { margin-left: auto; display: flex; align-items: center; gap: 4px; }
-  .dk-points small { margin-left: 4px; font-size: 11px; font-weight: 600; color: var(--muted); }
-  /* the words on the left */
-  .dk-words { grid-row: 2; display: flex; flex-direction: column; gap: 10px; min-height: 0; padding: 14px 10px 108px 14px; border-right: 1px solid var(--line); }
-  .dk-words-head { display: flex; align-items: baseline; gap: 6px; font-size: 14px; }
-  .dk-words-head small { color: var(--muted); }
-  .dk-fold { margin-left: auto; width: 26px; height: 26px; border-radius: 8px; color: var(--muted); }
+  .dk-link .dot:empty { width: 8px; height: 8px; min-width: 0; padding: 0; }
+  .dk-top .search.top { width: 100%; margin: 0; padding: 5px 5px 5px 22px; background: var(--bg); border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(0, 0, 0, .08), 0 4px 12px rgba(0, 0, 0, .05); transition: box-shadow .2s; }
+  .dk-top .search.top:hover, .dk-top .search.top:focus-within { box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 6px 20px rgba(0, 0, 0, .08); }
+  .dk-top .search.top input[type="text"] { padding: 8px 0; font-size: 14.5px; }
+  .dk-top .search.top .btn { padding: 9px 16px; font-size: 13.5px; }
+  .dk-me { justify-self: end; display: flex; align-items: center; gap: 2px; }
+  .dk-link { display: inline-flex; align-items: center; gap: 5px; padding: 9px 13px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--text); }
+  .dk-link:hover, .dk-link[aria-pressed="true"], .dk-link[aria-expanded="true"] { background: var(--surface); }
+  .dk-points { margin-left: 6px; }
+  /* "today": what the day holds, one click away */
+  .dk-today-wrap { position: relative; }
+  .dk-today { position: absolute; right: 0; top: calc(100% + 12px); z-index: 20; width: 348px; display: grid; gap: 16px; padding: 20px; border-radius: 20px; background: var(--bg); box-shadow: 0 2px 16px rgba(0, 0, 0, .14); animation: rise .2s both; }
+  .dk-today .goals { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0; }
+  .dk-today .today-box { margin: 0; padding: 0; background: none; }
+  .dk-today .quest-hint { margin: 0; justify-content: flex-start; }
+  .dk-present { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; border-radius: 12px; background: color-mix(in srgb, #ff8fab 16%, var(--bg)); font-size: 14px; font-weight: 700; }
+  .dk-present .gift-art { width: 22px; }
+  .dk-present .gift-art svg { display: block; width: 100%; height: auto; }
+  /* the words on the left: no box, no rule; white space sets them apart */
+  .dk-words { grid-row: 2; display: flex; flex-direction: column; gap: 12px; min-height: 0; padding: 30px 10px 108px 32px; }
+  .dk-words-head { display: flex; align-items: baseline; gap: 7px; font-size: 17px; }
+  .dk-words-head small { font-size: 13px; color: var(--muted); }
+  .dk-fold { margin-left: auto; width: 28px; height: 28px; border-radius: 50%; color: var(--muted); }
   .dk-fold:hover, .dk-unfold:hover, .dk-back:hover { background: var(--surface); color: var(--text); }
-  #dk-find { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 7px 10px; font-size: 13px; background: var(--bg); }
-  .dk-filters { display: flex; gap: 4px; }
-  .dk-filters button { flex: 1; padding: 5px 0; border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--muted); background: var(--surface); }
-  .dk-filters button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-dark); }
-  .dk-list { flex: 1; min-height: 0; overflow-y: auto; margin-right: -6px; padding-right: 6px; }
-  .dk-list h4 { display: flex; gap: 6px; margin: 12px 4px 4px; font-size: 11px; font-weight: 700; color: var(--muted); }
-  .dk-list section:first-child h4 { margin-top: 2px; }
-  .dk-word { display: flex; align-items: center; gap: 4px; padding: 0 4px 0 8px; border-radius: 10px; }
-  .dk-word:hover { background: var(--surface); }
-  .dk-word.on { background: var(--accent-soft); }
-  .dk-open { flex: 1; min-width: 0; display: grid; padding: 7px 0; text-align: left; }
-  .dk-open b { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .dk-open span { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #dk-find { width: 100%; border: 0; border-radius: 999px; padding: 9px 15px; font-size: 13.5px; background: var(--surface); }
+  .dk-filters { display: flex; gap: 6px; }
+  .dk-filters button { padding: 5px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+  .dk-filters button:hover { color: var(--text); }
+  .dk-filters button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+  .dk-list { flex: 1; min-height: 0; overflow-y: auto; margin: 0 -8px; padding: 0 8px; }
+  .dk-list h4 { display: flex; gap: 6px; margin: 18px 10px 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .dk-list section:first-child h4 { margin-top: 4px; }
+  .dk-word { display: flex; align-items: center; gap: 4px; padding: 1px 6px 1px 10px; border-radius: 12px; }
+  .dk-word:hover, .dk-word.on { background: var(--surface); }
+  .dk-open { flex: 1; min-width: 0; display: grid; padding: 8px 0; text-align: left; }
+  .dk-open b { font-size: 14.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dk-open span { font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .dk-mark { font-style: normal; font-size: 11px; color: var(--muted); }
   .dk-word .star { position: static; width: 26px; height: 26px; border: 0; font-size: 14px; opacity: 0; }
   .dk-word:hover .star, .dk-word .star[aria-pressed="true"] { opacity: 1; }
-  .dk-none { padding: 14px 6px; font-size: 13px; color: var(--muted); }
-  .dk-manage { padding: 8px; border-radius: 10px; font-size: 12.5px; font-weight: 600; color: var(--muted); background: var(--surface); }
-  .dk-manage[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-dark); }
-  .dk-unfold { grid-row: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border-right: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  .dk-none { padding: 14px 10px; font-size: 13.5px; color: var(--muted); }
+  .dk-manage { align-self: flex-start; padding: 6px 2px; font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+  .dk-unfold { grid-row: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 30px 0; font-size: 12px; color: var(--muted); }
   .dk-unfold i { font-style: normal; }
   .dk-unfold span { writing-mode: vertical-rl; letter-spacing: .12em; }
-  /* the middle: the chosen screen; the arrow at its top left goes back */
-  html.web .dk > main { grid-row: 2; position: relative; min-width: 0; padding: 18px 40px 130px; }
-  html.web .dk > main > * { width: 100%; max-width: 720px; margin-left: auto; margin-right: auto; }
-  html.web .dk > main > .dk-back { position: absolute; left: 12px; top: 14px; width: 34px; max-width: 34px; height: 34px; margin: 0; border-radius: 50%; font-size: 17px; color: var(--muted); }
-  html.web .dk > main > .banner { margin-bottom: 10px; }
-  .dk-hello { margin-bottom: 22px; text-align: center; font-size: 26px; font-weight: 700; letter-spacing: -.02em; line-height: 1.35; white-space: pre-line; }
-  /* the right: what matters now */
-  .dk-side { grid-row: 2; display: grid; gap: 14px; align-content: start; min-height: 0; overflow-y: auto; padding: 18px 18px 118px; border-left: 1px solid var(--line); }
-  .dk-side .goals { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 0; }
-  .dk-side .today-box, .dk-side .quest-hint { margin-top: 0; }
-  .dk-side .quest-hint { justify-content: flex-start; }
-  .dk-side > .block { margin-top: 0; }
-  .dk-present { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 14px; background: color-mix(in srgb, #ff8fab 16%, var(--bg)); font-size: 13.5px; font-weight: 700; }
-  .dk-present .gift-art { width: 22px; }
-  .dk-present .gift-art svg { display: block; width: 100%; height: auto; }
+  /* the page; the arrow at its top left goes back */
+  html.web .dk > main { grid-row: 2; position: relative; min-width: 0; padding: 34px 64px 140px; }
+  html.web .dk > main > * { width: 100%; max-width: 760px; margin-left: auto; margin-right: auto; }
+  html.web .dk > main > .dk-back { position: absolute; left: 14px; top: 32px; width: 36px; max-width: 36px; height: 36px; margin: 0; border-radius: 50%; font-size: 17px; }
+  html.web .dk > main > .banner { margin-bottom: 14px; }
+  .dk-hello { margin-bottom: 26px; text-align: center; font-size: 30px; font-weight: 700; letter-spacing: -.025em; line-height: 1.3; white-space: pre-line; }
+  /* a word on the page: text, not cards; every meaning open; one hairline between meanings and sections */
+  .dk .hero { padding-bottom: 8px; }
+  .dk .hero h2 { font-size: 42px; letter-spacing: -.03em; }
+  .dk .hero .cp { font-size: 22px; }
+  .dk .hero .def { margin-top: 22px; }
+  .dk .hero .def p:first-child { font-size: 19px; }
+  .dk .level-bar { justify-content: flex-start; gap: 14px; margin-top: 20px; padding: 0; background: none; }
+  .dk .senses-box { margin-top: 34px; }
+  .dk .senses-all, .dk .sense-chev { display: none; }
+  .dk .senses { gap: 0; }
+  .dk .senses li, .dk .senses li.open { padding: 28px 0; background: none; border: 0; border-top: 1px solid var(--line); border-radius: 0; }
+  .dk .sense-row { gap: 16px; padding: 0; pointer-events: none; }
+  .dk .sense-no { width: 22px; height: auto; margin-top: 2px; background: none; color: var(--text); font-size: 17px; font-weight: 700; }
+  .dk .sense-head b { font-size: 21px; }
+  .dk .sense-def { font-size: 16.5px; line-height: 1.55; }
+  .dk .sense-def.second { margin-top: 0; font-size: 15.5px; }
+  .dk .sense-more { gap: 18px; padding: 8px 0 0 38px; animation: none; }
+  .dk .sense-ex, .dk .sense-use { padding: 0; border-radius: 0; background: none; }
+  .dk .sense-note { padding: 0; border-left: 0; }
+  .dk .sense-label { margin-bottom: 4px; font-size: 12px; color: var(--muted); }
+  .dk .sense-line, .dk .use-row { font-size: 15.5px; }
+  .dk .entry .block { margin-top: 0; padding: 32px 0 6px; border: 0; border-top: 1px solid var(--line); }
+  .dk .entry .card-foot { margin-top: 30px; }
   /* a quiz in play: only the question, the points and the way out */
-  .dk:has(main .choices.act, main .search.answer) { grid-template-columns: 0 minmax(0, 1fr) 0; }
-  .dk:has(main .choices.act, main .search.answer) :is(.dk-words, .dk-unfold, .dk-side) { display: none; }
+  .dk:has(main .choices.act, main .search.answer) { grid-template-columns: 0 minmax(0, 1fr); }
+  .dk:has(main .choices.act, main .search.answer) :is(.dk-words, .dk-unfold) { display: none; }
   .dk:has(main .choices.act, main .search.answer) :is(.dk-nav, .search.top, .dk-link) { visibility: hidden; }
   /* what slides up from the bottom on a phone is a dialog in the middle here */
   html.web .sheet-wrap { align-items: center; }
   html.web .sheet { max-width: 480px; border-radius: 22px; }
 }
-@media (min-width: 860px) and (max-width: 1179px) { .dk, .dk.folded { grid-template-columns: 250px minmax(0, 1fr) 0; } .dk.folded { grid-template-columns: 46px minmax(0, 1fr) 0; } .dk-side { display: none; } .dk-points small { display: none; } }
+@media (min-width: 860px) and (max-width: 1179px) { .dk { grid-template-columns: 250px minmax(0, 1fr); } .dk-words { padding-left: 20px; } html.web .dk > main { padding-left: 52px; padding-right: 28px; } .dk-top { padding: 14px 20px; gap: 14px; } .dk-left { gap: 16px; } .dk-nav { gap: 14px; } }

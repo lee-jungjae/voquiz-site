@@ -53,33 +53,38 @@ export function initDesktop(c) {
       h("button", { class: "dk-manage", "aria-pressed": String(state.tab === "words"), onclick: () => { Object.assign(state, { tab: "words", notice: null }); render(); } }, t("단어장 전체 보기")));
   }
 
-  // ----- the top: logo, menu, the word box, and the student's own corner -----
+  // ----- the top: logo and menu on the left, the word box in the middle, the student's corner on the right -----
+  // "오늘" opens what the day holds (the present, today's points, the week's goal, today's words
+  // with the way on to a quiz, the character quest): it is one click away from every screen
+  // without taking a column of its own.
+  function todayMenu() {
+    return h("div", { class: "dk-today-wrap" },
+      h("button", { class: "dk-link", "aria-expanded": String(Boolean(state.todayOpen)), onclick: () => { state.todayOpen = !state.todayOpen; render(); } },
+        t("오늘"), c.presentWaiting() && h("em", { class: "dot", "aria-hidden": "true" })),
+      state.todayOpen && h("div", { class: "dk-today", role: "dialog", "aria-label": t("오늘") },
+        c.presentWaiting() && h("button", { class: "dk-present", onclick: () => { state.todayOpen = false; c.openPresent(); } }, c.giftArt(), t("오늘의 선물 받기")),
+        c.dailyGoal(),
+        c.todayBox(),
+        c.questHint()));
+  }
+  document.addEventListener("click", (e) => { // a click anywhere else closes it
+    if (state.todayOpen && !e.target.closest?.(".dk-today-wrap") && !e.target.closest?.("#sheet")) { state.todayOpen = false; render(); }
+  });
   function top(bare) {
     const item = (id, label) => h("button", { "aria-current": state.tab === id ? "page" : null, onclick: () => c.goTab(id) },
       label, id === "quiz" && c.duelBadge() > 0 && h("em", { class: "dot" }, String(c.duelBadge())));
     return h("header", { class: "dk-top" },
-      h("button", { class: "dk-logo", title: t("처음 화면으로"), "aria-label": t("처음 화면으로"), onclick: c.goHome }, c.logoIcon(26), c.wordmark(23)),
-      h("nav", { class: "dk-nav" }, item("search", t("사전")), item("quiz", t("퀴즈")), item("rank", t("랭킹"))),
+      h("div", { class: "dk-left" },
+        h("button", { class: "dk-logo", title: t("처음 화면으로"), "aria-label": t("처음 화면으로"), onclick: c.goHome }, c.logoIcon(28), c.wordmark(24)),
+        h("nav", { class: "dk-nav" }, item("search", t("사전")), item("quiz", t("퀴즈")), item("rank", t("랭킹")))),
       bare ? h("span", { class: "dk-gap" }) : c.searchForm(true),
       h("div", { class: "dk-me" },
-        h("button", { class: "points dk-points", id: "points", title: t("포인트샵 열기"), "aria-pressed": String(state.tab === "shop"), onclick: c.openShop },
-          h("i", { "aria-hidden": "true" }, "P"), h("span", null, String(state.user.points || 0)), h("small", null, t("포인트샵")), c.shopMark()),
+        todayMenu(),
         h("button", { class: "dk-link", "aria-pressed": String(state.tab === "friends"), onclick: () => c.openPage("friends") },
           t("친구"), c.friendsBadge() > 0 && h("em", { class: "dot" }, String(c.friendsBadge()))),
-        h("button", { class: "dk-link", "aria-pressed": String(state.tab === "settings"), onclick: c.openSettings }, t("설정"))));
-  }
-
-  // ----- the right: what matters now -----
-  // With a word open: where it comes from and its sayings. Always: today's present while it waits,
-  // today's points and the week's goal, the words of today with the way on to a quiz, the quest.
-  function side() {
-    const word = state.tab === "search" && !state.busy ? state.entry : null;
-    return h("aside", { class: "dk-side" },
-      word && c.entrySide(word),
-      !c.webHome() && c.presentWaiting() && h("button", { class: "dk-present", onclick: c.openPresent }, c.giftArt(), t("오늘의 선물 받기")),
-      c.dailyGoal(),
-      c.todayBox(),
-      c.questHint());
+        h("button", { class: "dk-link", "aria-pressed": String(state.tab === "settings"), onclick: c.openSettings }, t("설정")),
+        h("button", { class: "points dk-points", id: "points", title: t("포인트샵 열기"), "aria-pressed": String(state.tab === "shop"), onclick: c.openShop },
+          h("i", { "aria-hidden": "true" }, "P"), h("span", null, String(state.user.points || 0)), c.shopMark())));
   }
 
   // ----- the frame -----
@@ -95,8 +100,7 @@ export function initDesktop(c) {
         banners,
         // Back is the browser's own button; this arrow, at the top left of the screen, does the same.
         !bare && h("button", { class: "dk-back", title: t("뒤로"), "aria-label": t("뒤로"), onclick: () => history.back() }, "←"),
-        view),
-      side());
+        view));
   }
   return { frame };
 }

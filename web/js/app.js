@@ -1283,7 +1283,7 @@ const manySenses = (c) => Array.isArray(c.senses) && c.senses.filter((sense) => 
 const posIn = (label) => { const parts = String(label || "").split("·").map((part) => part.trim()); return (koFirst() ? parts[1] : parts[0]) || parts[0] || ""; };
 function sensesList(c, key) {
   const senses = c.senses.filter((sense) => sense?.definition_ko || sense?.definition_en);
-  const open = (state.openSense[key] ??= new Set([0]));
+  const open = WIDE() ? new Set(senses.keys()) : (state.openSense[key] ??= new Set([0]));
   const pair = (ko, en) => (koFirst() ? [ko, en] : [en, ko]).filter(Boolean);
   // "동사 2 · 명사 1": what kinds of word this is, at a glance.
   const kinds = new Map();
@@ -1413,7 +1413,6 @@ function entryCard(word, flat = false) { // flat: one column even in a wide wind
     h("button", { class: "link", onclick: () => removeWord(word) }, t("단어장에서 삭제")));
   // A wide window: the meanings (and the examples of a one-meaning word) on the left, to read down;
   // beside them, staying in view, where the word comes from, its sayings and its similar words.
-  if (WIDE() && !flat) return h("article", { class: "entry" }, hero(content, word), blocks.filter((el) => el.classList.contains("ex")), foot);
   return h("article", { class: "entry" }, hero(content, word), blocks, foot);
 }
 
@@ -1592,11 +1591,11 @@ function webActions() {
       (giftWaiting() || santaWaiting()) && h("button", { class: "present", onclick: () => (giftWaiting() ? openDailyGift() : takeSantaGift()) }, giftArt(), t("오늘의 선물 받기")),
       h("button", { onclick: toQuiz }, t("퀴즈 한 판"), duel().badge() > 0 && h("em", { class: "dot" }, String(duel().badge()))),
       state.suggest && !limitReached() && h("button", { onclick: () => search(state.suggest) }, t("오늘의 단어: {w}", { w: state.suggest }))),
-    !WIDE() && h("p", { class: "web-today" },
+    h("p", { class: "web-today" },
       h("button", { class: "link", onclick: searchPointsSheet }, t("오늘 {a} / {b}점", { a: searchPointsToday() + searchBonusToday(), b: SEARCH_DAILY_MAX })),
       h("span", { "aria-hidden": "true" }, " · "),
       h("button", { class: "link", onclick: weeklyGoalSheet }, t("이번 주 {a} / {b}개", { a: weekCount(), b: weekGoal() }))),
-    !WIDE() && questHint(),
+    questHint(),
   ];
 }
 function webQuiet() {
