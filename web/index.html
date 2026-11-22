@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko" class="web" data-version="0.1.23">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="VOQUIZ">
+  <title>VOQUIZ</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon48.png">
+  <link rel="apple-touch-icon" href="icons/icon128.png">
+  <link rel="stylesheet" href="app.css?v=0.1.23">
+</head>
+<body>
+  <div id="app"></div>
+  <div id="yard" hidden></div>
+  <script type="module">
+    // Back from signing in with Google? The session is taken out of the address first.
+    import { finishSignIn } from "./js/supabase.js";
+    await finishSignIn();
+    await import("./js/app.js");
+  </script>
+</body>
+</html>
