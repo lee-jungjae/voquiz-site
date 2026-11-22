@@ -2721,3 +2721,5 @@ nav button.gulp svg { animation: tab-gulp .38s ease-out; }
 .duel-row.waits .gift-all { flex: none; padding: 6px 14px; border-radius: 999px; background: #d6336c; color: #fff; font-size: 13px; font-weight: 700; white-space: nowrap; }
 .friend-tabs + .duel-list { margin-top: 0; }
 .friend-tabs + .duel-list > .duel-row:first-of-type, .friend-tabs + .duel-list > .gift-hint + .duel-row { border-top: 0; }
+/* ----- the badge of an item that waits (a gift to collect, a friend's request) ----- */
+.row-new { display: inline-grid; place-items: center; min-width: 18px; height: 18px; margin-left: 6px; padding: 0 5px; border-radius: 999px; background: #e5484d; color: #fff; font-style: normal; font-size: 10.5px; font-weight: 800; line-height: 1; vertical-align: 2px; }

@@ -251,13 +251,15 @@ export function initFriends(c) {
     const total = (list) => list.reduce((sum, g) => sum + g.points, 0);
     const collectButton = () => h("button", { class: "gift-all", disabled: ui.busy, onclick: collect },
       waiting().length > 1 ? t("모두 받기") : t("선물 받기"), ` +${total(waiting())}`);
+    // The badge of an item that waits (a gift to collect, a request to answer).
+    const fresh = () => h("em", { class: "row-new", title: t("새로 왔어요"), "aria-label": t("새로 왔어요") }, "N");
     const giftRow = (g, when) => h("div", { class: `duel-row gift${when ? "" : " hot"}` },
       h("span", { class: "gift-mark", "aria-hidden": "true" }, "♥"),
-      h("span", { class: "who" }, who(g.from), when && h("small", null, new Date(g.at).toLocaleDateString(c.locale(), { month: "long", day: "numeric" }))),
+      h("span", { class: "who" }, h("span", null, who(g.from), !when && fresh()), when && h("small", null, new Date(g.at).toLocaleDateString(c.locale(), { month: "long", day: "numeric" }))),
       h("b", { class: "gift-points" }, `+${g.points}`));
     const tabs = [
-      ["friends", t("친구"), friends.length, 0],
-      !state.giftSetup && ["gifts", t("선물"), null, waiting().length],
+      ["friends", t("친구 목록"), friends.length, 0],
+      !state.giftSetup && ["gifts", t("선물 받기"), null, waiting().length],
       ["add", t("추가·초대"), null, asking.length],
     ].filter(Boolean);
     const tab = tabs.some(([id]) => id === ui.tab) ? ui.tab : "friends";
@@ -302,7 +304,7 @@ export function initFriends(c) {
       asking.length > 0 && h("section", { class: "duel-list" },
         h("h3", null, t("받은 친구 신청"), h("small", null, String(asking.length))),
         asking.map((f) => h("div", { class: "duel-row hot" },
-          h("span", { class: "who" }, who(f.other), f.other.grade && h("small", null, `G${f.other.grade}`)),
+          h("span", { class: "who" }, h("span", null, who(f.other), fresh()), f.other.grade && h("small", null, `G${f.other.grade}`)),
           h("button", { class: "mini buy", onclick: () => run(() => api.answerFriend(f.id, true), t("{name}와(과) 친구가 됐어요!", { name: who(f.other) })) }, t("수락")),
           h("button", { class: "link", onclick: () => run(() => api.answerFriend(f.id, false), t("신청을 거절했어요.")) }, t("거절"))))),
       h("section", { class: "duel-list" },
@@ -337,14 +339,7 @@ export function initFriends(c) {
     return [
       head,
       ui.notice && h("div", { class: "notice" }, ui.notice),
-      // What waits for an answer, on whichever tab (the tab that shows it anyway does not repeat it).
-      tab !== "gifts" && waiting().length > 0 && h("div", { class: "duel-row hot gift waits" },
-        h("span", { class: "gift-mark", "aria-hidden": "true" }, "♥"),
-        h("span", { class: "who" }, t("{name}의 선물이 왔어요", { name: who(waiting()[0].from) }), waiting().length > 1 && h("small", null, t("외 {n}명", { n: waiting().length - 1 }))),
-        collectButton()),
-      tab !== "add" && asking.length > 0 && h("div", { class: "duel-row hot waits" },
-        h("span", { class: "who" }, t("{name}의 친구 신청이 왔어요", { name: who(asking[0].other) }), asking.length > 1 && h("small", null, t("외 {n}명", { n: asking.length - 1 }))),
-        h("button", { class: "mini buy", onclick: show("add") }, t("보기"))),
+      // What waits for an answer is counted on its tab; inside the tab each such item carries a badge.
       h("div", { class: `segment${tabs.length === 3 ? " three" : ""} friend-tabs`, role: "tablist" }, tabs.map(([id, label, count, alert]) =>
         h("button", { role: "tab", "aria-selected": String(tab === id), onclick: show(id) },
           label, count != null && h("small", null, String(count)), alert > 0 && h("em", { class: "dot" }, String(alert))))),
