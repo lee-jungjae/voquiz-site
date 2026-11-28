@@ -9,6 +9,7 @@ import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey } from "./goods.
 import { initGrow } from "./grow.js";
 import { logoIcon, wordmark } from "./logo.js";
 import { art, artToCss } from "./art.js";
+import { academicWords } from "./academic.js";
 artToCss();
 import { film } from "./film.js";
 import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js";
@@ -776,11 +777,12 @@ const searchLogToday = () => (isToday(state.user.search?.day) && Array.isArray(s
 // whether or not the day's search points are used up. Kept in `search` ({ dw: true } for the day).
 const DAILY_WORD_POINTS = 20;
 function dailyWord() {
-  const list = gradeList(Math.min(12, Math.max(3, state.user?.grade || 3)));
+  const grade = Math.min(12, Math.max(3, state.user?.grade || 3));
+  const list = academicWords(grade, gradeList(grade)); // academic words only (academic.js)
   if (!list.length) return "";
   let n = 7;
-  for (const ch of `${todayKey()}:${state.user?.grade || 3}`) n = (n * 31 + ch.charCodeAt(0)) % 1000003;
-  return list[n % list.length][0];
+  for (const ch of `${todayKey()}:${grade}`) n = (n * 31 + ch.charCodeAt(0)) % 1000003;
+  return list[n % list.length];
 }
 const dailyWordDone = () => Boolean(isToday(state.user.search?.day) && state.user.search.dw);
 function dailyWordBonus(word) {
@@ -796,8 +798,8 @@ function dailyWordCard() {
   if (!word || !state.user?.grade) return null;
   const done = dailyWordDone();
   return h("button", { class: `daily-word${done ? " done" : ""}`, title: t("오늘의 단어 찾아보기"), onclick: () => search(word) },
-    art("star"),
-    h("span", { class: "dw-text" }, h("small", null, t("오늘의 단어")), h("b", null, word)),
+    art("cap"),
+    h("span", { class: "dw-text" }, h("small", null, h("em", null, "ACADEMIC"), t("오늘의 아카데믹 단어")), h("b", null, word)),
     done ? h("span", { class: "dw-got" }, h("i", { class: "check-i", "aria-hidden": "true" }), t("받았어요"))
       : h("span", { class: "dw-pay" }, h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `+${DAILY_WORD_POINTS}`));
 }
@@ -1948,7 +1950,7 @@ function syncYard() {
     duel().badge() > 0 && state.tab !== "quiz" && { waits: true, text: t("대결 신청이 왔어!"), act: to("quiz") },
     friends().gifts() > 0 && { waits: true, text: t("친구가 선물을 보냈어!"), act: () => friends().collect() },
     friends().badge() > friends().gifts() && state.tab !== "friends" && { waits: true, text: t("친구 신청이 왔어!"), act: () => friends().open() },
-    state.suggest && !limitReached() && webHome() && { text: t("오늘의 단어 {w}, 찾아볼까?", { w: state.suggest }), act: () => search(state.suggest) },
+    !dailyWordDone() && dailyWord() && !limitReached() && webHome() && { text: t("오늘의 아카데믹 단어 {w}, 찾아볼까?", { w: dailyWord() }), act: () => search(dailyWord()) },
     state.words.length > 0 && state.tab !== "quiz" && { text: t("퀴즈 한 판 어때?"), act: to("quiz") },
     state.tab !== "rank" && { text: t("이번 주 순위 볼래?"), act: to("rank") },
     { text: t("새 단어 찾으러 가자!"), act: () => { if (state.tab !== "search") goTab("search"); document.getElementById("q")?.focus(); } },

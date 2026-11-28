@@ -16,6 +16,7 @@ const ART = {
   party: `<path d="M4 20 8.500 9l6.500 6.500z" fill="#ff8fb8" ${O}/><circle cx="15" cy="5" r="1.400" fill="#ffd84d" ${O}/><circle cx="19.500" cy="9.500" r="1.400" fill="#7fd6c2" ${O}/><path d="M12.500 8c.5-2 2-3 3.500-3M16 12.500c1.500-.8 3-.5 4.500.5" ${L}/>`,
   crown: `<path d="M3.500 8l4 4L12 5l4.500 7 4-4L19 18.500H5z" fill="#ffd84d" ${O}/><path d="M6 15.500h12" ${L}/>`,
   gift: `<rect x="4" y="10" width="16" height="10.500" rx="1.500" fill="#ff8fb8" ${O}/><rect x="3" y="6.500" width="18" height="4" rx="1.200" fill="#ffc2d8" ${O}/><path d="M12 6.500v14" ${L}/><path d="M12 6.500C10 3 6.500 3.500 7.500 5.500c.5 1 2.500 1 4.500 1zm0 0c2-3.500 5.500-3 4.500-1-.5 1-2.500 1-4.500 1z" fill="#ffd84d" ${O}/>`,
+  cap: `<path d="M6.500 12v4.500c1.500 1.500 3.500 2 5.500 2s4-.5 5.500-2V12" fill="#8f88d8" ${O}/><path d="M2 9.500 12 5l10 4.500L12 14z" fill="#655f9f" ${O}/><path d="M22 9.500V15" ${L}/>`,
   // ----- aims and news -----
   target: `<circle cx="11" cy="13" r="8.500" fill="#fff" ${O}/><circle cx="11" cy="13" r="5.300" fill="#ff8fb8" ${O}/><circle cx="11" cy="13" r="2" fill="#fff" ${O}/><path d="M11 13l8.500-8.500M17 4.500h2.500V7" ${L}/>`,
   flag: `<path d="M6 21.500V3" ${L}/><path d="M6 4h12l-2.700 3.800L18 11.500H6z" fill="#ff8fb8" ${O}/>`,

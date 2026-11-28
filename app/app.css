@@ -3276,3 +3276,6 @@ html[data-concept="rainbow"] nav { border-top: 2px solid; border-image: linear-g
 .dress-go.show:hover { opacity: 1; }
 .dress-go.gift-go { color: var(--accent); font-weight: 700; }
 .dress-go.gift-go.show { opacity: 1; }
+.dw-text small { display: flex; align-items: center; gap: 6px; }
+.dw-text small em { padding: 1px 6px; border-radius: 4px; background: #655f9f; color: #fff; font-style: normal; font-size: 9px; font-weight: 800; letter-spacing: .08em; }
+.daily-word.done .dw-text small em { background: var(--muted); }
