@@ -3,7 +3,7 @@
 // stamp for the run, a glow round the window that grows with it, a shake and a red flash on a
 // wrong answer, fireworks at a good result. Nothing here changes a game; it only shows it.
 // (A phone, and the extension's side panel, never call any of this.)
-import { focusOn } from "./prefs.js?v=0.1.28-tp81o5";
+import { focusOn } from "./prefs.js?v=0.1.28-tp81sz";
 const still = () => Boolean(globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
 const COLORS = ["#655f9f", "#bbd86b", "#ffd166", "#ff8fab", "#7cc6fe", "#23552b", "#a9a4d4", "#ff9f43"];
 const can = () => !still() && !focusOn() && Boolean(document.body.animate);

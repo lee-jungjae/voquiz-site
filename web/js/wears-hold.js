@@ -1,4 +1,4 @@
-import { stroke, star, twinkle, heart } from "./wear-art.js?v=0.1.28-tp81o5";
+import { stroke, star, twinkle, heart } from "./wear-art.js?v=0.1.28-tp81sz";
 // More things to hold and to wear at the neck. Rule: rare 1 (200 points) and rare 2 (400 points) can be bought; rare 3 comes from capsules only.
 // Held things start at a raised hand, (58,56) on the left or (142,56) on the right, and go up and outward.
 // Neck things stay below y 98 so the mouth is never covered.

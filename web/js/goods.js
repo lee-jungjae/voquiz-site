@@ -68,11 +68,11 @@ export const CONCEPTS = [
 ];
 export const conceptById = (id) => CONCEPTS.find((x) => x.id === id) || CONCEPTS[0];
 
-import { stroke, star, twinkle, heart } from "./wear-art.js?v=0.1.28-tp81o5";
-import { HEAD_WEARS } from "./wears-head.js?v=0.1.28-tp81o5";
-import { FACE_WEARS } from "./wears-face.js?v=0.1.28-tp81o5";
-import { HOLD_WEARS } from "./wears-hold.js?v=0.1.28-tp81o5";
-import { AROUND_WEARS } from "./wears-around.js?v=0.1.28-tp81o5";
+import { stroke, star, twinkle, heart } from "./wear-art.js?v=0.1.28-tp81sz";
+import { HEAD_WEARS } from "./wears-head.js?v=0.1.28-tp81sz";
+import { FACE_WEARS } from "./wears-face.js?v=0.1.28-tp81sz";
+import { HOLD_WEARS } from "./wears-hold.js?v=0.1.28-tp81sz";
+import { AROUND_WEARS } from "./wears-around.js?v=0.1.28-tp81sz";
 
 // ----- things to wear -----
 // slot: only one thing of a slot is worn at a time (head, eyes, cheek, hand, neck, back, aura). layer "back" is drawn behind the body.

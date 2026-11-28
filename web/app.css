@@ -3808,7 +3808,7 @@ b:has(> .coin-i:first-child) > .coin-i { margin: 0; vertical-align: 0; }
 
 /* Quiz on a phone (0.1.28): the question sits just above its answers instead of floating mid-screen. */
 @media (max-width: 859px) {
-  main > .question { justify-content: flex-end; padding-bottom: 12px; }
+  main > .question { justify-content: center; }
 }
 
 /* Settings: a choice of several under its explanation. */
