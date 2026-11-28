@@ -528,12 +528,13 @@ export function initGrow(c) {
   // and the way to the machine once they are full.
   function heartStrip() {
     const n = hearts().n, ready = n >= HEARTS_FOR_DRAW;
-    return h("section", { class: `heart-strip${ready ? " ready" : ""}` },
-      h("div", { class: "heart-count" },
-        h("div", { class: "heart-slots", role: "img", "aria-label": `${t("하트")} ${n} / ${HEARTS_FOR_DRAW}` },
+    // One button: the whole strip leads to the capsules (the picture inside is not a button of its own).
+    return h("button", { class: `heart-strip${ready ? " ready" : ""}`, title: t("하트 {n}개로 열기", { n: HEARTS_FOR_DRAW }), onclick: () => c.openGacha() },
+      h("span", { class: "heart-count" },
+        h("span", { class: "heart-slots", role: "img", "aria-label": `${t("하트")} ${n} / ${HEARTS_FOR_DRAW}` },
           Array.from({ length: HEARTS_FOR_DRAW }, (_, i) => h("i", { class: i < n ? "on" : "", style: `--i:${i}` }))),
         h("small", null, ready ? t("캡슐을 열 수 있어요!") : t("캡슐까지 하트 {n}개", { n: HEARTS_FOR_DRAW - n }))),
-      h("button", { class: "heart-go", title: t("하트 {n}개로 열기", { n: HEARTS_FOR_DRAW }), onclick: () => c.openGacha() },
+      h("span", { class: "heart-go" },
         svg("0 0 120 150", "gm basic mini", machineMini()), h("b", null, ready ? t("캡슐") : `${n} / ${HEARTS_FOR_DRAW}`)));
   }
   const canDraw = () => MACHINE_KINDS.some((kind) => ["hearts", "ticket"].some((pay) => canPay(kind, pay)));

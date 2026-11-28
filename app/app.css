@@ -3769,3 +3769,14 @@ html[data-concept="magazine"] .btn, html[data-concept="magazine"] .chip, html[da
 html[data-concept="magazine"] .segment button[aria-selected="true"], html[data-concept="magazine"] .segment button[aria-pressed="true"] { box-shadow: inset 0 -3px 0 var(--accent); }
 html[data-concept="chalk"] body { background: radial-gradient(at 20% 0%, rgba(255, 255, 255, .07) 0, transparent 46%), radial-gradient(at 90% 100%, rgba(255, 255, 255, .05) 0, transparent 40%), var(--bg); }
 html[data-concept="chalk"] .use b { color: #f2a7a7; }
+
+/* The heart strip is one button (0.1.28): no button inside a button. */
+button.heart-strip { width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; transition: transform .15s; }
+button.heart-strip:hover { transform: translateY(-1px); }
+button.heart-strip:active { transform: none; }
+.heart-strip .heart-go { background: none; border: 0; padding: 0 8px 0 0; pointer-events: none; animation: none; }
+.heart-strip .heart-go:hover { transform: none; }
+.heart-strip.ready { border-color: var(--accent); }
+.heart-strip.ready .heart-go { color: var(--accent-dark); border: 0; animation: none; }
+.heart-strip .heart-count small { display: block; }
+.heart-strip .heart-slots i:not(.on) { background: color-mix(in srgb, #e5386f 42%, var(--border)); }

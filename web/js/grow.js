@@ -4,9 +4,9 @@
 // file is what is done with them and how it is shown. Everything is kept with the account:
 // `level` { xp, got }, `bag` { tickets: { basic, gold } }, `hearts` { n, all }, and in `shop`: what
 // is owned ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
-import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, skinName, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, wearSpecial, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7z2l";
-import { lookOf } from "./characters.js?v=0.1.28-tp7z2l";
-import { art } from "./art.js?v=0.1.28-tp7z2l"; // eslint-disable-line no-unused-vars
+import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, skinName, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, wearSpecial, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7z95";
+import { lookOf } from "./characters.js?v=0.1.28-tp7z95";
+import { art } from "./art.js?v=0.1.28-tp7z95"; // eslint-disable-line no-unused-vars
 
 const TWICE_POINTS = 100; // a present the student already has turns into points
 
@@ -528,12 +528,13 @@ export function initGrow(c) {
   // and the way to the machine once they are full.
   function heartStrip() {
     const n = hearts().n, ready = n >= HEARTS_FOR_DRAW;
-    return h("section", { class: `heart-strip${ready ? " ready" : ""}` },
-      h("div", { class: "heart-count" },
-        h("div", { class: "heart-slots", role: "img", "aria-label": `${t("하트")} ${n} / ${HEARTS_FOR_DRAW}` },
+    // One button: the whole strip leads to the capsules (the picture inside is not a button of its own).
+    return h("button", { class: `heart-strip${ready ? " ready" : ""}`, title: t("하트 {n}개로 열기", { n: HEARTS_FOR_DRAW }), onclick: () => c.openGacha() },
+      h("span", { class: "heart-count" },
+        h("span", { class: "heart-slots", role: "img", "aria-label": `${t("하트")} ${n} / ${HEARTS_FOR_DRAW}` },
           Array.from({ length: HEARTS_FOR_DRAW }, (_, i) => h("i", { class: i < n ? "on" : "", style: `--i:${i}` }))),
         h("small", null, ready ? t("캡슐을 열 수 있어요!") : t("캡슐까지 하트 {n}개", { n: HEARTS_FOR_DRAW - n }))),
-      h("button", { class: "heart-go", title: t("하트 {n}개로 열기", { n: HEARTS_FOR_DRAW }), onclick: () => c.openGacha() },
+      h("span", { class: "heart-go" },
         svg("0 0 120 150", "gm basic mini", machineMini()), h("b", null, ready ? t("캡슐") : `${n} / ${HEARTS_FOR_DRAW}`)));
   }
   const canDraw = () => MACHINE_KINDS.some((kind) => ["hearts", "ticket"].some((pay) => canPay(kind, pay)));
