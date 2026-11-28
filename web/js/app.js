@@ -1,32 +1,32 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp7qlm";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7qlm";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7qlm";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.28-tp7qlm";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp7qlm";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7qlm";
-import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7qlm";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey } from "./goods.js?v=0.1.28-tp7qlm";
-import { initGrow } from "./grow.js?v=0.1.28-tp7qlm";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7qlm";
-import { art, artToCss } from "./art.js?v=0.1.28-tp7qlm";
+import { api, DEMO } from "./api.js?v=0.1.28-tp7qpt";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7qpt";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7qpt";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.28-tp7qpt";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp7qpt";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7qpt";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7qpt";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey } from "./goods.js?v=0.1.28-tp7qpt";
+import { initGrow } from "./grow.js?v=0.1.28-tp7qpt";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7qpt";
+import { art, artToCss } from "./art.js?v=0.1.28-tp7qpt";
 artToCss();
-import { film } from "./film.js?v=0.1.28-tp7qlm";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7qlm";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7qlm";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp7qlm";
-import { clockNow } from "./clock.js?v=0.1.28-tp7qlm";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7qlm";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7qlm";
-import { initDuel } from "./duel.js?v=0.1.28-tp7qlm";
-import { initFriends } from "./friends.js?v=0.1.28-tp7qlm";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp7qlm";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7qlm";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7qlm";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7qlm";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7qlm";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7qlm";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7qlm";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7qlm";
+import { film } from "./film.js?v=0.1.28-tp7qpt";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7qpt";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7qpt";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp7qpt";
+import { clockNow } from "./clock.js?v=0.1.28-tp7qpt";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7qpt";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7qpt";
+import { initDuel } from "./duel.js?v=0.1.28-tp7qpt";
+import { initFriends } from "./friends.js?v=0.1.28-tp7qpt";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp7qpt";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7qpt";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7qpt";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7qpt";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7qpt";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7qpt";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7qpt";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7qpt";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -1966,12 +1966,14 @@ function searchHome() {
       : [h("p", { class: "small" }, t("한국어나 영어 단어를 찾아보세요.")),
          !WEB && h("p", { class: "small" }, t("웹페이지에서 단어를 선택해 우클릭해도 돼요."))],
     mascot({
-      character: myLook(), t, onTap: () => { sfx.chirp(myShop().character); return mascotGift() || mascotSuggests(); },
+      character: myLook(), t, onTap: () => { sfx.chirp(myShop().character); document.querySelector(".dress-go")?.classList.add("show"); return mascotGift() || mascotSuggests(); },
       signature: isPlus() ? { pops: SIGNATURES[myShop().character] || ["✦", "♥", "★"], line: CHARACTER_LINES[myShop().character]?.[["ko", "en", "zh"].indexOf(getLang())] || "" } : null,
       gift: giftWaiting() || santaWaiting(), onGift: () => (giftWaiting() ? openDailyGift() : takeSantaGift()),
       resting: limitReached() ? t("오늘은 여기까지! 내일 또 만나요") : null,
       greet: quotaLine(), onGreet: () => { state.quotaSaid = quotaKey(); }, // marked as said only once it has spoken
     }),
+    // Shown faintly once the character has been tapped (the tap itself does what it always did).
+    h("button", { class: "link small dress-go", onclick: () => grow().openWardrobe() }, t("내 캐릭터 꾸미기")),
     recent.length > 0
       ? [h("div", { class: "hint" }, t("최근 찾은 단어")),
          h("div", { class: "chips center recent" }, recent.map((w) => h("button", { class: "chip", onclick: () => open(w) }, w.headword))),
