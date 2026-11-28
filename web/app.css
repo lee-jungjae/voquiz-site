@@ -3546,3 +3546,31 @@ html[data-font] body, html[data-font] body *:not(.font-sample):not(.font-sample 
 .lv-top .lv-next { grid-column: auto; margin: 4px 0 0; }
 .lv-sheet { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .lv-duo::before { animation: none; } }
+
+/* ----- the scenery of the road: bigger, of more kinds, and all of it gently moving ----- */
+.lv-scene, .lv-scene.s1, .lv-scene.s2 { width: 46px; height: 46px; rotate: 0deg; translate: 0 -50%; transform-origin: 50% 90%; }
+.lv-scene.s1 { width: 54px; height: 54px; }
+.lv-scene.s2 { width: 40px; height: 40px; }
+.lv-scene.sway { animation: none; }
+.lv-scene.a0 { animation: sc-sway 4.2s ease-in-out infinite; }
+.lv-scene.a1 { animation: sc-bob 3.4s ease-in-out infinite; }
+.lv-scene.a2 { animation: sc-drift 6s ease-in-out infinite alternate; }
+.lv-scene.a3 { animation: sc-breathe 3.2s ease-in-out infinite; }
+.lv-scene.a4 { animation: sc-float 5.2s ease-in-out infinite; }
+@keyframes sc-sway { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+@keyframes sc-bob { 50% { transform: translateY(-5px); } }
+@keyframes sc-drift { from { transform: translateX(-3px); } to { transform: translateX(4px); } }
+@keyframes sc-breathe { 50% { transform: scale(1.08); } }
+@keyframes sc-float { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-4px) rotate(4deg); } }
+.lv-mark.big { width: 96px; height: 96px; animation: sc-bob 4s ease-in-out infinite; }
+.lv-mark.mid { width: 58px; height: 58px; animation: sc-float 5s ease-in-out infinite; }
+.lv-mark.small { width: 36px; height: 36px; animation: sc-breathe 3s ease-in-out infinite; }
+.lv-mark.m-sun, .lv-mark.m-snow { animation: lv-rays 18s linear infinite; }
+.lv-mark.m-rocket { animation: lv-fly 5s ease-in-out infinite; }
+.lv-mark.m-whale, .lv-mark.m-fish { animation: lv-swim 4.5s ease-in-out infinite; }
+.lv-mark.m-star { animation: lv-twinkle 1.8s ease-in-out infinite; }
+.lv-mark.m-butterfly { animation: sc-float 2.4s ease-in-out infinite; }
+.lv-cloud { width: 54px; height: 54px; }
+.lv-cloud.m-moon { animation: sc-breathe 4s ease-in-out infinite; }
+.lv-twinkle { width: 20px; height: 20px; translate: -50% -50%; }
+@media (prefers-reduced-motion: reduce) { .lv-scene, .lv-mark, .lv-cloud, .lv-twinkle { animation: none !important; } }

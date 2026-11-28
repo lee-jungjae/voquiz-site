@@ -4,9 +4,9 @@
 // file is what is done with them and how it is shown. Everything is kept with the account:
 // `level` { xp, got }, `bag` { tickets: { basic, gold } }, `hearts` { n, all }, and in `shop`: what
 // is owned ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
-import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7tg4";
-import { lookOf } from "./characters.js?v=0.1.28-tp7tg4";
-import { art } from "./art.js?v=0.1.28-tp7tg4"; // eslint-disable-line no-unused-vars
+import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7tko";
+import { lookOf } from "./characters.js?v=0.1.28-tp7tko";
+import { art } from "./art.js?v=0.1.28-tp7tko"; // eslint-disable-line no-unused-vars
 
 const TWICE_POINTS = 100; // a present the student already has turns into points
 
@@ -211,8 +211,10 @@ export function initGrow(c) {
     const yOf = (n) => PAD + (LEVEL_MAX - n) * STEP + Math.floor((LEVEL_MAX - n) / ZONE) * GATE;
     const tall = yOf(1) + PAD;
     const landTop = (z) => (z === LANDS_N - 1 ? 0 : yOf(z * ZONE + ZONE) - STEP / 2); // a land begins under its last stone's row… and takes the gate below it
-    const LANDS = [["flower", "sprout", "leaf"], ["island", "sun", "star"], ["whale", "gem", "wind"], ["snow", "cloud", "spark"], ["rainbow", "planet", "rocket"]];
-    const GATES = [null, ["island", "sun"], ["whale", "wind"], ["snow", "cloud"], ["rainbow", "rocket"]]; // what stands at the way into each land
+    // The scenery of each land (five kinds, in turn) and what stands at the way into it: a big
+    // picture, one beside it on the other side, something that drifts, and a small one.
+    const LANDS = [["flower", "tree", "sprout", "butterfly", "leaf"], ["island", "shell", "sun", "fish", "star"], ["whale", "fish", "gem", "shell", "wind"], ["pine", "snowman", "snow", "mountain", "spark"], ["rainbow", "planet", "moon", "balloon", "rocket"]];
+    const GATES = [null, ["island", "sun", "cloud", "shell"], ["whale", "fish", "wind", "gem"], ["snowman", "pine", "cloud", "snow"], ["rainbow", "rocket", "moon", "star"]];
     const line = Array.from({ length: LEVEL_MAX }, (_, i) => {
       const n = i + 1;
       if (n === 1) return `M${xOf(1)} ${yOf(1)}`;
@@ -234,13 +236,19 @@ export function initGrow(c) {
         if (!gate) return null;
         const y = (yOf(z * ZONE) + yOf(z * ZONE + 1)) / 2;
         return [
-          h("i", { class: `lv-mark big m-${gate[0]}`, "aria-hidden": "true", style: `top:${y + 22}px;left:18%` }, art(gate[0])),
-          h("i", { class: `lv-mark m-${gate[1]}`, "aria-hidden": "true", style: `top:${y - 26}px;left:80%` }, art(gate[1])),
-          h("i", { class: "lv-cloud", "aria-hidden": "true", style: `top:${y - 54}px;left:56%;animation-delay:-${z * 1.7}s` }, art(z === LANDS_N - 1 ? "spark" : "cloud")),
+          h("i", { class: `lv-mark big m-${gate[0]}`, "aria-hidden": "true", style: `top:${y + 26}px;left:20%` }, art(gate[0])),
+          h("i", { class: `lv-mark mid m-${gate[1]}`, "aria-hidden": "true", style: `top:${y - 30}px;left:80%` }, art(gate[1])),
+          h("i", { class: `lv-cloud m-${gate[2]}`, "aria-hidden": "true", style: `top:${y - 54}px;left:60%;animation-delay:-${z * 1.7}s` }, art(gate[2])),
+          h("i", { class: `lv-mark small m-${gate[3]}`, "aria-hidden": "true", style: `top:${y - 56}px;left:10%;animation-delay:-${z * 0.9}s` }, art(gate[3])),
         ];
       }),
       h("i", { class: "lv-goal", "aria-hidden": "true", style: `top:${yOf(LEVEL_MAX) - 60}px;left:${xOf(LEVEL_MAX)}%` }, art("crown")),
       h("i", { class: "lv-mark m-flag", "aria-hidden": "true", style: `top:${yOf(1)}px;left:72%` }, art("flag")),
+      // under the first stone, and in the sky over the last
+      h("i", { class: "lv-mark mid m-tree", "aria-hidden": "true", style: `top:${yOf(1) + 62}px;left:80%` }, art("tree")),
+      h("i", { class: "lv-mark small m-butterfly", "aria-hidden": "true", style: `top:${yOf(1) + 60}px;left:14%` }, art("butterfly")),
+      h("i", { class: "lv-twinkle", "aria-hidden": "true", style: `top:${yOf(LEVEL_MAX) - 82}px;left:14%` }, art("spark")),
+      h("i", { class: "lv-twinkle", "aria-hidden": "true", style: `top:${yOf(LEVEL_MAX) - 78}px;left:38%;animation-delay:-.8s` }, art("star")),
       path("all"), path("done", lv), path("mid", lv),
       Array.from({ length: LEVEL_MAX }, (_, i) => {
         const n = i + 1;
@@ -250,7 +258,7 @@ export function initGrow(c) {
         const near = Math.abs(n - lv);
         const land = LANDS[Math.min(LANDS_N - 1, Math.floor((n - 1) / ZONE))];
         return [
-          h("i", { class: `lv-scene s${n % 3}${n % 4 === 0 ? " sway" : ""}`, "aria-hidden": "true", style: `top:${yOf(n)}px;${left ? "left:3%" : "right:3%"}` }, art(land[n % 3])),
+          h("i", { class: `lv-scene s${n % 3} a${n % 5}`, "aria-hidden": "true", style: `top:${yOf(n)}px;${left ? "left:3%" : "right:3%"};animation-delay:-${(n % 7) * 0.6}s` }, art(land[n % 5])),
           h("button", { class: `lv-step lv-stone ${where}${big ? " big" : ""}${n === lv ? " here" : ""}${n === just ? " just" : ""}`, style: `left:${xOf(n)}%;top:${yOf(n)}px;${at == null && near < 7 ? `animation-delay:${near * 60}ms` : ""}`, disabled: where !== "ready",
             title: where === "ready" ? t("받기") : t("단어 {n}개", { n: needFor(n) }), "aria-label": `Lv.${n}`, onclick: () => claim(n) },
             where === "got" ? h("i", { class: "check-i", "aria-hidden": "true" }) : String(n),
@@ -261,7 +269,6 @@ export function initGrow(c) {
         ];
       }),
       here));
-    const held = tickets().basic + tickets().gold;
     const big = badge(lv, at == null ? 0 : progress(), "big", need());
     const el = h("div", { id: "sheet", class: "sheet-wrap", onclick: (e) => { if (e.target === el) close(); } },
       h("div", { class: "sheet lv-sheet", role: "dialog", "aria-modal": "true", "aria-label": t("내 레벨") },
@@ -271,7 +278,6 @@ export function initGrow(c) {
           h("div", { class: "lv-duo" }, big, h("span", { class: "lv-me", "aria-hidden": "true" }, c.portrait(myLook()))),
           h("p", { class: "small lv-next" }, next ? t("다음 레벨까지 {n}개", { n: next - xp() }) : t("최고 레벨!"))),
         road,
-        held > 0 && h("button", { class: "btn wide ghost lv-go", onclick: () => { el.remove(); c.openGacha(); } }, ticketArt(tickets().gold ? "gold" : "basic"), t("뽑기 기계로 가기"), h("b", null, `×${held}`)),
         h("button", { class: "btn wide", onclick: close }, t("닫기"))));
     document.body.append(el);
     if (at != null) road.scrollTop = at;
