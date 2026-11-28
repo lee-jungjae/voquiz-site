@@ -1,5 +1,5 @@
 // Theme shop: things a student can buy with word points and switch between in Settings.
-import { conceptById } from "./goods.js?v=0.1.28-tp7u6z";
+import { conceptById } from "./goods.js?v=0.1.28-tp7ubs";
 // `accent` is used on light screens, `onDark` on dark ones. Names are Korean keys for i18n.
 // Prices climb from "a day or two" to `special` items that take about a week of steady use
 // (a busy day of searching, uncovering and quizzing earns roughly 200 points).
