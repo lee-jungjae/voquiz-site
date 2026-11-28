@@ -25,6 +25,7 @@ import { MOTTOS } from "./mottos.js";
 import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js";
 import { SIGNATURES } from "./signatures.js";
 import { sfx, soundOn, setSound } from "./sound.js";
+import { focusOn, setFocus, untimedOn, setUntimed, defLang, setDefLang, defKind } from "./prefs.js";
 import { tuning, setTuning } from "./tuning.js";
 import { WORD_LISTS } from "./wordlists.js";
 import { WORD_DEFS } from "./worddefs.js";
@@ -457,6 +458,11 @@ async function chooseGrade(grade) {
     const first = !state.user.grade;
     state.user = await api.setGrade(grade);
     state.level = null;
+    // A new account takes duel requests from friends only, until the student opens it up (Settings).
+    if (first && !state.user.duelFrom) {
+      state.user.duelFrom = "friends";
+      api.setDuelFrom("friends").then(() => api.saveProfile({ duelFrom: "friends", noDuels: false })).catch(console.error);
+    }
     if (first && typedName.trim()) await saveName(typedName);
     if (first) return loadWords();
   } catch (err) {
@@ -637,15 +643,17 @@ function quizMax(questions) {
 // Each quiz question has a time limit. When it runs out the question counts as not known.
 const QUESTION_MS = 10000; // to pick an answer
 const TYPED_MS = 20000; // to type one
-const limitFor = (typed) => (typed ? TYPED_MS : QUESTION_MS);
+// Grades 3 to 5 read and type more slowly: they get half as long again.
+const limitFor = (typed) => (typed ? TYPED_MS : QUESTION_MS) * ((state.user?.grade || 12) <= 5 ? 1.5 : 1);
 let questionTimer = 0;
 function startQuestionTimer() {
   clearTimeout(questionTimer);
   const quiz = state.quiz;
   if (!quiz || quiz.index >= quiz.cards.length) return;
   const index = quiz.index;
-  quiz.limit = limitFor(quiz.questions[index].kind === "type");
+  quiz.limit = untimedOn() ? 0 : limitFor(quiz.questions[index].kind === "type"); // 0: no clock (a setting)
   quiz.deadline = Date.now() + quiz.limit;
+  if (!quiz.limit) return;
   questionTimer = setTimeout(() => {
     if (state.quiz !== quiz || quiz.index !== index || quiz.phase !== "ask") return;
     quiz.timedOut = true;
@@ -980,7 +988,7 @@ function weeklyGoalSheet() {
 // "Look up N different words this week" (the week starts on Monday). Reaching it pays a bonus
 // in proportion to the goal, once a week. Kept with the account: { goal, claimed: <week> }.
 const WEEK_GOALS = [10, 20, 35, 50, 70];
-const WEEK_DEFAULT = 35;
+const WEEK_DEFAULT = 10; // one a day and a few more: a goal a first week can reach
 function weekStart(when = nowDate()) {
   const d = new Date(when.getFullYear(), when.getMonth(), when.getDate());
   d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); // back to Monday
@@ -1073,6 +1081,7 @@ function toast(points, label) {
 // The big moment: a coin pops in the middle with a ring and sparks, then flies up to the score.
 const SPARKS = ["#bbd86b", "#655f9f", "#23552b", "#a9a4d4"];
 function celebrate(points, label, text = `+${points}`) {
+  if (focusOn()) return toastText(`${label} ${text}`); // focus mode: said in a line, nothing over the screen
   const sparks = Array.from({ length: 18 }, (_, i) => h("i", {
     style: `--a:${i * 20}deg;--d:${60 + Math.random() * 60}px;--c:${SPARKS[i % SPARKS.length]};animation-delay:${Math.random() * 0.12}s`,
   }));
@@ -1085,6 +1094,35 @@ function celebrate(points, label, text = `+${points}`) {
   if (state.user) sfx.cheer(myShop().character);
   if (WEB) syncStage();
   setTimeout(() => { el.remove(); if (WEB) syncStage(); }, 2000);
+}
+
+// A new level: the badge lands in the middle of the screen, the number rolls over to the new one,
+// light turns behind it and paper flies. A press (or three seconds) puts it away.
+function levelUp(n) {
+  if (focusOn()) return toastText(`${t("레벨 업!")} Lv.${n}`);
+  document.querySelector(".lv-up")?.remove();
+  const el = h("div", { class: "lv-up", role: "status", onclick: () => close() },
+    h("div", { class: "lv-up-stage" },
+      h("div", { class: "lv-up-rays", "aria-hidden": "true" }),
+      h("i", { class: "lv-up-ring", "aria-hidden": "true" }), h("i", { class: "lv-up-ring late", "aria-hidden": "true" }),
+      h("div", { class: "lv-up-badge" }, h("small", null, "Lv."),
+        h("b", null, h("span", { "aria-hidden": "true" }, String(n - 1)), h("span", null, String(n))))),
+    h("p", { class: "lv-up-title" }, t("레벨 업!")),
+    h("p", { class: "lv-up-sub" }, t("단어를 익혀서 Lv.{n}이 됐어요!", { n })),
+    state.user && reaction(myLook(), "cheer"));
+  let closed = false;
+  const close = () => {
+    if (closed) return;
+    closed = true;
+    el.classList.add("out");
+    setTimeout(() => { el.remove(); if (WEB) syncStage(); }, 280);
+  };
+  document.body.append(el);
+  sfx.levelUp(myShop().character);
+  setTimeout(() => confetti(70, 1.1), 650);
+  setTimeout(() => fireworks(2), 900);
+  if (WEB) syncStage();
+  setTimeout(close, 3400);
 }
 
 // The score in the header counts up to its new value instead of jumping.
@@ -2034,7 +2072,7 @@ function peekSoon(first) {
 }
 function peekNow() {
   peekSoon();
-  const ok = !WIDE() && state.user?.grade && state.member && hasChosenLang() && state.update !== "force" && !presentWaiting()
+  const ok = !WIDE() && state.user?.grade && state.member && hasChosenLang() && state.update !== "force" && !presentWaiting() && !focusOn()
     && !playing() && !document.getElementById("sheet") && !document.hidden && !document.querySelector(".peek") && catchesToday() < CATCH_DAILY;
   if (!ok) return;
   const lead = myShop().character;
@@ -2054,11 +2092,11 @@ function peekNow() {
   document.body.append(el);
   setTimeout(() => { if (!el.classList.contains("caught")) { el.classList.add("away"); setTimeout(() => el.remove(), 500); } }, 5200);
 }
-if (DEMO) { globalThis.voquizVisit = visitNow; globalThis.voquizPeek = peekNow; } // for trying a visitor out in the demo
+if (DEMO) { globalThis.voquizVisit = visitNow; globalThis.voquizPeek = peekNow; globalThis.voquizLevelUp = (n) => levelUp(n); } // for trying a visitor out in the demo
 
 function syncYard() {
   if (yardHeld) return;
-  const inside = WIDE() && state.user?.grade && state.member && hasChosenLang() && state.update !== "force" && !presentWaiting();
+  const inside = WIDE() && state.user?.grade && state.member && hasChosenLang() && state.update !== "force" && !presentWaiting() && !focusOn();
   if (!inside) return showYard(null);
   const lead = myShop().character;
   const mine = ALL_CHARACTERS.filter((c) => c.id !== lead && (ownsCharacter(c) || (c.cost === 0 && !c.earn))).map((c) => c.id);
@@ -2539,7 +2577,7 @@ function nextChallengeWord() {
     ["en", "ko"], ["ko", "en"],
     ...(hasDefs ? [["dko", "ko"], ["den", "en"], ["ko", "dko"], ["en", "den"], ["dko", "en"], ["den", "ko"]] : []),
   ];
-  const [shown, asked] = kinds[Math.floor(Math.random() * kinds.length)];
+  const [shown, asked] = kinds[Math.floor(Math.random() * kinds.length)].map(defKind);
   Object.assign(c, {
     phase: "ask",
     picked: null,
@@ -3172,7 +3210,7 @@ function quizScope() {
 }
 const QUIZ_STEPS = () => [
   t("뜻을 보고 단어를 쓰거나 골라요."),
-  t("고르는 문제는 {a}초, 쓰는 문제는 {b}초예요.", { a: QUESTION_MS / 1000, b: TYPED_MS / 1000 }),
+  untimedOn() ? t("시간 제한 없이 천천히 풀어요.") : t("고르는 문제는 {a}초, 쓰는 문제는 {b}초예요.", { a: limitFor(false) / 1000, b: limitFor(true) / 1000 }),
   t("{n}번 연속(쓰기 1번 포함) 맞히면 다 익힌 단어가 되어 퀴즈에서 빠져요.", { n: MASTER_STREAK }),
 ];
 function quizSetup() {
@@ -3191,7 +3229,7 @@ function quizSetup() {
     h("p", { class: "small muted center", id: "quiz-count" },
       cards.length === 0 ? (scope.type === "review" ? t("지금은 틀린 단어가 없어요!") : t("이 범위에는 단어가 없어요. 범위를 바꿔 보세요."))
         : review > 0 && scope.type !== "review" ? t("지난번에 틀린 복습 단어 {n}개 포함", { n: review }) : ""),
-    h("p", { class: "act" }, h("button", { class: "btn wide", disabled: cards.length === 0, onclick: startQuiz }, t("퀴즈 시작"))),
+    h("p", { class: "act" }, h("button", { class: "btn wide with-cost", disabled: cards.length === 0, onclick: startQuiz }, t("퀴즈 시작"), cards.length > 0 && h("span", { class: "cost" }, h("i", { "aria-hidden": "true" }, "P"), `-${quizFee(cards.length)}`))),
   ];
 }
 
@@ -3212,7 +3250,8 @@ function quizProgress() {
 }
 
 // The quiz leads with the language of the screen: Korean on a Korean screen, English otherwise.
-const quizMain = () => (getLang() === "en" ? "en" : "ko"); // Korean and Chinese screens lead with Korean
+// A student may also choose to read definitions in one language only (Settings).
+const quizMain = () => (defLang() !== "mix" ? defLang() : getLang() === "en" ? "en" : "ko"); // Korean and Chinese screens lead with Korean
 // The Korean or the English word of an entry, whichever way round it was searched.
 function wordIn(c, lang) {
   const headIsKorean = /[가-힣]/.test(c.headword);
@@ -3243,8 +3282,8 @@ function quizAsk() {
   });
   return [
     quizProgress(),
-    hurry(quiz.deadline),
-    h("div", { class: "timer", role: "timer", "aria-label": t("남은 시간") },
+    quiz.limit > 0 && hurry(quiz.deadline),
+    quiz.limit > 0 && h("div", { class: "timer", role: "timer", "aria-label": t("남은 시간") },
       h("i", { style: `animation-duration:${quiz.limit}ms;animation-delay:-${Math.max(0, quiz.limit - (quiz.deadline - Date.now()))}ms` })),
     h("div", { class: `question${(first || "").length > (main === "ko" ? 55 : 95) ? " long" : ""}` },
       h("div", { class: "q-label" }, t("이 뜻을 가진 단어는?"),
@@ -3252,8 +3291,8 @@ function quizAsk() {
         // How far this word is from being learned: right answers in a row, and whether one was typed.
         h("span", { class: `badge${word.needs_review ? "" : " plain"}`, title: t("{n}번 연속(쓰기 1번 포함) 맞히면 다 익힌 단어가 되어 퀴즈에서 빠져요.", { n: MASTER_STREAK }) },
           `${word.needs_review ? `${t("복습")} ` : ""}${"●".repeat(Math.min(word.streak, MASTER_STREAK))}${"○".repeat(Math.max(0, MASTER_STREAK - word.streak))}${word.typed_ok ? " ✎" : ""}`)),
-      h("p", { class: "q-ko" }, mask(first, c)),
-      h("p", { class: "q-en" }, mask(second, c))),
+      h("p", { class: "q-ko" }, mask(first || second, c)),
+      defLang() === "mix" && h("p", { class: "q-en" }, mask(second, c))),
     question.kind === "choice"
       ? [h("div", { class: `choices act${question.options.some((o) => wordIn(o.content, main).length > 13) ? " wide" : ""}` }, question.options.map((option, i) =>
           h("button", { class: "choice", onclick: () => submitAnswer(option.headword, option) },
@@ -3379,7 +3418,7 @@ function friends() {
 let growModule = null;
 function grow() {
   return (growModule ||= initGrow({
-    h, t, state, api, render, award, celebrate, toastText, sfx, isLearned, myShop, saveShop, portrait, themeColor,
+    h, t, state, api, render, award, celebrate, levelUp, toastText, sfx, isLearned, myShop, saveShop, portrait, themeColor,
     CHARACTERS, THEMES, BACKGROUNDS,
     spend: (n) => { state.user.points -= n; countUp(-n); }, countUp, publish: () => publishRank(),
     openGacha: () => { document.getElementById("sheet")?.remove(); loadQuestStats(); Object.assign(state, { tab: "shop", shopTab: "gacha", confirmBuy: null, notice: null }); render(); },
@@ -3462,7 +3501,7 @@ function quizGames() {
         // How many are asked, and (when the range holds more than a quiz asks) out of how many.
         [guideStat(t("문제 수"), t("{n}개", { n: quiz.inRange > quiz.cards.length ? `${quiz.cards.length} / ${quiz.inRange}` : quiz.cards.length })), guideStat(t("쓰는 포인트"), [coin(), `-${quizFee(quiz.cards.length)}`], "use"), guideStat(t("다 맞히면 최대"), [coin(), `+${quizMax(quiz.cards.length)}`], "gain")],
         [WIDE() && quiz.custom, quiz.empty ? h("p", { class: "qz-note" }, quiz.empty) : quiz.review > 0 && h("p", { class: "qz-tags" }, h("span", { class: "qz-tag" }, "↻ ", t("복습"), " ", h("b", null, String(quiz.review))))],
-        h("button", { class: "btn", disabled: quiz.cards.length === 0, onclick: startQuiz }, t("퀴즈 시작")),
+        h("button", { class: "btn with-cost", disabled: quiz.cards.length === 0, onclick: startQuiz }, t("퀴즈 시작"), quiz.cards.length > 0 && h("span", { class: "cost" }, h("i", { "aria-hidden": "true" }, "P"), `-${quizFee(quiz.cards.length)}`)),
         QUIZ_STEPS()),
     streak: game("streak", [portrait(host2), h("i", { class: "qz-step s1" }), h("i", { class: "qz-step s2" }), h("i", { class: "qz-step s3" })],
         t("연속 도전"), t("틀릴 때까지 이어져요."),
@@ -3607,12 +3646,12 @@ function tryBar() {
       ? h("button", { class: "mini buy", onclick: () => { if (on.kind === "character") sfx.chirp(item.id); saveShop({ ...shop, [on.kind]: item.id, ...(on.kind === "theme" || on.kind === "bg" ? { concept: "basic" } : {}) }); } }, t("적용하기"))
       : h("span", { class: "tagline" }, t("가지고 있어요"))
     : on.kind === "wear" && !wearSpecial(item) ? h("button", { class: "mini buy", disabled: points < wearCost(item), title: points < wearCost(item) ? t("포인트 부족") : null, onclick: () => grow().buyWear(item) },
-        h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `${wearCost(item)} · `, t("사기"))
+        h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `${wearCost(item)} · `, points < wearCost(item) ? t("{n}포인트 더 필요", { n: wearCost(item) - points }) : t("사기"))
       : !list ? h("span", { class: "tagline earn" }, lock(), t("캡슐 전용"))
       : item.level ? h("span", { class: "tagline earn" }, lock(), t("Lv.{n} 선물", { n: item.level }))
       : item.earn ? h("span", { class: "tagline earn" }, lock(), t("도전 과제"))
         : h("button", { class: "mini buy", disabled: points < item.cost, title: points < item.cost ? t("포인트 부족") : null, onclick: () => buy(on.kind, item) },
-            h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `${item.cost} · `, t("사기"));
+            h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `${item.cost} · `, points < item.cost ? t("{n}포인트 더 필요", { n: item.cost - points }) : t("사기"));
   // Rule (design.md): what goes ON the character (a character, a skin, a prop) is tried in a big
   // preview sheet; what changes the whole screen (theme, colour, background, lettering) keeps the
   // small bar, because the screen itself is the preview.
@@ -3943,6 +3982,20 @@ function settingsView() {
         WIDE() ? h("div", { class: "grade-pick" }, t("학년"), gradeMenu()) : h("label", { class: "grade-pick" }, t("학년"), grade))),
     plansOn() && plusSection(),
     h("section", { class: "block" },
+      h("h3", null, t("학습")),
+      h("div", { class: "setting" },
+        h("div", { class: "setting-text" }, h("b", null, t("집중 모드")), h("small", null, t("캐릭터가 돌아다니거나 말을 걸지 않고, 축하 효과도 나오지 않아요. 수업 시간에 켜 두면 좋아요."))),
+        h("button", { class: "switch", role: "switch", "aria-checked": String(focusOn()), "aria-label": t("집중 모드"),
+          onclick: () => { setFocus(!focusOn()); document.querySelectorAll(".peek").forEach((el) => el.remove()); render(); } }, h("i", null))),
+      h("div", { class: "setting" },
+        h("div", { class: "setting-text" }, h("b", null, t("시간 제한 없이 풀기")), h("small", null, t("내 단어 퀴즈에서 시간을 재지 않아요. 연속 도전과 대결은 그대로 시간이 있어요."))),
+        h("button", { class: "switch", role: "switch", "aria-checked": String(untimedOn()), "aria-label": t("시간 제한 없이 풀기"),
+          onclick: () => { setUntimed(!untimedOn()); render(); } }, h("i", null))),
+      h("div", { class: "setting stack" },
+        h("div", { class: "setting-text" }, h("b", null, t("뜻풀이 언어")), h("small", null, t("퀴즈 문제의 뜻풀이를 어떤 언어로 볼지 골라요."))),
+        h("div", { class: "chips", role: "group", "aria-label": t("뜻풀이 언어") }, [["mix", t("두 언어")], ["ko", t("한국어만")], ["en", t("영어만")]].map(([id, label]) =>
+          h("button", { class: "chip", "aria-pressed": String(defLang() === id), onclick: () => { setDefLang(id); render(); } }, label))))),
+    h("section", { class: "block" },
       h("h3", null, t("소리")),
       h("div", { class: "setting" },
         h("div", { class: "setting-text" }, h("b", null, t("효과음")), h("small", null, t("정답, 축하, 캐릭터 소리가 나요. 캐릭터마다 소리가 달라요."))),
@@ -3964,6 +4017,7 @@ function settingsView() {
           state.invites && !WIDE() && h("span", { class: "btn-note" }, t("남은 초대장 {n}장", { n: friends().unusedInvites().length }))),
         storeUrl && h("button", { class: "btn ghost", onclick: ratePrompt }, t("평가하기")),
         HOME_URL && h("button", { class: "btn ghost", onclick: () => window.open(HOME_URL + (getLang() === "ko" ? "" : "en.html"), "_blank", "noopener") }, t("VOQUIZ 홈페이지 열기")),
+        HOME_URL && h("button", { class: "btn ghost", onclick: () => window.open(HOME_URL + (getLang() === "ko" ? "privacy.html" : "privacy-en.html"), "_blank", "noopener") }, t("개인정보 처리방침")),
         // the web version: the same app in a browser tab (not shown inside the web version itself)
         HOME_URL && !WEB && h("button", { class: "btn ghost", onclick: () => window.open(`${HOME_URL}web/`, "_blank", "noopener") }, t("웹 버전 이용해 보기"))),
       WIDE() && storeUrl && state.invites && h("p", { class: "small muted btn-caption" }, t("남은 초대장 {n}장", { n: friends().unusedInvites().length }))),
@@ -4208,6 +4262,7 @@ function updateGate() {
 // It waits for anything else on screen (a quiz, another pop-up, a celebration) to be over.
 let goalAsk = 0;
 function askWeekGoal() {
+  if (focusOn()) return;
   if (!state.user?.grade || !state.member || state.update === "force" || presentWaiting() || weekLocked()) return;
   if (state.tab !== "search" || state.entry || state.busy || state.quiz || state.challenge || state.duel) return;
   if (document.getElementById("sheet") || document.querySelector(".celebrate")) return;

@@ -1,11 +1,11 @@
 // Theme shop: things a student can buy with word points and switch between in Settings.
-import { conceptById } from "./goods.js?v=0.1.28-tp80rp";
-import { getLang } from "./i18n.js?v=0.1.28-tp80rp";
+import { conceptById } from "./goods.js?v=0.1.28-tp81o5";
+import { getLang } from "./i18n.js?v=0.1.28-tp81o5";
 // `accent` is used on light screens, `onDark` on dark ones. Names are Korean keys for i18n.
 // Prices climb from "a day or two" to `special` items that take about a week of steady use
 // (a busy day of searching, uncovering and quizzing earns roughly 200 points).
 export const THEMES = [
-  { id: "purple", name: "브랭섬 보라", cost: 0, accent: "#655f9f", onDark: "#a9a4d4" },
+  { id: "purple", name: "클래식 보라", cost: 0, accent: "#655f9f", onDark: "#a9a4d4" },
   { id: "forest", name: "숲 초록", cost: 60, accent: "#23552b", onDark: "#8fc27a" },
   { id: "ocean", name: "바다 파랑", cost: 150, accent: "#1f6fb2", onDark: "#7db8ea" },
   { id: "sunset", name: "노을 주황", cost: 250, accent: "#d9622b", onDark: "#f0996b" },

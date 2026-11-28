@@ -1,5 +1,5 @@
 /* Clean, airy look: white surfaces, near-black text, hairline dividers.
-   Main colour: Branksome Hall Asia purple. Second colour: its green. */
+   Main colour: purple. Second colour: green. */
 :root {
   --bg: #fff; --surface: #f7f7f7; --text: #222; --muted: #717171; --line: #ebebeb; --border: #ddd;
   --accent: #655f9f; --accent-dark: #574f82; --accent-soft: #f1f0f7; --lime: #bbd86b;
@@ -3810,3 +3810,37 @@ b:has(> .coin-i:first-child) > .coin-i { margin: 0; vertical-align: 0; }
 @media (max-width: 859px) {
   main > .question { justify-content: flex-end; padding-bottom: 12px; }
 }
+
+/* Settings: a choice of several under its explanation. */
+.setting.stack { flex-direction: column; align-items: stretch; gap: 8px; }
+/* A cost on a wide start button sits beside the label. */
+.btn.wide.with-cost { justify-content: center; }
+.btn .cost { font-weight: 700; }
+
+/* A new level. */
+.lv-up { position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; text-align: center;
+  background: radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--accent) 34%, transparent), color-mix(in srgb, var(--bg) 88%, transparent) 62%); backdrop-filter: blur(3px); animation: lvIn .25s ease-out both; }
+.lv-up.out { animation: lvOut .28s ease-in both; }
+.lv-up-stage { position: relative; width: 190px; height: 190px; display: grid; place-items: center; }
+.lv-up-rays { position: absolute; inset: -40px; border-radius: 50%; background: repeating-conic-gradient(from 0deg, color-mix(in srgb, #ffd166 55%, transparent) 0 10deg, transparent 10deg 30deg);
+  -webkit-mask: radial-gradient(circle, transparent 30%, #000 34%, transparent 70%); mask: radial-gradient(circle, transparent 30%, #000 34%, transparent 70%); animation: lvRays 9s linear infinite, lvIn .6s .2s both; }
+.lv-up-ring { position: absolute; inset: 30px; border-radius: 50%; border: 4px solid #ffd166; animation: ring 1s .45s ease-out both; opacity: 0; }
+.lv-up-ring.late { border-color: var(--accent); animation-delay: .7s; }
+.lv-up-badge { position: relative; width: 132px; height: 132px; border-radius: 50%; display: grid; place-content: center; justify-items: center; color: #fff;
+  background: radial-gradient(circle at 32% 26%, color-mix(in srgb, var(--accent) 62%, #fff), var(--accent) 62%); box-shadow: 0 0 0 6px #ffd166, 0 0 0 10px color-mix(in srgb, #ffd166 35%, transparent), 0 16px 34px rgba(40, 30, 90, .4);
+  animation: lvBadge .9s cubic-bezier(.2, 1.4, .3, 1) both; }
+.lv-up-badge small { font-size: 15px; font-weight: 800; letter-spacing: .04em; opacity: .9; line-height: 1; }
+.lv-up-badge b { position: relative; display: block; height: 58px; min-width: 70px; overflow: hidden; font-size: 56px; font-weight: 800; line-height: 58px; letter-spacing: -.02em; }
+.lv-up-badge b span { display: block; animation: lvRoll .5s .55s cubic-bezier(.3, 1.3, .4, 1) both; }
+.lv-up-title { margin: 14px 0 0; font-size: 28px; font-weight: 800; color: var(--text); animation: lvRise .45s .75s both; }
+.lv-up-sub { margin: 0; font-size: 14px; color: var(--muted, var(--text)); animation: lvRise .45s .9s both; }
+.lv-up .mascot.reaction { position: static; width: 96px; margin-top: 6px; animation: lvRise .45s 1s both; }
+@keyframes lvIn { from { opacity: 0; } }
+@keyframes lvOut { to { opacity: 0; transform: scale(1.04); } }
+@keyframes lvRays { to { transform: rotate(360deg); } }
+@keyframes lvBadge { 0% { transform: scale(0) rotate(-30deg); } 60% { transform: scale(1.14) rotate(5deg); } 100% { transform: scale(1) rotate(0); } }
+@keyframes lvRoll { from { transform: translateY(0); } to { transform: translateY(-58px); } }
+@keyframes lvRise { from { opacity: 0; transform: translateY(12px); } }
+@media (prefers-reduced-motion: reduce) { .lv-up, .lv-up * { animation-duration: .01s !important; animation-delay: 0s !important; } }
+
+.btn.with-cost { justify-content: center; }

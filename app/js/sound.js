@@ -273,6 +273,13 @@ export const sfx = {
     [2093, 2637, 3136, 2637, 3520].forEach((f, i) => note(f, 0.3 + i * 0.055, 0.09, { gain: 0.035 }));
     setTimeout(() => sfx.chirp(id), 650);
   },
+  // A new level: steps climbing to a held chord with bells on top, then the character's own sound.
+  levelUp(id) {
+    [523, 587, 659, 784, 880, 1047].forEach((f, i) => note(f, i * 0.075, 0.16, { wave: "triangle", gain: 0.085 }));
+    [523, 659, 784, 1047].forEach((f) => note(f, 0.5, 0.75, { wave: "triangle", gain: 0.06 }));
+    [2093, 2637, 3136, 4186].forEach((f, i) => bell(f, 0.55 + i * 0.09, 0.4, 0.035));
+    setTimeout(() => sfx.chirp(id), 1150);
+  },
   // The big one (a promotion, a duel won): a fanfare, then the cheer.
   grand(id) {
     [[392, 0], [392, 0.12], [392, 0.24], [523, 0.36], [659, 0.52], [784, 0.66]].forEach(([f, at]) =>

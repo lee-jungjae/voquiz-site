@@ -115,7 +115,7 @@ export function initGrow(c) {
     const up = sync();
     if (!up.length) return;
     const top = up[up.length - 1];
-    setTimeout(() => { c.celebrate(0, t("레벨 업!"), `Lv.${top}`); c.render(); }, 2100);
+    setTimeout(() => { c.levelUp(top); c.render(); }, 2100);
     setTimeout(() => giftPill(top), 4300);
   }
   // After the celebration of a new level: a button at the top that stays a while and leads
@@ -517,6 +517,7 @@ export function initGrow(c) {
       h("div", { class: "gacha-main" },
         kind === "basic" && h("div", { class: "heart-slots", role: "img", "aria-label": `${t("하트")} ${n} / ${HEARTS_FOR_DRAW}` },
           Array.from({ length: HEARTS_FOR_DRAW }, (_, i) => h("i", { class: i < n ? "on" : "", style: `--i:${i}` }))),
+        kind === "basic" && n < HEARTS_FOR_DRAW && h("p", { class: "small muted" }, t("친구가 보내 준 하트 {n}개를 모으면 캡슐을 열 수 있어요.", { n: HEARTS_FOR_DRAW })),
         kind === "gold" && h("p", { class: "small muted" }, t("스킨, 테마, 스페셜 캐릭터가 들어 있어요.")),
         h("div", { class: "gacha-pays" },
           kind === "basic" && way("hearts", heartArt(), t("하트 {n}개로 열기", { n: HEARTS_FOR_DRAW }), `${Math.min(n, 99)} / ${HEARTS_FOR_DRAW}`),

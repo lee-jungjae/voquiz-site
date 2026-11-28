@@ -1,7 +1,7 @@
 // Sound effects, made on the spot with Web Audio: no sound files, nothing to download.
 // Every character has a sound of its own that brings the thing itself to mind (a cat mews, a
 // frog croaks, a pudding wobbles, a ball bounces), kept short, soft and bouncy.
-import { CHARACTERS, characterById } from "./characters.js?v=0.1.28-tp80rp";
+import { CHARACTERS, characterById } from "./characters.js?v=0.1.28-tp81o5";
 
 const KEY = "wb_sound";
 export const soundOn = () => localStorage.getItem(KEY) !== "off";
@@ -272,6 +272,13 @@ export const sfx = {
     [523, 659, 784, 1047].forEach((f, i) => note(f, i * 0.07, 0.32, { wave: "triangle", gain: 0.09 }));
     [2093, 2637, 3136, 2637, 3520].forEach((f, i) => note(f, 0.3 + i * 0.055, 0.09, { gain: 0.035 }));
     setTimeout(() => sfx.chirp(id), 650);
+  },
+  // A new level: steps climbing to a held chord with bells on top, then the character's own sound.
+  levelUp(id) {
+    [523, 587, 659, 784, 880, 1047].forEach((f, i) => note(f, i * 0.075, 0.16, { wave: "triangle", gain: 0.085 }));
+    [523, 659, 784, 1047].forEach((f) => note(f, 0.5, 0.75, { wave: "triangle", gain: 0.06 }));
+    [2093, 2637, 3136, 4186].forEach((f, i) => bell(f, 0.55 + i * 0.09, 0.4, 0.035));
+    setTimeout(() => sfx.chirp(id), 1150);
   },
   // The big one (a promotion, a duel won): a fanfare, then the cheer.
   grand(id) {

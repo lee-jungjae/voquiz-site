@@ -4,9 +4,9 @@
 // file is what is done with them and how it is shown. Everything is kept with the account:
 // `level` { xp, got }, `bag` { tickets: { basic, gold } }, `hearts` { n, all }, and in `shop`: what
 // is owned ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
-import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, skinName, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, wearSpecial, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp80rp";
-import { lookOf } from "./characters.js?v=0.1.28-tp80rp";
-import { art } from "./art.js?v=0.1.28-tp80rp"; // eslint-disable-line no-unused-vars
+import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, skinName, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, wearSpecial, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp81o5";
+import { lookOf } from "./characters.js?v=0.1.28-tp81o5";
+import { art } from "./art.js?v=0.1.28-tp81o5"; // eslint-disable-line no-unused-vars
 
 const TWICE_POINTS = 100; // a present the student already has turns into points
 
@@ -115,7 +115,7 @@ export function initGrow(c) {
     const up = sync();
     if (!up.length) return;
     const top = up[up.length - 1];
-    setTimeout(() => { c.celebrate(0, t("레벨 업!"), `Lv.${top}`); c.render(); }, 2100);
+    setTimeout(() => { c.levelUp(top); c.render(); }, 2100);
     setTimeout(() => giftPill(top), 4300);
   }
   // After the celebration of a new level: a button at the top that stays a while and leads
@@ -517,6 +517,7 @@ export function initGrow(c) {
       h("div", { class: "gacha-main" },
         kind === "basic" && h("div", { class: "heart-slots", role: "img", "aria-label": `${t("하트")} ${n} / ${HEARTS_FOR_DRAW}` },
           Array.from({ length: HEARTS_FOR_DRAW }, (_, i) => h("i", { class: i < n ? "on" : "", style: `--i:${i}` }))),
+        kind === "basic" && n < HEARTS_FOR_DRAW && h("p", { class: "small muted" }, t("친구가 보내 준 하트 {n}개를 모으면 캡슐을 열 수 있어요.", { n: HEARTS_FOR_DRAW })),
         kind === "gold" && h("p", { class: "small muted" }, t("스킨, 테마, 스페셜 캐릭터가 들어 있어요.")),
         h("div", { class: "gacha-pays" },
           kind === "basic" && way("hearts", heartArt(), t("하트 {n}개로 열기", { n: HEARTS_FOR_DRAW }), `${Math.min(n, 99)} / ${HEARTS_FOR_DRAW}`),

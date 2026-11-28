@@ -79,11 +79,11 @@ import { AROUND_WEARS } from "./wears-around.js";
 // rare: 1 common, 2 rare, 3 very rare (which machine it comes out of, and how often).
 export const WEARS = [
   // on the head: hats and hair (the top of the head is near y 50)
-  { id: "cap", name: "야구 모자", slot: "head", rare: 1, added: 21,
+  { id: "cap", name: "야구 모자", slot: "head", rare: 1, cost: 50, added: 21,
     art: `<path d="M74 58 q4 -24 26 -24 q22 0 26 24 z" fill="#4f8fe0" stroke="#3a6fc0" stroke-width="2.2" stroke-linejoin="round"/><path d="M122 56 q18 -1 26 7 q-16 3 -28 -2 z" fill="#3a6fc0" stroke="#3a6fc0" stroke-width="2" stroke-linejoin="round"/><circle cx="100" cy="34" r="3" fill="#3a6fc0"/>` },
   { id: "beanie", name: "털모자", slot: "head", rare: 1, added: 21,
     art: `<path d="M74 58 q2 -26 26 -26 q24 0 26 26 z" fill="#ff8fb8" stroke="#e0569a" stroke-width="2.2" stroke-linejoin="round"/><rect x="71" y="53" width="58" height="9" rx="4.5" fill="#ffc2d8" stroke="#e0569a" stroke-width="2"/><circle cx="100" cy="29" r="7" fill="#fff" stroke="#e0569a" stroke-width="2"/>` },
-  { id: "bow", name: "리본", slot: "head", rare: 1, added: 21,
+  { id: "bow", name: "리본", slot: "head", rare: 1, cost: 50, added: 21,
     art: `<path d="M118 50 l-14 -9 v18 z M118 50 l14 -9 v18 z" fill="#ff5c8a" stroke="#d63d73" stroke-width="2" stroke-linejoin="round"/><circle cx="118" cy="50" r="4" fill="#d63d73"/>` },
   { id: "partyhat", name: "고깔모자", slot: "head", rare: 2, added: 21,
     art: `<path d="M100 18 l19 40 h-38 z" fill="#ffd84d" stroke="#e0a82e" stroke-width="2.2" stroke-linejoin="round"/>` + stroke("M90 40 l18 8 M86 50 l26 6", "#ff8fb8", 3) + `<circle cx="100" cy="17" r="5" fill="#ff8fb8" stroke="#e0569a" stroke-width="1.6"/>` },
@@ -94,7 +94,7 @@ export const WEARS = [
   { id: "crown", name: "왕관", slot: "head", rare: 3, added: 21,
     art: `<path d="M78 56 l-4 -22 l13 10 l13 -16 l13 16 l13 -10 l-4 22 z" fill="#ffd84d" stroke="#e0a82e" stroke-width="2.4" stroke-linejoin="round"/><circle cx="100" cy="46" r="3.4" fill="#ff5c8a"/><circle cx="87" cy="49" r="2.4" fill="#7fd6c2"/><circle cx="113" cy="49" r="2.4" fill="#9aa5ff"/>` + twinkle(128, 30, 3, "#fff3b0") },
   // on the eyes
-  { id: "glasses", name: "동그란 안경", slot: "eyes", rare: 1,
+  { id: "glasses", name: "동그란 안경", slot: "eyes", rare: 1, cost: 50,
     art: `<g fill="none" stroke="#3b3550" stroke-width="2.6" stroke-linecap="round"><circle cx="86" cy="82" r="9.5" fill="rgba(255,255,255,.25)"/><circle cx="114" cy="82" r="9.5" fill="rgba(255,255,255,.25)"/><path d="M95.5 82 h9 M76.5 80 l-7 -3 M123.5 80 l7 -3"/></g>` },
   { id: "shades", name: "선글라스", slot: "eyes", rare: 2,
     art: `<path d="M75 76 h20 a2 2 0 0 1 2 2 v4 a9 9 0 0 1 -9 9 h-6 a9 9 0 0 1 -9 -9 v-4 a2 2 0 0 1 2 -2 z M103 76 h20 a2 2 0 0 1 2 2 v4 a9 9 0 0 1 -9 9 h-6 a9 9 0 0 1 -9 -9 v-4 a2 2 0 0 1 2 -2 z" fill="#2b2840"/>${stroke("M97 79 h6 M73 78 l-6 -2 M127 78 l6 -2", "#2b2840")}${stroke("M79 80 l5 -2 M107 80 l5 -2", "rgba(255,255,255,.75)", 1.8)}` },
@@ -222,7 +222,8 @@ export const MACHINE_KINDS = ["basic", "gold"];
 // machines only. A new batch of props has some of each.
 export const WEAR_COST = { 1: 200, 2: 400 };
 export const wearSpecial = (wear) => wear.rare >= 3; // not for sale (and those with `level` are not in the machines either: a level gives them)
-export const wearCost = (wear) => (wearSpecial(wear) ? null : WEAR_COST[wear.rare] || WEAR_COST[1]);
+// A few of the common ones are cheap (`cost`), so that the first days already buy something.
+export const wearCost = (wear) => (wearSpecial(wear) ? null : wear.cost || WEAR_COST[wear.rare] || WEAR_COST[1]);
 export const HEARTS_FOR_DRAW = MACHINES.basic.hearts;
 
 // ----- levels -----

@@ -7,6 +7,7 @@
 import { WORD_LISTS } from "./wordlists.js";
 import { WORD_DEFS } from "./worddefs.js";
 import { clockNow } from "./clock.js";
+import { defKind } from "./prefs.js";
 
 export const DUEL_LENGTHS = [60, 100, 180]; // seconds; the challenger chooses
 export const DUEL_CHARGES = 3; // challenges a student can hold
@@ -78,7 +79,7 @@ export function duelQuestions(grade, seed, count = 240) {
     const kinds = hasDefs
       ? [["en", "ko"], ["ko", "en"], ["dko", "ko"], ["den", "en"], ["dko", "en"], ["den", "ko"]]
       : [["en", "ko"], ["ko", "en"]];
-    const [shown, asked] = kinds[Math.floor(rand() * kinds.length)];
+    const [shown, asked] = kinds[Math.floor(rand() * kinds.length)].map(defKind);
     return {
       prompt: side[shown](pair),
       answer: side[asked](pair),
@@ -209,7 +210,7 @@ export function initDuel(c) {
           h("span", { class: "duel-text" },
             h("b", null, t("{name}의 도전이 왔어요!", { name: who(d.other) })),
             h("small", null, t("{n}개를 넘으면 승리", { n: d.their_score }))),
-          h("span", { class: "go" }, t("받기")))),
+          h("span", { class: "go" }, t("받기"), " · ", c.coin(), String(Math.min(FEE, state.user.points || 0))))),
       news.slice(0, 1).map((d) =>
         h("button", { class: "duel-banner news", onclick: openTab },
           h("span", { class: "duel-vs", "aria-hidden": "true" }, d.my_score > d.their_score ? "W" : d.my_score === d.their_score ? "=" : "L"),
@@ -239,7 +240,7 @@ export function initDuel(c) {
             h("h3", null, t("받은 도전"), h("small", null, String(waiting.length))),
             waiting.map((d) => h("div", { class: "duel-row hot" },
               h("span", { class: "who" }, who(d.other), h("small", null, t("{n}개를 넘으면 승리", { n: d.their_score }))),
-              h("button", { class: "mini buy", onclick: () => start(d) }, t("받기")))))
+              h("button", { class: "mini buy", onclick: () => start(d) }, t("받기"), " · ", c.coin(), String(Math.min(FEE, state.user.points || 0))))))
         : c.guideSteps([
             t("상대와 시간을 고르고 문제를 풀어 기록을 세워요."),
             t("상대가 같은 문제로 내 기록에 도전해요. 틀리면 3초 동안 멈춰요."),
@@ -306,7 +307,7 @@ export function initDuel(c) {
           h("h3", null, t("받은 도전"), h("small", null, String(waiting.length))),
           waiting.map((d) => h("div", { class: "duel-row hot" },
             h("span", { class: "who" }, who(d.other), h("small", null, t("{n}개를 넘으면 승리", { n: d.their_score }))),
-            h("button", { class: "mini buy", onclick: () => start(d) }, t("받기"))))),
+            h("button", { class: "mini buy", onclick: () => start(d) }, t("받기"), " · ", c.coin(), String(Math.min(FEE, state.user.points || 0)))))),
         sent.length > 0 && h("section", { class: "duel-list" },
           h("h3", null, t("답을 기다리는 중")),
           sent.map((d) => h("div", { class: "duel-row" },
