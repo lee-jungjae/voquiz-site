@@ -9,8 +9,8 @@
 //   tiles   the three things it juggles    noLegs          it floats
 //   group   the grades it was designed for (anyone may buy any)   vibe  its personality
 // Names, groups and vibes are Korean keys for i18n.
-import { MORE_CHARACTERS } from "./characters-more.js?v=0.1.28-tp7tmy";
-import { WEARS, skinById } from "./goods.js?v=0.1.28-tp7tmy";
+import { MORE_CHARACTERS } from "./characters-more.js?v=0.1.28-tp7tpx";
+import { WEARS, skinById } from "./goods.js?v=0.1.28-tp7tpx";
 
 export const DEFAULT_CHARACTER = "bubble";
 

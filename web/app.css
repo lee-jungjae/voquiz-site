@@ -3578,3 +3578,11 @@ html[data-font] body, html[data-font] body *:not(.font-sample):not(.font-sample 
 .lv-top .lv-say { margin-bottom: 12px; }
 .lv-say::after { left: calc(50% + 45px); translate: -50% 0; bottom: -5px; }
 .lv-duo .lv-me { margin-top: 0; }
+
+/* the road of levels arrives as one piece with its sheet: nothing inside pops in by itself
+   (what moves afterwards is the ring filling, the character walking and the scenery) */
+.lv-top .lv-badge.big, .lv-duo .lv-me, .lv-top .lv-say { animation: none; }
+.lv-stone { animation: none; }
+.lv-stone.ready { animation: claim-pulse 1.2s ease-in-out infinite; }
+.lv-here { animation: here-bob 1.8s ease-in-out infinite; }
+.lv-here.walking { animation: here-hop .3s ease-in-out infinite; }

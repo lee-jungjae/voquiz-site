@@ -4,9 +4,9 @@
 // file is what is done with them and how it is shown. Everything is kept with the account:
 // `level` { xp, got }, `bag` { tickets: { basic, gold } }, `hearts` { n, all }, and in `shop`: what
 // is owned ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
-import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7tmy";
-import { lookOf } from "./characters.js?v=0.1.28-tp7tmy";
-import { art } from "./art.js?v=0.1.28-tp7tmy"; // eslint-disable-line no-unused-vars
+import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7tpx";
+import { lookOf } from "./characters.js?v=0.1.28-tp7tpx";
+import { art } from "./art.js?v=0.1.28-tp7tpx"; // eslint-disable-line no-unused-vars
 
 const TWICE_POINTS = 100; // a present the student already has turns into points
 
@@ -283,9 +283,9 @@ export function initGrow(c) {
     if (at != null) road.scrollTop = at;
     else {   // my stone a little below the middle: the next presents show above, the waiting ones just below
       const goal = () => Math.max(0, yOf(lv) - road.clientHeight * 0.55);
-      road.scrollTop = goal() + 260; // the map comes up from a little below, to where the character stands
+      road.scrollTop = goal(); // already where the character stands when the sheet comes up: the sheet and its picture arrive as one
       requestAnimationFrame(() => {
-        road.scrollTo({ top: goal(), behavior: "smooth" });
+        road.scrollTop = goal();
         const r = ringDash(progress(), need()), ring = big.querySelector(".lv-ring");
         ring.setAttribute("stroke-dasharray", r.dash);
         ring.setAttribute("stroke-dashoffset", r.off);
