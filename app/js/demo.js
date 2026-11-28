@@ -445,7 +445,7 @@ function friendList() {
   return list;
 }
 export async function listFriends() { return friendList(); }
-export async function friendsSeen() { return [{ id: "r1", hours: 0 }, { id: "r2", hours: 5 }, { id: "r3", hours: 30 }, { id: "r4", hours: 100 }]; }
+export async function friendsSeen() { return [{ id: "r1", hours: 0 }, { id: "r2", hours: 5 }, { id: "r3", hours: 400 }, { id: "r4", hours: 100 }]; }
 // Points given between friends: one gift waits to begin with; giving is remembered for the day.
 const GIFTS_KEY = "wb_demo_gifts";
 function giftBox() {
