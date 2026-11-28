@@ -30,6 +30,12 @@ export const CONCEPTS = [
   { id: "night", name: "한밤의 도서관", cost: 900, added: 20, dark: true,
     vars: { bg: "#1b1713", surface: "#2a231b", text: "#f4ead9", muted: "#b8a78d", line: "#332a20", border: "#46392b", accent: "#e6b85c", "accent-dark": "#f1cf86", "accent-soft": "#33291a", lime: "#c9d98a", good: "#c9d98a", "good-soft": "#252b17", bad: "#f1cf86", "bad-soft": "#33291a",
       shadow: "0 1px 2px rgba(0, 0, 0, .5), 0 4px 12px rgba(0, 0, 0, .4)", "shadow-lg": "0 6px 16px rgba(0, 0, 0, .6)" } },
+  // Given at a level only (`level`): not sold, not in the capsule machines.
+  { id: "sakura", name: "벚꽃 정원", level: 25, added: 21,
+    vars: { bg: "#fff8fa", surface: "#ffeef3", text: "#4a2b3a", muted: "#9a6c80", line: "#fadfe8", border: "#f2c2d2", accent: "#d9608f", "accent-dark": "#bf4a79", "accent-soft": "#ffe6ee", lime: "#bfe6a8", good: "#3d8a52", "good-soft": "#e6f6e6", bad: "#bf4a79", "bad-soft": "#ffe6ee" } },
+  { id: "aurora", name: "오로라 밤", level: 40, added: 21, dark: true,
+    vars: { bg: "#0e1a24", surface: "#16283a", text: "#e8fbf6", muted: "#9cc5c0", line: "#1f3447", border: "#2c4960", accent: "#5fe0c0", "accent-dark": "#8ef0d6", "accent-soft": "#143a3a", lime: "#b6f08a", good: "#b6f08a", "good-soft": "#17331f", bad: "#8ef0d6", "bad-soft": "#143a3a",
+      shadow: "0 1px 2px rgba(0, 0, 0, .5), 0 4px 12px rgba(0, 0, 0, .4)", "shadow-lg": "0 6px 16px rgba(0, 0, 0, .6)" } },
   { id: "rainbow", name: "무지개 젤리", cost: 1500, special: true, added: 20,
     vars: { bg: "#ffffff", surface: "#f6f3ff", text: "#2a2350", muted: "#6f6a94", line: "#ebe6fb", border: "#d9d1f7", accent: "#7a5cff", "accent-dark": "#5f43e0", "accent-soft": "#efeaff", lime: "#9af0c4", good: "#1f8a5c", "good-soft": "#e1f8ec", bad: "#5f43e0", "bad-soft": "#efeaff" } },
 ];
@@ -74,6 +80,15 @@ export const WEARS = [
     art: heart(86, 80, 9.5, "rgba(255,92,138,.22)", ' stroke="#ff5c8a" stroke-width="2.6" stroke-linejoin="round"') + heart(114, 80, 9.5, "rgba(255,92,138,.22)", ' stroke="#ff5c8a" stroke-width="2.6" stroke-linejoin="round"') + stroke("M95 80 h10", "#ff5c8a") },
   { id: "goldglasses", name: "황금 안경", slot: "eyes", rare: 3, added: 21,
     art: `<g fill="none" stroke="#e0a82e" stroke-width="3" stroke-linecap="round"><circle cx="86" cy="82" r="9.5" fill="rgba(255,216,77,.3)"/><circle cx="114" cy="82" r="9.5" fill="rgba(255,216,77,.3)"/><path d="M95.5 82 h9 M76.5 80 l-7 -3 M123.5 80 l7 -3"/></g>` + twinkle(128, 68, 3.2, "#fff3b0") },
+  // ----- given at a level only (`level`): not sold, not in the capsule machines -----
+  { id: "sproutpin", name: "새싹 핀", slot: "head", rare: 3, level: 5, added: 21,
+    art: stroke("M116 54 q0 -8 2 -12", "#4f9a58", 2.6) + `<path d="M118 42 q-10 -9 -15 1 q8 7 15 -1 z M118 42 q10 -9 15 1 q-8 7 -15 -1 z" fill="#7ccf6b" stroke="#4f9a58" stroke-width="1.6" stroke-linejoin="round"/>` },
+  { id: "medal", name: "별 메달", slot: "neck", rare: 3, level: 15, added: 21,
+    art: `<path d="M88 100 l12 14 l12 -14" fill="none" stroke="#4f8fe0" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="100" cy="117" r="8.5" fill="#ffd84d" stroke="#e0a82e" stroke-width="2"/>` + star(100, 117, 4.4, "#fff") },
+  { id: "explorerhat", name: "탐험가 모자", slot: "head", rare: 3, level: 30, added: 21,
+    art: `<path d="M78 56 q2 -23 22 -23 q20 0 22 23 z" fill="#d9b382" stroke="#a8804e" stroke-width="2.2" stroke-linejoin="round"/><path d="M62 57 q38 -9 76 0 q-38 9 -76 0 z" fill="#c79a62" stroke="#a8804e" stroke-width="2" stroke-linejoin="round"/>` + stroke("M80 50 q20 -4 40 0", "#7a5a2e", 4) },
+  { id: "goldwings", name: "황금 날개", slot: "back", layer: "back", rare: 3, level: 45, added: 21,
+    art: `<g fill="#ffe08a" stroke="#e0a82e" stroke-width="2.2" stroke-linejoin="round"><path d="M72 84 q-22 -34 -44 -20 q10 2 12 10 q-10 0 -10 8 q10 -2 14 4 q-8 2 -6 8 q18 0 34 -10 z"/><path d="M128 84 q22 -34 44 -20 q-10 2 -12 10 q10 0 10 8 q-10 -2 -14 4 q8 2 6 8 q-18 0 -34 -10 z"/></g>` + twinkle(30, 58, 3.4, "#fff3b0") + twinkle(170, 58, 3.4, "#fff3b0") },
   // on a cheek
   { id: "starsticker", name: "별 스티커", slot: "cheek", rare: 1, art: star(125, 97, 6.5, "#ffc93c") },
   { id: "bandaid", name: "반창고", slot: "cheek", rare: 1,
@@ -113,7 +128,8 @@ export const wearById = (id) => WEARS.find((x) => x.id === id);
 const ears = (fill, inner) => `<circle cx="72" cy="56" r="12" fill="${fill}"/><circle cx="128" cy="56" r="12" fill="${fill}"/><circle cx="72" cy="56" r="6" fill="${inner}"/><circle cx="128" cy="56" r="6" fill="${inner}"/>`;
 export const SKINS = [
   { id: "candy", of: "bubble", name: "솜사탕 말풍이", rare: 2, paint: { fill: "#ffd6e8", stroke: "#f092bd", limb: "#e0569a" } },
-  { id: "gold", of: "bubble", name: "황금 말풍이", rare: 3, paint: { fill: "#ffe08a", stroke: "#e0a82e", limb: "#c98a14" } },
+  { id: "star", of: "bubble", name: "별빛 말풍이", rare: 3, level: 20, added: 21, paint: { fill: "#4a4f96", stroke: "#2f3470", limb: "#2f3470", deco: twinkle(80, 66, 3.2, "#ffe89a") + twinkle(122, 62, 2.6, "#ffe89a") + twinkle(116, 104, 2.4, "#fff3b0") + twinkle(84, 102, 2, "#fff3b0") } },
+  { id: "gold", of: "bubble", name: "황금 말풍이", rare: 3, level: 50, paint: { fill: "#ffe08a", stroke: "#e0a82e", limb: "#c98a14" } },
   { id: "moon", of: "rabbit", name: "달빛 토토", rare: 2,
     paint: { fill: "#ece8ff", stroke: "#b9aef0", limb: "#9a8fe0",
       back: '<path d="M86 62 q-12 -32 -1 -40 q11 8 8 38 z M114 62 q12 -32 1 -40 q-11 8 -8 38 z" fill="#ece8ff" stroke="#b9aef0" stroke-width="2.5" stroke-linejoin="round"/><path d="M86 54 q-6 -18 -1 -24 M114 54 q6 -18 1 -24" fill="none" stroke="#cfc5ff" stroke-width="4" stroke-linecap="round"/>' } },
@@ -153,7 +169,7 @@ export const MACHINE_KINDS = ["basic", "gold"];
 // can be bought with points as well as won; the special ones (rare 3) come out of the capsule
 // machines only. A new batch of props has some of each.
 export const WEAR_COST = { 1: 200, 2: 400 };
-export const wearSpecial = (wear) => wear.rare >= 3;
+export const wearSpecial = (wear) => wear.rare >= 3; // not for sale (and those with `level` are not in the machines either: a level gives them)
 export const wearCost = (wear) => (wearSpecial(wear) ? null : WEAR_COST[wear.rare] || WEAR_COST[1]);
 export const HEARTS_FOR_DRAW = MACHINES.basic.hearts;
 
@@ -174,15 +190,15 @@ export function levelFor(words) {
 // What reaching a level gives: a list of { points } | { ticket, n } | { item: "wear:glasses" } …
 // Every fifth level has a present of its own (`big`); the others take turns: points, a ticket for the capsule machine.
 const BIG = {
-  5: [{ ticket: "gold", n: 1 }, { item: "wear:glasses" }],
+  5: [{ item: "wear:sproutpin" }, { ticket: "gold", n: 1 }],
   10: [{ item: "concept:candy" }, { ticket: "gold", n: 1 }],
-  15: [{ ticket: "gold", n: 2 }],
-  20: [{ item: "skin:bubble-candy" }, { ticket: "gold", n: 2 }],
-  25: [{ item: "bg:aurora" }, { ticket: "gold", n: 2 }],
-  30: [{ ticket: "gold", n: 3 }, { item: "wear:wand" }],
+  15: [{ item: "wear:medal" }, { ticket: "gold", n: 2 }],
+  20: [{ item: "skin:bubble-star" }, { ticket: "gold", n: 2 }],
+  25: [{ item: "concept:sakura" }, { ticket: "gold", n: 2 }],
+  30: [{ item: "wear:explorerhat" }, { ticket: "gold", n: 3 }],
   35: [{ item: "wear:wings" }, { points: 500 }],
-  40: [{ item: "concept:space" }, { ticket: "gold", n: 3 }],
-  45: [{ ticket: "gold", n: 5 }],
+  40: [{ item: "concept:aurora" }, { ticket: "gold", n: 3 }],
+  45: [{ item: "wear:goldwings" }, { ticket: "gold", n: 5 }],
   50: [{ item: "skin:bubble-gold" }, { ticket: "gold", n: 5 }, { points: 1000 }],
 };
 export function levelGift(level) {

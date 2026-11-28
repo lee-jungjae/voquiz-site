@@ -1,34 +1,34 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp7ugm";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7ugm";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7ugm";
-import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp7ugm";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp7ugm";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7ugm";
-import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7ugm";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp7ugm";
-import { initGrow } from "./grow.js?v=0.1.28-tp7ugm";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7ugm";
-import { art, artToCss } from "./art.js?v=0.1.28-tp7ugm";
-import { academicWords, academicField } from "./academic.js?v=0.1.28-tp7ugm";
+import { api, DEMO } from "./api.js?v=0.1.28-tp7un9";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7un9";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7un9";
+import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp7un9";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp7un9";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7un9";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7un9";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp7un9";
+import { initGrow } from "./grow.js?v=0.1.28-tp7un9";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7un9";
+import { art, artToCss } from "./art.js?v=0.1.28-tp7un9";
+import { academicWords, academicField } from "./academic.js?v=0.1.28-tp7un9";
 artToCss();
 setTimeout(() => peekSoon(true), 0);
-import { film } from "./film.js?v=0.1.28-tp7ugm";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7ugm";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7ugm";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp7ugm";
-import { clockNow } from "./clock.js?v=0.1.28-tp7ugm";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7ugm";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7ugm";
-import { initDuel } from "./duel.js?v=0.1.28-tp7ugm";
-import { initFriends } from "./friends.js?v=0.1.28-tp7ugm";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp7ugm";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7ugm";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7ugm";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7ugm";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7ugm";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7ugm";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7ugm";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7ugm";
+import { film } from "./film.js?v=0.1.28-tp7un9";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7un9";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7un9";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp7un9";
+import { clockNow } from "./clock.js?v=0.1.28-tp7un9";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7un9";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7un9";
+import { initDuel } from "./duel.js?v=0.1.28-tp7un9";
+import { initFriends } from "./friends.js?v=0.1.28-tp7un9";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp7un9";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7un9";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7un9";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7un9";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7un9";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7un9";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7un9";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7un9";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -3532,6 +3532,7 @@ function tryBar() {
     : on.kind === "wear" && !wearSpecial(item) ? h("button", { class: "mini buy", disabled: points < wearCost(item), title: points < wearCost(item) ? t("포인트 부족") : null, onclick: () => grow().buyWear(item) },
         h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `${wearCost(item)} · `, t("사기"))
       : !list ? h("span", { class: "tagline earn" }, lock(), t("뽑기에서만 나와요"))
+      : item.level ? h("span", { class: "tagline earn" }, lock(), t("Lv.{n} 선물", { n: item.level }))
       : item.earn ? h("span", { class: "tagline earn" }, lock(), t("도전 과제"))
         : h("button", { class: "mini buy", disabled: points < item.cost, title: points < item.cost ? t("포인트 부족") : null, onclick: () => buy(on.kind, item) },
             h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `${item.cost} · `, t("사기"));
@@ -3666,6 +3667,7 @@ function shelf(kind, heading, items) {
         ? h("span", { class: "tagline" }, t("사용 중"))
         : owned
           ? h("button", { class: "mini", onclick: () => { if (kind === "character") sfx.chirp(item.id); saveShop({ ...shop, [kind]: item.id, ...(kind === "theme" || kind === "bg" ? { concept: "basic" } : {}) }); } }, t("적용하기"))
+          : item.level ? h("span", { class: "tagline earn" }, h("i", { class: "lock-i", "aria-hidden": "true" }), t("Lv.{n} 선물", { n: item.level }))
           : item.earn
             // Earned, not bought: a button once it is earned, until then how far along the student is.
             ? kind === "character"
@@ -3686,6 +3688,7 @@ function shelf(kind, heading, items) {
         onclick: (e) => { if (e.target.closest("button")) return; if (kind === "character") sfx.chirp(item.id); if (!active) tryOn(kind, item.id); } },
         fresh && h("span", { class: "new-mark" }, "NEW"),
         item.special && h("span", { class: "ribbon" }, t("스페셜")),
+        item.level && h("span", { class: "ribbon" }, t("레벨 선물")),
         quest && h("span", { class: "ribbon quest" }, t("도전 과제")),
         kind === "character" && portrait(item.id),
         kind === "concept" && grow().conceptArt(item),
