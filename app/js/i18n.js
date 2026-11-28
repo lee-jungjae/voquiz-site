@@ -1064,6 +1064,7 @@ const T = {
   "왕관": ["Crown", "王冠"],
   "넘기기": ["Pass", "跳过"],
   "다른 단어로 넘기기": ["Pass to another word", "换一个单词"],
+  "모두 모았어요!": ["You have everything!", "已全部集齐！"],
   "알아 두기": ["Good to know", "小贴士"],
   "이렇게 써요": ["How to use it", "这样用"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],
