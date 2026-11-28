@@ -3006,6 +3006,9 @@ function rankView() {
   const score = (n) => (kind === "points" ? `P ${n}` : kind === "streak" ? t("{n}연속", { n }) : kind === "duel" ? t("{n}승", { n }) : t("{n}개", { n }));
   const top = league || rows.filter((row) => row.score > 0 && row.rank <= 20);
   const mine = rows.find((row) => row.me);
+  const friendsBoard = kind === "points" && state.rankScope === "friends";
+  // Friends who are in this week's league are shown even before I have joined it myself.
+  const friendsIn = friendsBoard && weekEarned() === 0 ? top.filter((row) => !row.me && row.score > 0) : [];
   // Each row: place, the student's own character, name (with their line under it), score.
   const line = (row) => h("li", { class: `rank-row${row.me ? " me" : ""}${row.rank <= 3 && row.score > 0 ? ` top${row.rank}` : ""}${row.zone ? ` zone-${row.zone}` : ""}` },
     row.rank <= 3 && row.score > 0 ? medal(row.rank) : h("span", { class: "place" }, String(row.rank)),
@@ -3051,7 +3054,12 @@ function rankView() {
     kind === "streak" && h("div", { class: "chips grade-chips" }, GRADES.map((g) =>
       h("button", { class: "chip", "aria-pressed": String(state.rankGrade === g), onclick: () => { state.rankGrade = g; openRankings(); } }, `G${g}`))),
     // Like other leagues, this week's board opens with the first point earned this week.
-    kind === "points" && weekEarned() === 0
+    kind === "points" && weekEarned() === 0 && friendsIn.length > 0
+      ? [h("ol", { class: "rank-list" }, friendsIn.map(line)),
+          h("div", { class: "league-join small" },
+            h("b", null, t("이번 주 리그에 아직 참여하지 않았어요")),
+            h("button", { class: "btn wide", onclick: () => { Object.assign(state, { tab: "search", entry: null, query: "", notice: null }); render(); } }, t("단어 찾으러 가기")))]
+      : kind === "points" && weekEarned() === 0
       ? h("div", { class: "league-join" },
           h("div", { class: "league-join-art", "aria-hidden": "true" }, portrait(myLook())),
           h("span", { class: "league-chip", style: leagueStyle(TIERS[myTier()]) }, art(TIERS[myTier()].icon), " ", t("내 등급: {name}", { name: tierName(myTier()) })),

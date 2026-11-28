@@ -36,6 +36,23 @@ export const CONCEPTS = [
   { id: "aurora", name: "오로라 밤", level: 40, added: 21, dark: true,
     vars: { bg: "#0e1a24", surface: "#16283a", text: "#e8fbf6", muted: "#9cc5c0", line: "#1f3447", border: "#2c4960", accent: "#5fe0c0", "accent-dark": "#8ef0d6", "accent-soft": "#143a3a", lime: "#b6f08a", good: "#b6f08a", "good-soft": "#17331f", bad: "#8ef0d6", "bad-soft": "#143a3a",
       shadow: "0 1px 2px rgba(0, 0, 0, .5), 0 4px 12px rgba(0, 0, 0, .4)", "shadow-lg": "0 6px 16px rgba(0, 0, 0, .6)" } },
+  // Seven more (0.1.28), so that every taste finds at least two: plain and grown-up, sporty, city
+  // neon, calm East Asian paper, warm desert, cool winter, bright fruit.
+  { id: "mono", name: "미니멀 모노", cost: 400, added: 22,
+    vars: { bg: "#ffffff", surface: "#f3f3f3", text: "#111111", muted: "#6b6b6b", line: "#e8e8e8", border: "#cfcfcf", accent: "#111111", "accent-dark": "#000000", "accent-soft": "#ededed", lime: "#ffd400", good: "#1a7f4b", "good-soft": "#e3f3ea", bad: "#c0392b", "bad-soft": "#fbe6e3" } },
+  { id: "field", name: "스포츠 필드", cost: 500, added: 22,
+    vars: { bg: "#f3faf0", surface: "#e1f1da", text: "#16331c", muted: "#557a5c", line: "#d2e8c9", border: "#b4d6a8", accent: "#1f8f3a", "accent-dark": "#17722d", "accent-soft": "#dcf1d3", lime: "#ffd84d", good: "#17722d", "good-soft": "#dcf1d3", bad: "#c2410c", "bad-soft": "#fde6da" } },
+  { id: "nordic", name: "북유럽 겨울", cost: 500, added: 22,
+    vars: { bg: "#f5f8fa", surface: "#e6edf2", text: "#24323d", muted: "#64788a", line: "#dbe4ea", border: "#c2d0da", accent: "#4a7a96", "accent-dark": "#3a6179", "accent-soft": "#dde9f0", lime: "#f4c95d", good: "#3c7a6a", "good-soft": "#dcefe9", bad: "#b5566a", "bad-soft": "#f6e1e6" } },
+  { id: "hanji", name: "한지와 먹", cost: 600, added: 22,
+    vars: { bg: "#f7f1e3", surface: "#ece3cf", text: "#26221c", muted: "#7a6f5e", line: "#e0d5bd", border: "#cbbd9f", accent: "#a8322a", "accent-dark": "#862620", "accent-soft": "#f3ddd3", lime: "#c9b458", good: "#4a6b3a", "good-soft": "#e6ecd6", bad: "#a8322a", "bad-soft": "#f3ddd3" } },
+  { id: "desert", name: "사막 노을", cost: 600, added: 22,
+    vars: { bg: "#fff6ee", surface: "#fbe6d4", text: "#4a2a1c", muted: "#9a6b55", line: "#f3d6c0", border: "#e6b999", accent: "#c8553d", "accent-dark": "#a5412c", "accent-soft": "#fbe0d2", lime: "#f2b84b", good: "#5f7a3a", "good-soft": "#ecf0d8", bad: "#a5412c", "bad-soft": "#fbe0d2" } },
+  { id: "tropical", name: "열대 과일", cost: 700, added: 22,
+    vars: { bg: "#fffaf0", surface: "#ffefc9", text: "#3a2a12", muted: "#8a6a3a", line: "#fbe3b0", border: "#f3cd7e", accent: "#e8502a", "accent-dark": "#c63f1c", "accent-soft": "#ffe1d4", lime: "#9be35a", good: "#2f8a3a", "good-soft": "#e0f5d9", bad: "#c63f1c", "bad-soft": "#ffe1d4" } },
+  { id: "neon", name: "네온 시티", cost: 900, added: 22, dark: true,
+    vars: { bg: "#0d0b1a", surface: "#1a1630", text: "#f1eeff", muted: "#a59fce", line: "#2a2448", border: "#3a3263", accent: "#ff5fdc", "accent-dark": "#ff8fe8", "accent-soft": "#2c1640", lime: "#3df5d0", good: "#3df5a0", "good-soft": "#10302a", bad: "#ff8a8a", "bad-soft": "#3a1a26",
+      shadow: "0 1px 2px rgba(0, 0, 0, .5), 0 4px 12px rgba(0, 0, 0, .4)", "shadow-lg": "0 6px 16px rgba(0, 0, 0, .6)" } },
   { id: "rainbow", name: "무지개 젤리", cost: 1500, special: true, added: 20,
     vars: { bg: "#ffffff", surface: "#f6f3ff", text: "#2a2350", muted: "#6f6a94", line: "#ebe6fb", border: "#d9d1f7", accent: "#7a5cff", "accent-dark": "#5f43e0", "accent-soft": "#efeaff", lime: "#9af0c4", good: "#1f8a5c", "good-soft": "#e1f8ec", bad: "#5f43e0", "bad-soft": "#efeaff" } },
 ];

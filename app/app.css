@@ -3725,5 +3725,35 @@ html[data-concept="aurora"] .use b { color: #f08a7a; }
 .dw-field { color: #5a3d00; background: #fff7dc; }
 .daily-word.done .dw-field { background: var(--bg); color: var(--muted); }
 
-.swatch .perk { color: color-mix(in srgb, var(--accent) 55
 .swatch .perk { color: color-mix(in srgb, var(--accent) 55%, var(--text)); }
+
+/* The heart strip follows the look in use (the hearts themselves stay pink). */
+.heart-strip { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); border-color: color-mix(in srgb, var(--accent) 26%, var(--border)); }
+.heart-strip.ready .heart-go { border-color: var(--accent); color: var(--accent-dark); }
+
+/* Seven more themes (0.1.28): a backdrop and a little shape each. */
+html[data-concept="mono"] .btn, html[data-concept="mono"] .chip, html[data-concept="mono"] .mini, html[data-concept="mono"] .swatch, html[data-concept="mono"] .goal, html[data-concept="mono"] .search { border-radius: 8px; }
+html[data-concept="field"] body { background: repeating-linear-gradient(90deg, rgba(31, 143, 58, .055) 0 64px, transparent 64px 128px), var(--bg); }
+html[data-concept="nordic"] body { background: radial-gradient(circle, rgba(255, 255, 255, .9) 1.6px, transparent 2px) 0 0 / 34px 34px, radial-gradient(circle, rgba(74, 122, 150, .14) 1.2px, transparent 1.6px) 17px 17px / 34px 34px, var(--bg); }
+html[data-concept="hanji"] body { background: radial-gradient(at 0% 0%, rgba(168, 50, 42, .06) 0, transparent 38%), repeating-linear-gradient(0deg, rgba(38, 34, 28, .022) 0 1px, transparent 1px 5px), var(--bg); }
+html[data-concept="hanji"] h2, html[data-concept="hanji"] h3, html[data-concept="hanji"] .page-title, html[data-concept="hanji"] .hello { font-family: "Nanum Myeongjo", "AppleMyungjo", "Songti SC", Georgia, serif; letter-spacing: 0; }
+html[data-concept="desert"] body { background: linear-gradient(180deg, #ffd9b8 0, rgba(255, 217, 184, 0) 240px), var(--bg); }
+html[data-concept="tropical"] body { background: radial-gradient(at 0% 0%, rgba(155, 227, 90, .28) 0, transparent 36%), radial-gradient(at 100% 8%, rgba(255, 120, 150, .22) 0, transparent 36%), var(--bg); }
+html[data-concept="neon"] body { background: radial-gradient(at 10% 0%, rgba(255, 95, 220, .2) 0, transparent 42%), radial-gradient(at 100% 20%, rgba(61, 245, 208, .16) 0, transparent 40%), var(--bg); }
+html[data-concept="neon"] .btn:not(.ghost) { box-shadow: 0 0 14px rgba(255, 95, 220, .45); }
+html[data-concept="neon"] .use b { color: #ff8a8a; }
+
+/* Friends in the weekly league: a small tier badge by the score, and when each friend was last here. */
+.tier-mini { flex: none; display: inline-grid; place-items: center; width: 22px; height: 22px; }
+.tier-mini .art-i, .tier-mini svg { width: 20px; height: 20px; }
+.league-join.small { padding: 14px 12px 4px; gap: 6px; }
+.league-join.small .league-join-art { display: none; }
+.seen { color: var(--muted); font-weight: 600; }
+.seen.now { color: var(--good); }
+
+/* The small level badge stays readable in dark looks: its number leans on the text colour. */
+.lv-mini { color: color-mix(in srgb, #2f6b2f 40%, var(--text)); }
+.lv-mini.z1 { color: color-mix(in srgb, #8a5a00 40%, var(--text)); }
+.lv-mini.z2 { color: color-mix(in srgb, #0b5a8a 40%, var(--text)); }
+.lv-mini.z3 { color: color-mix(in srgb, #4a3fa0 40%, var(--text)); }
+.lv-mini.z4 { color: color-mix(in srgb, #a02a5c 40%, var(--text)); }

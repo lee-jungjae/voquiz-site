@@ -340,6 +340,15 @@ export const setNoDuels = (off) => rpc("set_no_duels", { p_off: off });
 
 // ---------- friends and invite codes (supabase/migrations/0005_friends.sql) ----------
 export const listFriends = () => rpc("my_friends");
+// When each friend was last here, in whole hours (0025_friends_seen.sql; nothing without it).
+export async function friendsSeen() {
+  try {
+    return (await rpc("friends_seen")) || [];
+  } catch (err) {
+    if (err?.status === 404 || err?.code === "PGRST202") return [];
+    throw err;
+  }
+}
 export const requestFriend = (email) => rpc("request_friend", { p_email: email }); // -> "pending" | "accepted"
 export const answerFriend = (id, accept) => rpc("answer_friend", { p_id: id, p_accept: accept });
 export const removeFriend = (id) => rpc("remove_friend", { p_id: id });

@@ -12,6 +12,13 @@ export function initFriends(c) {
   const who = (other) => c.nameOf(other.nickname, other.tag);
   // A name as it is shown in a row: the level first, small, the same everywhere (as in the rankings).
   const named = (other) => c.h("span", { class: "who-line" }, c.levelMini(other), who(other));
+  // When a friend was last here, in hours at the finest ("within an hour", never "now" or a clock time).
+  const seen = (other) => {
+    const hours = state.seen?.get(other.id);
+    if (hours == null) return null;
+    const text = hours < 1 ? t("1시간 이내") : hours < 24 ? t("{n}시간 전", { n: hours }) : hours < 48 ? t("어제") : hours < 24 * 30 ? t("{n}일 전", { n: Math.floor(hours / 24) }) : t("오래전");
+    return c.h("span", { class: `seen${hours < 1 ? " now" : ""}` }, ` · ${text}`);
+  };
   const all = () => state.friends || [];
   const incoming = () => all().filter((f) => f.status === "incoming");
   // Points between friends: whom I gave to today, what waits for me, what I collected lately.
@@ -42,6 +49,7 @@ export function initFriends(c) {
     try {
       state.friends = await api.listFriends();
       c.loadLevels((state.friends || []).map((f) => f.other)); // not awaited
+      api.friendsSeen?.().then((list) => { state.seen = new Map((list || []).map((x) => [x.id, x.hours])); c.render(); }).catch(() => {}); // not awaited
       state.friendSetup = false;
       await loadGifts();
     } catch (err) {
@@ -297,7 +305,7 @@ export function initFriends(c) {
         ? h("div", { class: "empty small" }, t("아직 친구가 없어요. 이메일로 신청하거나 초대 코드를 보내 보세요."),
             h("p", { style: "margin-top:12px" }, h("button", { class: "btn", onclick: show("add") }, t("친구 추가"))))
         : friends.map((f) => h("div", { class: "duel-row" },
-            h("span", { class: "who" }, named(f.other), h("small", null, [f.other.grade && `G${f.other.grade}`, f.other.no_duels && t("대결 안 받음")].filter(Boolean).join(" · "))),
+            h("span", { class: "who" }, named(f.other), h("small", null, [f.other.grade && `G${f.other.grade}`, f.other.no_duels && t("대결 안 받음")].filter(Boolean).join(" · "), seen(f.other))),
             ui.confirm === f.id
               ? [h("button", { class: "mini danger", onclick: () => run(() => api.removeFriend(f.id), t("친구 목록에서 지웠어요.")) }, t("정말 삭제")),
                  h("button", { class: "link", onclick: () => { ui.confirm = null; c.render(); } }, t("취소"))]
