@@ -4,9 +4,9 @@
 // file is what is done with them and how it is shown. Everything is kept with the account:
 // `level` { xp, got }, `bag` { tickets: { basic, gold } }, `hearts` { n, all }, and in `shop`: what
 // is owned ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
-import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7sog";
-import { lookOf } from "./characters.js?v=0.1.28-tp7sog";
-import { art } from "./art.js?v=0.1.28-tp7sog"; // eslint-disable-line no-unused-vars
+import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7sty";
+import { lookOf } from "./characters.js?v=0.1.28-tp7sty";
+import { art } from "./art.js?v=0.1.28-tp7sty"; // eslint-disable-line no-unused-vars
 
 const TWICE_POINTS = 100; // a present the student already has turns into points
 
@@ -442,7 +442,7 @@ export function initGrow(c) {
           ...SLOTS.map(([id, name]) => [id, t(name), WEARS.filter((w) => w.slot === id && owned(`wear:${w.id}`)).length, WEARS.filter((w) => w.slot === id).length]),
           ["skin", t("스킨"), SKINS.filter((x) => owned(skinKey(x))).length, SKINS.length]].map(([id, label, have, all]) =>
           h("button", { class: "chip", "aria-pressed": String(place === id), onclick: () => { state.wearSlot = id; c.render(); } }, label, h("small", null, `${have}/${all}`)))),
-      place !== "skin" && h("h4", null, place ? t("{name}에 하는 소품", { name: t(slotName[place]) }) : t("소품")),
+      place !== "skin" && h("h4", null, place ? t("{name} 소품", { name: t(slotName[place]) }) : t("소품")),
       place !== "skin" && h("div", { class: "shelf" }, shown.map((w) => {
         const has = owned(`wear:${w.id}`), on = has && wearing()[w.slot] === w.id;
         const other = has && !on && wearing()[w.slot] && owned(`wear:${wearing()[w.slot]}`); // the place is taken: this would take its place

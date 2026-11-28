@@ -3494,3 +3494,36 @@ html[data-concept="space"] .use b, html[data-concept="night"] .use b { color: #f
 .gift-sheet .run-next { color: var(--on-accent); }
 .run-next .art-i { width: 18px; height: 18px; }
 @media (prefers-reduced-motion: reduce) { .run-strip > i.next { animation: none; } }
+
+/* the daily present, opened like a show */
+.gift-box.rock { animation: gift-rock .8s ease-in-out both; border-color: var(--accent); }
+@keyframes gift-rock { 0%, 100% { transform: rotate(0); } 15% { transform: rotate(-7deg); } 30% { transform: rotate(7deg); } 48% { transform: rotate(-11deg) scale(1.04); } 66% { transform: rotate(11deg) scale(1.07); } 84% { transform: rotate(-5deg) scale(1.1); } }
+.gift-sheet.jackpot, .jackpot .gift-sheet { position: relative; }
+.jackpot .gift-boxes { position: relative; isolation: isolate; }
+.jackpot .gift-boxes::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 50%; width: 520px; height: 520px; translate: -50% -50%; border-radius: 50%; background: repeating-conic-gradient(color-mix(in srgb, #ffd84d 45%, transparent) 0 10deg, transparent 10deg 20deg); -webkit-mask: radial-gradient(circle, #000 20%, transparent 62%); mask: radial-gradient(circle, #000 20%, transparent 62%); animation: lv-rays 12s linear infinite, pop .5s both; pointer-events: none; }
+.jackpot .gift-box.mine { border-color: #e6a700; background: #fff3c4; transform: scale(1.12); box-shadow: 0 0 0 4px color-mix(in srgb, #ffd84d 50%, transparent); animation: prize-in .55s cubic-bezier(.3, 1.5, .5, 1) both; }
+.jackpot .gift-box.mine .gift-prize { color: #8a5a00; font-size: 30px; }
+.jackpot h2 { color: color-mix(in srgb, #e6a700 60%, var(--text)); animation: pop .45s cubic-bezier(.3, 1.4, .5, 1) both; }
+.gift-box .g-burst { z-index: 3; }
+
+/* the days in a row as steps that rise */
+.run-strip.steps { align-items: end; gap: 5px; }
+.run-strip.steps > i, .run-strip.steps > i.last { height: auto; padding: 0; gap: 3px; background: none; border: 0; border-radius: 0; align-content: end; scale: 1; box-shadow: none; animation: none; }
+.run-strip.steps .run-add { display: grid; justify-items: center; gap: 1px; font-style: normal; }
+.run-strip.steps .run-add b { font-size: 13px; font-weight: 800; color: var(--muted); }
+.run-strip.steps .run-add .coin-i { width: 16px; height: 16px; filter: grayscale(1); opacity: .55; }
+.run-strip.steps .run-add .art-i { width: 20px; height: 20px; }
+.run-strip.steps .run-add .tix { font-size: 11px; }
+.run-strip.steps > i u { display: block; width: 100%; border-radius: 8px 8px 4px 4px; background: var(--surface); border: 2px solid var(--border); text-decoration: none; }
+.run-strip.steps > i small { font-size: 10px; font-weight: 700; color: var(--muted); }
+.run-strip.steps > i.on u { background: #ffd84d; border-color: #e6a700; }
+.run-strip.steps > i.on .run-add b { color: color-mix(in srgb, #8a5a00 70%, var(--text)); }
+.run-strip.steps > i.on .run-add .coin-i { filter: none; opacity: 1; }
+.run-strip.steps > i.today small { color: var(--text); font-weight: 800; }
+.run-strip.steps > i.next u { background: color-mix(in srgb, var(--accent) 18%, var(--bg)); border: 2px dashed var(--accent); }
+.run-strip.steps > i.next .run-add { animation: gift-bob 1s ease-in-out infinite; }
+.run-strip.steps > i.next .run-add b { font-size: 17px; color: var(--accent); }
+.run-strip.steps > i.next .run-add .coin-i { width: 22px; height: 22px; filter: none; opacity: 1; }
+.run-strip.steps > i.next .run-add .tix { font-size: 15px; }
+.run-strip.steps > i.next small { color: var(--accent); font-weight: 800; }
+@media (prefers-reduced-motion: reduce) { .gift-box.rock, .jackpot .gift-boxes::before, .jackpot .gift-box.mine, .run-strip.steps > i.next .run-add { animation: none !important; } }
