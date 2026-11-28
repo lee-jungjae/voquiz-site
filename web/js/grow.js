@@ -4,9 +4,9 @@
 // file is what is done with them and how it is shown. Everything is kept with the account:
 // `level` { xp, got }, `bag` { tickets: { basic, gold } }, `hearts` { n, all }, and in `shop`: what
 // is owned ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
-import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7qpt";
-import { lookOf } from "./characters.js?v=0.1.28-tp7qpt";
-import { art } from "./art.js?v=0.1.28-tp7qpt";
+import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7qsz";
+import { lookOf } from "./characters.js?v=0.1.28-tp7qsz";
+import { art } from "./art.js?v=0.1.28-tp7qsz"; // eslint-disable-line no-unused-vars
 
 const TWICE_POINTS = 100; // a present the student already has turns into points
 
@@ -126,14 +126,14 @@ export function initGrow(c) {
     document.body.append(el);
     setTimeout(() => el.remove(), 9000);
   }
-  // On the first screen: how near the next present is (or that one waits).
+  // On the first screen: how near the next present is. (A present that waits is not said here:
+  // the level badge at the top left carries a red dot for it.)
   function levelHint() {
     if (!state.user?.grade) return null;
-    const lv = level(), next = lv < LEVEL_MAX ? needFor(lv + 1) : null, gifts = waiting().length;
-    if (!gifts && !next) return null;
-    return h("button", { class: `lv-hint${gifts ? " ready" : ""}`, onclick: () => openLevels() },
-      next && !gifts ? levelGift(lv + 1).gifts.slice(0, 1).map(giftArt) : art("gift"),
-      gifts ? t("레벨 선물 받기") : t("다음 선물까지 단어 {n}개", { n: next - xp() }));
+    const lv = level(), next = lv < LEVEL_MAX ? needFor(lv + 1) : null;
+    if (waiting().length || !next) return null;
+    return h("button", { class: "lv-hint", onclick: () => openLevels() },
+      levelGift(lv + 1).gifts.slice(0, 1).map(giftArt), t("다음 선물까지 단어 {n}개", { n: next - xp() }));
   }
   function claim(n) {
     if (n < 2 || n > level() || taken().has(n)) return;
