@@ -4,10 +4,10 @@
 //
 // This file holds the rules and the screens. It gets what it needs from app.js through `c`
 // (the element builder, translations, the shared state, points, the character drawings).
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp832y";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp832y";
-import { clockNow } from "./clock.js?v=0.1.28-tp832y";
-import { defKind } from "./prefs.js?v=0.1.28-tp832y";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp83ws";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp83ws";
+import { clockNow } from "./clock.js?v=0.1.28-tp83ws";
+import { defKind } from "./prefs.js?v=0.1.28-tp83ws";
 
 export const DUEL_LENGTHS = [60, 100, 180]; // seconds; the challenger chooses
 export const DUEL_CHARGES = 3; // challenges a student can hold

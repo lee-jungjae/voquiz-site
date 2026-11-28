@@ -1,35 +1,35 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp832y";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp832y";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp832y";
-import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp832y";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp832y";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp832y";
-import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp832y";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, skinName, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp832y";
-import { initGrow } from "./grow.js?v=0.1.28-tp832y";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp832y";
-import { art, artToCss } from "./art.js?v=0.1.28-tp832y";
-import { academicWords, academicField } from "./academic.js?v=0.1.28-tp832y";
+import { api, DEMO } from "./api.js?v=0.1.28-tp83ws";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp83ws";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp83ws";
+import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp83ws";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp83ws";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp83ws";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp83ws";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, skinName, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp83ws";
+import { initGrow } from "./grow.js?v=0.1.28-tp83ws";
+import { logoIcon, wordmark, wordmarkIntro, INTRO_MS } from "./logo.js?v=0.1.28-tp83ws";
+import { art, artToCss } from "./art.js?v=0.1.28-tp83ws";
+import { academicWords, academicField } from "./academic.js?v=0.1.28-tp83ws";
 artToCss();
 setTimeout(() => peekSoon(true), 0);
-import { film } from "./film.js?v=0.1.28-tp832y";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp832y";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp832y";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp832y";
-import { clockNow } from "./clock.js?v=0.1.28-tp832y";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp832y";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp832y";
-import { initDuel } from "./duel.js?v=0.1.28-tp832y";
-import { initFriends } from "./friends.js?v=0.1.28-tp832y";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp832y";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp832y";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp832y";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp832y";
-import { focusOn, setFocus, untimedOn, setUntimed, defLang, setDefLang, defKind } from "./prefs.js?v=0.1.28-tp832y";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp832y";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp832y";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp832y";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch, reviewGap, englishOf } from "./quiz.js?v=0.1.28-tp832y";
+import { film } from "./film.js?v=0.1.28-tp83ws";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp83ws";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp83ws";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp83ws";
+import { clockNow } from "./clock.js?v=0.1.28-tp83ws";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp83ws";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp83ws";
+import { initDuel } from "./duel.js?v=0.1.28-tp83ws";
+import { initFriends } from "./friends.js?v=0.1.28-tp83ws";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp83ws";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp83ws";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp83ws";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp83ws";
+import { focusOn, setFocus, untimedOn, setUntimed, defLang, setDefLang, defKind } from "./prefs.js?v=0.1.28-tp83ws";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp83ws";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp83ws";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp83ws";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch, reviewGap, englishOf } from "./quiz.js?v=0.1.28-tp83ws";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -125,7 +125,27 @@ function openAtStart() {
   if (at.get("q")) search(at.get("q").slice(0, 40));
 }
 
+// The name's story ("VOCABULARY + QUIZ" becoming VOQUIZ): always on the way in (the login screen),
+// and once a day over the first screen for a student already signed in. A press puts it away.
+// Not in focus mode.
+const INTRO_DAY = "wb_intro_day";
+function introBrand() {
+  localStorage.setItem(INTRO_DAY, todayKey());
+  return wordmarkIntro(46);
+}
+function introOnce() {
+  if (focusOn() || localStorage.getItem(INTRO_DAY) === todayKey() || document.querySelector(".intro-cover")) return;
+  if (globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+  localStorage.setItem(INTRO_DAY, todayKey());
+  const el = h("div", { class: "intro-cover", role: "img", "aria-label": "VOQUIZ", onclick: () => close() }, wordmarkIntro(WIDE() ? 84 : 58, true));
+  const close = () => { el.classList.add("out"); setTimeout(() => el.remove(), 300); };
+  document.body.append(el);
+  setTimeout(close, INTRO_MS + 250);
+}
+if (DEMO) globalThis.voquizIntro = () => { localStorage.removeItem(INTRO_DAY); introOnce(); };
+
 async function loadWords() {
+  if (state.user?.grade) introOnce();
   try {
     state.words = (await api.listWords()).map((word) => ({ ...word, content: cleanEntry(word.content) }));
   } catch (err) {
@@ -4240,7 +4260,7 @@ const typedCode = () => localStorage.getItem(TYPED_CODE) || "";
 function loginView() {
   // The web version: the logo first, the film in the middle, then the invite code and the way in.
   if (WEB) return h("div", { class: "step splash with-film web-login" },
-    h("h1", { class: "brand" }, wordmark(46)),
+    h("h1", { class: "brand" }, introBrand()),
     h("p", { class: "web-tag" }, t("한국어와 영어, 두 언어로 단어를 쉽게 익혀요.")),
     film(),
     h("div", { class: "after-film" },
@@ -4265,7 +4285,7 @@ function loginView() {
   return h("div", { class: "step splash with-film" },
     film(),
     h("div", { class: "after-film" },
-      h("h1", { class: "brand" }, wordmark(46)),
+      h("h1", { class: "brand" }, introBrand()),
       h("p", null, t("한국어와 영어, 두 언어로 단어를 쉽게 익혀요.")),
       h("button", { class: "btn", disabled: state.busy, onclick: signIn }, DEMO ? t("데모로 시작하기") : t("Google 계정으로 로그인")),
       noticeBox()));

@@ -7,7 +7,7 @@ import { mascot, portrait, reaction, giftArt } from "./mascot.js";
 import { CHARACTERS, baseOf, lookOf } from "./characters.js";
 import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, skinName, wearCost, wearSpecial } from "./goods.js";
 import { initGrow } from "./grow.js";
-import { logoIcon, wordmark } from "./logo.js";
+import { logoIcon, wordmark, wordmarkIntro, INTRO_MS } from "./logo.js";
 import { art, artToCss } from "./art.js";
 import { academicWords, academicField } from "./academic.js";
 artToCss();
@@ -125,7 +125,27 @@ function openAtStart() {
   if (at.get("q")) search(at.get("q").slice(0, 40));
 }
 
+// The name's story ("VOCABULARY + QUIZ" becoming VOQUIZ): always on the way in (the login screen),
+// and once a day over the first screen for a student already signed in. A press puts it away.
+// Not in focus mode.
+const INTRO_DAY = "wb_intro_day";
+function introBrand() {
+  localStorage.setItem(INTRO_DAY, todayKey());
+  return wordmarkIntro(46);
+}
+function introOnce() {
+  if (focusOn() || localStorage.getItem(INTRO_DAY) === todayKey() || document.querySelector(".intro-cover")) return;
+  if (globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+  localStorage.setItem(INTRO_DAY, todayKey());
+  const el = h("div", { class: "intro-cover", role: "img", "aria-label": "VOQUIZ", onclick: () => close() }, wordmarkIntro(WIDE() ? 84 : 58, true));
+  const close = () => { el.classList.add("out"); setTimeout(() => el.remove(), 300); };
+  document.body.append(el);
+  setTimeout(close, INTRO_MS + 250);
+}
+if (DEMO) globalThis.voquizIntro = () => { localStorage.removeItem(INTRO_DAY); introOnce(); };
+
 async function loadWords() {
+  if (state.user?.grade) introOnce();
   try {
     state.words = (await api.listWords()).map((word) => ({ ...word, content: cleanEntry(word.content) }));
   } catch (err) {
@@ -4240,7 +4260,7 @@ const typedCode = () => localStorage.getItem(TYPED_CODE) || "";
 function loginView() {
   // The web version: the logo first, the film in the middle, then the invite code and the way in.
   if (WEB) return h("div", { class: "step splash with-film web-login" },
-    h("h1", { class: "brand" }, wordmark(46)),
+    h("h1", { class: "brand" }, introBrand()),
     h("p", { class: "web-tag" }, t("한국어와 영어, 두 언어로 단어를 쉽게 익혀요.")),
     film(),
     h("div", { class: "after-film" },
@@ -4265,7 +4285,7 @@ function loginView() {
   return h("div", { class: "step splash with-film" },
     film(),
     h("div", { class: "after-film" },
-      h("h1", { class: "brand" }, wordmark(46)),
+      h("h1", { class: "brand" }, introBrand()),
       h("p", null, t("한국어와 영어, 두 언어로 단어를 쉽게 익혀요.")),
       h("button", { class: "btn", disabled: state.busy, onclick: signIn }, DEMO ? t("데모로 시작하기") : t("Google 계정으로 로그인")),
       noticeBox()));
