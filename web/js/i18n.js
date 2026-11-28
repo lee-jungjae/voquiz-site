@@ -1004,6 +1004,8 @@ const T = {
   "간지러워, 히히!": ["That tickles, hee hee!", "好痒呀，嘻嘻！"],
   "오늘 뭐 배웠는지 말해 줘!": ["Tell me what you learned today!", "告诉我你今天学了什么！"],
   "나 여기 있었어. 기다렸지?": ["I was right here. Did you miss me?", "我一直在这儿，等很久了吧？"],
+  "오늘의 아카데믹 단어": ["Academic word of the day", "今日学术词汇"],
+  "오늘의 아카데믹 단어 {w}, 찾아볼까?": ["Today’s academic word is {w}. Look it up?", "今日学术词汇是 {w}，查一查吧？"],
   "알아 두기": ["Good to know", "小贴士"],
   "이렇게 써요": ["How to use it", "这样用"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],
