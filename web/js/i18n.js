@@ -1011,6 +1011,7 @@ const T = {
   "{name}에 하는 소품": ["Props for: {name}", "用在“{name}”的道具"],
   "모두 보기": ["Show all", "查看全部"],
   "바꿔 착용": ["Swap", "换上"],
+  "단어 {n}개만 더 익히면 다음 선물이야!": ["Learn {n} more words for your next present!", "再学会{n}个单词就有下一个礼物！"],
   "알아 두기": ["Good to know", "小贴士"],
   "이렇게 써요": ["How to use it", "这样用"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],

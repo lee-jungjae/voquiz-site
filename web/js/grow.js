@@ -4,9 +4,9 @@
 // file is what is done with them and how it is shown. Everything is kept with the account:
 // `level` { xp, got }, `bag` { tickets: { basic, gold } }, `hearts` { n, all }, and in `shop`: what
 // is owned ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
-import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7rpc";
-import { lookOf } from "./characters.js?v=0.1.28-tp7rpc";
-import { art } from "./art.js?v=0.1.28-tp7rpc"; // eslint-disable-line no-unused-vars
+import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7s3c";
+import { lookOf } from "./characters.js?v=0.1.28-tp7s3c";
+import { art } from "./art.js?v=0.1.28-tp7s3c"; // eslint-disable-line no-unused-vars
 
 const TWICE_POINTS = 100; // a present the student already has turns into points
 
@@ -126,14 +126,13 @@ export function initGrow(c) {
     document.body.append(el);
     setTimeout(() => el.remove(), 9000);
   }
-  // On the first screen: how near the next present is. (A present that waits is not said here:
-  // the level badge at the top left carries a red dot for it.)
-  function levelHint() {
+  // How near the next present is, as the character says it (it is not shown on the first screen:
+  // the badge's ring shows it, and the character tells it now and then).
+  function nextGiftLine() {
     if (!state.user?.grade) return null;
     const lv = level(), next = lv < LEVEL_MAX ? needFor(lv + 1) : null;
     if (waiting().length || !next) return null;
-    return h("button", { class: "lv-hint", onclick: () => openLevels() },
-      levelGift(lv + 1).gifts.slice(0, 1).map(giftArt), t("다음 선물까지 단어 {n}개", { n: next - xp() }));
+    return t("단어 {n}개만 더 익히면 다음 선물이야!", { n: next - xp() });
   }
   function claim(n) {
     if (n < 2 || n > level() || taken().has(n)) return;
@@ -145,9 +144,8 @@ export function initGrow(c) {
     else if (!got.every((g) => g.points)) c.toastText(t("Lv.{n} 선물: {what}", { n, what: got.filter((g) => !g.points).map(giftText).join(", ") }));
     openLevels(true, n);
   }
-  // The level as a badge: a seal with the number on it, and round it a ring that fills as the
-  // next level comes nearer.
-  const SEAL = Array.from({ length: 8 }, (_, i) => { const a = (i / 8) * Math.PI * 2; return `<circle cx="${(22 + Math.cos(a) * 11.5).toFixed(1)}" cy="${(22 + Math.sin(a) * 11.5).toFixed(1)}" r="4.2"/>`; }).join("");
+  // The level as a badge: a plain disc with the number on it, and round it a ring that fills as
+  // the next level comes nearer.
   const RING = 2 * Math.PI * 19.5;
   const progress = () => { const lv = level(), base = needFor(lv), next = lv < LEVEL_MAX ? needFor(lv + 1) : null; return next ? (xp() - base) / (next - base) : 1; };
   // The ring is cut into as many pieces as the level asks words for (when that is few enough to
@@ -161,7 +159,7 @@ export function initGrow(c) {
   }
   const badge = (lv, part, cls = "", pieces = 0) => { const r = ringDash(part, pieces); return svg("0 0 44 44", `lv-badge ${cls}${r.bg ? " pieces" : ""}`,
     `<circle class="lv-ring-bg" cx="22" cy="22" r="19.5"${r.bg ? ` stroke-dasharray="${r.bg}"` : ""} transform="rotate(-90 22 22)"/><circle class="lv-ring" cx="22" cy="22" r="19.5" stroke-dasharray="${r.dash}" stroke-dashoffset="${r.off}" transform="rotate(-90 22 22)"/>` +
-    `<g class="lv-seal">${SEAL}<circle cx="22" cy="22" r="12.5"/></g><text x="22" y="22" text-anchor="middle" dominant-baseline="central">${lv}</text>`); };
+    `<circle class="lv-seal" cx="22" cy="22" r="14"/><text x="22" y="22" text-anchor="middle" dominant-baseline="central">${lv}</text>`); };
   // At the top left of every screen. A dot says that presents wait. A press opens the road of levels.
   function levelChip() {
     if (!state.user?.grade) return null;
@@ -343,9 +341,10 @@ export function initGrow(c) {
     const worn = Object.values(wearing()).length > 0 || Boolean(shop().skin?.[me]);
     // Six places on the character, one thing in each: the places are drawn under the character,
     // filled or empty, and a press on one shows the things that go there.
-    const place = SLOTS.some(([id]) => id === state.wearSlot) ? state.wearSlot : null;
+    const place = SLOTS.some(([id]) => id === state.wearSlot) || state.wearSlot === "skin" ? state.wearSlot : null;
     const count = SLOTS.filter(([id]) => wearing()[id] && owned(`wear:${wearing()[id]}`)).length;
     const shown = WEARS.filter((w) => !place || w.slot === place);
+    void shown.length;
     return [
       h("div", { class: "wear-stage" },
         h("span", { class: "wear-me-art", "aria-hidden": "true" }, c.portrait(myLook())),
@@ -358,16 +357,21 @@ export function initGrow(c) {
         })),
         h("p", { class: "small wear-count" }, h("b", null, `${count} / ${SLOTS.length}`), " ", t("자리마다 하나씩, 여섯 자리를 함께 꾸밀 수 있어요."),
           worn && [" ", h("button", { class: "link small", onclick: () => { const skin = { ...(shop().skin || {}) }; delete skin[me]; c.saveShop({ ...shop(), wear: {}, skin }); } }, t("모두 벗기"))])),
-      h("h4", null, place ? t("{name}에 하는 소품", { name: t(slotName[place]) }) : t("소품"), h("small", null, ` ${shown.filter((w) => owned(`wear:${w.id}`)).length} / ${shown.length}`),
-        place && h("button", { class: "link small wear-all", onclick: () => { state.wearSlot = null; c.render(); } }, t("모두 보기"))),
-      h("div", { class: "shelf" }, shown.map((w) => {
+      // One chip for each place (and one for the skins), with how many there are and how many are owned.
+      h("div", { class: "chips one-line shop-kinds wear-kinds", role: "group", "aria-label": t("소품 자리") },
+        [[null, t("전체"), WEARS.filter((w) => owned(`wear:${w.id}`)).length + SKINS.filter((x) => owned(skinKey(x))).length, WEARS.length + SKINS.length],
+          ...SLOTS.map(([id, name]) => [id, t(name), WEARS.filter((w) => w.slot === id && owned(`wear:${w.id}`)).length, WEARS.filter((w) => w.slot === id).length]),
+          ["skin", t("스킨"), SKINS.filter((x) => owned(skinKey(x))).length, SKINS.length]].map(([id, label, have, all]) =>
+          h("button", { class: "chip", "aria-pressed": String(place === id), onclick: () => { state.wearSlot = id; c.render(); } }, label, h("small", null, `${have}/${all}`)))),
+      place !== "skin" && h("h4", null, place ? t("{name}에 하는 소품", { name: t(slotName[place]) }) : t("소품")),
+      place !== "skin" && h("div", { class: "shelf" }, shown.map((w) => {
         const has = owned(`wear:${w.id}`), on = has && wearing()[w.slot] === w.id;
         const other = has && !on && wearing()[w.slot] && owned(`wear:${wearing()[w.slot]}`); // the place is taken: this would take its place
         return tile(on, has, c.portrait(lookOf(me, "", [w.id])), t(w.name), t(slotName[w.slot]),
           has ? h("button", { class: "mini", onclick: () => putOn(w) }, on ? t("벗기") : other ? t("바꿔 착용") : t("착용하기")) : lock(), "wear", w.id);
       })),
-      h("h4", null, t("스킨"), h("small", null, ` ${SKINS.filter((s) => owned(skinKey(s))).length} / ${SKINS.length}`)),
-      h("div", { class: "shelf" }, SKINS.map((s) => {
+      (!place || place === "skin") && h("h4", null, t("스킨")),
+      (!place || place === "skin") && h("div", { class: "shelf" }, SKINS.map((s) => {
         const has = owned(skinKey(s)), mine = hasCharacter(s.of), on = has && shop().skin?.[s.of] === s.id;
         const who = t(c.CHARACTERS.find((x) => x.id === s.of)?.name || "");
         return tile(on && me === s.of, has, c.portrait(lookOf(s.of, s.id)), t(s.name), t("{name} 전용", { name: who }),
@@ -418,5 +422,5 @@ export function initGrow(c) {
   const canDraw = () => MACHINE_KINDS.some((kind) => ["hearts", "ticket"].some((pay) => canPay(kind, pay)));
 
   return { myLook, levelChip, openLevels, learnedOne, sync, waiting, level, wardrobe, conceptArt, addHearts, heartBox: heartStrip, gachaBox, canDraw, hearts, tickets,
-    ticketArt, levelHint, give: grant, openGacha: () => c.openGacha(), openWardrobe: () => c.openShopTab("wear") };
+    ticketArt, nextGiftLine, give: grant, openGacha: () => c.openGacha(), openWardrobe: () => c.openShopTab("wear") };
 }
