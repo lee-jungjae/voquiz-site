@@ -263,12 +263,21 @@ export const MORE_CHARACTERS = [
       '<rect x="64" y="52" width="72" height="13" rx="6.5" fill="#fff" stroke="#e6e9f2" stroke-width="2"/>' +
       '<circle cx="146" cy="50" r="8" fill="#fff" stroke="#e6e9f2" stroke-width="2"/>',
   }),
-  // The rose: pink petals all round, a swirl of them on its brow, two leaves. While it is the
-  // character in use, the streak challenge has one more run a day (see app.js, triesAll).
-  c("rose", "로즈", "식물·과일", "귀여움", 1500, B.round, "#ff9fc0", "#4f9a58", {
-    special: true, added: 20, stroke: "#f06a9b", tiles: ["♥", "가", "A"],
-    back: ring(8, 35, 15, "#ff7fab") + shape("M70 104 q-22 2 -26 -14 q16 -4 28 8 z M130 104 q22 2 26 -14 q-16 -4 -28 8 z", "#5fb56a"),
-    deco: line("M100 62 q9 -3 11 5 q-1 8 -11 6 q-8 -2 -6 -9 q3 -8 14 -8 q10 2 12 10", "#e8508a", 2.6),
+  // The rose: a red bud. Big petals wrapped round one another behind the face, the swirl of the
+  // heart of a rose on its brow, a green calyx and two leaves below. While it is the character in
+  // use, one miss in the streak challenge is forgiven, like the skeleton's (see app.js, missChallenge).
+  c("rose", "로즈", "식물·과일", "귀여움", 1500, B.round, "#f4567f", "#3f8a4c", {
+    special: true, added: 20, stroke: "#c92f5e", tiles: ["♥", "가", "A"],
+    back:
+      shape("M70 106 q-24 6 -30 -12 q16 -6 30 6 z M130 106 q24 6 30 -12 q-16 -6 -30 6 z", "#58a862") +
+      shape("M100 122 l-10 -10 l-16 6 l6 -16 h40 l6 16 l-16 -6 z", "#3f8a4c") +
+      `<g fill="#e03a68" stroke="#c92f5e" stroke-width="2.4" stroke-linejoin="round">` +
+      `<path d="M64 100 q-22 -30 4 -56 q18 14 12 44 z"/><path d="M136 100 q22 -30 -4 -56 q-18 14 -12 44 z"/>` +
+      `<path d="M74 60 q8 -26 26 -30 q18 4 26 30 q-26 10 -52 0 z"/></g>`,
+    deco:
+      line("M100 59 q7 -2 8 4 q0 6 -8 5 q-7 -1 -6 -8 q2 -8 13 -7 q10 2 11 11", "#c92f5e", 2.4) +
+      line("M70 80 q0 -18 16 -27 M130 80 q0 -18 -16 -27", "#c92f5e", 2.2) +
+      line("M76 62 q10 -8 20 -9", "#ff9db8", 3).replace("/>", ' opacity=".7"/>'),
   }),
   // ===================== earned, not bought =====================
   // Each is given for a fair amount of one part of the app (earn: what is counted, and how much;

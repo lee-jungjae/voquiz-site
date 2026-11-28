@@ -1,30 +1,32 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp7oez";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7oez";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7oez";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.28-tp7oez";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp7oez";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7oez";
-import { CHARACTERS, baseOf } from "./characters.js?v=0.1.28-tp7oez";
-import { CONCEPTS, WEARS, SKINS, conceptById } from "./goods.js?v=0.1.28-tp7oez";
-import { initGrow } from "./grow.js?v=0.1.28-tp7oez";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7oez";
-import { film } from "./film.js?v=0.1.28-tp7oez";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7oez";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7oez";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp7oez";
-import { clockNow } from "./clock.js?v=0.1.28-tp7oez";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7oez";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7oez";
-import { initDuel } from "./duel.js?v=0.1.28-tp7oez";
-import { initFriends } from "./friends.js?v=0.1.28-tp7oez";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp7oez";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7oez";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7oez";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7oez";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7oez";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7oez";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7oez";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7oez";
+import { api, DEMO } from "./api.js?v=0.1.28-tp7q09";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7q09";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7q09";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.28-tp7q09";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp7q09";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7q09";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7q09";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey } from "./goods.js?v=0.1.28-tp7q09";
+import { initGrow } from "./grow.js?v=0.1.28-tp7q09";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7q09";
+import { art, artToCss } from "./art.js?v=0.1.28-tp7q09";
+artToCss();
+import { film } from "./film.js?v=0.1.28-tp7q09";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7q09";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7q09";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp7q09";
+import { clockNow } from "./clock.js?v=0.1.28-tp7q09";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7q09";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7q09";
+import { initDuel } from "./duel.js?v=0.1.28-tp7q09";
+import { initFriends } from "./friends.js?v=0.1.28-tp7q09";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp7q09";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7q09";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7q09";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7q09";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7q09";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7q09";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7q09";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7q09";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -650,7 +652,7 @@ function gameFx(correct, run, grand) {
   if (!correct) { missFx(); comboFx(0); return; }
   confetti(26 + Math.min(run, 6) * 12, 0.8 + Math.min(run, 6) * 0.05);
   comboFx(run);
-  if (run >= 2) stamp(`🔥 ${t("{n}연속", { n: run })}`, run >= 4 ? "combo hot" : "combo");
+  if (run >= 2) stamp(t("{n}연속", { n: run }), run >= 4 ? "combo hot" : "combo");
   if (grand) setTimeout(() => fireworks(4), 250);
 }
 
@@ -786,7 +788,7 @@ function searchPointsSheet() {
           : ""),
       log.length
         ? h("ol", { class: "points-log" }, log.map(([word, points, bonus]) =>
-            h("li", null, h("span", { class: "points-word" }, word), h("b", null, `+${points}`), bonus > 0 && h("em", { title: t("황금 햇살 보너스") }, `☀ +${bonus}`))))
+            h("li", null, h("span", { class: "points-word" }, word), h("b", null, `+${points}`), bonus > 0 && h("em", { title: t("황금 햇살 보너스") }, art("sun"), ` +${bonus}`))))
         : h("p", { class: "points-none" }, total > 0 ? t("이 기기에서 찾은 기록이 없어요. 포인트는 그대로 받았어요.") : t("오늘은 아직 찾은 단어가 없어요.")),
       h("p", { class: "small muted" }, left > 0 ? t("오늘 {n}개 더 찾으면 검색 포인트를 다 받아요.", { n: left }) : t("오늘 검색 포인트를 다 받았어요!")),
       h("button", { class: "btn wide", onclick: close }, t("확인"))));
@@ -842,7 +844,7 @@ function earnSunrise() {
   api.saveProfile({ shop: state.user.shop }).catch(console.error);
   sfx.grand(shop.character);
   sheet({
-    art: "🌅", title: t("특별한 배경을 얻었어요!"),
+    art: art("sunrise"), title: t("특별한 배경을 얻었어요!"),
     text: t("이번 주 목표를 {n}주 연속으로 달성했어요! '황금 햇살' 배경을 쓰는 동안에는 단어를 찾을 때마다 +{p}포인트를 더 받아요.", { n: GOAL_RUN, p: SUNRISE_BONUS }),
     actions: [
       { label: t("지금 적용하기"), kind: "main", run: () => { saveShop({ ...myShop(), bg: "sunrise" }); } },
@@ -859,7 +861,7 @@ function weeklyGoalSheet() {
     const next = t("다음 주 월요일에 새 목표를 정할 수 있어요.");
     if (left <= 0) {
       return sheet({
-        art: "🎉", title: t("이번 주 목표 달성!"),
+        art: art("party"), title: t("이번 주 목표 달성!"),
         text: `${t("이번 주에 단어를 {c}개나 익혔어요. 목표 {n}개를 해냈어요, 정말 멋져요! 보너스 +{p}포인트도 받았어요.", { c: count, n: goal, p })} ${next}`,
         actions: [{ label: t("야호!"), kind: "main", run: () => true }],
       });
@@ -869,14 +871,14 @@ function weeklyGoalSheet() {
       : count * 2 >= goal ? t("벌써 절반을 넘었어요! {l}개만 더 익히면 돼요.", { l: left })
       : t("잘하고 있어요! 벌써 {c}개 익혔어요. {l}개 더 익혀 봐요.", { c: count, l: left });
     return sheet({
-      art: "💪", title: t("이번 주 {c} / {n}개", { c: count, n: goal }),
+      art: art("flag"), title: t("이번 주 {c} / {n}개", { c: count, n: goal }),
       text: `${cheer} ${t("목표를 채우면 +{p}포인트!", { p })}`,
       actions: [{ label: t("힘낼게요!"), kind: "main", run: () => true }],
     });
   }
   let chosen = weekGoal();
   sheet({
-    art: "🎯", title: t("이번 주 목표"),
+    art: art("target"), title: t("이번 주 목표"),
     text: t("일주일(월~일) 동안 다 익힐 단어 수를 정해요. 퀴즈에서 3번 연속(쓰기 1번 포함) 맞히면 익힌 단어예요. 목표를 채우면 보너스 포인트를 받고, 목표가 클수록 더 많이 받아요. 한 번 정하면 이번 주에는 바꿀 수 없어요."),
     actions: [
       { label: t("이 목표로 정하기"), kind: "main", run: () => {
@@ -1046,7 +1048,7 @@ async function sharePrompt() {
   const code = friends().unusedInvites()[0]?.code;
   const message = code ? friends().inviteText(code) : `${t("단어가 쉬워지는 VOQUIZ, 같이 써 보자!")} ${storeUrl}`;
   sheet({
-    art: "💌",
+    art: art("letter"),
     title: t("친구랑 같이 하면 더 재미있어요"),
     text: code
       ? t("초대 코드와 설치 링크를 함께 보내요. 친구는 설치한 뒤 이 코드로 가입해요. 처음 복사하면 {n} 단어포인트를 드려요!", { n: SHARE_REWARD })
@@ -1067,7 +1069,7 @@ function ratePrompt() {
   if (!storeUrl) return;
   notePrompt("rate", { last: Date.now() });
   sheet({
-    art: "⭐",
+    art: art("star"),
     title: t("VOQUIZ가 도움이 되고 있나요?"),
     text: t("별점과 한 줄 평가를 남겨 주면 더 좋은 VOQUIZ를 만드는 데 큰 힘이 돼요."),
     actions: [
@@ -2173,13 +2175,13 @@ function weekLabel(key) {
 // more in each stage, and reaching a stage pays a bonus. The numbers are in tuning.js ("streak").
 // Each stage has its own look: a colour, a sign, things drifting up the screen.
 const STAGES = [ // the last look holds for every later stage
-  { id: "sprout", name: "새싹", icon: "🌱", fx: ["🌱", "🍃"] },
-  { id: "spark", name: "불씨", icon: "✨", fx: ["✨", "⭐"] },
-  { id: "flame", name: "불꽃", icon: "🔥", fx: ["🔥", "✨"] },
-  { id: "bolt", name: "번개", icon: "⚡", fx: ["⚡", "✨"] },
-  { id: "storm", name: "폭풍", icon: "🌪️", fx: ["🌪️", "💨", "⚡"] },
-  { id: "space", name: "우주", icon: "🚀", fx: ["🚀", "🌟", "🪐"] },
-  { id: "legend", name: "전설", icon: "👑", fx: ["👑", "💎", "✨"] },
+  { id: "sprout", name: "새싹", icon: "sprout", fx: ["sprout", "leaf"] },
+  { id: "spark", name: "불씨", icon: "spark", fx: ["spark", "star"] },
+  { id: "flame", name: "불꽃", icon: "fire", fx: ["fire", "spark"] },
+  { id: "bolt", name: "번개", icon: "bolt", fx: ["bolt", "spark"] },
+  { id: "storm", name: "폭풍", icon: "storm", fx: ["storm", "wind", "bolt"] },
+  { id: "space", name: "우주", icon: "rocket", fx: ["rocket", "star", "planet"] },
+  { id: "legend", name: "전설", icon: "crown", fx: ["crown", "gem", "spark"] },
 ];
 const streakRules = () => tuning("streak");
 const stageOf = (streak) => Math.floor(streak / streakRules().step); // 0 = the first stage
@@ -2192,7 +2194,7 @@ const gradeList = (grade) => WORD_LISTS[grade] || [];
 const bestStreak = () => state.user.challenge?.best || 0;
 // Runs left today. The profile keeps the day and how many runs were started on it.
 const triesUsed = () => (isToday(state.user.challenge?.day) ? state.user.challenge.tries || 0 : 0);
-const triesAll = () => streakRules().tries + (using("rose") ? 1 : 0); // the rose gives one more run a day while it is the character in use
+const triesAll = () => streakRules().tries;
 const triesLeft = () => Math.max(0, triesAll() - triesUsed());
 
 // ----- the start screens of the two games: the character explains, three steps, the numbers -----
@@ -2213,7 +2215,7 @@ const challengeSteps = (grade) => [
 // The stages ahead, with what a right answer pays in each.
 const stageLadder = () => h("div", { class: "stage-ladder", role: "list", "aria-label": t("단계") }, STAGES.map((look, i) =>
   h("div", { class: "stage-rung", role: "listitem", "data-stage": look.id },
-    h("i", { "aria-hidden": "true" }, look.icon), h("b", null, t(look.name)), h("small", null, `+${stagePoints(i)}`))));
+    h("i", { "aria-hidden": "true" }, art(look.icon)), h("b", null, t(look.name)), h("small", null, `+${stagePoints(i)}`))));
 
 function challengeCard() {
   const grade = Math.min(12, Math.max(3, state.user.grade));
@@ -2344,13 +2346,14 @@ function pickChallenge(option) {
   render();
 }
 
-// A miss ends the run, except once per run for whoever is using the skeleton (its special power).
+// A miss ends the run, except once per run for whoever is using the skeleton or the rose (their special power).
 function missChallenge() {
   const c = state.challenge;
-  if (!using("skull") || c.revived) return finishChallenge(false);
+  const saver = ["skull", "rose"].find(using);
+  if (!saver || c.revived) return finishChallenge(false);
   c.revived = true;
-  sfx.chirp("skull");
-  toastText(t("본즈가 한 번 살려 줬어요! 계속 가요."));
+  sfx.chirp(saver);
+  toastText(saver === "rose" ? t("로즈가 한 번 살려 줬어요! 계속 가요.") : t("본즈가 한 번 살려 줬어요! 계속 가요."));
   nextChallengeWord();
   render();
 }
@@ -2383,7 +2386,7 @@ function challengeView() {
         !c.clearedAll && c.question && h("p", { class: "small muted", style: "margin-top:8px" }, `${c.question.prompt} = ${c.question.answer}`),
         h("div", { class: "settle" },
           h("div", { class: "best-line" }, h("span", null, t("내 최고 기록")), h("b", null, t("{n}연속", { n: bestStreak() }))),
-          h("div", null, h("span", null, t("도달한 단계")), h("b", null, `${stageLook(stageOf(c.streak)).icon} ${t("{n}단계", { n: stageOf(c.streak) + 1 })} · ${t(stageLook(stageOf(c.streak)).name)}`)),
+          h("div", null, h("span", null, t("도달한 단계")), h("b", null, art(stageLook(stageOf(c.streak)).icon), ` ${t("{n}단계", { n: stageOf(c.streak) + 1 })} · ${t(stageLook(stageOf(c.streak)).name)}`)),
           h("div", { class: c.earned ? "net up" : "net" }, h("span", null, t("획득")), h("b", null, `+${c.earned}`)),
           h("div", null, h("span", null, t("오늘 남은 도전")), h("b", null, `${triesLeft()} / ${triesAll()}`)))),
       h("p", { class: "act" }, h("button", { class: "btn wide", disabled: triesLeft() === 0, onclick: startChallenge },
@@ -2403,7 +2406,7 @@ function challengeView() {
   const drift = h("div", { class: "stage-fx", "aria-hidden": "true" },
     Array.from({ length: Math.min(14, 5 + stage * 2) }, (_, i) => {
       const seconds = Math.max(4, 9 - stage * 0.6) + (i % 4) * 0.9;
-      return h("i", { style: `left:${(i * 37 + 11) % 96}%;font-size:${14 + (i % 3) * 6}px;animation-duration:${seconds}s;animation-delay:-${((Date.now() / 1000 + i * 1.7) % seconds).toFixed(2)}s` }, look.fx[i % look.fx.length]);
+      return h("i", { style: `left:${(i * 37 + 11) % 96}%;font-size:${14 + (i % 3) * 6}px;animation-duration:${seconds}s;animation-delay:-${((Date.now() / 1000 + i * 1.7) % seconds).toFixed(2)}s` }, art(look.fx[i % look.fx.length]));
     }));
   const top = h("div", { class: "ch-top" },
     h("div", { class: `ch-streak${c.phase === "right" ? " bump" : ""}` }, h("b", null, String(c.streak)), h("span", null, t("연속"))),
@@ -2411,7 +2414,7 @@ function challengeView() {
       h("small", null, t("내 최고 기록")),
       h("b", null, String(Math.max(bestStreak(), c.streak))),
       h("span", null, c.streak > bestStreak() ? t("새 기록!") : bestStreak() - c.streak === 0 ? t("타이 기록!") : t("{n}개 남음", { n: bestStreak() - c.streak }))),
-    h("div", { class: "ch-stage" }, h("i", { "aria-hidden": "true" }, look.icon),
+    h("div", { class: "ch-stage" }, h("i", { "aria-hidden": "true" }, art(look.icon)),
       h("b", null, t("{n}단계", { n: stage + 1 })), h("small", null, `${t(look.name)} · +${stagePoints(stage)}`)));
   // Ten lamps: one lights with every right answer; the tenth opens the next stage.
   const lamps = h("div", { class: "stage-lamps", role: "img", "aria-label": t("다음 단계까지 {n}개", { n: step - inStage }) },
@@ -2421,7 +2424,7 @@ function challengeView() {
     return [
       drift, top, lamps,
       h("div", { class: "stage-up", role: "status" },
-        h("div", { class: "stage-up-icon", "aria-hidden": "true" }, look.icon),
+        h("div", { class: "stage-up-icon", "aria-hidden": "true" }, art(look.icon)),
         h("small", null, t("{n}단계", { n: stage + 1 })),
         h("b", null, t(look.name)),
         c.bonus > 0 && h("p", { class: "stage-up-bonus" }, t("단계 보너스"), ` +${c.bonus}`),
@@ -2495,7 +2498,7 @@ function tierStrip() {
   const tier = myTier(), top = topTier();
   return h("div", { class: "tier-strip", role: "img", "aria-label": t("내 등급: {name}", { name: tierName(tier) }) },
     TIERS.map((one, i) => h("span", { class: `tier-dot ${i === tier ? "now" : i <= top ? "seen" : "locked"}`, style: leagueStyle(one), title: i <= top ? tierName(i) : t("아직 가 보지 못한 세계") },
-      h("i", { "aria-hidden": "true" }, one.emoji),
+      h("i", { "aria-hidden": "true" }, art(one.icon)),
       i === tier && h("em", null, tierName(tier)))));
 }
 // When a new week has begun, the finished week is set aside to be settled.
@@ -2543,7 +2546,7 @@ async function settleLeague() {
       upGift > 0 && t("승급 선물 +{p}포인트", { p: upGift }),
       medalGift > 0 && t("{r}등 메달 선물 +{p}포인트", { r: rank, p: medalGift }),
     ].filter(Boolean).join(" · ");
-    const art = medalGift > 0 || (rank >= 1 && rank <= 3 && done.earned > 0) ? h("span", { class: "sheet-medal" }, medal(rank), TIERS[next].emoji) : TIERS[next].emoji;
+    const art = medalGift > 0 || (rank >= 1 && rank <= 3 && done.earned > 0) ? h("span", { class: "sheet-medal" }, medal(rank), art(TIERS[next].icon)) : art(TIERS[next].icon);
     const celebrateWeek = () => {
       // The new week opens with a celebration: paper, a fanfare, and the presents arriving.
       confettiRain();
@@ -2562,16 +2565,16 @@ async function settleLeague() {
       celebrateWeek();
     } else if (result === "down") {
       sfx.aww();
-      sheet({ art: TIERS[next].emoji, title: t("{name}로 내려왔어요", { name: tierName(next) }),
+      sheet({ art: art(TIERS[next].icon), title: t("{name}로 내려왔어요", { name: tierName(next) }),
         text: t("지난주 {old}에서 {r}등이었어요. 괜찮아요, 이번 주에 다시 올라가 봐요!", { old: tierName(tier), r: rank }),
         actions: [{ label: t("다시 도전!"), kind: "main", run: () => true }] });
     } else if (result === "rest") {
-      sheet({ art: TIERS[next].emoji, title: t("{name}로 내려왔어요", { name: tierName(next) }),
+      sheet({ art: art(TIERS[next].icon), title: t("{name}로 내려왔어요", { name: tierName(next) }),
         text: t("지난주에 리그를 쉬어서 한 등급 내려왔어요. 이번 주에 다시 올라가 봐요!"),
         actions: [{ label: t("다시 도전!"), kind: "main", run: () => true }] });
     } else if (result === "stay") {
       sfx.chirp(myShop().character); // a new week begins
-      sheet({ art: TIERS[next].emoji, title: t("{name} 유지", { name: tierName(next) }),
+      sheet({ art: art(TIERS[next].icon), title: t("{name} 유지", { name: tierName(next) }),
         text: t("지난주에 {r}등이었어요. 이번 주도 힘내요!", { r: rank }),
         actions: [{ label: t("확인"), kind: "main", run: () => true }] });
     }
@@ -2612,7 +2615,7 @@ function noteClimb() {
 }
 // A tier's colours and picture.
 const leagueStyle = (league) => `--league-bg:${league.bg};--league-mid:${league.mid};--league-ink:${league.ink}`;
-const leagueBadge = (league) => h("span", { class: "league-badge", "aria-hidden": "true" }, league.emoji);
+const leagueBadge = (league) => h("span", { class: "league-badge", "aria-hidden": "true" }, art(league.icon));
 
 function leagueCard(rows) {
   const tier = myTier(), league = TIERS[tier];
@@ -2662,21 +2665,21 @@ function leagueInfoView() {
     h("section", { class: "block" },
       h("h3", null, t("리그는 이렇게 돼요")),
       h("ul", { class: "info-list" },
-        rule("🏁", t("같은 등급끼리, 매주 새로"), t("같은 등급의 친구들과 겨뤄요. 월요일마다 0점에서 다시 시작해요.")),
-        rule("⬆️", t("{n}등 안에 들면 승급", { n: MOVE }), t("일요일 밤에 {n}등 안에 있으면 다음 주에 한 등급 올라가고, 승급 선물 +{p}포인트를 받아요.", { n: MOVE, p: promotionPrize() })),
-        rule("🎁", t("1·2·3등 메달 선물"), t("한 주를 1·2·3등으로 마치면 +{a} · +{b} · +{c}포인트를 선물로 받아요.", { a: medalPrize(1), b: medalPrize(2), c: medalPrize(3) })),
+        rule(art("finish"), t("같은 등급끼리, 매주 새로"), t("같은 등급의 친구들과 겨뤄요. 월요일마다 0점에서 다시 시작해요.")),
+        rule(art("up"), t("{n}등 안에 들면 승급", { n: MOVE }), t("일요일 밤에 {n}등 안에 있으면 다음 주에 한 등급 올라가고, 승급 선물 +{p}포인트를 받아요.", { n: MOVE, p: promotionPrize() })),
+        rule(art("gift"), t("1·2·3등 메달 선물"), t("한 주를 1·2·3등으로 마치면 +{a} · +{b} · +{c}포인트를 선물로 받아요.", { a: medalPrize(1), b: medalPrize(2), c: medalPrize(3) })),
         rule("⬇️", t("아래 {n}명은 강등", { n: MOVE }), t("순위표의 마지막 {n}명은 한 등급 내려가요. {name}에서는 내려가지 않아요.", { n: MOVE, name: tierName(0) })),
-        rule("⭐", t("이번 주에 모은 포인트로"), t("이번 주에 받은 포인트만 세요. 포인트샵에서 써도 리그 점수는 줄지 않아요.")),
-        rule("🚪", t("첫 포인트를 받으면 참가"), t("그 주에 포인트를 한 번이라도 받으면 리그에 들어가요.")),
-        rule("💤", t("쉬면 한 등급 강등"), t("한 주 동안 포인트를 한 번도 받지 않으면 다음 주에 한 등급 내려가요. 단어 하나만 찾아도 참가예요!")),
-        rule("🧸", t("캐릭터도 함께 뛰어요"), t("‘캐릭터’ 표시가 있는 친구는 VOQUIZ 캐릭터예요. 매주 다른 캐릭터가 나오고, 등급이 높을수록 더 빨라요.")))),
+        rule(art("star"), t("이번 주에 모은 포인트로"), t("이번 주에 받은 포인트만 세요. 포인트샵에서 써도 리그 점수는 줄지 않아요.")),
+        rule(art("door"), t("첫 포인트를 받으면 참가"), t("그 주에 포인트를 한 번이라도 받으면 리그에 들어가요.")),
+        rule(art("sleep"), t("쉬면 한 등급 강등"), t("한 주 동안 포인트를 한 번도 받지 않으면 다음 주에 한 등급 내려가요. 단어 하나만 찾아도 참가예요!")),
+        rule(art("mascot"), t("캐릭터도 함께 뛰어요"), t("‘캐릭터’ 표시가 있는 친구는 VOQUIZ 캐릭터예요. 매주 다른 캐릭터가 나오고, 등급이 높을수록 더 빨라요.")))),
     h("section", { class: "block" },
       h("h3", null, t("포인트는 이렇게 모아요")),
       h("ul", { class: "info-list small-gap" },
-        rule("🔎", t("단어 찾기"), t("새 단어를 찾을 때마다 포인트를 받아요. 하루 {n}점까지.", { n: SEARCH_DAILY_MAX })),
-        rule("✏️", t("퀴즈와 연속 도전"), t("맞힐 때마다 포인트가 쌓여요.")),
-        rule("⚔️", t("대결"), t("친구와 겨뤄 이기면 포인트를 받아요.")),
-        rule("🎯", t("이번 주 단어 목표"), t("목표를 채우면 보너스를 받아요. 목표가 클수록 더 많이 받고, 지금 목표로는 +{p}점이에요.", { p: weekBonus(weekGoal()) })))),
+        rule(art("search"), t("단어 찾기"), t("새 단어를 찾을 때마다 포인트를 받아요. 하루 {n}점까지.", { n: SEARCH_DAILY_MAX })),
+        rule(art("pencil"), t("퀴즈와 연속 도전"), t("맞힐 때마다 포인트가 쌓여요.")),
+        rule(art("swords"), t("대결"), t("친구와 겨뤄 이기면 포인트를 받아요.")),
+        rule(art("target"), t("이번 주 단어 목표"), t("목표를 채우면 보너스를 받아요. 목표가 클수록 더 많이 받고, 지금 목표로는 +{p}점이에요.", { p: weekBonus(weekGoal()) })))),
   ];
 }
 
@@ -2787,7 +2790,7 @@ function rankView() {
     kind === "points" && weekEarned() === 0
       ? h("div", { class: "league-join" },
           h("div", { class: "league-join-art", "aria-hidden": "true" }, portrait(myLook())),
-          h("span", { class: "league-chip", style: leagueStyle(TIERS[myTier()]) }, TIERS[myTier()].emoji, " ", t("내 등급: {name}", { name: tierName(myTier()) })),
+          h("span", { class: "league-chip", style: leagueStyle(TIERS[myTier()]) }, art(TIERS[myTier()].icon), " ", t("내 등급: {name}", { name: tierName(myTier()) })),
           h("b", null, t("이번 주 리그에 아직 참여하지 않았어요")),
           h("p", null, t("단어를 찾거나 퀴즈를 풀어 포인트를 모으면 이번 주 리그가 열려요. 리그는 월요일마다 새로 시작해요.")),
           h("button", { class: "btn wide", onclick: () => { Object.assign(state, { tab: "search", entry: null, query: "", notice: null }); render(); } }, t("단어 찾으러 가기")))
@@ -2929,7 +2932,7 @@ function quizProgress() {
     return h("div", { class: "progress dots" },
       h("span", null, `${Math.min(index + 1, cards.length)} / ${cards.length}`),
       h("div", { class: "qz-dots", "aria-hidden": "true" }, cards.map((_, i) => h("i", { class: results[i] ? (results[i].correct ? "ok" : "no") : i === index ? "now" : "" }))),
-      run >= 2 && h("b", { class: "qz-run" }, `🔥 ${t("{n}연속", { n: run })}`));
+      run >= 2 && h("b", { class: "qz-run" }, art("fire"), ` ${t("{n}연속", { n: run })}`));
   }
   return h("div", { class: "progress" },
     `${Math.min(index + 1, cards.length)} / ${cards.length}`,
@@ -3015,7 +3018,7 @@ function quizResult() {
         }))),
       h("div", { class: "art", "aria-hidden": "true" }, reaction(myLook(), quiz.correct ? "cheer" : "comfort")),
       h("div", { class: "fb-title" }, quiz.correct ? pick(CHEERS()) : quiz.timedOut ? t("시간이 다 됐어요!") : pick(COMFORTS())),
-      quiz.correct && word.streak > 1 && h("div", { class: "fb-sub" }, t("🔥 {n}번 연속 정답", { n: word.streak })),
+      quiz.correct && word.streak > 1 && h("div", { class: "fb-sub" }, art("fire"), " ", t("{n}번 연속 정답", { n: word.streak })),
       mastered && h("div", { class: "fb-sub" }, t("다 익혔어요! 이제 이 단어는 퀴즈에서 빠져요.")),
       !quiz.correct && quiz.typed && (spelling ? spellingView(spelling) : h("div", { class: "fb-sub" }, t("내가 쓴 답: "), h("s", null, quiz.typed))),
       h("div", { class: "fb-answer" }, wordIn(c, quizMain()), h("small", null, "⇄"), wordIn(c, quizMain() === "ko" ? "en" : "ko"))),
@@ -3092,12 +3095,15 @@ function friends() {
     addHearts: (n) => grow().addHearts(n), heartBox: () => grow().heartBox(),
   }));
 }
-// Levels, eggs, what the character wears, hearts (grow.js).
+// Levels, the capsule machines, what the character wears, hearts (grow.js).
 let growModule = null;
 function grow() {
   return (growModule ||= initGrow({
     h, t, state, api, render, award, celebrate, toastText, sfx, isLearned, myShop, saveShop, portrait, themeColor,
     CHARACTERS, THEMES, BACKGROUNDS,
+    spend: (n) => { state.user.points -= n; countUp(-n); }, countUp,
+    openGacha: () => { document.getElementById("sheet")?.remove(); loadQuestStats(); Object.assign(state, { tab: "shop", shopTab: "gacha", confirmBuy: null, notice: null }); render(); },
+    tryOn,
     openShopTab: (tab) => { document.getElementById("sheet")?.remove(); Object.assign(state, { tab: "shop", shopTab: tab, confirmBuy: null, notice: null }); render(); },
   }));
 }
@@ -3281,9 +3287,59 @@ const openShop = () => { loadQuestStats(); openPage("shop"); };
 
 const myShop = () => ({ ...DEFAULT_SHOP, ...(state.user?.shop || {}) });
 
+// Trying a thing on before it is bought or won: a press on it in the shop shows it at once (a
+// theme, a colour or a background on the whole app; a character, a thing to wear or a skin on the
+// character in the bar at the bottom). Nothing is saved; leaving the shop puts everything back.
+function tryOn(kind, id) {
+  const same = state.tryOn && state.tryOn.kind === kind && state.tryOn.id === id;
+  Object.assign(state, { tryOn: same ? null : { kind, id }, confirmBuy: null });
+  render();
+}
+const trying = (kind, id) => Boolean(state.tryOn) && state.tryOn.kind === kind && state.tryOn.id === id;
+function shopShown() {
+  const shop = state.user?.shop, on = state.tryOn;
+  if (!on || !shop || !["concept", "theme", "bg"].includes(on.kind)) return shop;
+  return { ...myShop(), [on.kind]: on.id, concept: on.kind === "concept" ? on.id : "basic" };
+}
+// The character as it would look with what is being tried on.
+function tryLook() {
+  const on = state.tryOn, shop = myShop();
+  const wears = Object.values(shop.wear || {}).filter((w) => shop.owned.includes(`wear:${w}`));
+  if (on?.kind === "character") return on.id;
+  if (on?.kind === "wear") { const w = wearById(on.id); return lookOf(shop.character, shop.skin?.[shop.character] || "", [...wears.filter((x) => wearById(x)?.slot !== w.slot), w.id]); }
+  if (on?.kind === "skin") { const skin = SKINS.find((x) => skinKey(x) === on.id); return lookOf(skin.of, skin.id, wears); }
+  return myLook();
+}
+// The bar at the bottom of the shop while something is tried on: what it is, and how to have it.
+function tryBar() {
+  const on = state.tryOn;
+  if (!on) return null;
+  const shop = myShop(), points = state.user.points || 0;
+  const list = { character: CHARACTERS, concept: CONCEPTS, theme: THEMES, bg: BACKGROUNDS }[on.kind];
+  const item = list ? list.find((x) => x.id === on.id) : on.kind === "wear" ? wearById(on.id) : SKINS.find((x) => skinKey(x) === on.id);
+  if (!item) return null;
+  const key = on.kind === "skin" ? on.id : `${on.kind}:${on.id}`;
+  const owned = (list && item.cost === 0 && !item.earn) || shop.owned.includes(key);
+  const lock = () => h("i", { class: "lock-i", "aria-hidden": "true" });
+  const how = owned
+    ? list
+      ? h("button", { class: "mini buy", onclick: () => { if (on.kind === "character") sfx.chirp(item.id); saveShop({ ...shop, [on.kind]: item.id, ...(on.kind === "theme" || on.kind === "bg" ? { concept: "basic" } : {}) }); } }, t("적용하기"))
+      : h("span", { class: "tagline" }, t("가지고 있어요"))
+    : !list ? h("span", { class: "tagline earn" }, lock(), t("뽑기에서 나와요"))
+      : item.earn ? h("span", { class: "tagline earn" }, lock(), t("도전 과제"))
+        : h("button", { class: "mini buy", disabled: points < item.cost, title: points < item.cost ? t("포인트 부족") : null, onclick: () => buy(on.kind, item) },
+            h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `${item.cost} · `, t("사기"));
+  return h("div", { class: "try-bar", role: "status" },
+    ["character", "wear", "skin"].includes(on.kind) && h("span", { class: "try-art", "aria-hidden": "true" }, portrait(tryLook())),
+    h("div", { class: "try-text" }, h("small", null, t("미리 보는 중")), h("b", null, t(item.name))),
+    how,
+    h("button", { class: "mini", onclick: () => { state.tryOn = null; render(); } }, t("그만 보기")));
+}
+
 function saveShop(shop) {
   state.user.shop = shop;
   state.confirmBuy = null;
+  state.tryOn = null;
   clearTimeout(saveTimer);
   api.saveProfile({ points: state.user.points, search: state.user.search, shop }).catch(console.error);
   publishRank();
@@ -3305,7 +3361,7 @@ const PERKS = {
   lion: "쓰는 동안: 대결에서 이기면 +10포인트 더",
   skull: "쓰는 동안: 연속 도전에서 한 번 틀려도 이어 가요",
   santa: "갖고 있으면: 12월 1~24일 매일 +200, 25일엔 +1000",
-  rose: "쓰는 동안: 연속 도전을 하루에 한 번 더 할 수 있어요",
+  rose: "쓰는 동안: 연속 도전에서 한 번 틀려도 이어 가요",
 };
 const using = (id) => myShop().character === id;
 const LION_BONUS = 10;
@@ -3409,8 +3465,8 @@ function shelf(kind, heading, items) {
             ? kind === "character"
               ? questDone(item)
                 ? h("button", { class: "mini buy claim", onclick: () => claimCharacter(item) }, t("캐릭터 받기"))
-                : h("span", { class: "tagline earn" }, "🔒 ", `${questNow(item)} / ${item.earn.goal}`)
-              : h("span", { class: "tagline earn" }, "🔒 ", `${Math.min(goalRun(), GOAL_RUN)} / ${GOAL_RUN}`)
+                : h("span", { class: "tagline earn" }, h("i", { class: "lock-i", "aria-hidden": "true" }), `${questNow(item)} / ${item.earn.goal}`)
+              : h("span", { class: "tagline earn" }, h("i", { class: "lock-i", "aria-hidden": "true" }), `${Math.min(goalRun(), GOAL_RUN)} / ${GOAL_RUN}`)
           : state.confirmBuy === key
             ? h("button", { class: "mini buy", onclick: () => buy(kind, item) }, t("살까요?"))
             : h("button", {
@@ -3419,8 +3475,9 @@ function shelf(kind, heading, items) {
               }, h("i", { "aria-hidden": "true" }, "P"), String(item.cost));
       const quest = kind === "character" && item.earn; // an earned character is shown as it is, with what it asks for
       const fresh = isNewItem(kind, item);
-      return h("div", { class: `swatch${active ? " active" : ""}${item.special ? " special" : ""}${kind === "character" ? " sounds" : ""}${quest ? " quest" : ""}${quest && !owned && questDone(item) ? " ready" : ""}${item.earn ? " earned-item" : ""}`,
-        onclick: kind === "character" ? (e) => { if (!e.target.closest("button")) sfx.chirp(item.id); } : null },
+      return h("div", { class: `swatch${active ? " active" : ""}${item.special ? " special" : ""}${kind === "character" ? " sounds" : ""}${quest ? " quest" : ""}${quest && !owned && questDone(item) ? " ready" : ""}${item.earn ? " earned-item" : ""}${trying(kind, item.id) ? " trying" : ""}`,
+        title: active ? null : t("눌러서 미리 보기"),
+        onclick: (e) => { if (e.target.closest("button")) return; if (kind === "character") sfx.chirp(item.id); if (!active) tryOn(kind, item.id); } },
         fresh && h("span", { class: "new-mark" }, "NEW"),
         item.special && h("span", { class: "ribbon" }, t("스페셜")),
         quest && h("span", { class: "ribbon quest" }, t("도전 과제")),
@@ -3466,7 +3523,7 @@ function shopSection() {
   const rank = (c) => (!c.earn ? 3 : ownsCharacter(c) ? 2 : questDone(c) ? 0 : 1);
   const shown = ALL_CHARACTERS.filter((c) => inKind(c, kind)).sort((a, b) => rank(a) - rank(b));
   const kinds = [["all", t("전체")], ["quest", t("도전 과제")], ...SHOP_KINDS.map((k) => [k, t(k)]), ["special", t("스페셜")]];
-  const tabs = [["character", t("캐릭터"), CHARACTERS.length], ["wear", t("꾸미기"), WEARS.length + SKINS.length], ["concept", t("테마"), CONCEPTS.length], ["theme", t("색상"), THEMES.length], ["bg", t("배경"), BACKGROUNDS.length]];
+  const tabs = [["gacha", t("뽑기"), null], ["character", t("캐릭터"), CHARACTERS.length], ["wear", t("꾸미기"), WEARS.length + SKINS.length], ["concept", t("테마"), CONCEPTS.length], ["theme", t("색상"), THEMES.length], ["bg", t("배경"), BACKGROUNDS.length]];
   const tab = tabs.some(([id]) => id === state.shopTab) ? state.shopTab : "character";
   (state.shopViewed ||= new Set()).add(tab); // looked at now: its NEW marks go when the student moves on
   const whole = conceptById(myShop().concept);
@@ -3475,7 +3532,8 @@ function shopSection() {
   return h("section", { class: "shop" },
     h("div", { class: "segment many", role: "tablist" }, tabs.map(([id, label, count]) =>
       h("button", { role: "tab", "aria-selected": String(tab === id), onclick: () => { markShopSeen(); Object.assign(state, { shopTab: id, confirmBuy: null }); render(); } },
-        label, h("small", null, String(count)), newCount(id) > 0 && h("em", { class: "new-dot", title: t("새로 나왔어요") }, "N")))),
+        label, count != null && h("small", null, String(count)), (id === "gacha" ? grow().canDraw() : newCount(id) > 0) && h("em", { class: "new-dot", title: id === "gacha" ? t("뽑을 수 있어요") : t("새로 나왔어요") }, "N")))),
+    tab === "gacha" && grow().gachaBox(),
     tab === "character" && h("div", { class: "chips one-line shop-kinds", role: "group", "aria-label": t("캐릭터 종류") }, kinds.map(([id, label]) =>
       h("button", { class: "chip", "aria-pressed": String(kind === id), onclick: () => { Object.assign(state, { shopKind: id, confirmBuy: null }); render(); } },
         label, h("small", null, String(ALL_CHARACTERS.filter((c) => inKind(c, id)).length))))),
@@ -3493,6 +3551,7 @@ function shopView() {
       h("button", { class: "back", "aria-label": t("뒤로"), title: t("뒤로"), onclick: openShop }, "←"),
       h("h2", { class: "page-title" }, t("포인트샵"))),
     shopSection(),
+    tryBar(),
   ];
 }
 
@@ -3755,7 +3814,7 @@ function showNews() {
   localStorage.setItem(SEEN_NOTICES, JSON.stringify([...seen, news.id].slice(-50)));
   const action = NOTICE_ACTIONS()[news.action];
   sheet({
-    art: "📣", title: inMyLanguage(news.title), text: inMyLanguage(news.body),
+    art: art("megaphone"), title: inMyLanguage(news.title), text: inMyLanguage(news.body),
     actions: action
       ? [{ label: action[0], kind: "main", run: () => { action[1](); } }, { label: t("닫기"), run: () => true }]
       : [{ label: t("확인"), kind: "main", run: () => true }],
@@ -3898,7 +3957,8 @@ function render() {
   else delete document.body.dataset.stage;
   clearTimeout(goalAsk);
   goalAsk = setTimeout(askWeekGoal, 700);
-  applyShop(state.user?.shop);
+  if (state.tab !== "shop") state.tryOn = null;
+  applyShop(shopShown());
   const keepFocus = state.focus || document.activeElement?.id;
   state.focus = null;
   // Same screen as before (a section uncovered, a star toggled)? Then stay exactly where the student was.
@@ -3935,7 +3995,7 @@ function render() {
       app.replaceChildren(...[
         h("header", null,
           grow().levelChip(),
-          h("h1", null, h("button", { class: "home", title: t("처음 화면으로"), onclick: goHome }, logoIcon(28), wordmark(25))),
+          h("h1", null, h("button", { class: "home", title: t("처음 화면으로"), onclick: goHome }, wordmark(25))),
           wide && tabBar,
           topSearch() && searchForm(true),
           h("button", { class: "points", id: "points", title: t("포인트샵 열기"), "aria-pressed": String(state.tab === "shop"), "aria-label": t("단어포인트"), onclick: openShop }, h("i", { "aria-hidden": "true" }, "P"), h("span", null, String(state.user.points || 0)), // One mark for the shop: a character is ready to be taken, or something in it is new.
