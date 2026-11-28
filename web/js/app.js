@@ -1,34 +1,34 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp7un9";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7un9";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7un9";
-import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp7un9";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp7un9";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7un9";
-import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7un9";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp7un9";
-import { initGrow } from "./grow.js?v=0.1.28-tp7un9";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7un9";
-import { art, artToCss } from "./art.js?v=0.1.28-tp7un9";
-import { academicWords, academicField } from "./academic.js?v=0.1.28-tp7un9";
+import { api, DEMO } from "./api.js?v=0.1.28-tp7v52";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7v52";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7v52";
+import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp7v52";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp7v52";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7v52";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7v52";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp7v52";
+import { initGrow } from "./grow.js?v=0.1.28-tp7v52";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7v52";
+import { art, artToCss } from "./art.js?v=0.1.28-tp7v52";
+import { academicWords, academicField } from "./academic.js?v=0.1.28-tp7v52";
 artToCss();
 setTimeout(() => peekSoon(true), 0);
-import { film } from "./film.js?v=0.1.28-tp7un9";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7un9";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7un9";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp7un9";
-import { clockNow } from "./clock.js?v=0.1.28-tp7un9";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7un9";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7un9";
-import { initDuel } from "./duel.js?v=0.1.28-tp7un9";
-import { initFriends } from "./friends.js?v=0.1.28-tp7un9";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp7un9";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7un9";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7un9";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7un9";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7un9";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7un9";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7un9";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7un9";
+import { film } from "./film.js?v=0.1.28-tp7v52";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7v52";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7v52";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp7v52";
+import { clockNow } from "./clock.js?v=0.1.28-tp7v52";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7v52";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7v52";
+import { initDuel } from "./duel.js?v=0.1.28-tp7v52";
+import { initFriends } from "./friends.js?v=0.1.28-tp7v52";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp7v52";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7v52";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7v52";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7v52";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7v52";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7v52";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7v52";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7v52";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -1309,21 +1309,23 @@ function kinRows(c, synonyms, antonyms) {
 }
 // What else to know about a meaning (where it ends, how it differs from a near word). It stands apart
 // from the meaning, which stays one sentence, so the meaning is read at a glance.
-function noteBox(sense) {
+function noteBox(sense, i = 0) {
   const lines = (koFirst() ? [sense?.note_ko, sense?.note_en] : [sense?.note_en, sense?.note_ko]).filter(Boolean);
   if (!lines.length) return null;
-  return h("div", { class: "sense-note" },
-    h("span", { class: "sense-label" }, t("알아 두기")),
+  const fresh = levelFresh(i).note;
+  return h("div", { class: `sense-note${fresh ? " fresh" : ""}` },
+    h("span", { class: "sense-label" }, t("알아 두기"), fresh && levelTag()),
     lines.map((text, n) => h("p", { class: n ? "sense-line second" : "sense-line" }, text)));
 }
 // How the word is used in one meaning: its sentence frames and partner words (balance A on B), each
 // with what it is in the other language. The pattern itself, in the headword's language, comes first.
-function useRows(c, patterns) {
+function useRows(c, patterns, i = 0) {
   const list = (Array.isArray(patterns) ? patterns : []).filter((p) => p?.en && p?.ko);
   if (!list.length) return null;
+  const fresh = levelFresh(i).patterns; // the patterns this level adds
   return h("div", { class: "sense-use" },
-    h("span", { class: "sense-label" }, t("이렇게 써요")),
-    list.map((p) => h("p", { class: "use-row" },
+    h("span", { class: "sense-label" }, t("이렇게 써요"), fresh.size > 0 && levelTag(`+${fresh.size}`)),
+    list.map((p) => h("p", { class: `use-row${fresh.has(p.en) ? " fresh" : ""}` },
       h("b", null, c.language === "ko" ? p.ko : p.en), h("span", null, c.language === "ko" ? p.en : p.ko))));
 }
 // ----- a wide window: a word's two languages side by side -----
@@ -1485,14 +1487,15 @@ function hero(c, word) {
     !manySenses(c) && !duo && h("div", { class: "cp" }, h("small", null, "⇄"), c.counterpart),
     h("div", { class: "meta" }, [c.pronunciation, !manySenses(c) && !duo && c.part_of_speech].filter(Boolean).join("  ·  "), sayButtons(c)),
     word && levelBar(word), // always here: under the word, above its meanings
+    word && levelDiffLine(word),
     manySenses(c) ? sensesList(c, word?.term_norm || c.headword)
     : duo ? h("div", { class: "duo-rows" }, duoSense(c, { ...(c.senses?.[0] || {}), definition_ko: c.definition_ko, definition_en: c.definition_en, part_of_speech: c.part_of_speech, counterpart: c.counterpart }, true))
     : [
       h("div", { class: "def" }, koFirst()
         ? [h("p", null, c.definition_ko), h("p", null, c.definition_en)]
         : [h("p", null, c.definition_en), h("p", null, c.definition_ko)]),
-      noteBox(c.senses?.[0]),
-      useRows(c, c.senses?.[0]?.patterns),
+      noteBox(c.senses?.[0], 0),
+      useRows(c, c.senses?.[0]?.patterns, 0),
     ]);
 }
 // A word with several parts of speech or meanings: each one with its own label, its equivalent in
@@ -1565,11 +1568,11 @@ function sensesList(c, key) {
           h("i", { class: "sense-chev", "aria-hidden": "true" }, "⌄")),
         shown && h("div", { class: "sense-more" },
           second && h("p", { class: "sense-def second" }, second),
-          noteBox(sense),
+          noteBox(sense, i),
           (sense.example_ko || sense.example_en) && h("div", { class: "sense-ex" },
-            h("span", { class: "sense-label" }, t("예문")),
+            h("span", { class: "sense-label" }, t("예문"), levelFresh(i).example && levelTag()),
             pair(sense.example_ko, sense.example_en).map((text, n) => h("p", { class: n ? "sense-line second" : "sense-line" }, text))),
-          useRows(c, sense.patterns),
+          useRows(c, sense.patterns, i),
           // Words that are only spelled alike (가정: a home, a supposition) each come from somewhere else.
           (sense.hun_eum || sense.origin_ko || sense.origin_en) && h("div", { class: "sense-origin" },
             h("span", { class: "sense-label" }, t("어디서 온 말일까?")),
@@ -1633,6 +1636,44 @@ function levelLive(word) {
   if (manySenses(word.content)) box.liveParts.cp.remove(); // as in the finished card, so the switch does not move
   updateLive(box.liveParts, levelOf(word).live);
   return box;
+}
+// What another level changes, made plain. The meaning itself stays one sentence at every level and
+// often reads much the same; what a level really adds is beside it: the note, more patterns, another
+// example. So when a level other than the student's own is shown, a line under the level bar counts
+// what is different from the student's own level, and each such part carries the level's name.
+function levelParts(word) {
+  const level = levelOf(word);
+  if (!level || level.busy || !level.content || !word?.content) return null;
+  const base = word.content.senses?.length ? word.content.senses : [word.content];
+  const now = level.content.senses?.length ? level.content.senses : [level.content];
+  const enOf = (sense) => new Set((Array.isArray(sense?.patterns) ? sense.patterns : []).map((p) => p?.en).filter(Boolean));
+  return now.map((sense, i) => {
+    const before = base[i] || {};
+    const had = enOf(before);
+    return {
+      note: Boolean(sense.note_ko || sense.note_en) && !(before.note_ko || before.note_en),
+      noteGone: !(sense.note_ko || sense.note_en) && Boolean(before.note_ko || before.note_en),
+      patterns: new Set([...enOf(sense)].filter((en) => !had.has(en))),
+      example: Boolean(sense.example_en) && sense.example_en !== before.example_en,
+    };
+  });
+}
+const NO_FRESH = { note: false, patterns: new Set(), example: false };
+const levelFresh = (i) => (state.entry && levelParts(state.entry)?.[i]) || NO_FRESH;
+const levelTag = (text) => h("em", { class: "lv-new" }, text || shownBand(state.entry).label);
+function levelDiffLine(word) {
+  const parts = levelParts(word);
+  if (!parts) return null;
+  const notes = parts.filter((p) => p.note).length, gone = parts.filter((p) => p.noteGone).length;
+  const patterns = parts.reduce((sum, p) => sum + p.patterns.size, 0), examples = parts.filter((p) => p.example).length;
+  const chips = [
+    notes > 0 && t("알아 두기 +{n}", { n: notes }),
+    gone > 0 && t("알아 두기 없음"),
+    patterns > 0 && t("이렇게 써요 +{n}", { n: patterns }),
+    examples > 0 && t("예문 {n}개 바뀜", { n: examples }),
+  ].filter(Boolean);
+  if (!chips.length) return null;
+  return h("div", { class: "level-diff", role: "status" }, h("b", null, t("{level}에서 달라지는 것", { level: shownBand(word).label })), chips.map((text) => h("span", null, text)));
 }
 function levelBar(word) {
   const own = bandOf(state.user.grade), at = shownBand(word), i = BANDS.indexOf(at), busy = Boolean(levelOf(word)?.busy);

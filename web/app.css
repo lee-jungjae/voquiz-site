@@ -3617,3 +3617,11 @@ html[data-font] body, html[data-font] body *:not(.font-sample):not(.font-sample 
 html[data-concept="sakura"] body { background: radial-gradient(at 12% 0%, #ffdbe8 0, transparent 42%), radial-gradient(at 100% 30%, #ffeecf 0, transparent 40%), var(--bg); }
 html[data-concept="aurora"] body { background: radial-gradient(at 20% 0%, rgba(95, 224, 192, .22) 0, transparent 45%), radial-gradient(at 90% 10%, rgba(154, 165, 255, .2) 0, transparent 42%), var(--bg); }
 html[data-concept="aurora"] .use b { color: #f08a7a; }
+
+/* ----- what another level changes: counted under the level bar, and marked where it is ----- */
+.level-diff { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 6px; margin: 8px 0 0; font-size: 12px; animation: pop .3s both; }
+.level-diff b { font-weight: 700; color: var(--muted); margin-right: 2px; }
+.level-diff span { padding: 2px 9px; border-radius: 999px; background: color-mix(in srgb, var(--lime) 30%, var(--bg)); border: 1px solid color-mix(in srgb, var(--lime) 70%, var(--border)); font-weight: 700; color: var(--text); }
+.lv-new { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 999px; background: var(--lime); color: #2c3a10; font-style: normal; font-size: 10px; font-weight: 800; line-height: 1.6; vertical-align: 1px; }
+.sense-note.fresh { padding: 8px 12px; border-left-width: 4px; border-radius: 0 12px 12px 0; background: color-mix(in srgb, var(--lime) 18%, var(--bg)); }
+.use-row.fresh b::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 1px color-mix(in srgb, var(--lime) 60%, var(--text)); vertical-align: 2px; }
