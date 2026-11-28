@@ -263,21 +263,15 @@ export const MORE_CHARACTERS = [
       '<rect x="64" y="52" width="72" height="13" rx="6.5" fill="#fff" stroke="#e6e9f2" stroke-width="2"/>' +
       '<circle cx="146" cy="50" r="8" fill="#fff" stroke="#e6e9f2" stroke-width="2"/>',
   }),
-  // The rose: a red bud. Big petals wrapped round one another behind the face, the swirl of the
-  // heart of a rose on its brow, a green calyx and two leaves below. While it is the character in
-  // use, one miss in the streak challenge is forgiven, like the skeleton's (see app.js, missChallenge).
-  c("rose", "로즈", "식물·과일", "귀여움", 1500, B.round, "#f4567f", "#3f8a4c", {
-    special: true, added: 20, stroke: "#c92f5e", tiles: ["♥", "가", "A"],
-    back:
-      shape("M70 106 q-24 6 -30 -12 q16 -6 30 6 z M130 106 q24 6 30 -12 q-16 -6 -30 6 z", "#58a862") +
-      shape("M100 122 l-10 -10 l-16 6 l6 -16 h40 l6 16 l-16 -6 z", "#3f8a4c") +
-      `<g fill="#e03a68" stroke="#c92f5e" stroke-width="2.4" stroke-linejoin="round">` +
-      `<path d="M64 100 q-22 -30 4 -56 q18 14 12 44 z"/><path d="M136 100 q22 -30 -4 -56 q-18 14 -12 44 z"/>` +
-      `<path d="M74 60 q8 -26 26 -30 q18 4 26 30 q-26 10 -52 0 z"/></g>`,
-    deco:
-      line("M100 59 q7 -2 8 4 q0 6 -8 5 q-7 -1 -6 -8 q2 -8 13 -7 q10 2 11 11", "#c92f5e", 2.4) +
-      line("M70 80 q0 -18 16 -27 M130 80 q0 -18 -16 -27", "#c92f5e", 2.2) +
-      line("M76 62 q10 -8 20 -9", "#ff9db8", 3).replace("/>", ' opacity=".7"/>'),
+  // The grapes (its id is still "rose", from when it was one): a bunch of purple grapes round
+  // the face, a stalk and a leaf on top. While it is the character in use, one miss in the
+  // streak challenge is forgiven, like the skeleton (see app.js, missChallenge).
+  c("rose", "포도", "식물·과일", "귀여움", 1500, B.round, "#a78bea", "#6a4fc0", {
+    special: true, added: 20, stroke: "#7a5fd0", tiles: ["♥", "가", "A"],
+    back: [[70, 60, 15], [100, 54, 15], [130, 60, 15], [58, 84, 14], [142, 84, 14], [72, 106, 14], [128, 106, 14], [100, 112, 14]]
+      .map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#9274e0" stroke="#7a5fd0" stroke-width="2.4"/><path d="M${x - r * 0.5} ${y - r * 0.3} q${r * 0.2} -${r * 0.4} ${r * 0.6} -${r * 0.5}" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".55"/>`).join(""),
+    deco: line("M78 68 q4 -9 13 -11", "#fff", 3.4).replace("/>", ' opacity=".6"/>'),
+    topper: line("M100 46 q-1 -8 4 -14", "#8a6a3a", 3.6) + shape("M103 36 q16 -14 30 -2 q-10 14 -30 2 z", "#6dbb74") + line("M106 36 q12 -4 22 0", "#4f9a58", 1.8),
   }),
   // ===================== earned, not bought =====================
   // Each is given for a fair amount of one part of the app (earn: what is counted, and how much;

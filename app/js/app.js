@@ -1753,6 +1753,45 @@ function animateLoading() {
 // tapping stays a treat and does not replace learning. Returns what the mascot says about it.
 const GIFT_CHANCE = 0.1;
 const GIFT_DAILY_MAX = 20;
+// What the character on the first screen offers when it is tapped, when something waits (the rule
+// of design.md, section 13: what to do next is the character's to say). The first that applies:
+// what it says, and the faint link that then shows under it. A new feature adds a line here.
+function petOffer() {
+  const eve = eveLine();
+  return [
+    claimable().length > 0 && { say: t("받을 수 있는 캐릭터가 있어!"), label: t("캐릭터 받기"), act: openShop },
+    grow().waiting().length > 0 && { say: t("레벨 선물이 기다려! 받으러 갈까?"), label: t("레벨 선물 받기"), act: () => grow().openLevels() },
+    grow().canDraw() && { say: t("뽑기를 돌릴 수 있어!"), label: t("뽑기 하러 가기"), act: () => grow().openGacha() },
+    eve && { say: eve.text, label: eve.tab === "rank" ? t("순위 보러 가기") : t("퀴즈 하러 가기"), act: () => goTab(eve.tab) },
+  ].find(Boolean) || null;
+}
+// What a character says of itself when it is tapped, so that it feels like a pet with a nature of
+// its own: its own line (character-lines.js), lines for its kind (an animal, a plant, a sweet, a
+// thing), and a few any character may say. They come between the offers, at random.
+const PET_LINES = {
+  "동물": ["쓰다듬어 줘서 좋아! 한 번 더?", "킁킁, 새 단어 냄새가 나!", "산책하듯 단어 하나 찾으러 갈래?"],
+  "식물·과일": ["햇빛이랑 단어만 있으면 쑥쑥 커!", "오늘도 한 뼘 자랐어. 너도 그렇지?", "물 대신 단어 한 모금 줄래?"],
+  "디저트": ["달콤한 단어 하나 먹을래?", "한 입만… 아니, 한 단어만 더!", "공부하고 나면 내가 더 달아져!"],
+  "물건": ["딸깍! 준비 완료야.", "오늘도 반짝반짝 닦아 뒀어!", "나를 꺼내 줘서 고마워!"],
+  "기타": ["오늘 기분 어때? 나는 최고야!", "네가 오면 심심하지 않아.", "비밀인데, 네가 제일 좋아."],
+  all: ["간지러워, 히히!", "오늘 뭐 배웠는지 말해 줘!", "나 여기 있었어. 기다렸지?"],
+};
+function petTalk() {
+  const id = myShop().character;
+  const own = CHARACTER_LINES[id]?.[["ko", "en", "zh"].indexOf(getLang())] || "";
+  const who = CHARACTERS.find((c) => c.id === id);
+  const pool = [own, own, ...(PET_LINES[who ? kindOf(who) : "기타"] || PET_LINES["기타"]).map((line) => t(line)), ...PET_LINES.all.map((line) => t(line))].filter(Boolean);
+  let line = pool[Math.floor(Math.random() * pool.length)];
+  if (line === state.petSaid) line = pool[(pool.indexOf(line) + 1) % pool.length]; // never the same line twice in a row
+  state.petSaid = line;
+  return line;
+}
+// A tap on the character: what it gives or says. A present now and then; what waits, every other
+// tap; otherwise something of its own, or a word to try.
+function petTap() {
+  state.pets = (state.pets || 0) + 1;
+  return mascotGift() || (state.pets % 2 === 1 && petOffer()?.say) || (Math.random() < 0.65 ? petTalk() : mascotSuggests()) || petTalk();
+}
 function mascotGift() {
   const key = `wb_gift_${state.user.id}`;
   const saved = JSON.parse(localStorage.getItem(key) || "null");
@@ -1959,21 +1998,21 @@ function searchHome() {
     h("p", { class: "hello" }, greeting()),
     dailyWordCard(),
     grow().levelHint(),
-    eveLine() && h("button", { class: "eve-line", onclick: () => goTab(eveLine().tab) }, art("flag"), eveLine().text),
     limitReached()
       ? [h("p", { class: "small" }, t("오늘 검색 {n}개를 모두 썼어요. 이미 찾은 단어는 단어장에서 볼 수 있어요.", { n: FREE_SEARCHES })),
          h("p", { class: "small" }, h("button", { class: "link", onclick: () => { state.plusOpen = true; openSettings(); } }, t("플러스로 전환하면 무제한으로 찾을 수 있어요")))]
       : [h("p", { class: "small" }, t("한국어나 영어 단어를 찾아보세요.")),
          !WEB && h("p", { class: "small" }, t("웹페이지에서 단어를 선택해 우클릭해도 돼요."))],
     mascot({
-      character: myLook(), t, onTap: () => { sfx.chirp(myShop().character); document.querySelector(".dress-go")?.classList.add("show"); return mascotGift() || mascotSuggests(); },
+      character: myLook(), t, onTap: () => { sfx.chirp(myShop().character); state.petted = true; document.querySelectorAll(".dress-go").forEach((el) => el.classList.add("show")); return petTap(); },
       signature: isPlus() ? { pops: SIGNATURES[myShop().character] || ["✦", "♥", "★"], line: CHARACTER_LINES[myShop().character]?.[["ko", "en", "zh"].indexOf(getLang())] || "" } : null,
       gift: giftWaiting() || santaWaiting(), onGift: () => (giftWaiting() ? openDailyGift() : takeSantaGift()),
       resting: limitReached() ? t("오늘은 여기까지! 내일 또 만나요") : null,
       greet: quotaLine(), onGreet: () => { state.quotaSaid = quotaKey(); }, // marked as said only once it has spoken
     }),
     // Shown faintly once the character has been tapped (the tap itself does what it always did).
-    h("button", { class: "link small dress-go", onclick: () => grow().openWardrobe() }, t("내 캐릭터 꾸미기")),
+    petOffer() && h("button", { class: `link small dress-go gift-go${state.petted ? " show" : ""}`, onclick: petOffer().act }, petOffer().label),
+    h("button", { class: `link small dress-go${state.petted ? " show" : ""}`, onclick: () => grow().openWardrobe() }, t("내 캐릭터 꾸미기")),
     recent.length > 0
       ? [h("div", { class: "hint" }, t("최근 찾은 단어")),
          h("div", { class: "chips center recent" }, recent.map((w) => h("button", { class: "chip", onclick: () => open(w) }, w.headword))),
@@ -2415,7 +2454,7 @@ function missChallenge() {
   if (!saver || c.revived) return finishChallenge(false);
   c.revived = true;
   sfx.chirp(saver);
-  toastText(saver === "rose" ? t("로즈가 한 번 살려 줬어요! 계속 가요.") : t("본즈가 한 번 살려 줬어요! 계속 가요."));
+  toastText(saver === "rose" ? t("포도가 한 번 살려 줬어요! 계속 가요.") : t("본즈가 한 번 살려 줬어요! 계속 가요."));
   nextChallengeWord();
   render();
 }
