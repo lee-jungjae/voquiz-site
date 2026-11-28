@@ -1,34 +1,34 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp7y1u";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7y1u";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7y1u";
-import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp7y1u";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp7y1u";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7y1u";
-import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7y1u";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, skinName, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp7y1u";
-import { initGrow } from "./grow.js?v=0.1.28-tp7y1u";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7y1u";
-import { art, artToCss } from "./art.js?v=0.1.28-tp7y1u";
-import { academicWords, academicField } from "./academic.js?v=0.1.28-tp7y1u";
+import { api, DEMO } from "./api.js?v=0.1.28-tp7ypy";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7ypy";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7ypy";
+import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp7ypy";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp7ypy";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7ypy";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7ypy";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, skinName, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp7ypy";
+import { initGrow } from "./grow.js?v=0.1.28-tp7ypy";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7ypy";
+import { art, artToCss } from "./art.js?v=0.1.28-tp7ypy";
+import { academicWords, academicField } from "./academic.js?v=0.1.28-tp7ypy";
 artToCss();
 setTimeout(() => peekSoon(true), 0);
-import { film } from "./film.js?v=0.1.28-tp7y1u";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7y1u";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7y1u";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp7y1u";
-import { clockNow } from "./clock.js?v=0.1.28-tp7y1u";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7y1u";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7y1u";
-import { initDuel } from "./duel.js?v=0.1.28-tp7y1u";
-import { initFriends } from "./friends.js?v=0.1.28-tp7y1u";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp7y1u";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7y1u";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7y1u";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7y1u";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7y1u";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7y1u";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7y1u";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7y1u";
+import { film } from "./film.js?v=0.1.28-tp7ypy";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7ypy";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7ypy";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp7ypy";
+import { clockNow } from "./clock.js?v=0.1.28-tp7ypy";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7ypy";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7ypy";
+import { initDuel } from "./duel.js?v=0.1.28-tp7ypy";
+import { initFriends } from "./friends.js?v=0.1.28-tp7ypy";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp7ypy";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7ypy";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7ypy";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7ypy";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7ypy";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7ypy";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7ypy";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7ypy";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -3006,6 +3006,9 @@ function rankView() {
   const score = (n) => (kind === "points" ? `P ${n}` : kind === "streak" ? t("{n}연속", { n }) : kind === "duel" ? t("{n}승", { n }) : t("{n}개", { n }));
   const top = league || rows.filter((row) => row.score > 0 && row.rank <= 20);
   const mine = rows.find((row) => row.me);
+  const friendsBoard = kind === "points" && state.rankScope === "friends";
+  // Friends who are in this week's league are shown even before I have joined it myself.
+  const friendsIn = friendsBoard && weekEarned() === 0 ? top.filter((row) => !row.me && row.score > 0) : [];
   // Each row: place, the student's own character, name (with their line under it), score.
   const line = (row) => h("li", { class: `rank-row${row.me ? " me" : ""}${row.rank <= 3 && row.score > 0 ? ` top${row.rank}` : ""}${row.zone ? ` zone-${row.zone}` : ""}` },
     row.rank <= 3 && row.score > 0 ? medal(row.rank) : h("span", { class: "place" }, String(row.rank)),
@@ -3051,7 +3054,12 @@ function rankView() {
     kind === "streak" && h("div", { class: "chips grade-chips" }, GRADES.map((g) =>
       h("button", { class: "chip", "aria-pressed": String(state.rankGrade === g), onclick: () => { state.rankGrade = g; openRankings(); } }, `G${g}`))),
     // Like other leagues, this week's board opens with the first point earned this week.
-    kind === "points" && weekEarned() === 0
+    kind === "points" && weekEarned() === 0 && friendsIn.length > 0
+      ? [h("ol", { class: "rank-list" }, friendsIn.map(line)),
+          h("div", { class: "league-join small" },
+            h("b", null, t("이번 주 리그에 아직 참여하지 않았어요")),
+            h("button", { class: "btn wide", onclick: () => { Object.assign(state, { tab: "search", entry: null, query: "", notice: null }); render(); } }, t("단어 찾으러 가기")))]
+      : kind === "points" && weekEarned() === 0
       ? h("div", { class: "league-join" },
           h("div", { class: "league-join-art", "aria-hidden": "true" }, portrait(myLook())),
           h("span", { class: "league-chip", style: leagueStyle(TIERS[myTier()]) }, art(TIERS[myTier()].icon), " ", t("내 등급: {name}", { name: tierName(myTier()) })),
