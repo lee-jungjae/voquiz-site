@@ -1,28 +1,30 @@
-import { api, DEMO } from "./api.js?v=0.1.27-townt1";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.27-townt1";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.27-townt1";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.27-townt1";
-import { cleanEntry } from "./clean.js?v=0.1.27-townt1";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.27-townt1";
-import { CHARACTERS } from "./characters.js?v=0.1.27-townt1";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.27-townt1";
-import { film } from "./film.js?v=0.1.27-townt1";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.27-townt1";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.27-townt1";
-import { initDesktop } from "./desktop.js?v=0.1.27-townt1";
-import { clockNow } from "./clock.js?v=0.1.27-townt1";
-import { BANDS, bandOf } from "./levels.js?v=0.1.27-townt1";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.27-townt1";
-import { initDuel } from "./duel.js?v=0.1.27-townt1";
-import { initFriends } from "./friends.js?v=0.1.27-townt1";
-import { MOTTOS } from "./mottos.js?v=0.1.27-townt1";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.27-townt1";
-import { SIGNATURES } from "./signatures.js?v=0.1.27-townt1";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.27-townt1";
-import { tuning, setTuning } from "./tuning.js?v=0.1.27-townt1";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.27-townt1";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.27-townt1";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.27-townt1";
+import { api, DEMO } from "./api.js?v=0.1.28-tp7o3t";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7o3t";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7o3t";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.28-tp7o3t";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp7o3t";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7o3t";
+import { CHARACTERS, baseOf } from "./characters.js?v=0.1.28-tp7o3t";
+import { CONCEPTS, WEARS, SKINS, conceptById } from "./goods.js?v=0.1.28-tp7o3t";
+import { initGrow } from "./grow.js?v=0.1.28-tp7o3t";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7o3t";
+import { film } from "./film.js?v=0.1.28-tp7o3t";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7o3t";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7o3t";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp7o3t";
+import { clockNow } from "./clock.js?v=0.1.28-tp7o3t";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7o3t";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7o3t";
+import { initDuel } from "./duel.js?v=0.1.28-tp7o3t";
+import { initFriends } from "./friends.js?v=0.1.28-tp7o3t";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp7o3t";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7o3t";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7o3t";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7o3t";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7o3t";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7o3t";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7o3t";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7o3t";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -124,6 +126,7 @@ async function loadWords() {
   } catch (err) {
     await fail(err);
   }
+  if (state.user?.grade) grow().sync(); // words learned before levels came count at once (their presents wait on the road)
   render();
   openAtStart();
   if (state.user?.grade) {
@@ -636,7 +639,7 @@ function submitAnswer(typed, picked) {
   if (correct) startAutoNext();
   else state.quiz.auto = false;
   patchWord(word, patch);
-  if (learned) checkWeekly();
+  if (learned) { checkWeekly(); grow().learnedOne(); }
 }
 
 // How many right answers in a row the quiz has just now.
@@ -902,7 +905,7 @@ function dailyGoal() {
   const got = searchPointsToday();
   const count = weekCount(), goal = weekGoal();
   const ring = (ratio) => h("i", { class: "goal-ring", style: `--p:${Math.min(1, ratio) * 360}deg`, "aria-hidden": "true" });
-  return h("div", { class: "goals" },
+  return [h("div", { class: "goals" },
     // What searching has paid today, the Golden sunshine bonus included (so it can read 200 / 100). A tap lists the words.
     h("button", { class: `goal${got >= SEARCH_DAILY_MAX ? " done" : ""}`, title: t("단어를 찾을 때마다 +{p}점", { p: SEARCH_POINTS }), onclick: searchPointsSheet },
       ring(got / SEARCH_DAILY_MAX),
@@ -910,7 +913,7 @@ function dailyGoal() {
     h("button", { class: `goal${count >= goal ? " done" : ""}`, title: weekLocked() ? t("이번 주 목표") : t("이번 주 목표 정하기"), onclick: weeklyGoalSheet },
       ring(count / goal),
       h("span", { class: "goal-text" }, h("small", null, weekLocked() ? t("이번 주 익힌 단어") : t("이번 주 목표")), h("b", null, `${count} / ${goal}`)),
-      !weekLocked() && h("span", { class: "goal-set" }, t("정하기"))));
+      !weekLocked() && h("span", { class: "goal-set" }, t("정하기"))))];
 }
 
 // Every change to the score is shown in one place: right under the score in the header.
@@ -942,7 +945,7 @@ function celebrate(points, label, text = `+${points}`) {
     h("div", { class: "burst" },
       h("div", { class: "ring" }), h("div", { class: "ring late" }), sparks,
       h("div", { class: "coin" }, h("b", null, text), h("span", null, label))),
-    state.user && reaction(myShop().character, "cheer"));
+    state.user && reaction(myLook(), "cheer"));
   document.body.append(el);
   if (state.user) sfx.cheer(myShop().character);
   if (WEB) syncStage();
@@ -1831,9 +1834,10 @@ function syncYard() {
   // In the yard: the student's own character and the ones they put there themselves (yardSheet).
   // Everybody else stays in hiding (they look out from under the menus).
   const picked = Array.isArray(myShop().yard) ? myShop().yard.filter((id) => mine.includes(id)).slice(0, YARD_MAX) : [];
-  const key = [lead, mine.length, picked.join(",")].join("|");
+  const dressed = myLook(); // the lead as it is dressed: drawn by this, known to the rest of the app by `lead`
+  const key = [dressed, mine.length, picked.join(",")].join("|");
   if (yardCast?.key !== key) {
-    yardCast = { key, ids: [lead, ...picked], rest: mine.filter((id) => !picked.includes(id)).sort(() => Math.random() - 0.5) };
+    yardCast = { key, ids: [dressed, ...picked], rest: mine.filter((id) => !picked.includes(id)).sort(() => Math.random() - 0.5) };
   }
   // What a character suggests, one thing at a time. What is waiting (a present, a duel, a friend's
   // request) comes every other time; the everyday ones take turns in between.
@@ -1842,6 +1846,7 @@ function syncYard() {
   const nudges = () => [
     gift() && { waits: true, text: t("오늘의 선물 받을래?"), act: () => (giftWaiting() ? openDailyGift() : takeSantaGift()) },
     claimable().length > 0 && state.tab !== "shop" && { waits: true, text: t("받을 수 있는 캐릭터가 있어!"), act: openShop },
+    grow().waiting().length > 0 && { waits: true, text: t("레벨 선물이 기다려!"), act: () => grow().openLevels() },
     duel().badge() > 0 && state.tab !== "quiz" && { waits: true, text: t("대결 신청이 왔어!"), act: to("quiz") },
     friends().gifts() > 0 && { waits: true, text: t("친구가 선물을 보냈어!"), act: () => friends().collect() },
     friends().badge() > friends().gifts() && state.tab !== "friends" && { waits: true, text: t("친구 신청이 왔어!"), act: () => friends().open() },
@@ -1861,9 +1866,9 @@ function syncYard() {
     return pool[(yardTurn >> 1) % pool.length];
   };
   showYard({
-    ids: yardCast.ids, lead, gift: gift(),
+    ids: yardCast.ids, lead: dressed, gift: gift(),
     onEdit: yardSheet, editLabel: t("함께 다닐 캐릭터 고르기"),
-    label: (id) => ALL_CHARACTERS.find((c) => c.id === id)?.name || id,
+    label: (id) => ALL_CHARACTERS.find((c) => c.id === baseOf(id))?.name || baseOf(id),
     nudge: () => nextNudge(false),
     // The others come by now and then; catching one is worth a few points (a few times a day).
     visitors: () => (playing() || document.getElementById("sheet") || catchesToday() >= CATCH_DAILY ? [] : yardCast.rest),
@@ -1899,7 +1904,7 @@ function searchHome() {
       : [h("p", { class: "small" }, t("한국어나 영어 단어를 찾아보세요.")),
          !WEB && h("p", { class: "small" }, t("웹페이지에서 단어를 선택해 우클릭해도 돼요."))],
     mascot({
-      character: myShop().character, t, onTap: () => { sfx.chirp(myShop().character); return mascotGift() || mascotSuggests(); },
+      character: myLook(), t, onTap: () => { sfx.chirp(myShop().character); return mascotGift() || mascotSuggests(); },
       signature: isPlus() ? { pops: SIGNATURES[myShop().character] || ["✦", "♥", "★"], line: CHARACTER_LINES[myShop().character]?.[["ko", "en", "zh"].indexOf(getLang())] || "" } : null,
       gift: giftWaiting() || santaWaiting(), onGift: () => (giftWaiting() ? openDailyGift() : takeSantaGift()),
       resting: limitReached() ? t("오늘은 여기까지! 내일 또 만나요") : null,
@@ -2187,12 +2192,13 @@ const gradeList = (grade) => WORD_LISTS[grade] || [];
 const bestStreak = () => state.user.challenge?.best || 0;
 // Runs left today. The profile keeps the day and how many runs were started on it.
 const triesUsed = () => (isToday(state.user.challenge?.day) ? state.user.challenge.tries || 0 : 0);
-const triesLeft = () => Math.max(0, streakRules().tries - triesUsed());
+const triesAll = () => streakRules().tries + (using("rose") ? 1 : 0); // the rose gives one more run a day while it is the character in use
+const triesLeft = () => Math.max(0, triesAll() - triesUsed());
 
 // ----- the start screens of the two games: the character explains, three steps, the numbers -----
 function guideHero(title, text) {
   return h("div", { class: "guide" },
-    h("div", { class: "guide-art", "aria-hidden": "true" }, portrait(myShop().character)),
+    h("div", { class: "guide-art", "aria-hidden": "true" }, portrait(myLook())),
     h("div", { class: "guide-say" }, h("b", null, title), h("span", null, text)));
 }
 const guideSteps = (steps) => h("ol", { class: "guide-steps" }, steps.map((step) => h("li", null, step)));
@@ -2221,7 +2227,7 @@ function challengeCard() {
     guideSteps(challengeSteps(grade)),
     stageLadder(),
     h("p", { class: "streak-note" },
-      h("span", null, t("오늘 남은 도전"), " ", h("b", null, `${triesLeft()} / ${streakRules().tries}`)),
+      h("span", null, t("오늘 남은 도전"), " ", h("b", null, `${triesLeft()} / ${triesAll()}`)),
       h("span", null, t("단계 보너스"), " ", h("b", null, `+${stageBonus(1)}~${stageBonus(STAGES.length)}`))),
     h("p", { class: "act" }, h("button", { class: "btn wide", disabled: triesLeft() === 0, onclick: startChallenge },
       triesLeft() ? t("도전 시작") : t("오늘 도전은 끝! 내일 또 만나요"))),
@@ -2370,7 +2376,7 @@ function challengeView() {
   if (c.phase === "over") {
     return [
       h("div", { class: "card center" },
-        h("div", { class: "score-art", "aria-hidden": "true" }, reaction(myShop().character, c.record || c.clearedAll || c.streak >= 10 ? "cheer" : "comfort")),
+        h("div", { class: "score-art", "aria-hidden": "true" }, reaction(myLook(), c.record || c.clearedAll || c.streak >= 10 ? "cheer" : "comfort")),
         h("div", { class: "muted" }, c.clearedAll ? t("모든 학년의 권장 단어를 다 맞혔어요!") : t("연속으로 맞힌 단어")),
         h("div", { class: "score" }, String(c.streak)),
         c.record && h("p", { class: "earned" }, t("새 최고 기록!")),
@@ -2379,7 +2385,7 @@ function challengeView() {
           h("div", { class: "best-line" }, h("span", null, t("내 최고 기록")), h("b", null, t("{n}연속", { n: bestStreak() }))),
           h("div", null, h("span", null, t("도달한 단계")), h("b", null, `${stageLook(stageOf(c.streak)).icon} ${t("{n}단계", { n: stageOf(c.streak) + 1 })} · ${t(stageLook(stageOf(c.streak)).name)}`)),
           h("div", { class: c.earned ? "net up" : "net" }, h("span", null, t("획득")), h("b", null, `+${c.earned}`)),
-          h("div", null, h("span", null, t("오늘 남은 도전")), h("b", null, `${triesLeft()} / ${streakRules().tries}`)))),
+          h("div", null, h("span", null, t("오늘 남은 도전")), h("b", null, `${triesLeft()} / ${triesAll()}`)))),
       h("p", { class: "act" }, h("button", { class: "btn wide", disabled: triesLeft() === 0, onclick: startChallenge },
         triesLeft() ? t("다시 도전") : t("오늘 도전은 끝! 내일 또 만나요"))),
       h("p", { class: "center act-note" },
@@ -2736,7 +2742,7 @@ function rankView() {
   // Each row: place, the student's own character, name (with their line under it), score.
   const line = (row) => h("li", { class: `rank-row${row.me ? " me" : ""}${row.rank <= 3 && row.score > 0 ? ` top${row.rank}` : ""}${row.zone ? ` zone-${row.zone}` : ""}` },
     row.rank <= 3 && row.score > 0 ? medal(row.rank) : h("span", { class: "place" }, String(row.rank)),
-    h("span", { class: "ava", "aria-hidden": "true" }, portrait(row.me ? myShop().character : row.character || "bubble")),
+    h("span", { class: "ava", "aria-hidden": "true" }, portrait(row.me ? myLook() : row.character || "bubble")),
     h("span", { class: "who" },
       h("span", { class: "who-name" }, row.bot ? row.nickname : nameOf(row.nickname, row.tag),
         row.me && h("small", null, t("나")), row.bot && h("small", { class: "bot" }, getLang() === "en" ? "character" : t("캐릭터"))),
@@ -2780,7 +2786,7 @@ function rankView() {
     // Like other leagues, this week's board opens with the first point earned this week.
     kind === "points" && weekEarned() === 0
       ? h("div", { class: "league-join" },
-          h("div", { class: "league-join-art", "aria-hidden": "true" }, portrait(myShop().character)),
+          h("div", { class: "league-join-art", "aria-hidden": "true" }, portrait(myLook())),
           h("span", { class: "league-chip", style: leagueStyle(TIERS[myTier()]) }, TIERS[myTier()].emoji, " ", t("내 등급: {name}", { name: tierName(myTier()) })),
           h("b", null, t("이번 주 리그에 아직 참여하지 않았어요")),
           h("p", null, t("단어를 찾거나 퀴즈를 풀어 포인트를 모으면 이번 주 리그가 열려요. 리그는 월요일마다 새로 시작해요.")),
@@ -3007,7 +3013,7 @@ function quizResult() {
         Array.from({ length: 30 }, (_, i) => h("i", {
           style: `left:${Math.random() * 100}%;background:${CONFETTI[i % CONFETTI.length]};animation-delay:${Math.random() * 0.5}s;animation-duration:${1.2 + Math.random()}s`,
         }))),
-      h("div", { class: "art", "aria-hidden": "true" }, reaction(myShop().character, quiz.correct ? "cheer" : "comfort")),
+      h("div", { class: "art", "aria-hidden": "true" }, reaction(myLook(), quiz.correct ? "cheer" : "comfort")),
       h("div", { class: "fb-title" }, quiz.correct ? pick(CHEERS()) : quiz.timedOut ? t("시간이 다 됐어요!") : pick(COMFORTS())),
       quiz.correct && word.streak > 1 && h("div", { class: "fb-sub" }, t("🔥 {n}번 연속 정답", { n: word.streak })),
       mastered && h("div", { class: "fb-sub" }, t("다 익혔어요! 이제 이 단어는 퀴즈에서 빠져요.")),
@@ -3047,7 +3053,7 @@ function quizDone() {
   }
   return [
     h("div", { class: "card center" },
-      h("div", { class: "score-art", "aria-hidden": "true" }, reaction(myShop().character, ratio >= 0.6 ? "cheer" : "comfort")),
+      h("div", { class: "score-art", "aria-hidden": "true" }, reaction(myLook(), ratio >= 0.6 ? "cheer" : "comfort")),
       h("div", { class: "score" }, `${results.length - wrong.length} / ${results.length}`),
       h("p", { class: "small muted" }, wrong.length ? t("틀린 단어는 다음 퀴즈에 다시 나와요.") : t("모두 맞혔어요! 최고예요!")),
       settlement(state.quiz)),
@@ -3066,7 +3072,7 @@ function quizDone() {
 let duelModule = null;
 function duel() {
   return (duelModule ||= initDuel({
-    h, t, state, api, render, award, fail, reaction, portrait, myShop, displayName, nameOf,
+    h, t, state, api, render, award, fail, reaction, portrait, myShop, myLook, displayName, nameOf,
     guideHero, guideSteps, guideStat, coin, toastText, locale, sfx,
     cheer: () => { cheerYard(); if (WIDE()) confetti(16, 0.7); },
     miss: () => { if (WIDE()) missFx(); },
@@ -3083,8 +3089,20 @@ function friends() {
     h, t, state, api, render, fail, nameOf, toastText, openPage, storeUrl, logoIcon, displayName, award, locale,
     today: todayKey,
     startDuel: (other) => duel().start({ other }),
+    addHearts: (n) => grow().addHearts(n), heartBox: () => grow().heartBox(),
   }));
 }
+// Levels, eggs, what the character wears, hearts (grow.js).
+let growModule = null;
+function grow() {
+  return (growModule ||= initGrow({
+    h, t, state, api, render, award, celebrate, toastText, sfx, isLearned, myShop, saveShop, portrait, themeColor,
+    CHARACTERS, THEMES, BACKGROUNDS,
+    openShopTab: (tab) => { document.getElementById("sheet")?.remove(); Object.assign(state, { tab: "shop", shopTab: tab, confirmBuy: null, notice: null }); render(); },
+  }));
+}
+// The student's own character as it is dressed (its coat of paint and what it wears).
+const myLook = () => grow().myLook();
 
 // The quiz page of the desktop frame: three cards side by side, one for each game, so it is plain
 // that there are three to choose from. Each card says what the game is, shows its numbers, and has
@@ -3102,7 +3120,7 @@ function howSheet(title, steps, extra) {
 // Under the cards: every game played, newest first, whichever game it was. A word-list quiz and a
 // streak run show the student's character (glad or sad) and the result; a duel shows both players.
 function playsList(duels, only) { // only: "q" word-list quiz, "s" streak, "d" duel; nothing = every game
-  const me = myShop().character;
+  const me = myLook();
   const when = (at) => `${dayLabel(dayOf(at))} ${new Date(at).toLocaleTimeString(locale(), { hour: "numeric", minute: "2-digit" })}`;
   const face = (mood) => h("span", { class: "face", "aria-hidden": "true" }, reaction(me, mood, true)); // glad or sorry, and still
   const signed = (n) => `${n > 0 ? "+" : ""}${n}`;
@@ -3162,7 +3180,7 @@ function quizGames() {
         QUIZ_STEPS()),
     streak: game("streak", [portrait(host2), h("i", { class: "qz-step s1" }), h("i", { class: "qz-step s2" }), h("i", { class: "qz-step s3" })],
         t("연속 도전"), t("틀릴 때까지 이어져요."),
-        slot(t("오늘 남은 도전"), pips(triesLeft(), streakRules().tries)),
+        slot(t("오늘 남은 도전"), pips(triesLeft(), triesAll())),
         [guideStat(t("내 최고 기록"), t("{n}연속", { n: bestStreak() })), guideStat(t("정답 점수"), [coin(), `+${points[0]}~${points[points.length - 1]}`], "gain"), guideStat(t("단계 보너스"), [coin(), `+${stageBonus(1)}~${stageBonus(STAGES.length)}`], "gain")],
         triesLeft() === 0 && h("p", { class: "qz-note" }, t("오늘 도전은 끝! 내일 또 만나요")),
         h("button", { class: "btn", disabled: triesLeft() === 0, onclick: startChallenge }, t("도전 시작")),
@@ -3278,7 +3296,7 @@ function buy(kind, item) {
   state.user.points -= item.cost;
   celebrate(0, t(item.name), "✓");
   countUp(-item.cost);
-  saveShop({ ...shop, owned: [...shop.owned, `${kind}:${item.id}`], [kind]: item.id });
+  saveShop({ ...shop, owned: [...shop.owned, `${kind}:${item.id}`], [kind]: item.id, ...(kind === "theme" || kind === "bg" ? { concept: "basic" } : {}) });
 }
 
 // What the special characters can do. The lion's and the skeleton's powers work while that
@@ -3287,6 +3305,7 @@ const PERKS = {
   lion: "쓰는 동안: 대결에서 이기면 +10포인트 더",
   skull: "쓰는 동안: 연속 도전에서 한 번 틀려도 이어 가요",
   santa: "갖고 있으면: 12월 1~24일 매일 +200, 25일엔 +1000",
+  rose: "쓰는 동안: 연속 도전을 하루에 한 번 더 할 수 있어요",
 };
 const using = (id) => myShop().character === id;
 const LION_BONUS = 10;
@@ -3296,12 +3315,12 @@ const LION_BONUS = 10;
 // its tab and on the points pill that opens the shop, until the student has opened that tab once.
 // What has been seen is kept on this computer, per student and per tab. A student with no record
 // yet (first run of this version, or a new account) sees the latest additions as new.
-const SHOP_ITEMS = { character: () => CHARACTERS, theme: () => THEMES, bg: () => BACKGROUNDS };
+const SHOP_ITEMS = { character: () => CHARACTERS, theme: () => THEMES, bg: () => BACKGROUNDS, concept: () => CONCEPTS, wear: () => [] };
 const seenKey = () => `wb_shop_seen_${state.user?.id}`;
 function shopSeen() {
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem(seenKey())) || {}; } catch { /* nothing kept */ }
-  return { character: CATALOG_REV - 1, theme: CATALOG_REV - 1, bg: CATALOG_REV - 1, ...saved };
+  return { character: CATALOG_REV - 1, theme: CATALOG_REV - 1, bg: CATALOG_REV - 1, concept: CATALOG_REV - 1, wear: CATALOG_REV, ...saved };
 }
 const isNewItem = (kind, item) => (item.added || 0) > shopSeen()[kind];
 const newCount = (kind) => (state.user ? SHOP_ITEMS[kind]().filter((item) => isNewItem(kind, item)).length : 0);
@@ -3378,11 +3397,13 @@ function shelf(kind, heading, items) {
     h("div", { class: "shelf" }, items.map((item) => {
       const key = `${kind}:${item.id}`;
       const owned = (item.cost === 0 && !item.earn) || shop.owned.includes(key);
-      const active = shop[kind] === item.id;
+      // A whole theme takes the place of the colour and the background; choosing one of those again puts the plain theme back.
+      const whole = (shop.concept || "basic") !== "basic";
+      const active = kind === "concept" ? (shop.concept || "basic") === item.id : shop[kind] === item.id && !(whole && (kind === "theme" || kind === "bg"));
       const action = active
         ? h("span", { class: "tagline" }, t("사용 중"))
         : owned
-          ? h("button", { class: "mini", onclick: () => { if (kind === "character") sfx.chirp(item.id); saveShop({ ...shop, [kind]: item.id }); } }, t("적용하기"))
+          ? h("button", { class: "mini", onclick: () => { if (kind === "character") sfx.chirp(item.id); saveShop({ ...shop, [kind]: item.id, ...(kind === "theme" || kind === "bg" ? { concept: "basic" } : {}) }); } }, t("적용하기"))
           : item.earn
             // Earned, not bought: a button once it is earned, until then how far along the student is.
             ? kind === "character"
@@ -3404,7 +3425,8 @@ function shelf(kind, heading, items) {
         item.special && h("span", { class: "ribbon" }, t("스페셜")),
         quest && h("span", { class: "ribbon quest" }, t("도전 과제")),
         kind === "character" && portrait(item.id),
-        kind !== "character" && h("div", {
+        kind === "concept" && grow().conceptArt(item),
+        kind !== "character" && kind !== "concept" && h("div", {
           class: "preview", "aria-hidden": "true", "data-bg": kind === "bg" ? item.id : null,
           style: kind === "theme" ? `background:${themeColor(item.id)}` : null,
         }),
@@ -3444,19 +3466,24 @@ function shopSection() {
   const rank = (c) => (!c.earn ? 3 : ownsCharacter(c) ? 2 : questDone(c) ? 0 : 1);
   const shown = ALL_CHARACTERS.filter((c) => inKind(c, kind)).sort((a, b) => rank(a) - rank(b));
   const kinds = [["all", t("전체")], ["quest", t("도전 과제")], ...SHOP_KINDS.map((k) => [k, t(k)]), ["special", t("스페셜")]];
-  const tabs = [["character", t("캐릭터"), CHARACTERS.length], ["theme", t("색상"), THEMES.length], ["bg", t("배경"), BACKGROUNDS.length]];
-  const tab = state.shopTab || "character";
+  const tabs = [["character", t("캐릭터"), CHARACTERS.length], ["wear", t("꾸미기"), WEARS.length + SKINS.length], ["concept", t("테마"), CONCEPTS.length], ["theme", t("색상"), THEMES.length], ["bg", t("배경"), BACKGROUNDS.length]];
+  const tab = tabs.some(([id]) => id === state.shopTab) ? state.shopTab : "character";
   (state.shopViewed ||= new Set()).add(tab); // looked at now: its NEW marks go when the student moves on
+  const whole = conceptById(myShop().concept);
+  // While a whole theme is on, the colour and the background are the theme's own.
+  const wholeNote = () => whole.vars && h("p", { class: "small muted whole-note" }, t("지금은 ‘{name}’ 테마를 쓰고 있어요. 여기서 하나를 고르면 기본 테마로 돌아가요.", { name: t(whole.name) }));
   return h("section", { class: "shop" },
-    h("div", { class: "segment three", role: "tablist" }, tabs.map(([id, label, count]) =>
+    h("div", { class: "segment many", role: "tablist" }, tabs.map(([id, label, count]) =>
       h("button", { role: "tab", "aria-selected": String(tab === id), onclick: () => { markShopSeen(); Object.assign(state, { shopTab: id, confirmBuy: null }); render(); } },
         label, h("small", null, String(count)), newCount(id) > 0 && h("em", { class: "new-dot", title: t("새로 나왔어요") }, "N")))),
     tab === "character" && h("div", { class: "chips one-line shop-kinds", role: "group", "aria-label": t("캐릭터 종류") }, kinds.map(([id, label]) =>
       h("button", { class: "chip", "aria-pressed": String(kind === id), onclick: () => { Object.assign(state, { shopKind: id, confirmBuy: null }); render(); } },
         label, h("small", null, String(ALL_CHARACTERS.filter((c) => inKind(c, id)).length))))),
     tab === "character" && shelf("character", null, shown),
-    tab === "theme" && shelf("theme", null, THEMES),
-    tab === "bg" && shelf("bg", null, BACKGROUNDS));
+    tab === "wear" && grow().wardrobe(),
+    tab === "concept" && [h("p", { class: "small muted whole-note" }, t("테마를 바꾸면 앱의 색, 배경, 분위기가 한꺼번에 바뀌어요.")), shelf("concept", null, CONCEPTS)],
+    tab === "theme" && [wholeNote(), shelf("theme", null, THEMES)],
+    tab === "bg" && [wholeNote(), shelf("bg", null, BACKGROUNDS)]);
 }
 
 // Tapping the score: go to Settings and bring the theme shop into view.
@@ -3835,7 +3862,7 @@ function goTab(id) {
 }
 let desktopModule;
 const desktop = () => (desktopModule ||= initDesktop({
-  h, t, state, render, logoIcon, wordmark, searchForm, goHome, goTab, openShop, openSettings, openPage, webHome, star, isLearned, dayOf, dayLabel,
+  h, t, state, render, logoIcon, wordmark, levelChip: () => grow().levelChip(), searchForm, goHome, goTab, openShop, openSettings, openPage, webHome, star, isLearned, dayOf, dayLabel,
   wordsList, icon,
   dailyGoal, todayBox, questHint, entrySide, giftArt, portrait,
   residents: () => yardCast?.rest || [], // the characters that are not out in the yard
@@ -3907,6 +3934,7 @@ function render() {
     } else {
       app.replaceChildren(...[
         h("header", null,
+          grow().levelChip(),
           h("h1", null, h("button", { class: "home", title: t("처음 화면으로"), onclick: goHome }, logoIcon(28), wordmark(25))),
           wide && tabBar,
           topSearch() && searchForm(true),

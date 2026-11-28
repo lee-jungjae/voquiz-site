@@ -9,7 +9,8 @@
 //   tiles   the three things it juggles    noLegs          it floats
 //   group   the grades it was designed for (anyone may buy any)   vibe  its personality
 // Names, groups and vibes are Korean keys for i18n.
-import { MORE_CHARACTERS } from "./characters-more.js?v=0.1.27-townt1";
+import { MORE_CHARACTERS } from "./characters-more.js?v=0.1.28-tp7o3t";
+import { WEARS, skinById } from "./goods.js?v=0.1.28-tp7o3t";
 
 export const DEFAULT_CHARACTER = "bubble";
 
@@ -168,4 +169,19 @@ export const CHARACTERS = [
 // Sixty more, sorted by kind (see characters-more.js).
 CHARACTERS.push(...MORE_CHARACTERS);
 
-export const characterById = (id) => CHARACTERS.find((c) => c.id === id) || CHARACTERS[0];
+// A look is a character with what it wears: "rabbit~moon~glasses.balloon" (the character, its
+// coat of paint, the things worn; the last two may be left out). Whatever draws a character by
+// its id draws a look as well.
+export const lookOf = (id, skin, wears) => [id, skin || "", (wears || []).filter(Boolean).join(".")].join("~").replace(/~+$/, "");
+export const baseOf = (look) => String(look || "").split("~")[0];
+export function characterById(look) {
+  const [id, skin, worn] = String(look || "").split("~");
+  const base = CHARACTERS.find((c) => c.id === id) || CHARACTERS[0];
+  if (!skin && !worn) return base;
+  const things = (worn || "").split(".").map((w) => WEARS.find((x) => x.id === w)).filter(Boolean);
+  return {
+    ...base, ...(skinById(base.id, skin)?.paint || {}),
+    wearBack: things.filter((w) => w.layer === "back").map((w) => w.art).join(""),
+    wearFront: things.filter((w) => w.layer !== "back").map((w) => w.art).join(""),
+  };
+}

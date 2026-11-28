@@ -1,4 +1,5 @@
 // Theme shop: things a student can buy with word points and switch between in Settings.
+import { conceptById } from "./goods.js?v=0.1.28-tp7o3t";
 // `accent` is used on light screens, `onDark` on dark ones. Names are Korean keys for i18n.
 // Prices climb from "a day or two" to `special` items that take about a week of steady use
 // (a busy day of searching, uncovering and quizzing earns roughly 200 points).
@@ -31,9 +32,9 @@ export const BACKGROUNDS = [
 // Items carry `added`: the catalogue revision they arrived in. The shop marks an item NEW until
 // the student has opened its tab once since then. Raise this when adding items, and give them
 // the new number.
-export const CATALOG_REV = 19;
+export const CATALOG_REV = 20;
 
-export const DEFAULT_SHOP = { owned: [], theme: "purple", bg: "plain", character: "bubble" };
+export const DEFAULT_SHOP = { owned: [], theme: "purple", bg: "plain", character: "bubble", concept: "basic" };
 
 const darkScreen = () => globalThis.matchMedia?.("(prefers-color-scheme: dark)").matches;
 
@@ -42,10 +43,23 @@ export function themeColor(id) {
   return darkScreen() ? theme.onDark : theme.accent;
 }
 
-// Paints the page with the chosen theme colour and background.
+// Paints the page with the chosen theme colour and background, or, when a whole theme is on
+// (goods.js, CONCEPTS), with every colour of that theme; its backdrop takes the background's place.
+const PAINTED = ["bg", "surface", "text", "muted", "line", "border", "accent", "accent-dark", "accent-soft", "lime", "good", "good-soft", "bad", "bad-soft", "shadow", "shadow-lg"];
 export function applyShop(shop) {
-  const { theme, bg } = shop || DEFAULT_SHOP;
+  const { theme, bg, concept } = { ...DEFAULT_SHOP, ...(shop || {}) };
   const root = document.documentElement;
+  const whole = conceptById(concept);
+  for (const name of PAINTED) root.style.removeProperty(`--${name}`);
+  if (whole.vars) {
+    for (const [name, value] of Object.entries(whole.vars)) root.style.setProperty(`--${name}`, value);
+    root.dataset.concept = whole.id;
+    root.style.colorScheme = whole.dark ? "dark" : "light";
+    document.body.dataset.bg = "plain";
+    return;
+  }
+  delete root.dataset.concept;
+  root.style.colorScheme = "";
   const accent = themeColor(theme);
   root.style.setProperty("--accent", accent);
   root.style.setProperty("--accent-dark", `color-mix(in srgb, ${accent} 82%, ${darkScreen() ? "white" : "black"})`);

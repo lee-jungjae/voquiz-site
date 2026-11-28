@@ -263,6 +263,13 @@ export const MORE_CHARACTERS = [
       '<rect x="64" y="52" width="72" height="13" rx="6.5" fill="#fff" stroke="#e6e9f2" stroke-width="2"/>' +
       '<circle cx="146" cy="50" r="8" fill="#fff" stroke="#e6e9f2" stroke-width="2"/>',
   }),
+  // The rose: pink petals all round, a swirl of them on its brow, two leaves. While it is the
+  // character in use, the streak challenge has one more run a day (see app.js, triesAll).
+  c("rose", "로즈", "식물·과일", "귀여움", 1500, B.round, "#ff9fc0", "#4f9a58", {
+    special: true, added: 20, stroke: "#f06a9b", tiles: ["♥", "가", "A"],
+    back: ring(8, 35, 15, "#ff7fab") + shape("M70 104 q-22 2 -26 -14 q16 -4 28 8 z M130 104 q22 2 26 -14 q-16 -4 -28 8 z", "#5fb56a"),
+    deco: line("M100 62 q9 -3 11 5 q-1 8 -11 6 q-8 -2 -6 -9 q3 -8 14 -8 q10 2 12 10", "#e8508a", 2.6),
+  }),
   // ===================== earned, not bought =====================
   // Each is given for a fair amount of one part of the app (earn: what is counted, and how much;
   // see QUESTS in app.js), so that every part gets used. They cost nothing and cannot be bought.

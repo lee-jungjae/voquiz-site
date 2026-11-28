@@ -1,7 +1,7 @@
 // Minimal Supabase client over fetch (no build step, no bundled library).
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js?v=0.1.27-townt1";
-import { parsePartial } from "./partial.js?v=0.1.27-townt1";
-import { syncClock, clockNow } from "./clock.js?v=0.1.27-townt1";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js?v=0.1.28-tp7o3t";
+import { parsePartial } from "./partial.js?v=0.1.28-tp7o3t";
+import { syncClock, clockNow } from "./clock.js?v=0.1.28-tp7o3t";
 
 const SESSION_KEY = "wb_session";
 let session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
@@ -60,7 +60,7 @@ async function accessToken() {
 
 const authed = async (path, options = {}) => request(path, { ...options, token: await accessToken() });
 
-const toUser = (u) => ({ id: u.id, email: u.email, grade: u.user_metadata?.grade ?? null, points: u.user_metadata?.points ?? 0, search: u.user_metadata?.search ?? null, nickname: u.user_metadata?.nickname ?? "", shop: u.user_metadata?.shop ?? null, challenge: u.user_metadata?.challenge ?? null, nameChanges: u.user_metadata?.nameChanges ?? 0, noDuels: u.user_metadata?.noDuels ?? false, gift: u.user_metadata?.gift ?? null, weekly: u.user_metadata?.weekly ?? null, plays: Array.isArray(u.user_metadata?.plays) ? u.user_metadata.plays : [], motto: u.user_metadata?.motto ?? "", welcome: u.user_metadata?.welcome ?? "", santa: u.user_metadata?.santa ?? null, duelFrom: u.user_metadata?.duelFrom ?? (u.user_metadata?.noDuels ? "none" : "all") });
+const toUser = (u) => ({ id: u.id, email: u.email, level: u.user_metadata?.level ?? null, bag: u.user_metadata?.bag ?? null, hearts: u.user_metadata?.hearts ?? null, grade: u.user_metadata?.grade ?? null, points: u.user_metadata?.points ?? 0, search: u.user_metadata?.search ?? null, nickname: u.user_metadata?.nickname ?? "", shop: u.user_metadata?.shop ?? null, challenge: u.user_metadata?.challenge ?? null, nameChanges: u.user_metadata?.nameChanges ?? 0, noDuels: u.user_metadata?.noDuels ?? false, gift: u.user_metadata?.gift ?? null, weekly: u.user_metadata?.weekly ?? null, plays: Array.isArray(u.user_metadata?.plays) ? u.user_metadata.plays : [], motto: u.user_metadata?.motto ?? "", welcome: u.user_metadata?.welcome ?? "", santa: u.user_metadata?.santa ?? null, duelFrom: u.user_metadata?.duelFrom ?? (u.user_metadata?.noDuels ? "none" : "all") });
 
 export function getUser() {
   return session ? toUser(session.user) : null;
@@ -325,7 +325,17 @@ export const removeFriend = (id) => rpc("remove_friend", { p_id: id });
 // day: the student's own date (YYYY-MM-DD). -> { sent: [friend id], waiting: [{ id, points, at, from }], got: [{ points, at, from }] }
 export const pointGifts = (day) => rpc("my_point_gifts", { p_day: day });
 export const sendPointGift = (friend, day) => rpc("send_point_gift", { p_friend: friend, p_day: day });
-export const claimPointGifts = () => rpc("claim_point_gifts"); // -> { points, gifts: [{ points, from }] }
+// -> { points, gifts: [{ points, from }] }. from: only that friend's (0022_claim_one_gift.sql); a
+// database without that part knows only "all of them", and that is what it then does.
+export async function claimPointGifts(from) {
+  if (!from) return rpc("claim_point_gifts");
+  try {
+    return await rpc("claim_point_gifts", { p_from: from });
+  } catch (err) {
+    if (err?.status === 404 || err?.code === "PGRST202") return rpc("claim_point_gifts");
+    throw err;
+  }
+}
 export const myInvites = () => rpc("my_invites");
 export const useInvite = (code) => rpc("use_invite", { p_code: code });
 

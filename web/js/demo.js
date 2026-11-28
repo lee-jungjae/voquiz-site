@@ -1,8 +1,8 @@
 // Demo backend: no server, no Claude. Everything stays in this browser's localStorage.
 // Used automatically while js/config.js is empty, so the UI can be tried right away.
-import { parsePartial } from "./partial.js?v=0.1.27-townt1";
-import { bandOf } from "./levels.js?v=0.1.27-townt1";
-import { FULL } from "./demo_levels.js?v=0.1.27-townt1";
+import { parsePartial } from "./partial.js?v=0.1.28-tp7o3t";
+import { bandOf } from "./levels.js?v=0.1.28-tp7o3t";
+import { FULL } from "./demo_levels.js?v=0.1.28-tp7o3t";
 
 const USER_KEY = "wb_demo_user";
 const WORDS_KEY = "wb_demo_words";
@@ -462,11 +462,11 @@ export async function sendPointGift(friend, day) {
   box.sent[friend] = day;
   write(GIFTS_KEY, box);
 }
-export async function claimPointGifts() {
+export async function claimPointGifts(from) {
   const box = giftBox();
-  const gifts = box.waiting;
+  const gifts = box.waiting.filter((g) => !from || g.from.id === from);
   box.got = [...gifts.map((g) => ({ points: g.points, at: new Date().toISOString(), from: g.from })), ...box.got].slice(0, 20);
-  box.waiting = [];
+  box.waiting = box.waiting.filter((g) => !gifts.includes(g));
   write(GIFTS_KEY, box);
   return { points: gifts.reduce((sum, g) => sum + g.points, 0), gifts };
 }
