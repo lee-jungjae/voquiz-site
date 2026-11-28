@@ -627,10 +627,10 @@ const QUIZ_FEE = 3;
 const quizFee = (questions) => Math.min(questions * QUIZ_FEE, state.user.points || 0);
 
 // The most a quiz of this size can pay: every answer right (typed 10, picked 5) plus the all-correct bonus.
-// Lucky bonuses come on top. Mirrors makeQuestions: kinds alternate starting with a typed question.
+// Lucky bonuses come on top. Mirrors makeQuestions: kinds alternate starting with a choice.
 function quizMax(questions) {
   const mixed = state.words.length >= 4;
-  const typed = mixed ? Math.ceil(questions / 2) : questions;
+  const typed = mixed ? Math.floor(questions / 2) : questions;
   return typed * 10 + (questions - typed) * 5 + (questions >= 3 ? 20 : 0);
 }
 

@@ -1,34 +1,34 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp80ao";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp80ao";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp80ao";
-import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp80ao";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp80ao";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp80ao";
-import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp80ao";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, skinName, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp80ao";
-import { initGrow } from "./grow.js?v=0.1.28-tp80ao";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp80ao";
-import { art, artToCss } from "./art.js?v=0.1.28-tp80ao";
-import { academicWords, academicField } from "./academic.js?v=0.1.28-tp80ao";
+import { api, DEMO } from "./api.js?v=0.1.28-tp80fn";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp80fn";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp80fn";
+import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp80fn";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp80fn";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp80fn";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp80fn";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, skinName, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp80fn";
+import { initGrow } from "./grow.js?v=0.1.28-tp80fn";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp80fn";
+import { art, artToCss } from "./art.js?v=0.1.28-tp80fn";
+import { academicWords, academicField } from "./academic.js?v=0.1.28-tp80fn";
 artToCss();
 setTimeout(() => peekSoon(true), 0);
-import { film } from "./film.js?v=0.1.28-tp80ao";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp80ao";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp80ao";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp80ao";
-import { clockNow } from "./clock.js?v=0.1.28-tp80ao";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp80ao";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp80ao";
-import { initDuel } from "./duel.js?v=0.1.28-tp80ao";
-import { initFriends } from "./friends.js?v=0.1.28-tp80ao";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp80ao";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp80ao";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp80ao";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp80ao";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp80ao";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp80ao";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp80ao";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp80ao";
+import { film } from "./film.js?v=0.1.28-tp80fn";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp80fn";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp80fn";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp80fn";
+import { clockNow } from "./clock.js?v=0.1.28-tp80fn";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp80fn";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp80fn";
+import { initDuel } from "./duel.js?v=0.1.28-tp80fn";
+import { initFriends } from "./friends.js?v=0.1.28-tp80fn";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp80fn";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp80fn";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp80fn";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp80fn";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp80fn";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp80fn";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp80fn";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp80fn";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -627,10 +627,10 @@ const QUIZ_FEE = 3;
 const quizFee = (questions) => Math.min(questions * QUIZ_FEE, state.user.points || 0);
 
 // The most a quiz of this size can pay: every answer right (typed 10, picked 5) plus the all-correct bonus.
-// Lucky bonuses come on top. Mirrors makeQuestions: kinds alternate starting with a typed question.
+// Lucky bonuses come on top. Mirrors makeQuestions: kinds alternate starting with a choice.
 function quizMax(questions) {
   const mixed = state.words.length >= 4;
-  const typed = mixed ? Math.ceil(questions / 2) : questions;
+  const typed = mixed ? Math.floor(questions / 2) : questions;
   return typed * 10 + (questions - typed) * 5 + (questions >= 3 ? 20 : 0);
 }
 
