@@ -1966,12 +1966,14 @@ function searchHome() {
       : [h("p", { class: "small" }, t("한국어나 영어 단어를 찾아보세요.")),
          !WEB && h("p", { class: "small" }, t("웹페이지에서 단어를 선택해 우클릭해도 돼요."))],
     mascot({
-      character: myLook(), t, onTap: () => { sfx.chirp(myShop().character); return mascotGift() || mascotSuggests(); },
+      character: myLook(), t, onTap: () => { sfx.chirp(myShop().character); document.querySelector(".dress-go")?.classList.add("show"); return mascotGift() || mascotSuggests(); },
       signature: isPlus() ? { pops: SIGNATURES[myShop().character] || ["✦", "♥", "★"], line: CHARACTER_LINES[myShop().character]?.[["ko", "en", "zh"].indexOf(getLang())] || "" } : null,
       gift: giftWaiting() || santaWaiting(), onGift: () => (giftWaiting() ? openDailyGift() : takeSantaGift()),
       resting: limitReached() ? t("오늘은 여기까지! 내일 또 만나요") : null,
       greet: quotaLine(), onGreet: () => { state.quotaSaid = quotaKey(); }, // marked as said only once it has spoken
     }),
+    // Shown faintly once the character has been tapped (the tap itself does what it always did).
+    h("button", { class: "link small dress-go", onclick: () => grow().openWardrobe() }, t("내 캐릭터 꾸미기")),
     recent.length > 0
       ? [h("div", { class: "hint" }, t("최근 찾은 단어")),
          h("div", { class: "chips center recent" }, recent.map((w) => h("button", { class: "chip", onclick: () => open(w) }, w.headword))),
