@@ -3574,3 +3574,7 @@ html[data-font] body, html[data-font] body *:not(.font-sample):not(.font-sample 
 .lv-cloud.m-moon { animation: sc-breathe 4s ease-in-out infinite; }
 .lv-twinkle { width: 20px; height: 20px; translate: -50% -50%; }
 @media (prefers-reduced-motion: reduce) { .lv-scene, .lv-mark, .lv-cloud, .lv-twinkle { animation: none !important; } }
+/* the cheer is the character's: its tail points down at the character (the right one of the pair) */
+.lv-top .lv-say { margin-bottom: 12px; }
+.lv-say::after { left: calc(50% + 45px); translate: -50% 0; bottom: -5px; }
+.lv-duo .lv-me { margin-top: 0; }
