@@ -36,7 +36,7 @@ export const CONCEPTS = [
 export const conceptById = (id) => CONCEPTS.find((x) => x.id === id) || CONCEPTS[0];
 
 // ----- things to wear -----
-// slot: only one thing of a slot is worn at a time. layer "back" is drawn behind the body.
+// slot: only one thing of a slot is worn at a time (head, eyes, cheek, hand, neck, back, aura). layer "back" is drawn behind the body.
 // rare: 1 common, 2 rare, 3 very rare (which machine it comes out of, and how often).
 const stroke = (d, colour, width = 2.6) => `<path d="${d}" fill="none" stroke="${colour}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"/>`;
 const star = (x, y, r, fill) => {
@@ -50,6 +50,21 @@ const twinkle = (x, y, r, fill) => `<path d="M${x} ${y - r} q${r * 0.2} ${r * 0.
 const heart = (x, y, s, fill, more = "") => `<path d="M${x} ${y + s} l-${s} -${s} a${s * 0.56} ${s * 0.56} 0 0 1 ${s} -${s * 0.56} a${s * 0.56} ${s * 0.56} 0 0 1 ${s} ${s * 0.56} z" fill="${fill}"${more}/>`;
 
 export const WEARS = [
+  // on the head: hats and hair (the top of the head is near y 50)
+  { id: "cap", name: "야구 모자", slot: "head", rare: 1, added: 21,
+    art: `<path d="M74 58 q4 -24 26 -24 q22 0 26 24 z" fill="#4f8fe0" stroke="#3a6fc0" stroke-width="2.2" stroke-linejoin="round"/><path d="M122 56 q18 -1 26 7 q-16 3 -28 -2 z" fill="#3a6fc0" stroke="#3a6fc0" stroke-width="2" stroke-linejoin="round"/><circle cx="100" cy="34" r="3" fill="#3a6fc0"/>` },
+  { id: "beanie", name: "털모자", slot: "head", rare: 1, added: 21,
+    art: `<path d="M74 58 q2 -26 26 -26 q24 0 26 26 z" fill="#ff8fb8" stroke="#e0569a" stroke-width="2.2" stroke-linejoin="round"/><rect x="71" y="53" width="58" height="9" rx="4.5" fill="#ffc2d8" stroke="#e0569a" stroke-width="2"/><circle cx="100" cy="29" r="7" fill="#fff" stroke="#e0569a" stroke-width="2"/>` },
+  { id: "bow", name: "리본", slot: "head", rare: 1, added: 21,
+    art: `<path d="M118 50 l-14 -9 v18 z M118 50 l14 -9 v18 z" fill="#ff5c8a" stroke="#d63d73" stroke-width="2" stroke-linejoin="round"/><circle cx="118" cy="50" r="4" fill="#d63d73"/>` },
+  { id: "partyhat", name: "고깔모자", slot: "head", rare: 2, added: 21,
+    art: `<path d="M100 18 l19 40 h-38 z" fill="#ffd84d" stroke="#e0a82e" stroke-width="2.2" stroke-linejoin="round"/>` + stroke("M90 40 l18 8 M86 50 l26 6", "#ff8fb8", 3) + `<circle cx="100" cy="17" r="5" fill="#ff8fb8" stroke="#e0569a" stroke-width="1.6"/>` },
+  { id: "wizardhat", name: "마법사 모자", slot: "head", rare: 2, added: 21,
+    art: `<path d="M104 14 q-2 22 14 42 h-38 q10 -18 12 -34 q4 -8 12 -8 z" fill="#6a5fd0" stroke="#4a3fb0" stroke-width="2.2" stroke-linejoin="round"/><path d="M64 58 q36 -10 72 0 q-36 8 -72 0 z" fill="#4a3fb0"/>` + star(101, 40, 5, "#ffd84d") },
+  { id: "curls", name: "뽀글머리", slot: "head", rare: 2, added: 21,
+    art: [[76, 56], [86, 48], [98, 45], [110, 47], [121, 53], [70, 66], [128, 64]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="9" fill="#8a5a3a" stroke="#6a4028" stroke-width="1.8"/>`).join("") },
+  { id: "crown", name: "왕관", slot: "head", rare: 3, added: 21,
+    art: `<path d="M78 56 l-4 -22 l13 10 l13 -16 l13 16 l13 -10 l-4 22 z" fill="#ffd84d" stroke="#e0a82e" stroke-width="2.4" stroke-linejoin="round"/><circle cx="100" cy="46" r="3.4" fill="#ff5c8a"/><circle cx="87" cy="49" r="2.4" fill="#7fd6c2"/><circle cx="113" cy="49" r="2.4" fill="#9aa5ff"/>` + twinkle(128, 30, 3, "#fff3b0") },
   // on the eyes
   { id: "glasses", name: "동그란 안경", slot: "eyes", rare: 1,
     art: `<g fill="none" stroke="#3b3550" stroke-width="2.6" stroke-linecap="round"><circle cx="86" cy="82" r="9.5" fill="rgba(255,255,255,.25)"/><circle cx="114" cy="82" r="9.5" fill="rgba(255,255,255,.25)"/><path d="M95.5 82 h9 M76.5 80 l-7 -3 M123.5 80 l7 -3"/></g>` },
@@ -57,6 +72,8 @@ export const WEARS = [
     art: `<path d="M75 76 h20 a2 2 0 0 1 2 2 v4 a9 9 0 0 1 -9 9 h-6 a9 9 0 0 1 -9 -9 v-4 a2 2 0 0 1 2 -2 z M103 76 h20 a2 2 0 0 1 2 2 v4 a9 9 0 0 1 -9 9 h-6 a9 9 0 0 1 -9 -9 v-4 a2 2 0 0 1 2 -2 z" fill="#2b2840"/>${stroke("M97 79 h6 M73 78 l-6 -2 M127 78 l6 -2", "#2b2840")}${stroke("M79 80 l5 -2 M107 80 l5 -2", "rgba(255,255,255,.75)", 1.8)}` },
   { id: "heartglasses", name: "하트 안경", slot: "eyes", rare: 2,
     art: heart(86, 80, 9.5, "rgba(255,92,138,.22)", ' stroke="#ff5c8a" stroke-width="2.6" stroke-linejoin="round"') + heart(114, 80, 9.5, "rgba(255,92,138,.22)", ' stroke="#ff5c8a" stroke-width="2.6" stroke-linejoin="round"') + stroke("M95 80 h10", "#ff5c8a") },
+  { id: "goldglasses", name: "황금 안경", slot: "eyes", rare: 3, added: 21,
+    art: `<g fill="none" stroke="#e0a82e" stroke-width="3" stroke-linecap="round"><circle cx="86" cy="82" r="9.5" fill="rgba(255,216,77,.3)"/><circle cx="114" cy="82" r="9.5" fill="rgba(255,216,77,.3)"/><path d="M95.5 82 h9 M76.5 80 l-7 -3 M123.5 80 l7 -3"/></g>` + twinkle(128, 68, 3.2, "#fff3b0") },
   // on a cheek
   { id: "starsticker", name: "별 스티커", slot: "cheek", rare: 1, art: star(125, 97, 6.5, "#ffc93c") },
   { id: "bandaid", name: "반창고", slot: "cheek", rare: 1,
@@ -82,11 +99,13 @@ export const WEARS = [
     art: `<path d="M76 68 q24 -8 48 0 l20 48 q-44 14 -88 0 z" fill="#e23b3b" stroke="#b92a2a" stroke-width="2.2" stroke-linejoin="round"/><path d="M84 70 q16 -5 32 0 l4 8 q-20 -6 -40 0 z" fill="#ffd84d"/>` },
   { id: "wings", name: "천사 날개", slot: "back", layer: "back", rare: 3,
     art: `<g fill="#fff" stroke="#bcd8f5" stroke-width="2.2" stroke-linejoin="round"><path d="M72 84 q-22 -34 -44 -20 q10 2 12 10 q-10 0 -10 8 q10 -2 14 4 q-8 2 -6 8 q18 0 34 -10 z"/><path d="M128 84 q22 -34 44 -20 q-10 2 -12 10 q10 0 10 8 q-10 -2 -14 4 q8 2 6 8 q-18 0 -34 -10 z"/></g>` },
+  { id: "rainbowcape", name: "무지개 망토", slot: "back", layer: "back", rare: 3, added: 21,
+    art: `<path d="M76 68 q24 -8 48 0 l20 48 q-44 14 -88 0 z" fill="#9aa5ff" stroke="#6a73d6" stroke-width="2.2" stroke-linejoin="round"/><path d="M73 76 l-7 16 q34 10 68 0 l-7 -16 q-27 8 -54 0 z" fill="#ff8fb8"/><path d="M66 92 l-6 14 q40 12 80 0 l-6 -14 q-34 10 -68 0 z" fill="#ffd84d"/><path d="M84 70 q16 -5 32 0 l4 8 q-20 -6 -40 0 z" fill="#fff"/>` },
   // around
   { id: "sparkle", name: "반짝반짝", slot: "aura", rare: 2, art: twinkle(52, 46, 6, "#ffd84d") + twinkle(152, 96, 5, "#ffd84d") + twinkle(44, 104, 4, "#ffe89a") + twinkle(158, 44, 3.6, "#ffe89a") },
   { id: "lovely", name: "하트 뿅뿅", slot: "aura", rare: 3, art: heart(50, 40, 6, "#ff7aa8") + heart(154, 34, 4.6, "#ffa6c4") + heart(160, 92, 5.4, "#ff7aa8") + heart(42, 98, 4, "#ffa6c4") },
 ];
-export const SLOTS = [["eyes", "눈"], ["cheek", "볼"], ["hand", "손"], ["neck", "목"], ["back", "몸"], ["aura", "주변"]];
+export const SLOTS = [["head", "머리"], ["eyes", "눈"], ["cheek", "볼"], ["hand", "손"], ["neck", "목"], ["back", "몸"], ["aura", "주변"]];
 export const wearById = (id) => WEARS.find((x) => x.id === id);
 
 // ----- another look for one character -----
@@ -128,9 +147,12 @@ export const MACHINES = {
     inside: [[["points", 700, 1200], 30], [["wear", 3], 20], [["skin", 3], 15], [["concept"], 15], [["bg", true], 10], [["character"], 6], [["ticket", "gold"], 4]] },
 };
 export const MACHINE_KINDS = ["basic", "gold"];
-// Every prop can also be bought with points, by how rare it is.
-export const WEAR_COST = { 1: 200, 2: 400, 3: 800 };
-export const wearCost = (wear) => WEAR_COST[wear.rare] || WEAR_COST[1];
+// The rule for props (kept as new ones are added): the common and the rare ones (rare 1, 2)
+// can be bought with points as well as won; the special ones (rare 3) come out of the capsule
+// machines only. A new batch of props has some of each.
+export const WEAR_COST = { 1: 200, 2: 400 };
+export const wearSpecial = (wear) => wear.rare >= 3;
+export const wearCost = (wear) => (wearSpecial(wear) ? null : WEAR_COST[wear.rare] || WEAR_COST[1]);
 export const HEARTS_FOR_DRAW = MACHINES.basic.hearts;
 
 // ----- levels -----

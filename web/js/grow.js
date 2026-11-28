@@ -4,9 +4,9 @@
 // file is what is done with them and how it is shown. Everything is kept with the account:
 // `level` { xp, got }, `bag` { tickets: { basic, gold } }, `hearts` { n, all }, and in `shop`: what
 // is owned ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
-import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7tpx";
-import { lookOf } from "./characters.js?v=0.1.28-tp7tpx";
-import { art } from "./art.js?v=0.1.28-tp7tpx"; // eslint-disable-line no-unused-vars
+import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, wearSpecial, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7u6z";
+import { lookOf } from "./characters.js?v=0.1.28-tp7u6z";
+import { art } from "./art.js?v=0.1.28-tp7u6z"; // eslint-disable-line no-unused-vars
 
 const TWICE_POINTS = 100; // a present the student already has turns into points
 
@@ -417,7 +417,7 @@ export function initGrow(c) {
   // Bought with points instead of won: it is put on at once.
   function buyWear(w) {
     const cost = wearCost(w);
-    if (owned(`wear:${w.id}`) || (state.user.points || 0) < cost) return;
+    if (cost == null || owned(`wear:${w.id}`) || (state.user.points || 0) < cost) return; // the special ones are not for sale
     c.spend(cost);
     c.celebrate(0, t(w.name), "✓");
     c.saveShop({ ...shop(), owned: [...shop().owned, `wear:${w.id}`], wear: { ...wearing(), [w.slot]: w.id } });
@@ -436,9 +436,9 @@ export function initGrow(c) {
   function wardrobe() {
     const me = shop().character;
     const slotName = Object.fromEntries(SLOTS);
-    const tile = (active, has, art, name, sub, action, kind, id) => h("div", { class: `swatch wear-tile${active ? " active" : ""}${has ? "" : " locked"}${state.tryOn?.kind === kind && state.tryOn.id === id ? " trying" : ""}`,
-      title: active ? null : t("눌러서 미리 보기"), onclick: (e) => { if (!e.target.closest("button") && !active) c.tryOn(kind, id); } }, art, h("div", { class: "swatch-name" }, name, sub && h("small", null, sub)), action);
-    const lock = () => h("span", { class: "tagline earn" }, h("i", { class: "lock-i", "aria-hidden": "true" }), t("뽑기에서 나와요"));
+    const tile = (active, has, art, name, sub, action, kind, id) => h("div", { class: `swatch wear-tile${kind === "wear" && wearSpecial(wearById(id)) ? " special" : ""}${active ? " active" : ""}${has ? "" : " locked"}${state.tryOn?.kind === kind && state.tryOn.id === id ? " trying" : ""}`,
+      title: active ? null : t("눌러서 미리 보기"), onclick: (e) => { if (!e.target.closest("button") && !active) c.tryOn(kind, id); } }, kind === "wear" && wearSpecial(wearById(id)) && h("span", { class: "ribbon" }, t("스페셜")), art, h("div", { class: "swatch-name" }, name, sub && h("small", null, sub)), action);
+    const lock = () => h("span", { class: "tagline earn" }, h("i", { class: "lock-i", "aria-hidden": "true" }), t("뽑기에서만 나와요"));
     const worn = Object.values(wearing()).length > 0 || Boolean(shop().skin?.[me]);
     // Six places on the character, one thing in each: the places are drawn under the character,
     // filled or empty, and a press on one shows the things that go there.
@@ -456,7 +456,7 @@ export function initGrow(c) {
             h("span", { class: "wear-slot-art", "aria-hidden": "true" }, worn ? c.portrait(lookOf(me, "", [worn.id])) : null),
             h("small", null, t(name)));
         })),
-        h("p", { class: "small wear-count" }, h("b", null, `${count} / ${SLOTS.length}`), " ", t("자리마다 하나씩, 여섯 자리를 함께 꾸밀 수 있어요."),
+        h("p", { class: "small wear-count" }, h("b", null, `${count} / ${SLOTS.length}`), " ", t("자리마다 하나씩, {n}곳을 함께 꾸밀 수 있어요.", { n: SLOTS.length }),
           worn && [" ", h("button", { class: "link small", onclick: () => { const skin = { ...(shop().skin || {}) }; delete skin[me]; c.saveShop({ ...shop(), wear: {}, skin }); } }, t("모두 벗기"))])),
       // One chip for each place (and one for the skins), with how many there are and how many are owned.
       h("div", { class: "chips one-line shop-kinds wear-kinds", role: "group", "aria-label": t("소품 자리") },
@@ -470,6 +470,7 @@ export function initGrow(c) {
         const other = has && !on && wearing()[w.slot] && owned(`wear:${wearing()[w.slot]}`); // the place is taken: this would take its place
         return tile(on, has, c.portrait(lookOf(me, "", [w.id])), t(w.name), t(slotName[w.slot]),
           has ? h("button", { class: "mini", onclick: () => putOn(w) }, on ? t("벗기") : other ? t("바꿔 착용") : t("착용하기"))
+            : wearSpecial(w) ? lock()
             : state.confirmBuy === `wear:${w.id}` ? h("button", { class: "mini buy", onclick: () => buyWear(w) }, t("살까요?"))
               : h("button", { class: "mini price", disabled: (state.user.points || 0) < wearCost(w), title: (state.user.points || 0) < wearCost(w) ? t("포인트 부족") : null, onclick: () => { state.confirmBuy = `wear:${w.id}`; c.render(); } }, h("i", { "aria-hidden": "true" }, "P"), String(wearCost(w))), "wear", w.id);
       })),

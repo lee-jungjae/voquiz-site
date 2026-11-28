@@ -1,34 +1,34 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp7tpx";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7tpx";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7tpx";
-import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp7tpx";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp7tpx";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7tpx";
-import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7tpx";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, wearCost } from "./goods.js?v=0.1.28-tp7tpx";
-import { initGrow } from "./grow.js?v=0.1.28-tp7tpx";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7tpx";
-import { art, artToCss } from "./art.js?v=0.1.28-tp7tpx";
-import { academicWords } from "./academic.js?v=0.1.28-tp7tpx";
+import { api, DEMO } from "./api.js?v=0.1.28-tp7u6z";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7u6z";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7u6z";
+import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp7u6z";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp7u6z";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7u6z";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7u6z";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp7u6z";
+import { initGrow } from "./grow.js?v=0.1.28-tp7u6z";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7u6z";
+import { art, artToCss } from "./art.js?v=0.1.28-tp7u6z";
+import { academicWords, academicField } from "./academic.js?v=0.1.28-tp7u6z";
 artToCss();
 setTimeout(() => peekSoon(true), 0);
-import { film } from "./film.js?v=0.1.28-tp7tpx";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7tpx";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7tpx";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp7tpx";
-import { clockNow } from "./clock.js?v=0.1.28-tp7tpx";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7tpx";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7tpx";
-import { initDuel } from "./duel.js?v=0.1.28-tp7tpx";
-import { initFriends } from "./friends.js?v=0.1.28-tp7tpx";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp7tpx";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7tpx";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7tpx";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7tpx";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7tpx";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7tpx";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7tpx";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7tpx";
+import { film } from "./film.js?v=0.1.28-tp7u6z";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7u6z";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7u6z";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp7u6z";
+import { clockNow } from "./clock.js?v=0.1.28-tp7u6z";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7u6z";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7u6z";
+import { initDuel } from "./duel.js?v=0.1.28-tp7u6z";
+import { initFriends } from "./friends.js?v=0.1.28-tp7u6z";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp7u6z";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7u6z";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7u6z";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7u6z";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7u6z";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7u6z";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7u6z";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7u6z";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -799,32 +799,52 @@ const searchLogToday = () => (isToday(state.user.search?.day) && Array.isArray(s
 // the date). Looking it up pays a bonus of its own, once a day, on top of the search points and
 // whether or not the day's search points are used up. Kept in `search` ({ dw: true } for the day).
 const DAILY_WORD_POINTS = 20;
+// The day's field (science, maths, social studies, language, arts and technology in turn) and its
+// word: a term of that field a step above the student's grade (academic.js).
+const dayNumber = () => { const [y, m, d] = todayKey().split("-").map(Number); return Math.floor(Date.UTC(y, m - 1, d) / 86400000); };
+const dailyField = () => academicField(dayNumber());
+// Today's part of `search`, as it is kept: the search points, and for the word of the day whether
+// its bonus was taken (dw), which word that was (dwWord) and how many were passed over (dws).
+const searchToday = () => (isToday(state.user.search?.day) ? state.user.search : {});
+const dailyWordDone = () => Boolean(searchToday().dw);
 function dailyWord() {
+  if (dailyWordDone() && searchToday().dwWord) return searchToday().dwWord; // the word the bonus was for stays in view
   const grade = Math.min(12, Math.max(3, state.user?.grade || 3));
-  const list = academicWords(grade, gradeList(grade)); // academic words only (academic.js)
-  if (!list.length) return "";
-  let n = 7;
-  for (const ch of `${todayKey()}:${grade}`) n = (n * 31 + ch.charCodeAt(0)) % 1000003;
-  return list[n % list.length];
+  const all = academicWords(grade, dailyField()[0]);
+  // not the words already learned (when every word of the field is learned, all of them again)
+  const learned = new Set(state.words.filter(isLearned).map((w) => w.term_norm));
+  const list = all.filter((w) => !learned.has(w));
+  const from = list.length ? list : all;
+  if (!from.length) return "";
+  // the same word all day; "pass" moves on to the next one of the field
+  return from[(Math.floor(dayNumber() / 5) + (searchToday().dws || 0)) % from.length];
 }
-const dailyWordDone = () => Boolean(isToday(state.user.search?.day) && state.user.search.dw);
 function dailyWordBonus(word) {
   const today = dailyWord().toLowerCase();
   if (!today || dailyWordDone()) return;
   if (![word?.term_norm, word?.headword, word?.counterpart].some((x) => String(x || "").toLowerCase() === today)) return;
-  state.user.search = { day: keepDay(state.user.search?.day), points: searchPointsToday(), bonus: searchBonusToday(), log: searchLogToday(), dw: true };
+  state.user.search = { day: keepDay(state.user.search?.day), points: searchPointsToday(), bonus: searchBonusToday(), log: searchLogToday(), dws: searchToday().dws || 0, dw: true, dwWord: today };
   setTimeout(() => award(DAILY_WORD_POINTS, t("오늘의 단어 보너스"), true), 2300);
 }
-// On the first screen, where it cannot be missed: the word, and what looking it up pays.
+// Not to the student's liking (or known already): the next word of the field.
+function passDailyWord() {
+  if (dailyWordDone()) return;
+  state.user.search = { day: keepDay(state.user.search?.day), points: searchPointsToday(), bonus: searchBonusToday(), log: searchLogToday(), dw: false, dws: (searchToday().dws || 0) + 1 };
+  saveSoon();
+  render();
+}
+// Right under the word box: the word, what looking it up pays, and a way to pass it over.
 function dailyWordCard() {
   const word = dailyWord();
   if (!word || !state.user?.grade) return null;
   const done = dailyWordDone();
-  return h("button", { class: `daily-word${done ? " done" : ""}`, title: t("오늘의 단어 찾아보기"), onclick: () => search(word) },
-    art("cap"),
-    h("span", { class: "dw-text" }, h("small", null, h("em", null, "ACADEMIC"), t("오늘의 아카데믹 단어")), h("b", null, word)),
-    done ? h("span", { class: "dw-got" }, h("i", { class: "check-i", "aria-hidden": "true" }), t("받았어요"))
-      : h("span", { class: "dw-pay" }, h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `+${DAILY_WORD_POINTS}`));
+  return h("div", { class: `daily-word${done ? " done" : ""}` },
+    h("button", { class: "dw-main", title: t("오늘의 단어 찾아보기"), onclick: () => search(word) },
+      art("cap"),
+      h("span", { class: "dw-text" }, h("small", null, h("em", null, "ACADEMIC"), t("오늘의 아카데믹 단어")), h("i", { class: "dw-field" }, t(dailyField()[1])), h("b", null, word)),
+      done ? h("span", { class: "dw-got" }, h("i", { class: "check-i", "aria-hidden": "true" }), t("받았어요"))
+        : h("span", { class: "dw-pay" }, h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `+${DAILY_WORD_POINTS}`)),
+    !done && h("button", { class: "dw-skip", title: t("다른 단어로 넘기기"), "aria-label": t("다른 단어로 넘기기"), onclick: passDailyWord }, h("i", { class: "next-i", "aria-hidden": "true" })));
 }
 // The evening before the week closes (Saturday, Sunday): what is still within reach.
 function eveLine() {
@@ -841,7 +861,7 @@ function awardSearch(word) {
   if (add <= 0) return;
   const bonus = sunriseOn() ? SUNRISE_BONUS : 0;
   state.user.search = {
-    dw: dailyWordDone(),
+    dw: dailyWordDone(), dws: searchToday().dws || 0, dwWord: searchToday().dwWord,
     day: keepDay(state.user.search?.day), points: sofar + add, bonus: searchBonusToday() + bonus,
     log: [...searchLogToday(), [String(word || "").slice(0, 24), add, bonus]].slice(-40),
   };
@@ -3509,9 +3529,9 @@ function tryBar() {
     ? list
       ? h("button", { class: "mini buy", onclick: () => { if (on.kind === "character") sfx.chirp(item.id); saveShop({ ...shop, [on.kind]: item.id, ...(on.kind === "theme" || on.kind === "bg" ? { concept: "basic" } : {}) }); } }, t("적용하기"))
       : h("span", { class: "tagline" }, t("가지고 있어요"))
-    : on.kind === "wear" ? h("button", { class: "mini buy", disabled: points < wearCost(item), title: points < wearCost(item) ? t("포인트 부족") : null, onclick: () => grow().buyWear(item) },
+    : on.kind === "wear" && !wearSpecial(item) ? h("button", { class: "mini buy", disabled: points < wearCost(item), title: points < wearCost(item) ? t("포인트 부족") : null, onclick: () => grow().buyWear(item) },
         h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `${wearCost(item)} · `, t("사기"))
-      : !list ? h("span", { class: "tagline earn" }, lock(), t("뽑기에서 나와요"))
+      : !list ? h("span", { class: "tagline earn" }, lock(), t("뽑기에서만 나와요"))
       : item.earn ? h("span", { class: "tagline earn" }, lock(), t("도전 과제"))
         : h("button", { class: "mini buy", disabled: points < item.cost, title: points < item.cost ? t("포인트 부족") : null, onclick: () => buy(on.kind, item) },
             h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `${item.cost} · `, t("사기"));

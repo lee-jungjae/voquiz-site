@@ -3586,3 +3586,28 @@ html[data-font] body, html[data-font] body *:not(.font-sample):not(.font-sample 
 .lv-stone.ready { animation: claim-pulse 1.2s ease-in-out infinite; }
 .lv-here { animation: here-bob 1.8s ease-in-out infinite; }
 .lv-here.walking { animation: here-hop .3s ease-in-out infinite; }
+.dw-field { flex: none; padding: 1px 7px; border-radius: 999px; background: var(--bg); border: 1.5px solid #e6a700; font-style: normal; font-size: 11px; font-weight: 800; color: color-mix(in srgb, #8a5a00 70%, var(--text)); }
+.daily-word.done .dw-field { border-color: var(--border); color: var(--muted); }
+.wear-slots { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; max-width: 440px; }
+.wear-slot-art { width: 40px; height: 40px; }
+
+/* the academic word: the word itself is the button; "pass" stands beside it */
+.daily-word { display: flex; align-items: stretch; gap: 6px; padding: 0; border: 0; background: none; border-radius: 0; }
+.daily-word:hover, .daily-word:active { transform: none; }
+.dw-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 5px 8px 5px 10px; border-radius: 14px; background: color-mix(in srgb, #ffd84d 22%, var(--bg)); border: 1.5px solid #e6a700; border-bottom-width: 3px; text-align: left; transition: transform .15s; }
+.dw-main:hover { transform: translateY(-1px); }
+.dw-main:active { transform: translateY(1px); border-bottom-width: 1.5px; }
+.dw-main > .art-i { width: 22px; height: 22px; flex: none; }
+.daily-word.done .dw-main { background: var(--surface); border-color: var(--border); }
+.daily-word.done .dw-main > .art-i { opacity: .45; }
+.dw-skip { flex: none; padding: 0 12px; border-radius: 14px; background: var(--surface); border: 1.5px solid var(--border); font-size: 12px; font-weight: 700; color: var(--muted); transition: color .15s, border-color .15s; }
+.dw-skip:hover { color: var(--text); border-color: var(--text); }
+/* the word on a line of its own under its labels, so that a long term is never cut */
+.dw-text { flex: 1; flex-wrap: wrap; align-items: center; gap: 2px 6px; }
+.dw-text b { flex-basis: 100%; font-size: 17px; line-height: 1.2; white-space: normal; overflow: visible; overflow-wrap: anywhere; }
+.dw-main { padding: 6px 8px 6px 10px; }
+/* "pass": an icon only (two arrows that go round: another one) */
+:root { --i-next: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 12a8 8 0 0 1-13.700 5.700M4 12a8 8 0 0 1 13.700-5.700'/%3E%3Cpath d='M18 2.500v4h-4M6 21.500v-4h4'/%3E%3C/svg%3E"); }
+.next-i { display: block; width: 18px; height: 18px; background: currentColor; -webkit-mask: var(--i-next) center / contain no-repeat; mask: var(--i-next) center / contain no-repeat; }
+.dw-skip { display: grid; place-items: center; width: 40px; padding: 0; border-radius: 14px; }
+.dw-skip:active .next-i { rotate: 180deg; transition: rotate .25s; }
