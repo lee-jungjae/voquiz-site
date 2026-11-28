@@ -3279,3 +3279,8 @@ html[data-concept="rainbow"] nav { border-top: 2px solid; border-image: linear-g
 .dw-text small { display: flex; align-items: center; gap: 6px; }
 .dw-text small em { padding: 1px 6px; border-radius: 4px; background: #655f9f; color: #fff; font-style: normal; font-size: 9px; font-weight: 800; letter-spacing: .08em; }
 .daily-word.done .dw-text small em { background: var(--muted); }
+/* the level ring: thicker and clearer, in pieces when the words to learn are few enough to count */
+.lv-ring-bg { stroke: var(--border); stroke-width: 4.5; }
+.lv-ring { stroke: color-mix(in srgb, var(--lime) 45%, var(--good)); stroke-width: 4.5; }
+.lv-badge.pieces .lv-ring, .lv-badge.pieces .lv-ring-bg { stroke-linecap: butt; }
+.lv-chip { width: 42px; height: 42px; }

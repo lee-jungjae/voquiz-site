@@ -150,9 +150,18 @@ export function initGrow(c) {
   const SEAL = Array.from({ length: 8 }, (_, i) => { const a = (i / 8) * Math.PI * 2; return `<circle cx="${(22 + Math.cos(a) * 11.5).toFixed(1)}" cy="${(22 + Math.sin(a) * 11.5).toFixed(1)}" r="4.2"/>`; }).join("");
   const RING = 2 * Math.PI * 19.5;
   const progress = () => { const lv = level(), base = needFor(lv), next = lv < LEVEL_MAX ? needFor(lv + 1) : null; return next ? (xp() - base) / (next - base) : 1; };
-  const badge = (lv, part, cls = "") => svg("0 0 44 44", `lv-badge ${cls}`,
-    `<circle class="lv-ring-bg" cx="22" cy="22" r="19.5"/><circle class="lv-ring" cx="22" cy="22" r="19.5" stroke-dasharray="${RING.toFixed(1)}" stroke-dashoffset="${(RING * (1 - part)).toFixed(1)}" transform="rotate(-90 22 22)"/>` +
-    `<g class="lv-seal">${SEAL}<circle cx="22" cy="22" r="12.5"/></g><text x="22" y="22" text-anchor="middle" dominant-baseline="central">${lv}</text>`);
+  // The ring is cut into as many pieces as the level asks words for (when that is few enough to
+  // count at a glance), so the pieces still empty are the words still to learn.
+  const SEG_MAX = 12, GAP = 3;
+  const need = () => { const lv = level(); return lv < LEVEL_MAX ? needFor(lv + 1) - needFor(lv) : 0; };
+  function ringDash(part, pieces) {
+    if (!pieces || pieces > SEG_MAX) return { bg: "", dash: RING.toFixed(1), off: (RING * (1 - part)).toFixed(1) };
+    const piece = RING / pieces - GAP, done = Math.round(part * pieces);
+    return { bg: `${piece.toFixed(2)} ${GAP}`, dash: `${Array.from({ length: done }, () => `${piece.toFixed(2)} ${GAP}`).join(" ")} 0 ${RING.toFixed(1)}`.trim(), off: "0" };
+  }
+  const badge = (lv, part, cls = "", pieces = 0) => { const r = ringDash(part, pieces); return svg("0 0 44 44", `lv-badge ${cls}${r.bg ? " pieces" : ""}`,
+    `<circle class="lv-ring-bg" cx="22" cy="22" r="19.5"${r.bg ? ` stroke-dasharray="${r.bg}"` : ""} transform="rotate(-90 22 22)"/><circle class="lv-ring" cx="22" cy="22" r="19.5" stroke-dasharray="${r.dash}" stroke-dashoffset="${r.off}" transform="rotate(-90 22 22)"/>` +
+    `<g class="lv-seal">${SEAL}<circle cx="22" cy="22" r="12.5"/></g><text x="22" y="22" text-anchor="middle" dominant-baseline="central">${lv}</text>`); };
   // At the top left of every screen. A dot says that presents wait. A press opens the road of levels.
   function levelChip() {
     if (!state.user?.grade) return null;
@@ -160,7 +169,7 @@ export function initGrow(c) {
     const gifts = waiting().length;
     const label = next ? `${t("내 레벨")} ${lv} · ${t("다음 레벨까지 {n}개", { n: next - xp() })}` : `${t("내 레벨")} ${lv}`;
     return h("button", { class: `lv-chip${gifts ? " has-gift" : ""}`, title: label, "aria-label": label, onclick: () => openLevels() },
-      badge(lv, progress()), gifts > 0 && h("em", { class: "lv-dot", "aria-hidden": "true" }));
+      badge(lv, progress(), "", need()), gifts > 0 && h("em", { class: "lv-dot", "aria-hidden": "true" }));
   }
   // The road of levels, as a map: a path that winds upward through five lands, a stone for every
   // level (level 1 at the bottom), the student's character on the stone it has reached, and each
@@ -207,7 +216,7 @@ export function initGrow(c) {
         ];
       })));
     const held = tickets().basic + tickets().gold;
-    const big = badge(lv, at == null ? 0 : progress(), "big");
+    const big = badge(lv, at == null ? 0 : progress(), "big", need());
     const el = h("div", { id: "sheet", class: "sheet-wrap", onclick: (e) => { if (e.target === el) close(); } },
       h("div", { class: "sheet lv-sheet", role: "dialog", "aria-modal": "true", "aria-label": t("내 레벨") },
         h("div", { class: "lv-top" },
@@ -223,7 +232,7 @@ export function initGrow(c) {
       const me = road.querySelector(".lv-step.here") || road.querySelector(".lv-step.ready");
       const put = () => { if (me) road.scrollTop = me.offsetTop - road.clientHeight * 0.55; };
       put();
-      requestAnimationFrame(() => { put(); big.querySelector(".lv-ring").setAttribute("stroke-dashoffset", (RING * (1 - progress())).toFixed(1)); });
+      requestAnimationFrame(() => { put(); const r = ringDash(progress(), need()), ring = big.querySelector(".lv-ring"); ring.setAttribute("stroke-dasharray", r.dash); ring.setAttribute("stroke-dashoffset", r.off); });
     }
   }
 
