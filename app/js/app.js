@@ -3003,7 +3003,7 @@ function rankView() {
   const kind = state.rankKind || "points";
   const league = kind === "points" && state.rankings ? leagueRows() : null;
   const rows = league || state.rankings?.[kind] || [];
-  const score = (n) => (kind === "points" ? `P ${n}` : kind === "streak" ? t("{n}연속", { n }) : kind === "duel" ? t("{n}승", { n }) : t("{n}개", { n }));
+  const score = (n) => (kind === "points" ? [h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), String(n)] : kind === "streak" ? t("{n}연속", { n }) : kind === "duel" ? t("{n}승", { n }) : t("{n}개", { n }));
   const top = league || rows.filter((row) => row.score > 0 && row.rank <= 20);
   const mine = rows.find((row) => row.me);
   const friendsBoard = kind === "points" && state.rankScope === "friends";

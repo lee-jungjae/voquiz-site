@@ -3780,3 +3780,11 @@ button.heart-strip:active { transform: none; }
 .heart-strip.ready .heart-go { color: var(--accent-dark); border: 0; animation: none; }
 .heart-strip .heart-count small { display: block; }
 .heart-strip .heart-slots i:not(.on) { background: color-mix(in srgb, #e5386f 42%, var(--border)); }
+
+/* One point coin everywhere (0.1.28): the smiling coin with its shine and cheeks, whatever the size. */
+:root { --i-coin: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23ffd166' stroke='%23e6a700' stroke-width='1.6'/%3E%3Cpath d='M6.5 8.5q3-4 8-3.4' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' opacity='.8'/%3E%3Ccircle cx='8.6' cy='12' r='1.5' fill='%237a5200'/%3E%3Ccircle cx='15.4' cy='12' r='1.5' fill='%237a5200'/%3E%3Cpath d='M9.4 15q2.6 2.4 5.2 0' fill='none' stroke='%237a5200' stroke-width='1.5' stroke-linecap='round'/%3E%3Ccircle cx='6.6' cy='14.6' r='1.4' fill='%23ff8fab' opacity='.8'/%3E%3Ccircle cx='17.4' cy='14.6' r='1.4' fill='%23ff8fab' opacity='.8'/%3E%3C/svg%3E"); }
+.points i, .mini.price i, .quiz-cost b i, .btn .cost i, .spend i, .pt-chip i, .guide-stats .stat b i, .play-points i, .coin-i { background-image: var(--i-coin) !important; background-position: center !important; background-size: contain !important; background-repeat: no-repeat !important; }
+.pt-coins i.on { background: var(--i-coin) center / contain no-repeat; border: 0; box-shadow: none; border-radius: 0; }
+.rank-list b .coin-i, .rank-row b .coin-i { vertical-align: -2px; margin-right: 4px; }
+b:has(> .coin-i:first-child) { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+b:has(> .coin-i:first-child) > .coin-i { margin: 0; vertical-align: 0; }

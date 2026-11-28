@@ -1,4 +1,4 @@
-import { stroke, twinkle } from "./wear-art.js?v=0.1.28-tp7z95";
+import { stroke, twinkle } from "./wear-art.js?v=0.1.28-tp7zjj";
 // More things for the head (hats and hair). Rule: rare 1 (200 points) and rare 2 (400 points) can be bought; rare 3 comes from capsules only.
 
 // A thin band of hair lying along the top of the head (used by the hairstyles below).
