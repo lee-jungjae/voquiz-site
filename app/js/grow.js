@@ -6,6 +6,7 @@
 // is owned ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
 import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js";
 import { lookOf } from "./characters.js";
+import { art } from "./art.js";
 
 const TWICE_POINTS = 100; // a present the student already has turns into points
 
@@ -114,6 +115,25 @@ export function initGrow(c) {
     if (!up.length) return;
     const top = up[up.length - 1];
     setTimeout(() => { c.celebrate(0, t("레벨 업!"), `Lv.${top}`); c.render(); }, 2100);
+    setTimeout(() => giftPill(top), 4300);
+  }
+  // After the celebration of a new level: a button at the top that stays a while and leads
+  // straight to the present. It covers nothing and stops nothing (a quiz may be going on).
+  function giftPill(n) {
+    document.querySelector(".lv-pill")?.remove();
+    if (!waiting().length) return;
+    const el = h("button", { class: "lv-pill", onclick: () => { el.remove(); openLevels(); } }, badge(n, 1), t("Lv.{n} 선물 받기", { n }));
+    document.body.append(el);
+    setTimeout(() => el.remove(), 9000);
+  }
+  // On the first screen: how near the next present is (or that one waits).
+  function levelHint() {
+    if (!state.user?.grade) return null;
+    const lv = level(), next = lv < LEVEL_MAX ? needFor(lv + 1) : null, gifts = waiting().length;
+    if (!gifts && !next) return null;
+    return h("button", { class: `lv-hint${gifts ? " ready" : ""}`, onclick: () => openLevels() },
+      next && !gifts ? levelGift(lv + 1).gifts.slice(0, 1).map(giftArt) : art("gift"),
+      gifts ? t("레벨 선물 받기") : t("다음 선물까지 단어 {n}개", { n: next - xp() }));
   }
   function claim(n) {
     if (n < 2 || n > level() || taken().has(n)) return;
@@ -345,14 +365,12 @@ export function initGrow(c) {
   // The first tab of the shop: the machine, and what a turn is paid with. Ten places fill up with
   // the hearts friends send; tickets come from levels; points always work. The golden machine
   // stands beside it.
-  function gachaBox() {
-    const kind = MACHINE_KINDS.includes(state.machine) ? state.machine : "basic";
+  const gachaBox = () => h("div", { class: "gachas" }, MACHINE_KINDS.map(machineBox)); // both machines, side by side or one under the other
+  function machineBox(kind) {
     const machine = MACHINES[kind], held = tickets(), n = hearts().n;
     const way = (pay, art, label, sub) => h("button", { class: `gacha-pay ${pay}${canPay(kind, pay) ? " can" : ""}`, disabled: !canPay(kind, pay), title: label, "aria-label": label, onclick: () => draw(kind, pay) }, art, h("b", null, sub));
     return h("section", { class: `gacha ${kind}${["hearts", "ticket"].some((pay) => canPay(kind, pay)) ? " ready" : ""}` },
-      h("div", { class: "gacha-kinds", role: "tablist" }, MACHINE_KINDS.map((id) =>
-        h("button", { role: "tab", "aria-selected": String(kind === id), onclick: () => { state.machine = id; c.render(); } },
-          t(MACHINES[id].name), held[id] > 0 && h("em", { class: "lv-dot", "aria-hidden": "true" })))),
+      h("b", { class: "gacha-name" }, t(machine.name)),
       h("div", { class: "gacha-stage" }, machineArt(kind)),
       h("div", { class: "gacha-main" },
         kind === "basic" && h("div", { class: "heart-slots", role: "img", "aria-label": `${t("하트")} ${n} / ${HEARTS_FOR_DRAW}` },
@@ -369,12 +387,15 @@ export function initGrow(c) {
   function heartStrip() {
     const n = hearts().n, ready = n >= HEARTS_FOR_DRAW;
     return h("section", { class: `heart-strip${ready ? " ready" : ""}` },
-      h("div", { class: "heart-slots", role: "img", "aria-label": `${t("하트")} ${n} / ${HEARTS_FOR_DRAW}` },
-        Array.from({ length: HEARTS_FOR_DRAW }, (_, i) => h("i", { class: i < n ? "on" : "", style: `--i:${i}` }))),
+      h("div", { class: "heart-count" },
+        h("div", { class: "heart-slots", role: "img", "aria-label": `${t("하트")} ${n} / ${HEARTS_FOR_DRAW}` },
+          Array.from({ length: HEARTS_FOR_DRAW }, (_, i) => h("i", { class: i < n ? "on" : "", style: `--i:${i}` }))),
+        h("small", null, ready ? t("뽑기를 돌릴 수 있어요!") : t("뽑기까지 하트 {n}개", { n: HEARTS_FOR_DRAW - n }))),
       h("button", { class: "heart-go", title: t("하트 {n}개로 뽑기", { n: HEARTS_FOR_DRAW }), onclick: () => c.openGacha() },
         svg("0 0 120 150", "gm basic mini", machineMini()), h("b", null, ready ? t("뽑기") : `${n} / ${HEARTS_FOR_DRAW}`)));
   }
   const canDraw = () => MACHINE_KINDS.some((kind) => ["hearts", "ticket"].some((pay) => canPay(kind, pay)));
 
-  return { myLook, levelChip, openLevels, learnedOne, sync, waiting, level, wardrobe, conceptArt, addHearts, heartBox: heartStrip, gachaBox, canDraw, hearts, tickets };
+  return { myLook, levelChip, openLevels, learnedOne, sync, waiting, level, wardrobe, conceptArt, addHearts, heartBox: heartStrip, gachaBox, canDraw, hearts, tickets,
+    ticketArt, levelHint, give: grant, openGacha: () => c.openGacha(), openWardrobe: () => c.openShopTab("wear") };
 }
