@@ -6,10 +6,10 @@
 // to the scene (s1, s2, …: the styles in app.css do the rest) or makes a character act.
 // film() always returns the same element, so it keeps playing where it was when the screen is drawn
 // again, and it speaks the language of the screen: change the language and the scene starts over in it.
-import { t, getLang } from "./i18n.js?v=0.1.28-tp82vr";
-import { art } from "./mascot.js?v=0.1.28-tp82vr";
-import { CHARACTERS } from "./characters.js?v=0.1.28-tp82vr";
-import { ICON_SVG, WORDMARK_SVG } from "./logo.js?v=0.1.28-tp82vr";
+import { t, getLang } from "./i18n.js?v=0.1.28-tp82zs";
+import { art } from "./mascot.js?v=0.1.28-tp82zs";
+import { CHARACTERS } from "./characters.js?v=0.1.28-tp82zs";
+import { ICON_SVG, WORDMARK_SVG } from "./logo.js?v=0.1.28-tp82zs";
 
 const actor = (id, name, place) => `<span class="mascot f-actor ${name}" style="${place}" data-eyes="default" data-mouth="smile">${art(id)}</span>`;
 const mini = (id, step) => `<span class="mascot shade ${step}">${art(id)}</span>`;

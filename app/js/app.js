@@ -998,6 +998,8 @@ function searchPointsSheet() {
 function weeklyGoalSheet() {
   if (weekLocked()) {
     const goal = weekGoal(), count = weekCount(), left = goal - count, p = weekBonus(goal), done = left <= 0;
+    const WEEK_CHIPS = 12;
+    const learnedNow = state.words.filter((w) => w.mastered_at && new Date(w.mastered_at) >= weekStart()).sort((a, b) => new Date(b.mastered_at) - new Date(a.mastered_at));
     return talkSheet({
       label: t("이번 주 목표"),
       say: done ? t("목표 달성! 정말 멋져!")
@@ -1010,6 +1012,11 @@ function weeklyGoalSheet() {
         h("div", { class: `goal-road${done ? " done" : ""}`, role: "img", "aria-label": `${count} / ${goal}` },
           h("i", { class: "goal-fill", style: `width:${Math.min(100, (count / goal) * 100)}%` }),
           h("span", { class: "goal-end" }, art(done ? "party" : "flag"), h("b", null, h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `+${p}`))),
+        // The words learned this week, newest first, as chips: what the number is made of.
+        learnedNow.length > 0 && h("div", { class: "week-words" },
+          h("small", null, t("이번 주 익힌 단어")),
+          h("div", { class: "week-chips" }, learnedNow.slice(0, WEEK_CHIPS).map((w) => h("span", { class: "week-chip" }, w.headword)),
+            learnedNow.length > WEEK_CHIPS && h("span", { class: "week-chip more" }, `+${learnedNow.length - WEEK_CHIPS}`))),
         // The words missed lately, so the week's look back says what to go over.
         state.words.some((w) => w.needs_review) && h("p", { class: "small muted", style: "margin-top:12px" }, t("복습할 단어"), ": ",
           state.words.filter((w) => w.needs_review).slice(0, 5).map((w) => w.headword).join(", ")),

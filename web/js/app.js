@@ -1,35 +1,35 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp82vr";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp82vr";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp82vr";
-import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp82vr";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp82vr";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp82vr";
-import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp82vr";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, skinName, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp82vr";
-import { initGrow } from "./grow.js?v=0.1.28-tp82vr";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp82vr";
-import { art, artToCss } from "./art.js?v=0.1.28-tp82vr";
-import { academicWords, academicField } from "./academic.js?v=0.1.28-tp82vr";
+import { api, DEMO } from "./api.js?v=0.1.28-tp82zs";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp82zs";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp82zs";
+import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp82zs";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp82zs";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp82zs";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp82zs";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, skinName, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp82zs";
+import { initGrow } from "./grow.js?v=0.1.28-tp82zs";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp82zs";
+import { art, artToCss } from "./art.js?v=0.1.28-tp82zs";
+import { academicWords, academicField } from "./academic.js?v=0.1.28-tp82zs";
 artToCss();
 setTimeout(() => peekSoon(true), 0);
-import { film } from "./film.js?v=0.1.28-tp82vr";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp82vr";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp82vr";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp82vr";
-import { clockNow } from "./clock.js?v=0.1.28-tp82vr";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp82vr";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp82vr";
-import { initDuel } from "./duel.js?v=0.1.28-tp82vr";
-import { initFriends } from "./friends.js?v=0.1.28-tp82vr";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp82vr";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp82vr";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp82vr";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp82vr";
-import { focusOn, setFocus, untimedOn, setUntimed, defLang, setDefLang, defKind } from "./prefs.js?v=0.1.28-tp82vr";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp82vr";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp82vr";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp82vr";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch, reviewGap, englishOf } from "./quiz.js?v=0.1.28-tp82vr";
+import { film } from "./film.js?v=0.1.28-tp82zs";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp82zs";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp82zs";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp82zs";
+import { clockNow } from "./clock.js?v=0.1.28-tp82zs";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp82zs";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp82zs";
+import { initDuel } from "./duel.js?v=0.1.28-tp82zs";
+import { initFriends } from "./friends.js?v=0.1.28-tp82zs";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp82zs";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp82zs";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp82zs";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp82zs";
+import { focusOn, setFocus, untimedOn, setUntimed, defLang, setDefLang, defKind } from "./prefs.js?v=0.1.28-tp82zs";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp82zs";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp82zs";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp82zs";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch, reviewGap, englishOf } from "./quiz.js?v=0.1.28-tp82zs";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -998,6 +998,8 @@ function searchPointsSheet() {
 function weeklyGoalSheet() {
   if (weekLocked()) {
     const goal = weekGoal(), count = weekCount(), left = goal - count, p = weekBonus(goal), done = left <= 0;
+    const WEEK_CHIPS = 12;
+    const learnedNow = state.words.filter((w) => w.mastered_at && new Date(w.mastered_at) >= weekStart()).sort((a, b) => new Date(b.mastered_at) - new Date(a.mastered_at));
     return talkSheet({
       label: t("이번 주 목표"),
       say: done ? t("목표 달성! 정말 멋져!")
@@ -1010,6 +1012,11 @@ function weeklyGoalSheet() {
         h("div", { class: `goal-road${done ? " done" : ""}`, role: "img", "aria-label": `${count} / ${goal}` },
           h("i", { class: "goal-fill", style: `width:${Math.min(100, (count / goal) * 100)}%` }),
           h("span", { class: "goal-end" }, art(done ? "party" : "flag"), h("b", null, h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `+${p}`))),
+        // The words learned this week, newest first, as chips: what the number is made of.
+        learnedNow.length > 0 && h("div", { class: "week-words" },
+          h("small", null, t("이번 주 익힌 단어")),
+          h("div", { class: "week-chips" }, learnedNow.slice(0, WEEK_CHIPS).map((w) => h("span", { class: "week-chip" }, w.headword)),
+            learnedNow.length > WEEK_CHIPS && h("span", { class: "week-chip more" }, `+${learnedNow.length - WEEK_CHIPS}`))),
         // The words missed lately, so the week's look back says what to go over.
         state.words.some((w) => w.needs_review) && h("p", { class: "small muted", style: "margin-top:12px" }, t("복습할 단어"), ": ",
           state.words.filter((w) => w.needs_review).slice(0, 5).map((w) => w.headword).join(", ")),
