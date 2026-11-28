@@ -1,9 +1,9 @@
 // What a student can collect besides characters, colours and backgrounds:
 //   CONCEPTS  whole themes: one changes every colour of the app, its backdrop and a little of its
-//             shape and lettering (bought with points, or found in an egg)
-//   WEARS     small things any character can wear or hold (found in eggs, or given at a level)
+//             shape and lettering (bought with points, or found in a capsule)
+//   WEARS     small things any character can wear or hold (found in capsules, or given at a level)
 //   SKINS     another coat of paint for one particular character
-//   EGGS      what a level, or ten hearts from friends, gives: an egg to crack, with a prize inside
+//   MACHINES  the capsule machines: what a turn may give (paid with hearts, a ticket or points)
 //   levels    how many learned words each level asks for, and what reaching it gives
 // Names are Korean keys for i18n. Everything drawn is in the characters' own space (200 x 150:
 // the face sits around x 100, y 84, the eyes at 86 and 114, the hands near 58 and 142, y 52).
@@ -37,7 +37,7 @@ export const conceptById = (id) => CONCEPTS.find((x) => x.id === id) || CONCEPTS
 
 // ----- things to wear -----
 // slot: only one thing of a slot is worn at a time. layer "back" is drawn behind the body.
-// rare: 1 common, 2 rare, 3 very rare (which eggs it comes out of, and how often).
+// rare: 1 common, 2 rare, 3 very rare (which machine it comes out of, and how often).
 const stroke = (d, colour, width = 2.6) => `<path d="${d}" fill="none" stroke="${colour}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"/>`;
 const star = (x, y, r, fill) => {
   const points = Array.from({ length: 10 }, (_, i) => {
@@ -110,24 +110,25 @@ export const SKINS = [
 export const skinById = (of, id) => SKINS.find((x) => x.of === of && x.id === id);
 export const skinKey = (skin) => `skin:${skin.of}-${skin.id}`;
 
-// ----- eggs -----
-// An egg is cracked for a prize. What may be inside: [what, how often]. `what` is
+// ----- the capsule machines -----
+// A machine is turned for a capsule with a prize inside. There are two: the everyday one (paid
+// with ten hearts from friends, a ticket, or points) and the golden one (a golden ticket, or
+// many points) where the rare things are. What may be inside: [what, how often]. `what` is
 //   ["points", least, most]   points, in steps of ten
 //   ["wear", most rare]       something to wear the student does not have yet, up to that rarity
 //   ["skin", most rare]       a look for a character
 //   ["concept"] / ["bg", special?] / ["theme"]   a whole theme, a background, a colour
 //   ["character"]             one of the special characters
-//   ["egg", kind]             another egg
-// When there is nothing left of a kind to give, the egg pays `again` points instead.
-export const EGGS = {
-  sprout: { name: "새싹 알", again: 30, inside: [[["points", 20, 80], 78], [["wear", 1], 22]] },
-  shiny: { name: "반짝 알", again: 100, inside: [[["points", 80, 200], 50], [["wear", 2], 25], [["bg", false], 8], [["theme"], 7], [["skin", 2], 5], [["concept"], 5]] },
-  rainbow: { name: "무지개 알", again: 300, inside: [[["points", 200, 500], 30], [["skin", 3], 20], [["concept"], 15], [["wear", 3], 15], [["bg", true], 12], [["character"], 8]] },
-  // ten hearts from friends
-  heart: { name: "하트 알", again: 40, inside: [[["points", 30, 120], 52], [["egg", "sprout"], 22], [["egg", "shiny"], 10], [["wear", 2], 13], [["skin", 2], 3]] },
+//   ["ticket", kind]          a ticket for another turn
+// When there is nothing left of a kind to give, the capsule pays `again` points instead.
+export const MACHINES = {
+  basic: { name: "캡슐 뽑기", ticket: "뽑기권", hearts: 10, points: 150, again: 40,
+    inside: [[["points", 20, 120], 55], [["wear", 2], 24], [["ticket", "basic"], 8], [["bg", false], 5], [["theme"], 4], [["skin", 2], 3], [["ticket", "gold"], 1]] },
+  gold: { name: "황금 뽑기", ticket: "황금 뽑기권", points: 600, again: 250,
+    inside: [[["points", 150, 400], 30], [["wear", 3], 20], [["skin", 3], 15], [["concept"], 15], [["bg", true], 10], [["character"], 6], [["ticket", "gold"], 4]] },
 };
-export const EGG_KINDS = ["sprout", "shiny", "rainbow"]; // the ones that are kept as tickets
-export const HEARTS_FOR_EGG = 10;
+export const MACHINE_KINDS = ["basic", "gold"];
+export const HEARTS_FOR_DRAW = MACHINES.basic.hearts;
 
 // ----- levels -----
 // A level is reached by words learned (the most the student has ever had learned at once).
@@ -143,23 +144,23 @@ export function levelFor(words) {
   while (level < LEVEL_MAX && words >= NEED[level + 1]) level += 1;
   return level;
 }
-// What reaching a level gives: a list of { points } | { egg, n } | { item: "wear:glasses" } …
-// Every fifth level has a present of its own (`big`); the others take turns: points, an egg.
+// What reaching a level gives: a list of { points } | { ticket, n } | { item: "wear:glasses" } …
+// Every fifth level has a present of its own (`big`); the others take turns: points, a ticket for the capsule machine.
 const BIG = {
-  5: [{ egg: "shiny", n: 1 }, { item: "wear:glasses" }],
-  10: [{ item: "concept:candy" }, { egg: "shiny", n: 1 }],
-  15: [{ egg: "rainbow", n: 1 }],
-  20: [{ item: "skin:bubble-candy" }, { egg: "shiny", n: 2 }],
-  25: [{ item: "bg:aurora" }, { egg: "rainbow", n: 1 }],
-  30: [{ egg: "rainbow", n: 2 }, { item: "wear:wand" }],
+  5: [{ ticket: "gold", n: 1 }, { item: "wear:glasses" }],
+  10: [{ item: "concept:candy" }, { ticket: "gold", n: 1 }],
+  15: [{ ticket: "gold", n: 2 }],
+  20: [{ item: "skin:bubble-candy" }, { ticket: "gold", n: 2 }],
+  25: [{ item: "bg:aurora" }, { ticket: "gold", n: 2 }],
+  30: [{ ticket: "gold", n: 3 }, { item: "wear:wand" }],
   35: [{ item: "wear:wings" }, { points: 500 }],
-  40: [{ item: "concept:space" }, { egg: "rainbow", n: 2 }],
-  45: [{ egg: "rainbow", n: 3 }],
-  50: [{ item: "skin:bubble-gold" }, { egg: "rainbow", n: 3 }, { points: 1000 }],
+  40: [{ item: "concept:space" }, { ticket: "gold", n: 3 }],
+  45: [{ ticket: "gold", n: 5 }],
+  50: [{ item: "skin:bubble-gold" }, { ticket: "gold", n: 5 }, { points: 1000 }],
 };
 export function levelGift(level) {
   if (level < 2 || level > LEVEL_MAX) return { big: false, gifts: [] };
   if (BIG[level]) return { big: true, gifts: BIG[level] };
   if (level % 2 === 0) return { big: false, gifts: [{ points: Math.min(300, 30 + level * 5) }] };
-  return { big: false, gifts: [{ egg: level % 5 === 3 && level > 3 ? "shiny" : "sprout", n: 1 }] };
+  return { big: false, gifts: [{ ticket: "basic", n: level % 5 === 3 && level > 3 ? 2 : 1 }] };
 }

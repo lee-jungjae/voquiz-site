@@ -300,20 +300,19 @@ export function initFriends(c) {
                  h("button", { class: "link", onclick: () => { ui.confirm = null; c.render(); } }, t("취소"))]
               : [!state.giftSetup && h("button", { class: `gift-heart${given(f) ? " sent" : ""}`, disabled: given(f) || ui.busy,
                    title: given(f) ? t("오늘은 이미 하트를 보냈어요. 내일 또 보낼 수 있어요.") : t("하트 보내기"), "aria-label": given(f) ? t("오늘은 이미 하트를 보냈어요. 내일 또 보낼 수 있어요.") : t("하트 보내기"),
-                   onclick: () => give(f) }, h("i", { "aria-hidden": "true" }, "♥"), given(f) ? t("보냄") : t("보내기")),
+                   onclick: () => give(f) }, h("i", { class: "heart-i", "aria-hidden": "true" }), given(f) ? t("보냄") : t("보내기")),
                  h("button", { class: "mini buy", disabled: Boolean(f.other.no_duels), onclick: () => c.startDuel(f.other) }, t("대결")),
                  h("button", { class: "link", onclick: () => { ui.confirm = f.id; c.render(); } }, t("삭제"))])));
 
     // ----- gifts: what waits, what came in the last seven days (who and when), whom I gave to today -----
     const givenToday = friends.filter(given);
     const giftsTab = () => [
-      c.heartBox(),
       h("section", { class: "duel-list gifts" },
         h("h3", null, t("받은 하트"), waiting().length > 0 && h("small", null, String(waiting().length))),
         // Each friend's hearts are an item of their own: taken, or taken with one sent back.
         waiting().length > 1 && h("div", { class: "gift-all" },
           h("button", { class: "mini", disabled: ui.busy, onclick: () => collect(null, false) }, t("모두 받기")),
-          h("button", { class: "mini buy", disabled: ui.busy, onclick: () => collect(null, true) }, h("i", { "aria-hidden": "true" }, "♥"), t("모두 받고 보내기"))),
+          h("button", { class: "mini buy", disabled: ui.busy, onclick: () => collect(null, true) }, h("i", { class: "heart-i", "aria-hidden": "true" }), t("모두 받고 보내기"))),
         waiting().length > 0
           ? byFriend().map(({ from, n }) => {
               const friend = friends.find((f) => f.other.id === from.id);
@@ -321,7 +320,7 @@ export function initFriends(c) {
                 h("span", { class: "gift-mark", "aria-hidden": "true" }, "♥"),
                 h("span", { class: "who" }, h("span", null, who(from), n > 1 && ` ×${n}`, fresh())),
                 h("button", { class: "mini", disabled: ui.busy, onclick: () => collect(from.id, false) }, t("받기")),
-                friend && !given(friend) && h("button", { class: "mini buy", disabled: ui.busy, onclick: () => collect(from.id, true) }, h("i", { "aria-hidden": "true" }, "♥"), t("받고 보내기")));
+                friend && !given(friend) && h("button", { class: "mini buy", disabled: ui.busy, onclick: () => collect(from.id, true) }, h("i", { class: "heart-i", "aria-hidden": "true" }), t("받고 보내기")));
             })
           : h("div", { class: "empty small" }, t("받을 하트가 없어요."))),
       h("section", { class: "duel-list" },
@@ -375,6 +374,7 @@ export function initFriends(c) {
     return [
       head,
       ui.notice && h("div", { class: "notice" }, ui.notice),
+      c.heartBox(), // the hearts collected for the capsule machine: above every tab
       // What waits for an answer is counted on its tab; inside the tab each such item carries a badge.
       h("div", { class: `segment${tabs.length === 3 ? " three" : ""} friend-tabs`, role: "tablist" }, tabs.map(([id, label, count, alert]) =>
         h("button", { role: "tab", "aria-selected": String(tab === id), onclick: show(id) },

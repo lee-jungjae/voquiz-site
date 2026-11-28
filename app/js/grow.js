@@ -1,10 +1,10 @@
 // Growing with the app: a level that rises with the words learned, the presents each level gives,
-// the eggs that are cracked for a prize, the things a character wears, and the hearts friends send
-// (ten hearts are an egg too). The lists themselves are in goods.js; this file is what is done
-// with them and how it is shown. Everything is kept with the account: `level` { xp, got },
-// `bag` { eggs: { sprout, shiny, rainbow } }, `hearts` { n, all }, and in `shop`: what is owned
-// ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
-import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, EGGS, EGG_KINDS, HEARTS_FOR_EGG, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js";
+// the capsule machines that are turned for a prize, the things a character wears, and the hearts
+// friends send (ten hearts are a turn of the machine). The lists themselves are in goods.js; this
+// file is what is done with them and how it is shown. Everything is kept with the account:
+// `level` { xp, got }, `bag` { tickets: { basic, gold } }, `hearts` { n, all }, and in `shop`: what
+// is owned ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
+import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js";
 import { lookOf } from "./characters.js";
 
 const TWICE_POINTS = 100; // a present the student already has turns into points
@@ -13,9 +13,19 @@ export function initGrow(c) {
   const { h, t, state } = c;
   const shop = () => c.myShop();
   const owned = (key) => shop().owned.includes(key);
-  const keep = () => c.api.saveProfile({ level: state.user.level, bag: state.user.bag, hearts: state.user.hearts }).catch(console.error);
+  const keep = () => c.api.saveProfile({ points: state.user.points, level: state.user.level, bag: state.user.bag, hearts: state.user.hearts }).catch(console.error);
   const coin = () => h("i", { class: "coin-i", "aria-hidden": "true" }, "P");
-  const eggArt = (kind) => h("i", { class: `egg ${kind}`, "aria-hidden": "true" }, h("u"));
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = (box, cls, inner) => {
+    const el = document.createElementNS(NS, "svg");
+    el.setAttribute("viewBox", box);
+    el.setAttribute("class", cls);
+    el.setAttribute("aria-hidden", "true");
+    el.innerHTML = inner;
+    return el;
+  };
+  const ticketArt = (kind) => h("i", { class: `tix ${kind}`, "aria-hidden": "true" });
+  const heartArt = () => h("i", { class: "heart-i", "aria-hidden": "true" });
 
   // ----- the character as it is dressed -----
   const wearing = () => shop().wear || {};
@@ -42,22 +52,33 @@ export function initGrow(c) {
     if (kind === "character") { const x = c.CHARACTERS.find((y) => y.id === id); return x && { kind, name: t(x.name), art: () => c.portrait(id) }; }
     return null;
   }
-  const giftText = (g) => (g.points ? `+${g.points}` : g.egg ? `${t(EGGS[g.egg].name)}${(g.n || 1) > 1 ? ` ×${g.n}` : ""}` : `${t(KIND_NAMES[itemOf(g.item)?.kind] || "선물")} · ${itemOf(g.item)?.name || ""}`);
-  const giftChip = (g) => h("span", { class: `gift-chip${g.points ? " points" : g.egg ? " egg-chip" : " item"}` }, g.points ? coin() : g.egg ? eggArt(g.egg) : null, giftText(g));
+  const giftText = (g) => (g.points ? `+${g.points}` : g.ticket ? `${t(MACHINES[g.ticket].ticket)}${(g.n || 1) > 1 ? ` ×${g.n}` : ""}` : `${t(KIND_NAMES[itemOf(g.item)?.kind] || "선물")} · ${itemOf(g.item)?.name || ""}`);
+  // A present as a picture: the coin with its number, the ticket, or the thing itself.
+  const giftArt = (g) => h("span", { class: `gift-b${g.points ? " points" : g.ticket ? ` ticket ${g.ticket}` : " item"}`, title: giftText(g), role: "img", "aria-label": giftText(g) },
+    g.points ? [coin(), h("b", null, `+${g.points}`)] : g.ticket ? [ticketArt(g.ticket), (g.n || 1) > 1 && h("b", null, `×${g.n}`)] : itemOf(g.item)?.art());
 
-  // Gives what a level or an egg holds. Returns what arrived (a thing the student has already
+  // Tickets for the machines. (An account from the first days of levels may still hold eggs:
+  // a sprout egg counts as a ticket, the others as golden tickets.)
+  function tickets() {
+    const bag = state.user?.bag || {};
+    if (bag.tickets) return { basic: bag.tickets.basic || 0, gold: bag.tickets.gold || 0 };
+    const eggs = bag.eggs || {};
+    return { basic: eggs.sprout || 0, gold: (eggs.shiny || 0) + (eggs.rainbow || 0) };
+  }
+  const setTickets = (next) => { state.user.bag = { tickets: next }; };
+
+  // Gives what a level or a capsule holds. Returns what arrived (a thing the student has already
   // comes as points, marked `twice`). It is saved at once.
-  function grant(gifts) {
+  // quiet: the points are added without a word (a capsule says it itself when it opens).
+  function grant(gifts, quiet) {
     const got = [];
     const fresh = [];
+    const pay = (n) => { if (quiet) state.user.points = (state.user.points || 0) + n; else c.award(n, t("선물"), false, { league: false }); };
     for (const g of gifts) {
-      if (g.points) { c.award(g.points, t("선물"), false, { league: false }); got.push(g); }
-      else if (g.egg) {
-        const eggs = state.user.bag?.eggs || {};
-        state.user.bag = { ...(state.user.bag || {}), eggs: { ...eggs, [g.egg]: (eggs[g.egg] || 0) + (g.n || 1) } };
-        got.push(g);
-      } else if (g.item) {
-        if (owned(g.item) || fresh.includes(g.item)) { c.award(TWICE_POINTS, t("선물"), false, { league: false }); got.push({ points: TWICE_POINTS, twice: g.item }); }
+      if (g.points) { pay(g.points); got.push(g); }
+      else if (g.ticket) { setTickets({ ...tickets(), [g.ticket]: tickets()[g.ticket] + (g.n || 1) }); got.push(g); }
+      else if (g.item) {
+        if (owned(g.item) || fresh.includes(g.item)) { pay(TWICE_POINTS); got.push({ points: TWICE_POINTS, twice: g.item }); }
         else { fresh.push(g.item); got.push(g); }
       }
     }
@@ -98,38 +119,40 @@ export function initGrow(c) {
     if (n < 2 || n > level() || taken().has(n)) return;
     state.user.level = { ...kept(), xp: xp(), got: [...taken(), n].sort((a, b) => a - b) };
     const got = grant(levelGift(n).gifts);
+    c.sfx.cheer(shop().character);
     // points announce themselves (the points pill): one message at a time
-    if (!got.every((g) => g.points)) c.toastText(t("Lv.{n} 선물: {what}", { n, what: got.filter((g) => !g.points).map(giftText).join(", ") }));
-    openLevels(true);
+    if (got.some((g) => g.ticket)) c.toastText(t("뽑기권을 받았어요! 뽑기 기계에서 써 보세요."));
+    else if (!got.every((g) => g.points)) c.toastText(t("Lv.{n} 선물: {what}", { n, what: got.filter((g) => !g.points).map(giftText).join(", ") }));
+    openLevels(true, n);
   }
-  // At the top left of every screen: the level, and under it how far the next one is. A dot says
-  // that presents wait. A press opens the road of levels.
+  // The level as a badge: a seal with the number on it, and round it a ring that fills as the
+  // next level comes nearer.
+  const SEAL = Array.from({ length: 8 }, (_, i) => { const a = (i / 8) * Math.PI * 2; return `<circle cx="${(22 + Math.cos(a) * 11.5).toFixed(1)}" cy="${(22 + Math.sin(a) * 11.5).toFixed(1)}" r="4.2"/>`; }).join("");
+  const RING = 2 * Math.PI * 19.5;
+  const progress = () => { const lv = level(), base = needFor(lv), next = lv < LEVEL_MAX ? needFor(lv + 1) : null; return next ? (xp() - base) / (next - base) : 1; };
+  const badge = (lv, part, cls = "") => svg("0 0 44 44", `lv-badge ${cls}`,
+    `<circle class="lv-ring-bg" cx="22" cy="22" r="19.5"/><circle class="lv-ring" cx="22" cy="22" r="19.5" stroke-dasharray="${RING.toFixed(1)}" stroke-dashoffset="${(RING * (1 - part)).toFixed(1)}" transform="rotate(-90 22 22)"/>` +
+    `<g class="lv-seal">${SEAL}<circle cx="22" cy="22" r="12.5"/></g><text x="22" y="22" text-anchor="middle" dominant-baseline="central">${lv}</text>`);
+  // At the top left of every screen. A dot says that presents wait. A press opens the road of levels.
   function levelChip() {
     if (!state.user?.grade) return null;
-    const lv = level(), base = needFor(lv), next = lv < LEVEL_MAX ? needFor(lv + 1) : null;
+    const lv = level(), next = lv < LEVEL_MAX ? needFor(lv + 1) : null;
     const gifts = waiting().length;
     const label = next ? `${t("내 레벨")} ${lv} · ${t("다음 레벨까지 {n}개", { n: next - xp() })}` : `${t("내 레벨")} ${lv}`;
     return h("button", { class: `lv-chip${gifts ? " has-gift" : ""}`, title: label, "aria-label": label, onclick: () => openLevels() },
-      h("b", null, `Lv.${lv}`),
-      h("span", { class: "lv-bar", "aria-hidden": "true" }, h("i", { style: `width:${next ? Math.round(((xp() - base) / (next - base)) * 100) : 100}%` })),
-      gifts > 0 && h("em", { class: "lv-dot", "aria-hidden": "true" }));
+      badge(lv, progress()), gifts > 0 && h("em", { class: "lv-dot", "aria-hidden": "true" }));
   }
-  // The eggs the student holds; a press cracks one.
-  const eggsHeld = () => state.user.bag?.eggs || {};
-  const eggBar = (from) => h("div", { class: "egg-bar" }, EGG_KINDS.map((kind) =>
-    h("button", { class: "egg-slot", disabled: !(eggsHeld()[kind] > 0), title: t("알 깨기"), onclick: () => openEgg(kind, from) },
-      eggArt(kind), h("small", null, t(EGGS[kind].name)), h("b", null, `×${eggsHeld()[kind] || 0}`))));
-  // The road of levels: what each one gives, which presents wait, which are still ahead.
-  function openLevels(same) {
+  // The road of levels, as a map: a path that winds upward through five lands, a stone for every
+  // level (level 1 at the bottom), the student's character on the stone it has reached, and each
+  // stone's present drawn beside it. just: the level whose present was taken a moment ago.
+  function openLevels(same, just) {
     const old = document.getElementById("sheet");
     const at = same ? old?.querySelector(".lv-road")?.scrollTop : null;
     old?.remove();
     const close = () => { el.remove(); c.render(); };
-    const lv = level(), got = taken(), base = needFor(lv), next = lv < LEVEL_MAX ? needFor(lv + 1) : null;
-    // A map, not a list: a path that winds upward, a stone for every level (level 1 at the bottom),
-    // the student's character on the stone it has reached, and each stone's present beside it.
-    const STEP = 84, PAD = 56, tall = (LEVEL_MAX - 1) * STEP + PAD * 2;
-    const xOf = (n) => 50 + 27 * Math.sin((n - 1) * 0.95), yOf = (n) => PAD + (LEVEL_MAX - n) * STEP;
+    const lv = level(), got = taken(), next = lv < LEVEL_MAX ? needFor(lv + 1) : null;
+    const STEP = 92, PAD = 60, tall = (LEVEL_MAX - 1) * STEP + PAD * 2;
+    const xOf = (n) => 50 + 26 * Math.sin((n - 1) * 0.95), yOf = (n) => PAD + (LEVEL_MAX - n) * STEP;
     const line = Array.from({ length: LEVEL_MAX }, (_, i) => {
       const n = i + 1;
       if (n === 1) return `M${xOf(1)} ${yOf(1)}`;
@@ -137,113 +160,127 @@ export function initGrow(c) {
       return `C${xOf(n - 1)} ${mid} ${xOf(n)} ${mid} ${xOf(n)} ${yOf(n)}`;
     }).join(" ");
     const path = (cls, upTo) => { // drawn in a box 100 wide that is stretched to the map: the line keeps its own width
-      const el = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      el.setAttribute("viewBox", `0 0 100 ${tall}`);
-      el.setAttribute("preserveAspectRatio", "none");
-      el.setAttribute("class", `lv-path ${cls}`);
-      el.setAttribute("aria-hidden", "true");
-      el.innerHTML = `<path d="${upTo ? line.split(" C").slice(0, upTo).join(" C") : line}" fill="none" vector-effect="non-scaling-stroke"/>`;
-      return el;
+      const p = svg(`0 0 100 ${tall}`, `lv-path ${cls}`, `<path d="${upTo ? line.split(" C").slice(0, upTo).join(" C") : line}" fill="none" vector-effect="non-scaling-stroke"/>`);
+      p.setAttribute("preserveAspectRatio", "none");
+      return p;
     };
+    const ZONE = 10; // a land every ten levels
     const road = h("div", { class: "lv-road lv-map" }, h("div", { class: "lv-map-in", style: `height:${tall}px` },
+      Array.from({ length: LEVEL_MAX / ZONE }, (_, z) => h("i", { class: `lv-zone z${z}`, "aria-hidden": "true", style: `top:${z === LEVEL_MAX / ZONE - 1 ? 0 : yOf((z + 1) * ZONE) - STEP / 2}px;height:${z === LEVEL_MAX / ZONE - 1 ? yOf(z * ZONE) + STEP / 2 : ZONE * STEP}px` })),
       path("all"), path("done", lv),
       Array.from({ length: LEVEL_MAX }, (_, i) => {
         const n = i + 1;
         const { big, gifts } = levelGift(n);
         const where = n === 1 ? "start" : got.has(n) ? "got" : n <= lv ? "ready" : "locked";
         const side = xOf(n) > 50 ? "left" : "right";
+        const near = Math.abs(n - lv);
         return [
-          h("button", { class: `lv-step lv-stone ${where}${big ? " big" : ""}${n === lv ? " here" : ""}`, style: `left:${xOf(n)}%;top:${yOf(n)}px`, disabled: where !== "ready",
+          // a little thing of the land, on the stone's own side of the map
+          n % 2 === 0 && h("i", { class: `lv-deco d${(n / 2) % 4}`, "aria-hidden": "true", style: `top:${yOf(n) + STEP / 2}px;${side === "left" ? "right:6%" : "left:6%"}` }),
+          h("button", { class: `lv-step lv-stone ${where}${big ? " big" : ""}${n === lv ? " here" : ""}${n === just ? " just" : ""}`, style: `left:${xOf(n)}%;top:${yOf(n)}px;${at == null && near < 7 ? `animation-delay:${near * 60}ms` : ""}`, disabled: where !== "ready",
             title: where === "ready" ? t("받기") : t("단어 {n}개", { n: needFor(n) }), "aria-label": `Lv.${n}`, onclick: () => claim(n) },
-            where === "got" ? "✓" : String(n)),
+            where === "got" ? h("i", { class: "check-i", "aria-hidden": "true" }) : String(n)),
           n === lv && h("span", { class: "lv-here", style: `left:${xOf(n)}%;top:${yOf(n)}px`, "aria-hidden": "true" }, c.portrait(myLook())),
           n > 1 && h("div", { class: `lv-tag ${side} ${where}${big ? " big" : ""}`, style: `top:${yOf(n)}px;${side === "left" ? `right:${100 - xOf(n) + 11}%` : `left:${xOf(n) + 11}%`}` },
-            h("span", { class: "lv-gifts" }, gifts.map(giftChip)),
-            where === "ready" ? h("button", { class: "mini buy", onclick: () => claim(n) }, t("받기")) : h("small", null, t("단어 {n}개", { n: needFor(n) }))),
+            h("span", { class: "lv-gifts" }, gifts.map(giftArt)),
+            where === "ready" && h("button", { class: "mini buy", onclick: () => claim(n) }, t("받기"))),
         ];
       })));
+    const held = tickets().basic + tickets().gold;
+    const big = badge(lv, at == null ? 0 : progress(), "big");
     const el = h("div", { id: "sheet", class: "sheet-wrap", onclick: (e) => { if (e.target === el) close(); } },
       h("div", { class: "sheet lv-sheet", role: "dialog", "aria-modal": "true", "aria-label": t("내 레벨") },
         h("div", { class: "lv-top" },
+          big,
           h("span", { class: "lv-me", "aria-hidden": "true" }, c.portrait(myLook())),
-          h("div", { class: "lv-now" },
-            h("h2", null, `Lv.${lv}`),
-            h("span", { class: "lv-bar", "aria-hidden": "true" }, h("i", { style: `width:${next ? Math.round(((xp() - base) / (next - base)) * 100) : 100}%` })),
-            h("p", { class: "small" }, t("다 익힌 단어 {n}개", { n: xp() }), " · ", next ? t("다음 레벨까지 {n}개", { n: next - xp() }) : t("최고 레벨!")))),
-        h("p", { class: "small muted" }, t("퀴즈에서 단어를 다 익힐 때마다 레벨이 올라요. 레벨마다 선물이 있어요.")),
-        eggBar("levels"),
+          h("p", { class: "small lv-next" }, next ? t("다음 레벨까지 {n}개", { n: next - xp() }) : t("최고 레벨!"))),
         road,
+        held > 0 && h("button", { class: "btn wide ghost lv-go", onclick: () => { el.remove(); c.openGacha(); } }, ticketArt(tickets().gold ? "gold" : "basic"), t("뽑기 기계로 가기"), h("b", null, `×${held}`)),
         h("button", { class: "btn wide", onclick: close }, t("닫기"))));
     document.body.append(el);
     if (at != null) road.scrollTop = at;
     else {   // my stone a little below the middle: the next gifts show above, the waiting ones just below
       const me = road.querySelector(".lv-step.here") || road.querySelector(".lv-step.ready");
       const put = () => { if (me) road.scrollTop = me.offsetTop - road.clientHeight * 0.55; };
-      put(); requestAnimationFrame(put);
+      put();
+      requestAnimationFrame(() => { put(); big.querySelector(".lv-ring").setAttribute("stroke-dashoffset", (RING * (1 - progress())).toFixed(1)); });
     }
   }
 
-  // ----- eggs -----
+  // ----- the capsule machines -----
+  const CAPS = [[38, 62, "#ff8fb8", -20], [56, 70, "#ffd84d", 30], [76, 66, "#7fd6c2", -40], [88, 52, "#9aa5ff", 15], [30, 46, "#ffd84d", 50], [48, 48, "#9aa5ff", -10], [66, 48, "#ff8fb8", 70], [58, 30, "#7fd6c2", 20], [78, 34, "#ffd84d", -60], [40, 30, "#ff8fb8", 40]];
+  const capsule = (x, y, colour, turn, cls = "") => `<g class="${cls}" transform="translate(${x} ${y}) rotate(${turn})"><circle r="9" fill="#fff" stroke="#3b3550" stroke-width="1.6"/><path d="M-9 0 a9 9 0 0 1 18 0 z" fill="${colour}" stroke="#3b3550" stroke-width="1.6" stroke-linejoin="round"/></g>`;
+  const machineArt = (kind, cls = "") => svg("0 0 120 150", `gm ${kind} ${cls}`,
+    `<ellipse class="gm-shadow" cx="60" cy="145" rx="42" ry="4"/>` +
+    `<circle class="gm-dome" cx="60" cy="50" r="44"/><g class="gm-caps">${CAPS.map(([x, y, colour, turn], i) => capsule(x, y, kind === "gold" && i % 2 ? "#ffc93c" : colour, turn, `gm-cap c${i % 3}`)).join("")}</g>` +
+    `<path class="gm-shine" d="M27 34 q9 -15 25 -19"/>` +
+    `<rect class="gm-body" x="16" y="86" width="88" height="54" rx="14"/><rect class="gm-rim" x="12" y="82" width="96" height="12" rx="6"/>` +
+    `<g class="gm-knob"><circle class="gm-knob-c" cx="44" cy="117" r="14"/><rect class="gm-knob-h" x="40" y="105" width="8" height="24" rx="4"/></g>` +
+    `<rect class="gm-chute" x="68" y="106" width="26" height="24" rx="7"/><g class="gm-drop">${capsule(81, 118, kind === "gold" ? "#ffc93c" : "#ff8fb8", 25)}</g>`);
+
+  // The same machine, small and still (the button that leads to it).
+  const machineMini = () => `<circle class="gm-dome" cx="60" cy="50" r="44"/>${CAPS.slice(0, 6).map(([x, y, colour, turn]) => capsule(x, y, colour, turn)).join("")}` +
+    `<rect class="gm-body" x="16" y="86" width="88" height="54" rx="14"/><rect class="gm-rim" x="12" y="82" width="96" height="12" rx="6"/><circle class="gm-knob-c" cx="44" cy="117" r="14"/><rect class="gm-chute" x="68" y="106" width="26" height="24" rx="7"/>`;
   const one = (list) => list[Math.floor(Math.random() * list.length)];
   function roll(kind) {
-    const egg = EGGS[kind];
-    let pick = Math.random() * egg.inside.reduce((sum, [, often]) => sum + often, 0);
-    const [what] = egg.inside.find(([, often]) => (pick -= often) < 0) || egg.inside[0];
+    const machine = MACHINES[kind];
+    let pick = Math.random() * machine.inside.reduce((sum, [, often]) => sum + often, 0);
+    const [what] = machine.inside.find(([, often]) => (pick -= often) < 0) || machine.inside[0];
     const left = (keys) => keys.filter((key) => !owned(key));
-    const item = (keys) => (left(keys).length ? { item: one(left(keys)) } : { points: egg.again, twice: true });
+    const item = (keys) => (left(keys).length ? { item: one(left(keys)) } : { points: machine.again, twice: true });
     if (what[0] === "points") return { points: what[1] + 10 * Math.floor(Math.random() * (Math.floor((what[2] - what[1]) / 10) + 1)) };
-    if (what[0] === "egg") return { egg: what[1], n: 1 };
+    if (what[0] === "ticket") return { ticket: what[1], n: 1 };
     if (what[0] === "wear") return item(WEARS.filter((w) => w.rare <= what[1]).map((w) => `wear:${w.id}`));
     if (what[0] === "skin") return item(SKINS.filter((s) => s.rare <= what[1]).map(skinKey));
     if (what[0] === "concept") return item(CONCEPTS.filter((x) => x.cost > 0 && !x.special).map((x) => `concept:${x.id}`));
     if (what[0] === "bg") return item(c.BACKGROUNDS.filter((x) => x.cost > 0 && !x.earn && Boolean(x.special) === what[1]).map((x) => `bg:${x.id}`));
     if (what[0] === "theme") return item(c.THEMES.filter((x) => x.cost > 0 && !x.special).map((x) => `theme:${x.id}`));
     if (what[0] === "character") return item(c.CHARACTERS.filter((x) => x.special && !x.earn && x.id !== "santa").map((x) => `character:${x.id}`));
-    return { points: egg.again };
+    return { points: machine.again };
   }
   const hearts = () => ({ n: 0, all: 0, ...(state.user?.hearts || {}) });
-  const canOpen = (kind) => (kind === "heart" ? hearts().n >= HEARTS_FOR_EGG : eggsHeld()[kind] > 0);
-  // Cracks one egg: the prize is decided and kept first, then shown, so nothing is lost if the
-  // window is closed half way. from: where to go back to ("levels": the road of levels).
-  function openEgg(kind, from) {
-    if (!canOpen(kind)) return;
-    if (kind === "heart") state.user.hearts = { ...hearts(), n: hearts().n - HEARTS_FOR_EGG };
-    else state.user.bag = { ...(state.user.bag || {}), eggs: { ...eggsHeld(), [kind]: eggsHeld()[kind] - 1 } };
+  // A turn is paid with ten hearts (the everyday machine only), a ticket, or points.
+  const canPay = (kind, pay) => (pay === "hearts" ? kind === "basic" && hearts().n >= HEARTS_FOR_DRAW : pay === "ticket" ? tickets()[kind] > 0 : (state.user.points || 0) >= MACHINES[kind].points);
+  // One turn: it is paid, the prize is decided and kept first, and only then shown (the handle
+  // turns, a capsule rolls out and opens), so nothing is lost if the window is closed half way.
+  function draw(kind, pay) {
+    if (!canPay(kind, pay)) return;
+    if (pay === "hearts") state.user.hearts = { ...hearts(), n: hearts().n - HEARTS_FOR_DRAW };
+    else if (pay === "ticket") setTickets({ ...tickets(), [kind]: tickets()[kind] - 1 });
+    else c.spend(MACHINES[kind].points);
     const prize = roll(kind);
-    const got = grant([prize.twice ? { points: prize.points } : prize])[0];
+    const got = grant([prize.twice ? { points: prize.points } : prize], true)[0];
     const twice = Boolean(prize.twice || got.twice);
     document.getElementById("sheet")?.remove();
-    const back = () => { el.remove(); c.render(); if (from === "levels") openLevels(); };
+    c.render(); // the hearts, tickets or points just paid show as paid behind the machine
+    const back = () => { el.remove(); c.render(); };
     const thing = got.item ? itemOf(got.item) : null;
-    const title = h("h2", null, t(EGGS[kind].name));
-    const text = h("p", null, t("알을 눌러서 깨 보세요!"));
+    const colour = kind === "gold" ? "gold" : got.item ? "pink" : got.ticket ? "blue" : "yellow";
+    const machine = machineArt(kind, "big");
+    const ball = h("div", { class: `capsule-big ${colour}`, hidden: true, "aria-hidden": "true" }, h("i"), h("u"));
     const prizeBox = h("div", { class: "prize", hidden: true },
-      h("div", { class: `prize-art${got.points ? " points" : ""}` }, got.points ? [coin(), h("b", null, `+${got.points}`)] : got.egg ? eggArt(got.egg) : thing?.art()),
-      h("b", { class: "prize-name" }, got.points ? t("{n}포인트", { n: got.points }) : got.egg ? t(EGGS[got.egg].name) : thing?.name),
-      h("small", null, twice ? t("이미 다 가지고 있어서 포인트로 받았어요.") : got.item ? t(KIND_NAMES[thing?.kind] || "선물") : got.egg ? t("알이 하나 더 생겼어요!") : ""));
-    const more = h("button", { class: "btn wide", hidden: true, onclick: () => { el.remove(); openEgg(kind, from); } }, t("하나 더 깨기"));
+      h("div", { class: `prize-art${got.points ? " points" : ""}` }, got.points ? [coin(), h("b", null, `+${got.points}`)] : got.ticket ? ticketArt(got.ticket) : thing?.art()),
+      h("b", { class: "prize-name" }, got.points ? t("{n}포인트", { n: got.points }) : got.ticket ? t(MACHINES[got.ticket].ticket) : thing?.name),
+      h("small", null, twice ? t("이미 다 가지고 있어서 포인트로 받았어요.") : got.item ? t(KIND_NAMES[thing?.kind] || "선물") : got.ticket ? t("한 번 더 뽑을 수 있어요!") : ""));
+    const more = h("button", { class: "btn wide", hidden: true, onclick: () => { el.remove(); draw(kind, pay); } }, t("한 번 더 뽑기"));
     const use = h("button", { class: "btn wide ghost", hidden: true, onclick: () => { el.remove(); useNow(got.item); } }, t("지금 써 보기"));
     const done = h("button", { class: "link", hidden: true, onclick: back }, t("닫기"));
-    let cracked = false;
-    const crack = () => {
-      if (cracked) return;
-      cracked = true;
-      egg.classList.add("crack");
-      c.sfx.cheer(shop().character);
-      setTimeout(() => {
-        egg.hidden = true;
-        prizeBox.hidden = false;
-        title.textContent = t("짜잔!");
-        text.hidden = true;
-        more.hidden = !canOpen(kind);
-        use.hidden = !(got.item && ["wear", "skin", "concept", "bg", "theme", "character"].includes(thing?.kind));
-        done.hidden = false;
-      }, 700);
-    };
-    const egg = h("button", { class: `egg-big egg ${kind}`, "aria-label": t("알 깨기"), onclick: crack }, h("u"));
     const el = h("div", { id: "sheet", class: "sheet-wrap" },
-      h("div", { class: "sheet egg-sheet", role: "dialog", "aria-modal": "true", "aria-label": t(EGGS[kind].name) }, title, text, egg, prizeBox, more, use, done));
+      h("div", { class: "sheet gacha-sheet", role: "dialog", "aria-modal": "true", "aria-label": t(MACHINES[kind].name) }, machine, ball, prizeBox, more, use, done));
     document.body.append(el);
+    const still = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const step = (ms, fn) => setTimeout(() => { if (el.isConnected) fn(); }, still ? Math.min(ms, 200) : ms);
+    requestAnimationFrame(() => machine.classList.add("turning"));
+    step(1500, () => { machine.remove(); ball.hidden = false; });
+    step(2000, () => { ball.classList.add("open"); c.sfx.cheer(shop().character); });
+    step(2450, () => {
+      ball.hidden = true;
+      prizeBox.hidden = false;
+      if (got.points) c.countUp(got.points);
+      more.hidden = !canPay(kind, pay);
+      use.hidden = !(got.item && ["wear", "skin", "concept", "bg", "theme", "character"].includes(thing?.kind));
+      done.hidden = false;
+    });
   }
   // Puts a prize to use at once: wears it, or applies the theme, background, colour or character.
   function useNow(key) {
@@ -271,21 +308,22 @@ export function initGrow(c) {
   function wardrobe() {
     const me = shop().character;
     const slotName = Object.fromEntries(SLOTS);
-    const tile = (active, has, art, name, sub, action) => h("div", { class: `swatch wear-tile${active ? " active" : ""}${has ? "" : " locked"}` }, art, h("div", { class: "swatch-name" }, name, sub && h("small", null, sub)), action);
-    const lock = () => h("span", { class: "tagline earn" }, "🔒 ", t("알에서 나와요"));
+    const tile = (active, has, art, name, sub, action, kind, id) => h("div", { class: `swatch wear-tile${active ? " active" : ""}${has ? "" : " locked"}${state.tryOn?.kind === kind && state.tryOn.id === id ? " trying" : ""}`,
+      title: active ? null : t("눌러서 미리 보기"), onclick: (e) => { if (!e.target.closest("button") && !active) c.tryOn(kind, id); } }, art, h("div", { class: "swatch-name" }, name, sub && h("small", null, sub)), action);
+    const lock = () => h("span", { class: "tagline earn" }, h("i", { class: "lock-i", "aria-hidden": "true" }), t("뽑기에서 나와요"));
     const worn = Object.values(wearing()).length > 0 || Boolean(shop().skin?.[me]);
     return [
       h("div", { class: "wear-me" },
         h("span", { class: "wear-me-art", "aria-hidden": "true" }, c.portrait(myLook())),
         h("div", null,
           h("b", null, t("내 캐릭터 꾸미기")),
-          h("p", { class: "small muted" }, t("소품과 스킨은 알에서 나오거나 레벨 선물로 받아요. 꾸민 모습은 내 화면에서 보여요.")),
+          h("p", { class: "small muted" }, t("소품과 스킨은 뽑기 기계에서 나오거나 레벨 선물로 받아요.")),
           worn && h("button", { class: "link small", onclick: () => { const skin = { ...(shop().skin || {}) }; delete skin[me]; c.saveShop({ ...shop(), wear: {}, skin }); } }, t("모두 벗기")))),
       h("h4", null, t("소품"), h("small", null, ` ${WEARS.filter((w) => owned(`wear:${w.id}`)).length} / ${WEARS.length}`)),
       h("div", { class: "shelf" }, WEARS.map((w) => {
         const has = owned(`wear:${w.id}`), on = has && wearing()[w.slot] === w.id;
         return tile(on, has, c.portrait(lookOf(me, "", [w.id])), t(w.name), t(slotName[w.slot]),
-          has ? h("button", { class: "mini", onclick: () => putOn(w) }, on ? t("벗기") : t("착용하기")) : lock());
+          has ? h("button", { class: "mini", onclick: () => putOn(w) }, on ? t("벗기") : t("착용하기")) : lock(), "wear", w.id);
       })),
       h("h4", null, t("스킨"), h("small", null, ` ${SKINS.filter((s) => owned(skinKey(s))).length} / ${SKINS.length}`)),
       h("div", { class: "shelf" }, SKINS.map((s) => {
@@ -293,7 +331,7 @@ export function initGrow(c) {
         const who = t(c.CHARACTERS.find((x) => x.id === s.of)?.name || "");
         return tile(on && me === s.of, has, c.portrait(lookOf(s.of, s.id)), t(s.name), t("{name} 전용", { name: who }),
           !has ? lock() : !mine ? h("span", { class: "tagline" }, t("{name}가 있어야 해요", { name: who }))
-            : h("button", { class: "mini", onclick: () => paint(s) }, on ? t("기본 모습으로") : t("적용하기")));
+            : h("button", { class: "mini", onclick: () => paint(s) }, on ? t("기본 모습으로") : t("적용하기")), "skin", skinKey(s));
       })),
     ];
   }
@@ -304,19 +342,39 @@ export function initGrow(c) {
     state.user.hearts = { n: hearts().n + n, all: hearts().all + n };
     keep();
   }
-  // At the top of the screen where hearts are sent and taken: ten places that fill up, and the egg
-  // they make. It is meant to be looked at: the hearts held beat, the egg rocks once it is ready.
-  function heartBox() {
-    const n = hearts().n, ready = n >= HEARTS_FOR_EGG;
-    return h("section", { class: `heart-box${ready ? " ready" : ""}` },
-      h("span", { class: "heart-egg", "aria-hidden": "true" }, eggArt("heart")),
-      h("div", { class: "heart-main" },
-        h("b", null, ready ? t("하트 알을 깰 수 있어요!") : t("하트 {n}개를 모으면 하트 알 하나!", { n: HEARTS_FOR_EGG })),
-        h("div", { class: "heart-slots", role: "img", "aria-label": `${n} / ${HEARTS_FOR_EGG}` },
-          Array.from({ length: HEARTS_FOR_EGG }, (_, i) => h("i", { class: i < n ? "on" : "", style: `--i:${i}` }, "♥"))),
-        h("small", null, n > HEARTS_FOR_EGG ? t("하트 {n}개가 모였어요.", { n }) : ready ? t("알 안에 포인트, 알, 소품이 들어 있어요.") : t("친구가 보낸 하트를 받으면 채워져요. {n}개 남았어요.", { n: HEARTS_FOR_EGG - n }))),
-      h("button", { class: "btn heart-open", disabled: !ready, onclick: () => openEgg("heart", "friends") }, t("알 깨기")));
+  // The first tab of the shop: the machine, and what a turn is paid with. Ten places fill up with
+  // the hearts friends send; tickets come from levels; points always work. The golden machine
+  // stands beside it.
+  function gachaBox() {
+    const kind = MACHINE_KINDS.includes(state.machine) ? state.machine : "basic";
+    const machine = MACHINES[kind], held = tickets(), n = hearts().n;
+    const way = (pay, art, label, sub) => h("button", { class: `gacha-pay ${pay}${canPay(kind, pay) ? " can" : ""}`, disabled: !canPay(kind, pay), title: label, "aria-label": label, onclick: () => draw(kind, pay) }, art, h("b", null, sub));
+    return h("section", { class: `gacha ${kind}${["hearts", "ticket"].some((pay) => canPay(kind, pay)) ? " ready" : ""}` },
+      h("div", { class: "gacha-kinds", role: "tablist" }, MACHINE_KINDS.map((id) =>
+        h("button", { role: "tab", "aria-selected": String(kind === id), onclick: () => { state.machine = id; c.render(); } },
+          t(MACHINES[id].name), held[id] > 0 && h("em", { class: "lv-dot", "aria-hidden": "true" })))),
+      h("div", { class: "gacha-stage" }, machineArt(kind)),
+      h("div", { class: "gacha-main" },
+        kind === "basic" && h("div", { class: "heart-slots", role: "img", "aria-label": `${t("하트")} ${n} / ${HEARTS_FOR_DRAW}` },
+          Array.from({ length: HEARTS_FOR_DRAW }, (_, i) => h("i", { class: i < n ? "on" : "", style: `--i:${i}` }))),
+        kind === "gold" && h("p", { class: "small muted" }, t("스킨, 테마, 스페셜 캐릭터가 들어 있어요.")),
+        h("div", { class: "gacha-pays" },
+          kind === "basic" && way("hearts", heartArt(), t("하트 {n}개로 뽑기", { n: HEARTS_FOR_DRAW }), `${Math.min(n, 99)} / ${HEARTS_FOR_DRAW}`),
+          way("ticket", ticketArt(kind), t("{name}으로 뽑기", { name: t(machine.ticket) }), `×${held[kind]}`),
+          way("points", coin(), t("포인트로 뽑기"), String(machine.points)))));
   }
 
-  return { myLook, levelChip, openLevels, learnedOne, sync, waiting, level, wardrobe, conceptArt, addHearts, heartBox, hearts, eggArt };
+  // At the top of the friends screen: the ten places that fill up with the hearts friends send,
+  // and the way to the machine once they are full.
+  function heartStrip() {
+    const n = hearts().n, ready = n >= HEARTS_FOR_DRAW;
+    return h("section", { class: `heart-strip${ready ? " ready" : ""}` },
+      h("div", { class: "heart-slots", role: "img", "aria-label": `${t("하트")} ${n} / ${HEARTS_FOR_DRAW}` },
+        Array.from({ length: HEARTS_FOR_DRAW }, (_, i) => h("i", { class: i < n ? "on" : "", style: `--i:${i}` }))),
+      h("button", { class: "heart-go", title: t("하트 {n}개로 뽑기", { n: HEARTS_FOR_DRAW }), onclick: () => c.openGacha() },
+        svg("0 0 120 150", "gm basic mini", machineMini()), h("b", null, ready ? t("뽑기") : `${n} / ${HEARTS_FOR_DRAW}`)));
+  }
+  const canDraw = () => MACHINE_KINDS.some((kind) => ["hearts", "ticket"].some((pay) => canPay(kind, pay)));
+
+  return { myLook, levelChip, openLevels, learnedOne, sync, waiting, level, wardrobe, conceptArt, addHearts, heartBox: heartStrip, gachaBox, canDraw, hearts, tickets };
 }
