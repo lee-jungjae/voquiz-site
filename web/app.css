@@ -3533,3 +3533,16 @@ html[data-font] body, html[data-font] body *:not(.font-sample):not(.font-sample 
 .preview.font-sample { display: grid; place-items: center; align-content: center; gap: 2px; background: var(--surface); color: var(--text); }
 .preview.font-sample b { font-size: 19px; font-weight: 700; line-height: 1.2; }
 .preview.font-sample small { font-size: 11px; color: var(--muted); }
+
+/* the top of the road of levels: the cheer, then the badge and the character side by side in the middle */
+.lv-top { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 0; padding-top: 4px; }
+.lv-top::before { display: none; }
+.lv-top .lv-say { grid-column: auto; grid-row: auto; margin: 0 0 10px; max-width: 100%; }
+.lv-say::after { left: 50%; translate: -50% 0; }
+.lv-duo { position: relative; isolation: isolate; display: flex; align-items: flex-end; justify-content: center; gap: 6px; }
+.lv-duo::before { content: ""; position: absolute; z-index: -1; left: 42px; top: 42px; width: 190px; height: 190px; translate: -50% -50%; border-radius: 50%; background: repeating-conic-gradient(color-mix(in srgb, #ffd84d 34%, transparent) 0 12deg, transparent 12deg 24deg); -webkit-mask: radial-gradient(circle, #000 30%, transparent 68%); mask: radial-gradient(circle, #000 30%, transparent 68%); animation: lv-rays 24s linear infinite; pointer-events: none; }
+.lv-duo .lv-badge.big { width: 84px; height: 84px; flex: none; }
+.lv-duo .lv-me { width: 74px; flex: none; }
+.lv-top .lv-next { grid-column: auto; margin: 4px 0 0; }
+.lv-sheet { overflow: hidden; }
+@media (prefers-reduced-motion: reduce) { .lv-duo::before { animation: none; } }
