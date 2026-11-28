@@ -3638,3 +3638,13 @@ html[data-concept="aurora"] .use b { color: #f08a7a; }
 .lv-mini.z3 { background: color-mix(in srgb, #b9aef0 34%, var(--bg)); color: color-mix(in srgb, #4a3fa0 70%, var(--text)); }
 .lv-mini.z4 { background: color-mix(in srgb, #ff8fb8 30%, var(--bg)); color: color-mix(in srgb, #a02a5c 70%, var(--text)); }
 .who-line .lv-mini { vertical-align: 0; }
+
+/* the level badge takes the colour of its range of levels (the same five as before names) */
+.lv-badge.z0 .lv-seal { fill: #58a862; }
+.lv-badge.z1 .lv-seal { fill: #e0a21a; }
+.lv-badge.z2 .lv-seal { fill: #3f95d9; }
+.lv-badge.z3 .lv-seal { fill: #7a6fd0; }
+.lv-badge.z4 .lv-seal { fill: #e0569a; }
+.lv-badge text { fill: #fff; }
+.lv-pill .lv-seal { fill: #fff; }
+.lv-pill .lv-badge text { fill: var(--accent); }

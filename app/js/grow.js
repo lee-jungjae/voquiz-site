@@ -158,7 +158,7 @@ export function initGrow(c) {
     const piece = RING / pieces - GAP, done = Math.round(part * pieces);
     return { bg: `${piece.toFixed(2)} ${GAP}`, dash: `${Array.from({ length: done }, () => `${piece.toFixed(2)} ${GAP}`).join(" ")} 0 ${RING.toFixed(1)}`.trim(), off: "0" };
   }
-  const badge = (lv, part, cls = "", pieces = 0) => { const r = ringDash(part, pieces); return svg("0 0 44 44", `lv-badge ${cls}${r.bg ? " pieces" : ""}`,
+  const badge = (lv, part, cls = "", pieces = 0) => { const r = ringDash(part, pieces); return svg("0 0 44 44", `lv-badge ${cls}${r.bg ? " pieces" : ""} z${Math.min(4, Math.floor((lv - 1) / 10))}`, // coloured by its range of levels, like the small ones before names
     `<circle class="lv-ring-bg" cx="22" cy="22" r="19.5"${r.bg ? ` stroke-dasharray="${r.bg}"` : ""} transform="rotate(-90 22 22)"/><circle class="lv-ring" cx="22" cy="22" r="19.5" stroke-dasharray="${r.dash}" stroke-dashoffset="${r.off}" transform="rotate(-90 22 22)"/>` +
     `<circle class="lv-seal" cx="22" cy="22" r="14"/><text x="22" y="22" text-anchor="middle" dominant-baseline="central">${lv}</text>`); };
   // At the top left of every screen. A dot says that presents wait. A press opens the road of levels.
