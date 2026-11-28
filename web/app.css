@@ -3125,3 +3125,28 @@ html[data-concept="rainbow"] nav { border-top: 2px solid; border-image: linear-g
 .egg.heart u::after { color: #e5386f; }
 .heart-box { background: #fff0f5; }
 .lv-sheet > p.small.muted { display: none; } /* the road says it by itself */
+/* The road of levels as a map: a path that winds upward, a stone for each level, the presents beside them. */
+.lv-map { display: block; max-height: 52vh; padding: 0; border-radius: 18px; background: var(--surface); }
+.lv-map-in { position: relative; }
+.lv-path { position: absolute; inset: 0; width: 100%; height: 100%; }
+.lv-path path { stroke: var(--border); stroke-width: 10; stroke-linecap: round; stroke-dasharray: 2 16; }
+.lv-path.done path { stroke: var(--accent); stroke-dasharray: none; stroke-width: 8; opacity: .55; }
+.lv-stone { position: absolute; z-index: 1; transform: translate(-50%, -50%); display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 50%; background: var(--bg); border: 3px solid var(--border); color: var(--muted); font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; box-shadow: none; opacity: 1; }
+.lv-stone.start, .lv-stone.got { background: var(--accent); border-color: var(--accent-dark, var(--accent)); color: #fff; }
+.lv-stone.ready { background: var(--bg); border-color: var(--accent); color: var(--accent); cursor: pointer; animation: claim-pulse 1.2s ease-in-out infinite; }
+.lv-stone.big { width: 56px; height: 56px; border-color: #e6a700; background: #ffe9a6; color: #5a3d00; font-size: 17px; }
+.lv-stone.big.got { background: #e6a700; color: #fff; }
+.lv-stone.locked { opacity: 1; }
+.lv-stone.here { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent); }
+.lv-here { position: absolute; z-index: 2; width: 58px; transform: translate(-50%, -112%); pointer-events: none; }
+.lv-here .mascot { width: 100%; }
+.lv-tag { position: absolute; z-index: 1; transform: translateY(-50%); display: grid; gap: 3px; max-width: 42%; justify-items: start; }
+.lv-tag.left { justify-items: end; text-align: right; }
+.lv-tag.left .lv-gifts { justify-content: flex-end; }
+.lv-tag small { font-size: 10.5px; color: var(--muted); }
+.lv-tag.locked { opacity: .6; }
+.lv-tag.got small { display: none; }
+.lv-tag .gift-chip { box-shadow: inset 0 0 0 1px var(--line); }
+.lv-tag.big .gift-chip { box-shadow: inset 0 0 0 1.5px #e6a700; }
+.lv-tag .mini { width: auto; padding: 4px 14px; }
+@media (prefers-reduced-motion: reduce) { .lv-stone.ready { animation: none; } }

@@ -4,8 +4,8 @@
 // with them and how it is shown. Everything is kept with the account: `level` { xp, got },
 // `bag` { eggs: { sprout, shiny, rainbow } }, `hearts` { n, all }, and in `shop`: what is owned
 // ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
-import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, EGGS, EGG_KINDS, HEARTS_FOR_EGG, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7o3t";
-import { lookOf } from "./characters.js?v=0.1.28-tp7o3t";
+import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, EGGS, EGG_KINDS, HEARTS_FOR_EGG, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7oez";
+import { lookOf } from "./characters.js?v=0.1.28-tp7oez";
 
 const TWICE_POINTS = 100; // a present the student already has turns into points
 
@@ -98,7 +98,8 @@ export function initGrow(c) {
     if (n < 2 || n > level() || taken().has(n)) return;
     state.user.level = { ...kept(), xp: xp(), got: [...taken(), n].sort((a, b) => a - b) };
     const got = grant(levelGift(n).gifts);
-    c.toastText(t("Lv.{n} 선물: {what}", { n, what: got.map(giftText).join(", ") }));
+    // points announce themselves (the points pill): one message at a time
+    if (!got.every((g) => g.points)) c.toastText(t("Lv.{n} 선물: {what}", { n, what: got.filter((g) => !g.points).map(giftText).join(", ") }));
     openLevels(true);
   }
   // At the top left of every screen: the level, and under it how far the next one is. A dot says
@@ -125,17 +126,42 @@ export function initGrow(c) {
     old?.remove();
     const close = () => { el.remove(); c.render(); };
     const lv = level(), got = taken(), base = needFor(lv), next = lv < LEVEL_MAX ? needFor(lv + 1) : null;
-    const road = h("ol", { class: "lv-road" }, Array.from({ length: LEVEL_MAX }, (_, i) => {
+    // A map, not a list: a path that winds upward, a stone for every level (level 1 at the bottom),
+    // the student's character on the stone it has reached, and each stone's present beside it.
+    const STEP = 84, PAD = 56, tall = (LEVEL_MAX - 1) * STEP + PAD * 2;
+    const xOf = (n) => 50 + 27 * Math.sin((n - 1) * 0.95), yOf = (n) => PAD + (LEVEL_MAX - n) * STEP;
+    const line = Array.from({ length: LEVEL_MAX }, (_, i) => {
       const n = i + 1;
-      const { big, gifts } = levelGift(n);
-      const where = n === 1 ? "start" : got.has(n) ? "got" : n <= lv ? "ready" : "locked";
-      return h("li", { class: `lv-step ${where}${big ? " big" : ""}${n === lv ? " here" : ""}` },
-        h("span", { class: "lv-step-no" }, h("b", null, String(n)), h("small", null, t("단어 {n}개", { n: needFor(n) }))),
-        h("span", { class: "lv-gifts" }, n === 1 ? h("span", { class: "small muted" }, t("여기서 시작!")) : [big && h("em", { class: "lv-big" }, t("특별 선물")), gifts.map(giftChip)]),
-        where === "ready" ? h("button", { class: "mini buy", onclick: () => claim(n) }, t("받기"))
-          : where === "got" ? h("span", { class: "lv-done", title: t("받음"), "aria-label": t("받음") }, "✓")
-          : where === "locked" ? h("span", { class: "lv-lock", "aria-hidden": "true" }, "🔒") : null);
-    }));
+      if (n === 1) return `M${xOf(1)} ${yOf(1)}`;
+      const mid = (yOf(n) + yOf(n - 1)) / 2;
+      return `C${xOf(n - 1)} ${mid} ${xOf(n)} ${mid} ${xOf(n)} ${yOf(n)}`;
+    }).join(" ");
+    const path = (cls, upTo) => { // drawn in a box 100 wide that is stretched to the map: the line keeps its own width
+      const el = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      el.setAttribute("viewBox", `0 0 100 ${tall}`);
+      el.setAttribute("preserveAspectRatio", "none");
+      el.setAttribute("class", `lv-path ${cls}`);
+      el.setAttribute("aria-hidden", "true");
+      el.innerHTML = `<path d="${upTo ? line.split(" C").slice(0, upTo).join(" C") : line}" fill="none" vector-effect="non-scaling-stroke"/>`;
+      return el;
+    };
+    const road = h("div", { class: "lv-road lv-map" }, h("div", { class: "lv-map-in", style: `height:${tall}px` },
+      path("all"), path("done", lv),
+      Array.from({ length: LEVEL_MAX }, (_, i) => {
+        const n = i + 1;
+        const { big, gifts } = levelGift(n);
+        const where = n === 1 ? "start" : got.has(n) ? "got" : n <= lv ? "ready" : "locked";
+        const side = xOf(n) > 50 ? "left" : "right";
+        return [
+          h("button", { class: `lv-step lv-stone ${where}${big ? " big" : ""}${n === lv ? " here" : ""}`, style: `left:${xOf(n)}%;top:${yOf(n)}px`, disabled: where !== "ready",
+            title: where === "ready" ? t("받기") : t("단어 {n}개", { n: needFor(n) }), "aria-label": `Lv.${n}`, onclick: () => claim(n) },
+            where === "got" ? "✓" : String(n)),
+          n === lv && h("span", { class: "lv-here", style: `left:${xOf(n)}%;top:${yOf(n)}px`, "aria-hidden": "true" }, c.portrait(myLook())),
+          n > 1 && h("div", { class: `lv-tag ${side} ${where}${big ? " big" : ""}`, style: `top:${yOf(n)}px;${side === "left" ? `right:${100 - xOf(n) + 11}%` : `left:${xOf(n) + 11}%`}` },
+            h("span", { class: "lv-gifts" }, gifts.map(giftChip)),
+            where === "ready" ? h("button", { class: "mini buy", onclick: () => claim(n) }, t("받기")) : h("small", null, t("단어 {n}개", { n: needFor(n) }))),
+        ];
+      })));
     const el = h("div", { id: "sheet", class: "sheet-wrap", onclick: (e) => { if (e.target === el) close(); } },
       h("div", { class: "sheet lv-sheet", role: "dialog", "aria-modal": "true", "aria-label": t("내 레벨") },
         h("div", { class: "lv-top" },
@@ -150,7 +176,11 @@ export function initGrow(c) {
         h("button", { class: "btn wide", onclick: close }, t("닫기"))));
     document.body.append(el);
     if (at != null) road.scrollTop = at;
-    else road.querySelector(waiting().length ? ".lv-step.ready" : ".lv-step.here")?.scrollIntoView({ block: "center" });
+    else {   // my stone a little below the middle: the next gifts show above, the waiting ones just below
+      const me = road.querySelector(".lv-step.here") || road.querySelector(".lv-step.ready");
+      const put = () => { if (me) road.scrollTop = me.offsetTop - road.clientHeight * 0.55; };
+      put(); requestAnimationFrame(put);
+    }
   }
 
   // ----- eggs -----
