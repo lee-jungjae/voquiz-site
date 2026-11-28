@@ -1,4 +1,4 @@
-import { stroke, star, twinkle } from "./wear-art.js?v=0.1.28-tp81sz";
+import { stroke, star, twinkle } from "./wear-art.js?v=0.1.28-tp82g3";
 // More things for the back (drawn behind the body) and to float around. Rule: rare 1 (200 points) and rare 2 (400 points) can be bought; rare 3 comes from capsules only.
 
 // Small local helpers. `both` draws the left half and its mirror image on the right.

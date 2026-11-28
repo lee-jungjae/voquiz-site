@@ -10,7 +10,7 @@ const DEFAULTS = {
   weekly: { perWord: 20, min: 200 },
   // The daily present: [points, how often] (relative). The average is about 67; 1,000 comes up
   // in about one box in 125. picks / plusPicks: how many boxes a day a free / a Plus student opens.
-  gift: { prizes: [[10, 20], [20, 20], [30, 16], [50, 14], [80, 10], [100, 8], [150, 5], [200, 3], [300, 2], [500, 1.2], [1000, 0.8]], picks: 1, plusPicks: 2 },
+  gift: { prizes: [[10, 23.5], [20, 24], [30, 20], [50, 14], [80, 8], [100, 4], [150, 2.5], [200, 2], [300, 1.2], [500, 0.5], [1000, 0.3]], picks: 1, plusPicks: 2 },
   // The weekly league, when a week is settled: what a promotion pays, and what finishing first,
   // second and third pays (the medals). These are presents: they do not count as points earned in
   // the new week's league.

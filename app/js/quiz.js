@@ -11,8 +11,13 @@ const DAY = 24 * 60 * 60 * 1000;
 export const isLearned = (word) => Boolean(word.mastered_at);
 export const canRetest = (word, now = clockNow()) => isLearned(word) && now - new Date(word.mastered_at).getTime() >= RETEST_DAYS * DAY;
 // Learned, and neither learned nor asked again in the last RETEST_DAYS: ready for a check-up quiz.
+// A learned word comes back for a check at growing intervals: a day after it was learned, then
+// three days after that check, then a week, then three weeks. Every right answer after learning
+// adds one to its streak, so the streak says which check is next.
+export const REVIEW_DAYS = [1, 3, 7, 21];
+export const reviewGap = (word) => REVIEW_DAYS[Math.min(REVIEW_DAYS.length - 1, Math.max(0, (word.streak || 0) - MASTER_STREAK))];
 export const isRested = (word, now = clockNow()) => isLearned(word) &&
-  now - Math.max(new Date(word.mastered_at).getTime(), new Date(word.last_reviewed_at || 0).getTime()) >= RETEST_DAYS * DAY;
+  now - Math.max(new Date(word.mastered_at).getTime(), new Date(word.last_reviewed_at || 0).getTime()) >= reviewGap(word) * DAY;
 // What to save to put a learned word back into the quizzes.
 export const retestPatch = () => ({ mastered_at: null, streak: 0, typed_ok: false });
 
@@ -51,8 +56,11 @@ export function buildQuizSet(words, scope, now = clockNow(), max = Infinity) {
     const j = Math.floor(Math.random() * (i + 1));
     [picked[i], picked[j]] = [picked[j], picked[i]];
   }
-  return picked.slice(0, Math.max(1, max));
+  // A few learned words whose check is due ride along (not in the two special ranges).
+  const due = scope.type === "review" || scope.type === "learned" ? [] : shuffled(words.filter((w) => isRested(w, now))).slice(0, DUE_PER_QUIZ);
+  return [...picked.slice(0, Math.max(1, max - due.length)), ...due];
 }
+const DUE_PER_QUIZ = 3;
 
 // Returns the fields to save after one answer.
 export function applyAnswer(word, correct, typed = false, now = new Date(clockNow())) {
@@ -102,8 +110,29 @@ export function makeQuestions(cards, pool) {
     // One answer away from being learned but never typed yet: this one has to be typed.
     const mustType = !word.typed_ok && word.streak >= MASTER_STREAK - 1;
     if (others.length < 3 || i % 2 === 1 || mustType) return { word, kind: "type", sense };
-    return { word, kind: "choice", sense, options: shuffled([word, ...shuffled(others).slice(0, 3)]) };
+    const options = shuffled([word, ...shuffled(others).slice(0, 3)]);
+    // Now and then the question is an example sentence with the word left out (when the entry has
+    // one in English that shows the word, and every choice has a plain English word to show).
+    const cloze = i % 4 === 2 && options.every((o) => englishOf(o.content)) ? clozeOf(word.content, sense) : null;
+    return { word, kind: "choice", sense, options, cloze };
   });
+}
+
+// The English word of an entry (the first, when several are given), or "" when it is not one plain word.
+export function englishOf(content) {
+  const text = /[가-힣]/.test(content?.headword || "") ? content?.counterpart : content?.headword;
+  const first = (text || "").split(/[,;/]/)[0].replace(/\([^)]*\)/g, "").trim();
+  return /^[A-Za-z][A-Za-z'-]*$/.test(first) ? first : "";
+}
+// An example sentence with the word taken out: { text, gloss } or null.
+function clozeOf(content, sense) {
+  const word = englishOf(content);
+  if (!word) return null;
+  const found = new RegExp(`\\b${word.replace(/[-']/g, "\\$&")}[a-z]*\\b`, "i");
+  const pairs = [[sense?.example_en, sense?.example_ko], ...(content.examples || []).map((e) => [e?.en, e?.ko]),
+    ...(content.senses || []).map((one) => [one?.example_en, one?.example_ko])];
+  const hit = pairs.find(([en]) => typeof en === "string" && found.test(en));
+  return hit ? { text: hit[0].replace(found, "＿＿＿"), gloss: hit[1] || "" } : null;
 }
 
 // The entry as this question sees it: the meaning being asked stands in for the first one.

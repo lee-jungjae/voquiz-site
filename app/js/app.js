@@ -29,7 +29,7 @@ import { focusOn, setFocus, untimedOn, setUntimed, defLang, setDefLang, defKind 
 import { tuning, setTuning } from "./tuning.js";
 import { WORD_LISTS } from "./wordlists.js";
 import { WORD_DEFS } from "./worddefs.js";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch, reviewGap, englishOf } from "./quiz.js";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -206,12 +206,12 @@ function openDailyGift() {
         const day = i + 1;
         return h("i", { class: `${day < pos ? "on" : day === pos ? "on today" : day === pos + 1 ? "next" : ""}${day === 7 ? " last" : ""}` },
           // what the day adds, standing on a step that is higher every day
-          h("span", { class: "run-add" }, day === 7 ? grow().ticketArt("gold") : day === 1 ? art("gift") : [h("em", { class: "coin-i", "aria-hidden": "true" }, "P"), h("b", null, `+${(day - 1) * 5}`)]),
+          h("span", { class: "run-add" }, day === 7 ? grow().ticketArt("gold") : day === 3 ? grow().ticketArt("basic") : day === 1 ? art("gift") : [h("em", { class: "coin-i", "aria-hidden": "true" }, "P"), h("b", null, `+${(day - 1) * 5}`)]),
           h("u", { style: `height:${8 + day * 6}px` }),
           h("small", null, day === pos ? t("오늘") : day === pos + 1 ? t("내일") : String(day)));
       }));
   };
-  const tomorrow = (run) => h("p", { class: "run-next" }, art("spark"), (run + 1) % 7 === 0 ? t("내일 오면 황금 티켓을 받아요!") : t("내일 오면 보너스 +{p} 더!", { p: runBonus(run + 1) }));
+  const tomorrow = (run) => h("p", { class: "run-next" }, art("spark"), (run + 1) % 7 === 0 ? t("내일 오면 황금 티켓을 받아요!") : (run + 1) % 7 === 3 ? t("내일 오면 캡슐 티켓을 받아요!") : t("내일 오면 보너스 +{p} 더!", { p: runBonus(run + 1) }));
   const runBox = h("div", { class: "run-box" }, h("b", null, t("연속 {n}일", { n: runOf() })), strip(runOf()), tomorrow(runOf()));
   const title = h("h2", null, extra ? t("한 번 더 고르기") : t("오늘의 선물"), extra && h("em", { class: "plus-badge" }, "PLUS"));
   const text = h("p", null, t("상자 하나를 골라요. 안에 든 포인트가 모두 달라요!"));
@@ -241,6 +241,7 @@ function openDailyGift() {
         award(prize, t("오늘의 선물"));
         if (!extra) {
           if (run % 7 === 0) grow().give([{ ticket: "gold", n: 1 }]); // the seventh day in a row: a golden ticket
+          else if (run % 7 === 3) { grow().give([{ ticket: "basic", n: 1 }]); setTimeout(() => toastText(t("연속 3일! 캡슐 티켓을 받았어요.")), 1500); } // the third day: a capsule ticket
           else if (runBonus(run) > 0) setTimeout(() => award(runBonus(run), t("연속 {n}일 보너스", { n: run })), 1500);
         }
         boxes.forEach((box, n) => { box.classList.remove("rock"); box.classList.add(n === i ? "mine" : "other"); });
@@ -630,7 +631,12 @@ async function removeWord(word) {
 // each (plus bonuses), so a good run wins back more than it cost, and a run with every answer wrong
 // wins nothing. A student who cannot afford the full fee pays what they have, so nobody is locked out.
 const QUIZ_FEE = 3;
-const quizFee = (questions) => Math.min(questions * QUIZ_FEE, state.user.points || 0);
+// The first few quizzes of an account are free, so that a first day never starts by losing points.
+const FREE_QUIZZES = 3;
+const quizStarts = () => state.user.quizStarts ?? ((state.user.plays || []).some((play) => play.k === "q") ? FREE_QUIZZES : 0);
+const quizFree = () => quizStarts() < FREE_QUIZZES;
+const quizFee = (questions) => (quizFree() ? 0 : Math.min(questions * QUIZ_FEE, state.user.points || 0));
+const LEARN_POINTS = 10; // on top of the answer's points, the first time a word is learned
 
 // The most a quiz of this size can pay: every answer right (typed 10, picked 5) plus the all-correct bonus.
 // Lucky bonuses come on top. Mirrors makeQuestions: kinds alternate starting with a choice.
@@ -667,6 +673,8 @@ function startQuiz() {
   if (!cards.length) return;
   const fee = quizFee(cards.length);
   award(-fee, t("퀴즈에 사용"));
+  state.user.quizStarts = quizStarts() + 1;
+  api.saveProfile({ quizStarts: state.user.quizStarts }).catch(console.error);
   // Each card becomes a typed question or a multiple-choice one, mixed at random.
   const questions = makeQuestions(cards, state.words);
   state.quiz = { cards, questions, fee, index: 0, phase: "ask", typed: "", correct: false, results: [] };
@@ -683,10 +691,21 @@ function submitAnswer(typed, picked) {
   clearTimeout(questionTimer);
   const word = quiz.cards[quiz.index];
   const correct = picked ? picked === word : isCorrect(typed, askedContent(word, quiz.questions[quiz.index]));
+  quiz.pickedWord = picked && picked !== word ? picked : null;
+  // A second go at the words just missed: practice only. No points, and the words stay as they are.
+  if (quiz.retry) {
+    Object.assign(quiz, { phase: "result", typed: typed.trim(), correct, perfect: false, earned: 0, recheck: false });
+    quiz.results.push({ word, correct });
+    state.focus = "next";
+    if (correct) { sfx.right(myShop().character); startAutoNext(); } else { sfx.wrong(); quiz.auto = false; }
+    return render();
+  }
+  const hinted = !picked && quiz.hint > 0; // a typed answer with a hint: fewer points, and it does not count toward learning
+  quiz.recheck = Boolean(word.mastered_at); // a learned word back for its check
   // Typing the word is harder than picking it, so it earns more. A lucky bonus drops now and then.
   const lucky = correct && Math.random() < 0.25;
   let earned = 0;
-  if (correct) earned = (picked ? 5 : 10) + (lucky ? randomInt(1, 10) : 0);
+  if (correct) earned = (picked || hinted ? 5 : 10) + (lucky ? randomInt(1, 10) : 0);
   const last = quiz.index + 1 >= quiz.cards.length;
   const perfect = last && correct && quiz.results.every((r) => r.correct) && quiz.cards.length >= 3;
   if (perfect) earned += 20;
@@ -695,10 +714,15 @@ function submitAnswer(typed, picked) {
   state.focus = "next";
   if (correct) { sfx.right(myShop().character); cheerYard(); } else sfx.wrong();
   if (WIDE()) gameFx(correct, quizRun(quiz), perfect);
-  if (last) recordPlay({ k: "q", r: quiz.results.filter((r) => r.correct).length, n: quiz.results.length, p: quiz.earned - quiz.fee });
   // A word that has just been learned gets the celebration to itself (the points still arrive).
-  const patch = applyAnswer(word, correct, !picked);
-  const learned = Boolean(patch.mastered_at);
+  const patch = correct && hinted ? { last_reviewed_at: new Date(clockNow()).toISOString() } : applyAnswer(word, correct, !picked);
+  const learned = Boolean(patch.mastered_at) && !word.mastered_at;
+  if (learned) { earned += LEARN_POINTS; quiz.earned += LEARN_POINTS; }
+  if (last) {
+    const firstEver = !(state.user.plays || []).some((play) => play.k === "q");
+    recordPlay({ k: "q", r: quiz.results.filter((r) => r.correct).length, n: quiz.results.length, p: quiz.earned - quiz.fee });
+    setTimeout(() => quizGifts(firstEver), 2600);
+  }
   award(earned, perfect ? t("전부 정답!") : lucky ? t("럭키 보너스!") : null, (perfect || lucky) && !learned);
   if (learned) celebrate(0, word.headword, t("다 익힘"));
   // A right answer moves on by itself; a wrong one waits, so there is time to read the correction.
@@ -707,6 +731,40 @@ function submitAnswer(typed, picked) {
   else state.quiz.auto = false;
   patchWord(word, patch);
   if (learned) { checkWeekly(); grow().learnedOne(); }
+}
+
+// What finishing a quiz brings besides points: the very first one a capsule ticket, and the first
+// of each day a heart (so that a student without friends still fills the capsule, slowly).
+function quizGifts(firstEver) {
+  if (!state.user) return;
+  if (firstEver && !state.user.firstQuizGift) {
+    state.user.firstQuizGift = true;
+    api.saveProfile({ firstQuizGift: true }).catch(console.error);
+    grow().give([{ ticket: "basic", n: 1 }]);
+    return toastText(t("첫 퀴즈 완료! 캡슐 티켓을 받았어요. 상점에서 열어 보세요."));
+  }
+  if (state.user.quizHeart !== todayKey()) {
+    state.user.quizHeart = todayKey();
+    api.saveProfile({ quizHeart: state.user.quizHeart }).catch(console.error);
+    grow().addHearts(1);
+    toastText(t("오늘의 첫 퀴즈! 하트 +1"));
+    render();
+  }
+}
+// Once more through the words just missed.
+function retryWrong() {
+  const cards = state.quiz.results.filter((r) => !r.correct).map((r) => r.word);
+  if (!cards.length) return;
+  state.quiz = { cards, questions: makeQuestions(cards, state.words), fee: 0, retry: true, index: 0, phase: "ask", typed: "", correct: false, results: [] };
+  state.focus = "answer";
+  startQuestionTimer();
+  render();
+}
+// A hint for a word to type: its first letter, then how long it is.
+function hintText(quiz) {
+  const word = englishOf(askedContent(quiz.cards[quiz.index], quiz.questions[quiz.index])) || wordIn(askedContent(quiz.cards[quiz.index], quiz.questions[quiz.index]), "en");
+  const letters = [...word];
+  return quiz.hint >= 2 ? `${letters[0]} ${letters.slice(1).map((ch) => (ch === " " ? "  " : "_")).join(" ")}` : `${letters[0]}…`;
 }
 
 // How many right answers in a row the quiz has just now.
@@ -742,7 +800,7 @@ function stopAutoNext() {
 
 function nextCard() {
   clearTimeout(autoNext);
-  Object.assign(state.quiz, { index: state.quiz.index + 1, phase: "ask", typed: "", correct: false, timedOut: false });
+  Object.assign(state.quiz, { index: state.quiz.index + 1, phase: "ask", typed: "", correct: false, timedOut: false, hint: 0, pickedWord: null });
   startQuestionTimer();
   const { results, cards, index } = state.quiz;
   if (index >= cards.length && results.filter((r) => r.correct).length / results.length >= 0.8) setTimeout(happyMoment, 1200);
@@ -952,6 +1010,9 @@ function weeklyGoalSheet() {
         h("div", { class: `goal-road${done ? " done" : ""}`, role: "img", "aria-label": `${count} / ${goal}` },
           h("i", { class: "goal-fill", style: `width:${Math.min(100, (count / goal) * 100)}%` }),
           h("span", { class: "goal-end" }, art(done ? "party" : "flag"), h("b", null, h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `+${p}`))),
+        // The words missed lately, so the week's look back says what to go over.
+        state.words.some((w) => w.needs_review) && h("p", { class: "small muted", style: "margin-top:12px" }, t("복습할 단어"), ": ",
+          state.words.filter((w) => w.needs_review).slice(0, 5).map((w) => w.headword).join(", ")),
       ],
       note: t("다음 주 월요일에 새 목표를 정해요."),
       actions: [{ label: done ? t("야호!") : t("힘낼게요!"), kind: "main", run: () => true }],
@@ -1018,10 +1079,20 @@ const goalRun = () => {
 };
 const sunriseOn = () => myShop().bg === "sunrise" && myShop().owned.includes("bg:sunrise");
 function checkWeekly() {
-  if (weekCount() < weekGoal() || state.user.weekly?.claimed === weekKey()) return;
+  if (state.user.weekly?.claimed === weekKey()) return;
+  // Halfway there pays part of the bonus early; the rest comes with the goal.
+  const bonus = weekBonus(weekGoal()), early = Math.round(bonus * 0.3);
+  const halfPaid = state.user.weekly?.half === weekKey();
+  if (weekCount() < weekGoal()) {
+    if (weekCount() * 2 >= weekGoal() && !halfPaid) {
+      saveWeekly({ half: weekKey() });
+      setTimeout(() => award(early, t("주간 목표 절반 달성!"), true), 1500);
+    }
+    return;
+  }
   const run = state.user.weekly?.claimed === lastWeekKey() ? (state.user.weekly.run || 1) + 1 : 1;
   saveWeekly({ claimed: weekKey(), run });
-  setTimeout(() => award(weekBonus(weekGoal()), t("주간 목표 달성!"), true), 1500);
+  setTimeout(() => award(bonus - (halfPaid ? early : 0), t("주간 목표 달성!"), true), 1500);
   if (run >= GOAL_RUN && !myShop().owned.includes("bg:sunrise")) setTimeout(earnSunrise, 4400);
 }
 function earnSunrise() {
@@ -2779,6 +2850,7 @@ async function openRankings() {
 // ----- tiers: up, down or the same, once a week -----
 // Presents when a week of the league is settled (tuning.js, "league").
 const promotionPrize = () => tuning("league").promotion;
+const MEDAL_WORDS = 5;
 const medalPrize = (rank) => (rank >= 1 && rank <= 3 ? tuning("league").medals[rank - 1] || 0 : 0);
 // Paper falling over a result worth celebrating.
 function confettiRain() {
@@ -2842,7 +2914,9 @@ async function settleLeague() {
     await api.saveProfile({ weekly: state.user.weekly }).catch(console.error);
     publishRank();
     // Presents for last week: for moving up, and for finishing first, second or third.
-    const medalGift = done.earned > 0 ? medalPrize(rank) : 0;
+    // A medal's present is for a week of study: at least MEDAL_WORDS words learned in it.
+    const from = new Date(`${done.week}T00:00:00`).getTime(), learnedThen = state.words.filter((w) => w.mastered_at && new Date(w.mastered_at).getTime() >= from && new Date(w.mastered_at).getTime() < from + 7 * 86400000).length;
+    const medalGift = done.earned > 0 && learnedThen >= MEDAL_WORDS ? medalPrize(rank) : 0;
     const upGift = result === "up" ? promotionPrize() : 0;
     const gifts = [
       upGift > 0 && t("승급 선물 +{p}포인트", { p: upGift }),
@@ -2969,7 +3043,7 @@ function leagueInfoView() {
       h("ul", { class: "info-list" },
         rule(art("finish"), t("같은 등급끼리, 매주 새로"), t("같은 등급의 친구들과 겨뤄요. 월요일마다 0점에서 다시 시작해요.")),
         rule(art("up"), t("{n}등 안에 들면 승급", { n: MOVE }), t("일요일 밤에 {n}등 안에 있으면 다음 주에 한 등급 올라가고, 승급 선물 +{p}포인트를 받아요.", { n: MOVE, p: promotionPrize() })),
-        rule(art("gift"), t("1·2·3등 메달 선물"), t("한 주를 1·2·3등으로 마치면 +{a} · +{b} · +{c}포인트를 선물로 받아요.", { a: medalPrize(1), b: medalPrize(2), c: medalPrize(3) })),
+        rule(art("gift"), t("1·2·3등 메달 선물"), t("단어를 {n}개 이상 익히고 한 주를 1·2·3등으로 마치면 +{a} · +{b} · +{c}포인트를 선물로 받아요.", { n: MEDAL_WORDS, a: medalPrize(1), b: medalPrize(2), c: medalPrize(3) })),
         rule("⬇️", t("아래 {n}명은 강등", { n: MOVE }), t("순위표의 마지막 {n}명은 한 등급 내려가요. {name}에서는 내려가지 않아요.", { n: MOVE, name: tierName(0) })),
         rule(art("star"), t("이번 주에 모은 포인트로"), t("이번 주에 받은 포인트만 세요. 포인트샵에서 써도 리그 점수는 줄지 않아요.")),
         rule(art("door"), t("첫 포인트를 받으면 참가"), t("그 주에 포인트를 한 번이라도 받으면 리그에 들어가요.")),
@@ -3171,7 +3245,7 @@ function quizScope() {
     h("option", { value: "range" }, t("날짜 범위")),
     h("option", { value: "favorites" }, t("즐겨찾기")),
     h("option", { value: "review" }, t("퀴즈에서 틀린 단어만")),
-    h("option", { value: "learned" }, t("다 익힌 단어 다시 확인 ({d}일 지난 것)", { d: RETEST_DAYS })),
+    h("option", { value: "learned" }, t("다 익힌 단어 다시 확인")),
     h("option", { value: "all" }, t("전체 단어")));
   select.value = scope.type === "days" ? (scope.custom ? "days" : "7") : scope.type;
   // The same choice as a menu of the desktop frame.
@@ -3201,7 +3275,7 @@ function quizScope() {
   const inline = scope.custom ? [h("span", null, t("시험 범위")), h("span", { class: "qz-custom" }, daysInput(), t("일"))]
     : scope.type === "range" ? [h("span", { class: "qz-custom dates" }, dateInputs())] : null;
   // One line under the numbers: why the count is what it is.
-  const note = cards.length === 0 ? (scope.type === "review" ? t("지금은 틀린 단어가 없어요!") : scope.type === "learned" && inRange === 0 ? t("익힌 지 {d}일이 지난 단어가 아직 없어요.", { d: RETEST_DAYS }) : t("이 범위에는 단어가 없어요. 범위를 바꿔 보세요."))
+  const note = cards.length === 0 ? (scope.type === "review" ? t("지금은 틀린 단어가 없어요!") : scope.type === "learned" && inRange === 0 ? t("지금 다시 확인할 단어가 없어요.") : t("이 범위에는 단어가 없어요. 범위를 바꿔 보세요."))
     : inRange > cards.length ? t("범위에 {n}개가 있어요. 그중 {m}개를 골라서 내요.", { n: inRange, m: cards.length })
     : review > 0 && scope.type !== "review" ? t("지난번에 틀린 복습 단어 {n}개 포함", { n: review }) : "";
   // The same in short, for the desktop card: nothing to ask (a line), or what the count holds (tags).
@@ -3221,7 +3295,7 @@ function quizSetup() {
     guideSteps(QUIZ_STEPS()),
     h("div", { class: "guide-form" }, fields),
     inRange > cards.length && h("p", { class: "small muted quiz-cut" }, t("범위에 {n}개가 있어요. 그중 {m}개를 골라서 내요.", { n: inRange, m: cards.length })),
-    scope.type === "learned" && inRange === 0 && h("p", { class: "small muted quiz-cut" }, t("익힌 지 {d}일이 지난 단어가 아직 없어요.", { d: RETEST_DAYS })),
+    scope.type === "learned" && inRange === 0 && h("p", { class: "small muted quiz-cut" }, t("지금 다시 확인할 단어가 없어요.")),
     h("div", { class: "guide-stats" },
       guideStat(t("문제 수"), t("{n}개", { n: cards.length }), "best"),
       guideStat(t("쓰는 포인트"), [coin(), `-${quizFee(cards.length)}`], "use"),
@@ -3229,7 +3303,7 @@ function quizSetup() {
     h("p", { class: "small muted center", id: "quiz-count" },
       cards.length === 0 ? (scope.type === "review" ? t("지금은 틀린 단어가 없어요!") : t("이 범위에는 단어가 없어요. 범위를 바꿔 보세요."))
         : review > 0 && scope.type !== "review" ? t("지난번에 틀린 복습 단어 {n}개 포함", { n: review }) : ""),
-    h("p", { class: "act" }, h("button", { class: "btn wide with-cost", disabled: cards.length === 0, onclick: startQuiz }, t("퀴즈 시작"), cards.length > 0 && h("span", { class: "cost" }, h("i", { "aria-hidden": "true" }, "P"), `-${quizFee(cards.length)}`))),
+    h("p", { class: "act" }, h("button", { class: "btn wide with-cost", disabled: cards.length === 0, onclick: startQuiz }, t("퀴즈 시작"), cards.length > 0 && h("span", { class: "cost" }, h("i", { "aria-hidden": "true" }, "P"), quizFree() ? t("무료") : `-${quizFee(cards.length)}`))),
   ];
 }
 
@@ -3275,7 +3349,9 @@ function quizAsk() {
   const question = quiz.questions[quiz.index];
   const c = askedContent(word, question); // the meaning this question asks about
   const main = quizMain();
-  const [first, second] = main === "ko" ? [c.definition_ko, c.definition_en] : [c.definition_en, c.definition_ko];
+  const cloze = defLang() !== "ko" ? question.cloze : null; // an English sentence with the word left out
+  const [first, second] = cloze ? [cloze.text, defLang() === "mix" ? cloze.gloss : ""] : main === "ko" ? [c.definition_ko, c.definition_en] : [c.definition_en, c.definition_ko];
+  const shownIn = cloze ? "en" : main; // the language the choices are in
   const input = h("input", {
     type: "text", id: "answer", maxLength: 60, autocomplete: "off", autocapitalize: "off", spellcheck: false,
     placeholder: t("단어를 써 보세요"), "aria-label": t("정답 입력"),
@@ -3286,24 +3362,30 @@ function quizAsk() {
     quiz.limit > 0 && h("div", { class: "timer", role: "timer", "aria-label": t("남은 시간") },
       h("i", { style: `animation-duration:${quiz.limit}ms;animation-delay:-${Math.max(0, quiz.limit - (quiz.deadline - Date.now()))}ms` })),
     h("div", { class: `question${(first || "").length > (main === "ko" ? 55 : 95) ? " long" : ""}` },
-      h("div", { class: "q-label" }, t("이 뜻을 가진 단어는?"),
+      h("div", { class: "q-label" }, cloze ? t("빈칸에 들어갈 단어는?") : t("이 뜻을 가진 단어는?"),
         question.sense?.part_of_speech && h("span", { class: "sense-pos" }, posIn(question.sense.part_of_speech)),
         // How far this word is from being learned: right answers in a row, and whether one was typed.
         h("span", { class: `badge${word.needs_review ? "" : " plain"}`, title: t("{n}번 연속(쓰기 1번 포함) 맞히면 다 익힌 단어가 되어 퀴즈에서 빠져요.", { n: MASTER_STREAK }) },
           `${word.needs_review ? `${t("복습")} ` : ""}${"●".repeat(Math.min(word.streak, MASTER_STREAK))}${"○".repeat(Math.max(0, MASTER_STREAK - word.streak))}${word.typed_ok ? " ✎" : ""}`)),
-      h("p", { class: "q-ko" }, mask(first || second, c)),
-      defLang() === "mix" && h("p", { class: "q-en" }, mask(second, c))),
+      h("p", { class: "q-ko" }, cloze ? first : mask(first || second, c)),
+      defLang() === "mix" && second && h("p", { class: "q-en" }, cloze ? second : mask(second, c))),
     question.kind === "choice"
-      ? [h("div", { class: `choices act${question.options.some((o) => wordIn(o.content, main).length > 13) ? " wide" : ""}` }, question.options.map((option, i) =>
+      ? [h("div", { class: `choices act${question.options.some((o) => wordIn(o.content, shownIn).length > 13) ? " wide" : ""}` }, question.options.map((option, i) =>
           h("button", { class: "choice", onclick: () => submitAnswer(option.headword, option) },
-            h("span", { class: "num" }, String(i + 1)), wordIn(option === word ? c : option.content, main)))),
+            h("span", { class: "num" }, String(i + 1)), cloze ? englishOf(option.content) : wordIn(option === word ? c : option.content, main)))),
          h("p", { class: "small muted center act-note" }, t("알맞은 단어를 골라 보세요."))]
       : [h("form", { class: "search answer act", onsubmit: (e) => { e.preventDefault(); if (input.value.trim()) submitAnswer(input.value); } },
           input, h("button", { class: "btn" }, t("확인"))),
-         h("p", { class: "small muted center act-note" }, t("한국어와 영어 중 어느 쪽으로 써도 정답이에요."))],
+         h("p", { class: "small muted center act-note", id: "hint-line" }, quiz.hint > 0 ? `${t("힌트")}: ${hintText(quiz)}` : t("한국어와 영어 중 어느 쪽으로 써도 정답이에요."))],
     h("p", { class: "center act-note" },
+      question.kind === "type" && [h("button", { class: "link", onclick: () => {
+        quiz.hint = Math.min(2, (quiz.hint || 0) + 1);
+        const line = document.getElementById("hint-line");
+        if (line) line.textContent = `${t("힌트")}: ${hintText(quiz)}`;
+        document.getElementById("answer")?.focus();
+      } }, t("힌트")), "  ·  "],
       h("button", { class: "link", onclick: () => submitAnswer("") }, t("모르겠어요")), "  ·  ",
-      h("button", { class: "link", onclick: quitQuizAsk }, t("그만하기"))),
+      h("button", { class: "link", onclick: quiz.retry ? () => { state.quiz = null; render(); } : quitQuizAsk }, t("그만하기"))),
   ];
 }
 
@@ -3327,7 +3409,8 @@ function quizResult() {
   const c = askedContent(word, quiz.questions[quiz.index]);
   const spelling = !quiz.correct && quiz.questions[quiz.index].kind === "type" ? spellingDiff(quiz.typed, c) : null;
   const last = quiz.index + 1 >= quiz.cards.length;
-  const mastered = quiz.correct && isLearned(word);
+  const mastered = quiz.correct && isLearned(word) && !quiz.recheck;
+  const wrongPick = !quiz.correct && quiz.pickedWord;
   return [
     quizProgress(),
     h("div", { class: `feedback ${quiz.correct ? "good" : "bad"}`, role: "status", onclick: stopAutoNext },
@@ -3338,7 +3421,10 @@ function quizResult() {
       h("div", { class: "art", "aria-hidden": "true" }, reaction(myLook(), quiz.correct ? "cheer" : "comfort")),
       h("div", { class: "fb-title" }, quiz.correct ? pick(CHEERS()) : quiz.timedOut ? t("시간이 다 됐어요!") : pick(COMFORTS())),
       quiz.correct && word.streak > 1 && h("div", { class: "fb-sub" }, art("fire"), " ", t("{n}번 연속 정답", { n: word.streak })),
-      mastered && h("div", { class: "fb-sub" }, t("다 익혔어요! 이제 이 단어는 퀴즈에서 빠져요.")),
+      mastered && h("div", { class: "fb-sub" }, t("다 익혔어요! 잊지 않게 가끔 다시 물어볼게요.")),
+      quiz.correct && quiz.recheck && isLearned(word) && h("div", { class: "fb-sub" }, t("기억하고 있네요! {d}일 뒤에 다시 확인해요.", { d: reviewGap(word) })),
+      // The word picked by mistake, with what it means: the two are told apart at a glance.
+      wrongPick && h("div", { class: "fb-sub" }, t("내가 고른 답: "), h("s", null, wordIn(wrongPick.content, "en")), ` = ${wordIn(wrongPick.content, "ko")}`),
       !quiz.correct && quiz.typed && (spelling ? spellingView(spelling) : h("div", { class: "fb-sub" }, t("내가 쓴 답: "), h("s", null, quiz.typed))),
       h("div", { class: "fb-answer" }, wordIn(c, quizMain()), h("small", null, "⇄"), wordIn(c, quizMain() === "ko" ? "en" : "ko"))),
     h("p", { class: "act" },
@@ -3378,15 +3464,19 @@ function quizDone() {
       h("div", { class: "score-art", "aria-hidden": "true" }, reaction(myLook(), ratio >= 0.6 ? "cheer" : "comfort")),
       h("div", { class: "score" }, `${results.length - wrong.length} / ${results.length}`),
       h("p", { class: "small muted" }, wrong.length ? t("틀린 단어는 다음 퀴즈에 다시 나와요.") : t("모두 맞혔어요! 최고예요!")),
-      settlement(state.quiz)),
+      state.quiz.retry ? h("p", { class: "small muted" }, t("연습이라 포인트와 기록은 그대로예요.")) : settlement(state.quiz)),
     wrong.length > 0 && h("div", { class: "list", style: "margin-top:10px" }, wrong.map(({ word }) =>
       h("div", { class: "item" },
         h("div", { class: "avatar", "aria-hidden": "true" }, [...word.headword][0].toUpperCase()),
         h("div", { class: "open" },
           h("div", { class: "word" }, word.headword),
           h("div", { class: "sub" }, word.content.counterpart))))),
-    h("p", { class: "act" }, h("button", { class: "btn wide", onclick: () => { state.quiz = null; render(); } }, t("확인"))),
-    h("p", { class: "act-note center" }, h("button", { class: "link", onclick: () => { state.quiz = null; openRankings(); } }, t("이번 주 내 순위 보기"))),
+    // With words missed, the first thing offered is another go at them (free, for practice).
+    wrong.length > 0
+      ? [h("p", { class: "act" }, h("button", { class: "btn wide", onclick: retryWrong }, t("틀린 단어 다시 풀기"))),
+         h("p", { class: "act-note center" }, h("button", { class: "link", onclick: () => { state.quiz = null; render(); } }, t("확인")))]
+      : [h("p", { class: "act" }, h("button", { class: "btn wide", onclick: () => { state.quiz = null; render(); } }, t("확인"))),
+         h("p", { class: "act-note center" }, h("button", { class: "link", onclick: () => { state.quiz = null; openRankings(); } }, t("이번 주 내 순위 보기")))],
     WIDE() && questHint(),
   ];
 }
@@ -3501,7 +3591,7 @@ function quizGames() {
         // How many are asked, and (when the range holds more than a quiz asks) out of how many.
         [guideStat(t("문제 수"), t("{n}개", { n: quiz.inRange > quiz.cards.length ? `${quiz.cards.length} / ${quiz.inRange}` : quiz.cards.length })), guideStat(t("쓰는 포인트"), [coin(), `-${quizFee(quiz.cards.length)}`], "use"), guideStat(t("다 맞히면 최대"), [coin(), `+${quizMax(quiz.cards.length)}`], "gain")],
         [WIDE() && quiz.custom, quiz.empty ? h("p", { class: "qz-note" }, quiz.empty) : quiz.review > 0 && h("p", { class: "qz-tags" }, h("span", { class: "qz-tag" }, "↻ ", t("복습"), " ", h("b", null, String(quiz.review))))],
-        h("button", { class: "btn with-cost", disabled: quiz.cards.length === 0, onclick: startQuiz }, t("퀴즈 시작"), quiz.cards.length > 0 && h("span", { class: "cost" }, h("i", { "aria-hidden": "true" }, "P"), `-${quizFee(quiz.cards.length)}`)),
+        h("button", { class: "btn with-cost", disabled: quiz.cards.length === 0, onclick: startQuiz }, t("퀴즈 시작"), quiz.cards.length > 0 && h("span", { class: "cost" }, h("i", { "aria-hidden": "true" }, "P"), quizFree() ? t("무료") : `-${quizFee(quiz.cards.length)}`)),
         QUIZ_STEPS()),
     streak: game("streak", [portrait(host2), h("i", { class: "qz-step s1" }), h("i", { class: "qz-step s2" }), h("i", { class: "qz-step s3" })],
         t("연속 도전"), t("틀릴 때까지 이어져요."),
@@ -4048,28 +4138,59 @@ const GIFT_CHOICES = 6;
 const giftChoices = () => ALL_CHARACTERS.filter((c) => c.cost > 0 && !myShop().owned.includes(`character:${c.id}`)).slice(0, GIFT_CHOICES);
 const presentWaiting = () => !state.user.welcome && giftChoices().length > 0;
 
+// The present comes from 말풍이 (the first character) in three steps on one screen: a wrapped box
+// handed over, a friend to choose, then a theme to choose (any of them: taste differs).
+const giftThemes = () => CONCEPTS.filter((x) => x.id === "basic" || x.cost > 0);
 function giftPicker() {
+  const stage = state.giftStage || "hello";
   const picked = giftChoices().find((c) => c.id === state.giftPick);
-  return h("div", { class: "step gift" },
-    h("h1", null, t("선물이 도착했어요!")),
-    h("p", null, t("함께할 캐릭터를 하나 골라요. 선물이라 포인트는 들지 않아요.")),
+  const host = (say) => h("div", { class: "gift-host" }, h("p", { class: "talk-say" }, say), h("span", { class: "gift-me", "aria-hidden": "true" }, portrait("bubble")));
+  if (stage === "hello") {
+    const open = () => {
+      const box = document.querySelector(".gift-box");
+      if (!box || box.classList.contains("open")) return;
+      box.classList.add("open");
+      sfx.cheer("bubble");
+      setTimeout(() => { state.giftStage = "friend"; render(); }, 950);
+    };
+    return h("div", { class: "step gift hello" },
+      host(t("만나서 반가워! 나는 말풍이야. 너를 위해 선물을 준비했어!")),
+      h("button", { class: "gift-box", "aria-label": t("선물 열기"), onclick: open }, art("gift")),
+      h("button", { class: "btn wide", onclick: open }, t("선물 열기")));
+  }
+  if (stage === "friend") return h("div", { class: "step gift" },
+    host(t("첫 번째 선물! 함께할 친구를 하나 골라 줘.")),
     h("div", { class: "gift-grid" }, giftChoices().map((item) =>
       h("button", { class: "gift-card", "aria-pressed": String(picked === item), onclick: () => { state.giftPick = item.id; sfx.chirp(item.id); render(); } },
         portrait(item.id), h("b", null, t(item.name)), h("small", null, t(item.vibe))))),
-    h("button", { class: "btn wide", disabled: !picked, onclick: takePresent }, picked ? t("{name} 받기", { name: t(picked.name) }) : t("캐릭터를 골라 주세요")));
+    h("button", { class: "btn wide", disabled: !picked, onclick: () => { state.giftStage = "theme"; render(); document.getElementById("app")?.scrollTo?.(0, 0); } },
+      picked ? t("{name} 받기", { name: t(picked.name) }) : t("캐릭터를 골라 주세요")));
+  const theme = giftThemes().find((x) => x.id === state.giftTheme);
+  return h("div", { class: "step gift" },
+    host(t("하나 더 있어! 마음에 드는 테마도 골라 봐. 누르면 바로 입혀 볼 수 있어.")),
+    h("div", { class: "gift-grid themes" }, giftThemes().map((item) =>
+      h("button", { class: "gift-card", "aria-pressed": String(theme === item), onclick: () => {
+        state.giftTheme = item.id;
+        state.user.shop = { ...myShop(), concept: item.id }; // tried on at once: the screen itself is the preview
+        render();
+      } }, grow().conceptArt(item), h("b", null, t(item.name))))),
+    h("button", { class: "btn wide", disabled: !theme || !picked, onclick: takePresent }, theme ? t("{name} 받기", { name: t(theme.name) }) : t("테마를 골라 주세요")));
 }
 
 function takePresent() {
   const item = giftChoices().find((c) => c.id === state.giftPick);
-  if (!item) return;
+  const theme = giftThemes().find((x) => x.id === state.giftTheme);
+  if (!item || !theme) return;
   const shop = myShop();
-  state.user.shop = { ...shop, owned: [...shop.owned, `character:${item.id}`], character: item.id };
+  const got = [`character:${item.id}`, theme.id !== "basic" && `concept:${theme.id}`].filter((key) => key && !shop.owned.includes(key));
+  state.user.shop = { ...shop, owned: [...shop.owned, ...got], character: item.id, concept: theme.id };
   state.user.welcome = item.id;
-  state.giftPick = null;
+  state.giftPick = state.giftTheme = state.giftStage = null;
   api.saveProfile({ shop: state.user.shop, welcome: item.id }).catch(console.error);
   publishRank();
   render();
   celebrate(0, t(item.name), "✓");
+  confetti(80, 1);
 }
 
 function gradePicker() {
