@@ -4,7 +4,7 @@
 // file is what is done with them and how it is shown. Everything is kept with the account:
 // `level` { xp, got }, `bag` { tickets: { basic, gold } }, `hearts` { n, all }, and in `shop`: what
 // is owned ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
-import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js";
+import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js";
 import { lookOf } from "./characters.js";
 import { art } from "./art.js"; // eslint-disable-line no-unused-vars
 
@@ -303,25 +303,33 @@ export function initGrow(c) {
   const machineMini = () => `<circle class="gm-dome" cx="60" cy="50" r="44"/>${CAPS.slice(0, 6).map(([x, y, colour, turn]) => capsule(x, y, colour, turn)).join("")}` +
     `<rect class="gm-body" x="16" y="86" width="88" height="54" rx="14"/><rect class="gm-rim" x="12" y="82" width="96" height="12" rx="6"/><circle class="gm-knob-c" cx="44" cy="117" r="14"/><rect class="gm-chute" x="68" y="106" width="26" height="24" rx="7"/>`;
   const one = (list) => list[Math.floor(Math.random() * list.length)];
+  // The things of a kind that a capsule may hold: null for points and tickets (there are always
+  // more of those), otherwise the keys of that kind.
+  function keysOf(what) {
+    if (what[0] === "wear") return WEARS.filter((w) => w.rare <= what[1]).map((w) => `wear:${w.id}`);
+    if (what[0] === "skin") return SKINS.filter((x) => x.rare <= what[1]).map(skinKey);
+    if (what[0] === "concept") return CONCEPTS.filter((x) => x.cost > 0 && !x.special).map((x) => `concept:${x.id}`);
+    if (what[0] === "bg") return c.BACKGROUNDS.filter((x) => x.cost > 0 && !x.earn && Boolean(x.special) === what[1]).map((x) => `bg:${x.id}`);
+    if (what[0] === "theme") return c.THEMES.filter((x) => x.cost > 0 && !x.special).map((x) => `theme:${x.id}`);
+    if (what[0] === "character") return c.CHARACTERS.filter((x) => x.special && !x.earn && x.id !== "santa").map((x) => `character:${x.id}`);
+    return null;
+  }
+  const leftOf = (what) => (keysOf(what) || []).filter((key) => !owned(key));
+  const thingsLeft = (kind) => MACHINES[kind].inside.some(([what]) => leftOf(what).length > 0); // is there still a thing to win?
+  // A kind of thing the student has all of is not drawn: the chance goes to what is still to be had.
   function roll(kind) {
     const machine = MACHINES[kind];
-    let pick = Math.random() * machine.inside.reduce((sum, [, often]) => sum + often, 0);
-    const [what] = machine.inside.find(([, often]) => (pick -= often) < 0) || machine.inside[0];
-    const left = (keys) => keys.filter((key) => !owned(key));
-    const item = (keys) => (left(keys).length ? { item: one(left(keys)) } : { points: machine.again, twice: true });
+    const open = machine.inside.filter(([what]) => !keysOf(what) || leftOf(what).length > 0);
+    let pick = Math.random() * open.reduce((sum, [, often]) => sum + often, 0);
+    const [what] = open.find(([, often]) => (pick -= often) < 0) || open[0];
     if (what[0] === "points") return { points: what[1] + 10 * Math.floor(Math.random() * (Math.floor((what[2] - what[1]) / 10) + 1)) };
     if (what[0] === "ticket") return { ticket: what[1], n: 1 };
-    if (what[0] === "wear") return item(WEARS.filter((w) => w.rare <= what[1]).map((w) => `wear:${w.id}`));
-    if (what[0] === "skin") return item(SKINS.filter((s) => s.rare <= what[1]).map(skinKey));
-    if (what[0] === "concept") return item(CONCEPTS.filter((x) => x.cost > 0 && !x.special).map((x) => `concept:${x.id}`));
-    if (what[0] === "bg") return item(c.BACKGROUNDS.filter((x) => x.cost > 0 && !x.earn && Boolean(x.special) === what[1]).map((x) => `bg:${x.id}`));
-    if (what[0] === "theme") return item(c.THEMES.filter((x) => x.cost > 0 && !x.special).map((x) => `theme:${x.id}`));
-    if (what[0] === "character") return item(c.CHARACTERS.filter((x) => x.special && !x.earn && x.id !== "santa").map((x) => `character:${x.id}`));
-    return { points: machine.again };
+    const left = leftOf(what);
+    return left.length ? { item: one(left) } : { points: machine.again, twice: true };
   }
   const hearts = () => ({ n: 0, all: 0, ...(state.user?.hearts || {}) });
   // A turn is paid with ten hearts (the everyday machine only), a ticket, or points.
-  const canPay = (kind, pay) => (pay === "hearts" ? kind === "basic" && hearts().n >= HEARTS_FOR_DRAW : pay === "ticket" ? tickets()[kind] > 0 : (state.user.points || 0) >= MACHINES[kind].points);
+  const canPay = (kind, pay) => (pay === "hearts" ? kind === "basic" && hearts().n >= HEARTS_FOR_DRAW : pay === "ticket" ? tickets()[kind] > 0 : Boolean(MACHINES[kind].points) && thingsLeft(kind) && (state.user.points || 0) >= MACHINES[kind].points); // points: only where a turn has a price, and while there is a thing left to win (points won are more than the price)
   // One turn: it is paid, the prize is decided and kept first, and only then shown (the handle
   // turns, a capsule rolls out and opens), so nothing is lost if the window is closed half way.
   function draw(kind, pay) {
@@ -400,6 +408,14 @@ export function initGrow(c) {
   }
 
   // ----- what the character wears (a tab of the shop) -----
+  // Bought with points instead of won: it is put on at once.
+  function buyWear(w) {
+    const cost = wearCost(w);
+    if (owned(`wear:${w.id}`) || (state.user.points || 0) < cost) return;
+    c.spend(cost);
+    c.celebrate(0, t(w.name), "✓");
+    c.saveShop({ ...shop(), owned: [...shop().owned, `wear:${w.id}`], wear: { ...wearing(), [w.slot]: w.id } });
+  }
   function putOn(w) {
     const next = { ...wearing() };
     if (next[w.slot] === w.id) delete next[w.slot]; else next[w.slot] = w.id;
@@ -447,7 +463,9 @@ export function initGrow(c) {
         const has = owned(`wear:${w.id}`), on = has && wearing()[w.slot] === w.id;
         const other = has && !on && wearing()[w.slot] && owned(`wear:${wearing()[w.slot]}`); // the place is taken: this would take its place
         return tile(on, has, c.portrait(lookOf(me, "", [w.id])), t(w.name), t(slotName[w.slot]),
-          has ? h("button", { class: "mini", onclick: () => putOn(w) }, on ? t("벗기") : other ? t("바꿔 착용") : t("착용하기")) : lock(), "wear", w.id);
+          has ? h("button", { class: "mini", onclick: () => putOn(w) }, on ? t("벗기") : other ? t("바꿔 착용") : t("착용하기"))
+            : state.confirmBuy === `wear:${w.id}` ? h("button", { class: "mini buy", onclick: () => buyWear(w) }, t("살까요?"))
+              : h("button", { class: "mini price", disabled: (state.user.points || 0) < wearCost(w), title: (state.user.points || 0) < wearCost(w) ? t("포인트 부족") : null, onclick: () => { state.confirmBuy = `wear:${w.id}`; c.render(); } }, h("i", { "aria-hidden": "true" }, "P"), String(wearCost(w))), "wear", w.id);
       })),
       (!place || place === "skin") && h("h4", null, t("스킨")),
       (!place || place === "skin") && h("div", { class: "shelf" }, SKINS.map((s) => {
@@ -483,7 +501,7 @@ export function initGrow(c) {
         h("div", { class: "gacha-pays" },
           kind === "basic" && way("hearts", heartArt(), t("하트 {n}개로 뽑기", { n: HEARTS_FOR_DRAW }), `${Math.min(n, 99)} / ${HEARTS_FOR_DRAW}`),
           way("ticket", ticketArt(kind), t("{name}으로 뽑기", { name: t(machine.ticket) }), `×${held[kind]}`),
-          way("points", coin(), t("포인트로 뽑기"), String(machine.points)))));
+          machine.points && way("points", coin(), thingsLeft(kind) ? t("포인트로 뽑기") : t("모두 모았어요! 뽑기권으로만 뽑을 수 있어요."), String(machine.points)))));
   }
 
   // At the top of the friends screen: the ten places that fill up with the hearts friends send,
@@ -501,5 +519,5 @@ export function initGrow(c) {
   const canDraw = () => MACHINE_KINDS.some((kind) => ["hearts", "ticket"].some((pay) => canPay(kind, pay)));
 
   return { myLook, levelChip, openLevels, learnedOne, sync, waiting, level, wardrobe, conceptArt, addHearts, heartBox: heartStrip, gachaBox, canDraw, hearts, tickets,
-    ticketArt, nextGiftLine, give: grant, openGacha: () => c.openGacha(), openWardrobe: () => c.openShopTab("wear") };
+    ticketArt, nextGiftLine, buyWear, give: grant, openGacha: () => c.openGacha(), openWardrobe: () => c.openShopTab("wear") };
 }

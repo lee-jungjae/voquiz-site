@@ -86,7 +86,7 @@ export const CHARACTER_LINES = {
   orangutan: ["우끼끼! 단어 나무를 타고 다녀요", "Ook ook! Swinging through the word trees", "呜呜！在单词树上荡来荡去"],
   banana: ["미끄러지듯 술술 외워져요", "Words slide right in", "单词滑溜溜地记住啦"],
   santa: ["호호호! 착한 단어 친구에게 선물을", "Ho ho ho! Presents for good word friends", "呵呵呵！给乖乖学单词的你送礼物"],
-  rose: ["한 알 한 알, 단어도 송이송이", "Word by word, grape by grape", "一颗一颗，单词也一串一串"],
+  rose: ["까도 까도 새 단어가 나와!", "Peel after peel, a new word!", "剥了一层又一层，全是新单词！"],
   shark: ["대결이라면 물러서지 않아", "Never backs away from a duel", "对决从不退缩"],
   dragon: ["틀리지 않는 한 불꽃은 계속돼", "The flame burns on while I'm right", "只要不答错，火焰就不灭"],
   bookworm: ["익힌 단어를 야금야금 모아요", "Nibbling up every word I learn", "一口一口啃掉学会的单词"],

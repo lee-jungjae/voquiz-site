@@ -1,11 +1,11 @@
 import { api, DEMO } from "./api.js";
 import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js";
 import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js";
+import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js";
 import { cleanEntry } from "./clean.js";
 import { mascot, portrait, reaction, giftArt } from "./mascot.js";
 import { CHARACTERS, baseOf, lookOf } from "./characters.js";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey } from "./goods.js";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, wearCost } from "./goods.js";
 import { initGrow } from "./grow.js";
 import { logoIcon, wordmark } from "./logo.js";
 import { art, artToCss } from "./art.js";
@@ -2536,7 +2536,7 @@ function missChallenge() {
   if (!saver || c.revived) return finishChallenge(false);
   c.revived = true;
   sfx.chirp(saver);
-  toastText(saver === "rose" ? t("포도가 한 번 살려 줬어요! 계속 가요.") : t("본즈가 한 번 살려 줬어요! 계속 가요."));
+  toastText(saver === "rose" ? t("귤이 한 번 살려 줬어요! 계속 가요.") : t("본즈가 한 번 살려 줬어요! 계속 가요."));
   nextChallengeWord();
   render();
 }
@@ -3481,7 +3481,8 @@ function tryOn(kind, id) {
 const trying = (kind, id) => Boolean(state.tryOn) && state.tryOn.kind === kind && state.tryOn.id === id;
 function shopShown() {
   const shop = state.user?.shop, on = state.tryOn;
-  if (!on || !shop || !["concept", "theme", "bg"].includes(on.kind)) return shop;
+  if (!on || !shop || !["concept", "theme", "bg", "font"].includes(on.kind)) return shop;
+  if (on.kind === "font") return { ...myShop(), font: on.id }; // lettering goes with any look
   return { ...myShop(), [on.kind]: on.id, concept: on.kind === "concept" ? on.id : "basic" };
 }
 // The character as it would look with what is being tried on.
@@ -3498,7 +3499,7 @@ function tryBar() {
   const on = state.tryOn;
   if (!on) return null;
   const shop = myShop(), points = state.user.points || 0;
-  const list = { character: CHARACTERS, concept: CONCEPTS, theme: THEMES, bg: BACKGROUNDS }[on.kind];
+  const list = { character: CHARACTERS, concept: CONCEPTS, theme: THEMES, bg: BACKGROUNDS, font: FONTS }[on.kind];
   const item = list ? list.find((x) => x.id === on.id) : on.kind === "wear" ? wearById(on.id) : SKINS.find((x) => skinKey(x) === on.id);
   if (!item) return null;
   const key = on.kind === "skin" ? on.id : `${on.kind}:${on.id}`;
@@ -3508,7 +3509,9 @@ function tryBar() {
     ? list
       ? h("button", { class: "mini buy", onclick: () => { if (on.kind === "character") sfx.chirp(item.id); saveShop({ ...shop, [on.kind]: item.id, ...(on.kind === "theme" || on.kind === "bg" ? { concept: "basic" } : {}) }); } }, t("적용하기"))
       : h("span", { class: "tagline" }, t("가지고 있어요"))
-    : !list ? h("span", { class: "tagline earn" }, lock(), t("뽑기에서 나와요"))
+    : on.kind === "wear" ? h("button", { class: "mini buy", disabled: points < wearCost(item), title: points < wearCost(item) ? t("포인트 부족") : null, onclick: () => grow().buyWear(item) },
+        h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `${wearCost(item)} · `, t("사기"))
+      : !list ? h("span", { class: "tagline earn" }, lock(), t("뽑기에서 나와요"))
       : item.earn ? h("span", { class: "tagline earn" }, lock(), t("도전 과제"))
         : h("button", { class: "mini buy", disabled: points < item.cost, title: points < item.cost ? t("포인트 부족") : null, onclick: () => buy(on.kind, item) },
             h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `${item.cost} · `, t("사기"));
@@ -3554,7 +3557,7 @@ const LION_BONUS = 10;
 // its tab and on the points pill that opens the shop, until the student has opened that tab once.
 // What has been seen is kept on this computer, per student and per tab. A student with no record
 // yet (first run of this version, or a new account) sees the latest additions as new.
-const SHOP_ITEMS = { character: () => CHARACTERS, theme: () => THEMES, bg: () => BACKGROUNDS, concept: () => CONCEPTS, wear: () => [] };
+const SHOP_ITEMS = { character: () => CHARACTERS, theme: () => THEMES, bg: () => BACKGROUNDS, concept: () => CONCEPTS, font: () => FONTS, wear: () => [] };
 const seenKey = () => `wb_shop_seen_${state.user?.id}`;
 function shopSeen() {
   let saved = {};
@@ -3666,10 +3669,11 @@ function shelf(kind, heading, items) {
         quest && h("span", { class: "ribbon quest" }, t("도전 과제")),
         kind === "character" && portrait(item.id),
         kind === "concept" && grow().conceptArt(item),
-        kind !== "character" && kind !== "concept" && h("div", {
+        kind !== "character" && kind !== "concept" && kind !== "font" && h("div", {
           class: "preview", "aria-hidden": "true", "data-bg": kind === "bg" ? item.id : null,
           style: kind === "theme" ? `background:${themeColor(item.id)}` : null,
         }),
+        kind === "font" && h("div", { class: "preview font-sample", "aria-hidden": "true", style: loadFont(item.id)?.family ? `font-family:"${item.family}", sans-serif` : null }, h("b", null, "Aa 가나"), h("small", null, "word 단어")),
         h("div", { class: "swatch-name" }, t(item.name), kind === "character" && h("small", null, t(item.vibe))),
         // An earned character not yet owned shows what to do and how far along it is, instead of its line.
         quest && !owned && h("p", { class: "swatch-line quest-text" }, QUESTS[item.earn.by].text(item.earn.goal)),
@@ -3707,13 +3711,13 @@ function shopSection() {
   const shown = ALL_CHARACTERS.filter((c) => inKind(c, kind)).sort((a, b) => rank(a) - rank(b));
   const kinds = [["all", t("전체")], ["quest", t("도전 과제")], ...SHOP_KINDS.map((k) => [k, t(k)]), ["special", t("스페셜")]];
   // Four tabs: the whole themes, the colours and the backgrounds are three shelves of one tab.
-  const tabs = [["gacha", t("뽑기"), null], ["character", t("캐릭터"), CHARACTERS.length], ["wear", t("꾸미기"), WEARS.length + SKINS.length], ["concept", t("테마"), CONCEPTS.length + THEMES.length + BACKGROUNDS.length]];
+  const tabs = [["gacha", t("뽑기"), null], ["character", t("캐릭터"), CHARACTERS.length], ["wear", t("꾸미기"), WEARS.length + SKINS.length], ["concept", t("테마"), CONCEPTS.length + THEMES.length + BACKGROUNDS.length + FONTS.length]];
   if (state.shopTab === "theme" || state.shopTab === "bg") state.shopTab = "concept";
   const tab = tabs.some(([id]) => id === state.shopTab) ? state.shopTab : "character";
   ["theme", "bg"].forEach((id) => tab === "concept" && state.shopViewed?.add(id));
   (state.shopViewed ||= new Set()).add(tab); // looked at now: its NEW marks go when the student moves on
   const whole = conceptById(myShop().concept);
-  const look = ["concept", "theme", "bg"].includes(state.lookKind) ? state.lookKind : "all";
+  const look = ["concept", "theme", "bg", "font"].includes(state.lookKind) ? state.lookKind : "all";
   // While a whole theme is on, the colour and the background are the theme's own.
   const wholeNote = () => whole.vars && h("p", { class: "small muted whole-note" }, t("지금은 ‘{name}’ 테마를 쓰고 있어요. 여기서 하나를 고르면 기본 테마로 돌아가요.", { name: t(whole.name) }));
   return h("section", { class: "shop" },
@@ -3728,13 +3732,14 @@ function shopSection() {
     tab === "wear" && grow().wardrobe(),
     // The same chips as the other tabs: everything, or one kind of look at a time.
     tab === "concept" && h("div", { class: "chips one-line shop-kinds", role: "group", "aria-label": t("테마") },
-      [["all", t("전체"), CONCEPTS.length + THEMES.length + BACKGROUNDS.length], ["concept", t("테마"), CONCEPTS.length], ["theme", t("색상"), THEMES.length], ["bg", t("배경"), BACKGROUNDS.length]].map(([id, label, count]) =>
+      [["all", t("전체"), CONCEPTS.length + THEMES.length + BACKGROUNDS.length + FONTS.length], ["concept", t("테마"), CONCEPTS.length], ["theme", t("색상"), THEMES.length], ["bg", t("배경"), BACKGROUNDS.length], ["font", t("글꼴"), FONTS.length]].map(([id, label, count]) =>
         h("button", { class: "chip", "aria-pressed": String(look === id), onclick: () => { Object.assign(state, { lookKind: id, confirmBuy: null }); render(); } }, label, h("small", null, String(count))))),
     tab === "concept" && [
       (look === "all" || look === "concept") && shelf("concept", look === "all" ? t("테마") : null, CONCEPTS),
       look !== "concept" && wholeNote(),
       (look === "all" || look === "theme") && shelf("theme", look === "all" ? t("색상") : null, THEMES),
-      (look === "all" || look === "bg") && shelf("bg", look === "all" ? t("배경") : null, BACKGROUNDS)]);
+      (look === "all" || look === "bg") && shelf("bg", look === "all" ? t("배경") : null, BACKGROUNDS),
+      (look === "all" || look === "font") && shelf("font", look === "all" ? t("글꼴") : null, FONTS)]);
 }
 
 // Tapping the score: go to Settings and bring the theme shop into view.
@@ -3847,7 +3852,9 @@ function settingsView() {
         storeUrl && h("button", { class: "btn ghost", onclick: sharePrompt }, t("친구에게 공유"),
           state.invites && !WIDE() && h("span", { class: "btn-note" }, t("남은 초대장 {n}장", { n: friends().unusedInvites().length }))),
         storeUrl && h("button", { class: "btn ghost", onclick: ratePrompt }, t("평가하기")),
-        HOME_URL && h("button", { class: "btn ghost", onclick: () => window.open(HOME_URL + (getLang() === "ko" ? "" : "en.html"), "_blank", "noopener") }, t("VOQUIZ 홈페이지 열기"))),
+        HOME_URL && h("button", { class: "btn ghost", onclick: () => window.open(HOME_URL + (getLang() === "ko" ? "" : "en.html"), "_blank", "noopener") }, t("VOQUIZ 홈페이지 열기")),
+        // the web version: the same app in a browser tab (not shown inside the web version itself)
+        HOME_URL && !WEB && h("button", { class: "btn ghost", onclick: () => window.open(`${HOME_URL}web/`, "_blank", "noopener") }, t("웹 버전 이용해 보기"))),
       WIDE() && storeUrl && state.invites && h("p", { class: "small muted btn-caption" }, t("남은 초대장 {n}장", { n: friends().unusedInvites().length }))),
     h("section", { class: "block" },
       h("h3", null, t("계정")),

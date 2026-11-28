@@ -32,9 +32,30 @@ export const BACKGROUNDS = [
 // Items carry `added`: the catalogue revision they arrived in. The shop marks an item NEW until
 // the student has opened its tab once since then. Raise this when adding items, and give them
 // the new number.
-export const CATALOG_REV = 20;
+export const CATALOG_REV = 21;
 
-export const DEFAULT_SHOP = { owned: [], theme: "purple", bg: "plain", character: "bubble", concept: "basic" };
+// Lettering for the whole app. Free to choose. Every one is an open font (SIL Open Font License)
+// served by Google Fonts; it is fetched only once it is chosen or tried on. `family` is its name
+// there. Chinese falls back to the device's own lettering.
+export const FONTS = [
+  { id: "system", name: "기본 글꼴", cost: 0 },
+  { id: "gowun", name: "고운돋움", cost: 0, family: "Gowun Dodum", added: 21 },
+  { id: "jua", name: "주아", cost: 0, family: "Jua", added: 21 },
+  { id: "gaegu", name: "개구", cost: 0, family: "Gaegu", added: 21 },
+  { id: "myeongjo", name: "나눔명조", cost: 0, family: "Nanum Myeongjo", added: 21 },
+];
+export function loadFont(id) {
+  const font = FONTS.find((x) => x.id === id);
+  if (!font?.family || document.getElementById(`wb-font-${id}`)) return font;
+  const link = document.createElement("link");
+  link.id = `wb-font-${id}`;
+  link.rel = "stylesheet";
+  link.href = `https://fonts.googleapis.com/css2?family=${font.family.replaceAll(" ", "+")}:wght@400;700&display=swap`;
+  document.head.append(link);
+  return font;
+}
+
+export const DEFAULT_SHOP = { owned: [], theme: "purple", bg: "plain", character: "bubble", concept: "basic", font: "system" };
 
 const darkScreen = () => globalThis.matchMedia?.("(prefers-color-scheme: dark)").matches;
 
@@ -47,8 +68,11 @@ export function themeColor(id) {
 // (goods.js, CONCEPTS), with every colour of that theme; its backdrop takes the background's place.
 const PAINTED = ["on-accent", "bg", "surface", "text", "muted", "line", "border", "accent", "accent-dark", "accent-soft", "lime", "good", "good-soft", "bad", "bad-soft", "shadow", "shadow-lg"];
 export function applyShop(shop) {
-  const { theme, bg, concept } = { ...DEFAULT_SHOP, ...(shop || {}) };
+  const { theme, bg, concept, font } = { ...DEFAULT_SHOP, ...(shop || {}) };
   const root = document.documentElement;
+  const lettering = loadFont(font);
+  if (lettering?.family) { root.dataset.font = lettering.id; root.style.setProperty("--font", `"${lettering.family}"`); }
+  else { delete root.dataset.font; root.style.removeProperty("--font"); }
   const whole = conceptById(concept);
   for (const name of PAINTED) root.style.removeProperty(`--${name}`);
   if (whole.vars) {
