@@ -1783,7 +1783,7 @@ function petTalk() {
   const id = myShop().character;
   const own = CHARACTER_LINES[id]?.[["ko", "en", "zh"].indexOf(getLang())] || "";
   const who = CHARACTERS.find((c) => c.id === id);
-  const pool = [own, own, ...(PET_LINES[who ? kindOf(who) : "기타"] || PET_LINES["기타"]).map((line) => t(line)), ...PET_LINES.all.map((line) => t(line))].filter(Boolean);
+  const pool = [own, own, grow().nextGiftLine(), ...(PET_LINES[who ? kindOf(who) : "기타"] || PET_LINES["기타"]).map((line) => t(line)), ...PET_LINES.all.map((line) => t(line))].filter(Boolean);
   let line = pool[Math.floor(Math.random() * pool.length)];
   if (line === state.petSaid) line = pool[(pool.indexOf(line) + 1) % pool.length]; // never the same line twice in a row
   state.petSaid = line;
@@ -1855,7 +1855,7 @@ function todayRow() {
 // Under the word box of the first screen: only how the day and the week stand. What to do next
 // (the present, a quiz, the word of the day, a character to take) is the yard character's to say.
 function webActions() {
-  return [dailyWordCard(), todayRow(), grow().levelHint()];
+  return [todayRow(), dailyWordCard()];
 }
 function webQuiet() {
   const recent = WIDE() ? [] : state.words.slice(0, 8);
@@ -1982,6 +1982,7 @@ function syncYard() {
     friends().gifts() > 0 && { waits: true, text: t("친구가 선물을 보냈어!"), act: () => friends().collect() },
     friends().badge() > friends().gifts() && state.tab !== "friends" && { waits: true, text: t("친구 신청이 왔어!"), act: () => friends().open() },
     !dailyWordDone() && dailyWord() && !limitReached() && webHome() && { text: t("오늘의 아카데믹 단어 {w}, 찾아볼까?", { w: dailyWord() }), act: () => search(dailyWord()) },
+    grow().nextGiftLine() && { text: grow().nextGiftLine(), act: () => grow().openLevels() },
     state.words.length > 0 && state.tab !== "quiz" && { text: t("퀴즈 한 판 어때?"), act: to("quiz") },
     state.tab !== "rank" && { text: t("이번 주 순위 볼래?"), act: to("rank") },
     { text: t("새 단어 찾으러 가자!"), act: () => { if (state.tab !== "search") goTab("search"); document.getElementById("q")?.focus(); } },
@@ -2029,8 +2030,6 @@ function searchHome() {
     duel().banner(),
     friends().banner(),
     h("p", { class: "hello" }, greeting()),
-    dailyWordCard(),
-    grow().levelHint(),
     limitReached()
       ? [h("p", { class: "small" }, t("오늘 검색 {n}개를 모두 썼어요. 이미 찾은 단어는 단어장에서 볼 수 있어요.", { n: FREE_SEARCHES })),
          h("p", { class: "small" }, h("button", { class: "link", onclick: () => { state.plusOpen = true; openSettings(); } }, t("플러스로 전환하면 무제한으로 찾을 수 있어요")))]
@@ -2098,6 +2097,7 @@ function searchView() {
     home && h("p", { class: "dk-hello" }, greeting()),
     !topSearch() && searchForm(),
     home ? webActions() : !WIDE() && dailyGoal(),
+    !WIDE() && !state.busy && !state.entry && !state.notice && dailyWordCard(), // beside the day's meters, not in the middle of the screen
     noticeBox(),
     state.busy && loadingView(),
     state.entry && entryCard(state.entry),

@@ -3330,3 +3330,17 @@ html[data-concept="rainbow"] nav { border-top: 2px solid; border-image: linear-g
 .zone-line.down { color: color-mix(in srgb, #a23b2a 55%, var(--text)); }
 @media (prefers-color-scheme: dark) { .use b { color: #f08a7a; } }
 html[data-concept="space"] .use b, html[data-concept="night"] .use b { color: #f08a7a; }
+
+/* the academic word of the day: a slim line beside the day's meters */
+.daily-word { max-width: none; margin: 8px 0 0; padding: 5px 8px 5px 10px; gap: 8px; border-radius: 14px; border-width: 1.5px; border-bottom-width: 3px; }
+.daily-word > .art-i { width: 22px; height: 22px; }
+.dw-text { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.dw-text small { flex: none; }
+.dw-text small { font-size: 0; gap: 0; }
+.dw-text small em { font-size: 9px; }
+.dw-text b { font-size: 15px; }
+.dw-pay, .dw-got { padding: 2px 8px; font-size: 12px; border-width: 1.5px; }
+.dw-pay .coin-i { width: 15px; height: 15px; }
+.empty .daily-word { width: auto; }
+@media (min-width: 860px) { .dk .daily-word { max-width: 420px; margin: 12px auto 0; } }
+.wear-kinds { margin: 10px 0 2px; }
