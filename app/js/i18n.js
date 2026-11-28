@@ -1273,6 +1273,8 @@ const T = {
   "하나 더 있어! 마음에 드는 테마도 골라 봐. 누르면 바로 입혀 볼 수 있어.": ["One more! Pick a theme you like. Tap one to try it on.", "还有一个！选一个喜欢的主题吧。点一下就能试用。"],
   "테마를 골라 주세요": ["Pick a theme", "请选择主题"],
   "다음 장면": ["Next scene", "下一个场景"],
+  "그동안 함께해 줘서 고마워! 선물을 하나 준비했어!": ["Thanks for being with me! I have a present for you!", "谢谢你一直陪着我！我准备了一份礼物！"],
+  "마음에 드는 테마를 골라 봐. 누르면 바로 입혀 볼 수 있어.": ["Pick a theme you like. Tap one to try it on.", "选一个喜欢的主题吧。点一下就能试用。"],
   "알아 두기": ["Good to know", "小贴士"],
   "이렇게 써요": ["How to use it", "这样用"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],

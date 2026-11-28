@@ -1,35 +1,35 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp82ly";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp82ly";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp82ly";
-import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp82ly";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp82ly";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp82ly";
-import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp82ly";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, skinName, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp82ly";
-import { initGrow } from "./grow.js?v=0.1.28-tp82ly";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp82ly";
-import { art, artToCss } from "./art.js?v=0.1.28-tp82ly";
-import { academicWords, academicField } from "./academic.js?v=0.1.28-tp82ly";
+import { api, DEMO } from "./api.js?v=0.1.28-tp82vr";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp82vr";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp82vr";
+import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp82vr";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp82vr";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp82vr";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp82vr";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, skinName, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp82vr";
+import { initGrow } from "./grow.js?v=0.1.28-tp82vr";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp82vr";
+import { art, artToCss } from "./art.js?v=0.1.28-tp82vr";
+import { academicWords, academicField } from "./academic.js?v=0.1.28-tp82vr";
 artToCss();
 setTimeout(() => peekSoon(true), 0);
-import { film } from "./film.js?v=0.1.28-tp82ly";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp82ly";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp82ly";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp82ly";
-import { clockNow } from "./clock.js?v=0.1.28-tp82ly";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp82ly";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp82ly";
-import { initDuel } from "./duel.js?v=0.1.28-tp82ly";
-import { initFriends } from "./friends.js?v=0.1.28-tp82ly";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp82ly";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp82ly";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp82ly";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp82ly";
-import { focusOn, setFocus, untimedOn, setUntimed, defLang, setDefLang, defKind } from "./prefs.js?v=0.1.28-tp82ly";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp82ly";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp82ly";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp82ly";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch, reviewGap, englishOf } from "./quiz.js?v=0.1.28-tp82ly";
+import { film } from "./film.js?v=0.1.28-tp82vr";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp82vr";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp82vr";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp82vr";
+import { clockNow } from "./clock.js?v=0.1.28-tp82vr";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp82vr";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp82vr";
+import { initDuel } from "./duel.js?v=0.1.28-tp82vr";
+import { initFriends } from "./friends.js?v=0.1.28-tp82vr";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp82vr";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp82vr";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp82vr";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp82vr";
+import { focusOn, setFocus, untimedOn, setUntimed, defLang, setDefLang, defKind } from "./prefs.js?v=0.1.28-tp82vr";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp82vr";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp82vr";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp82vr";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch, reviewGap, englishOf } from "./quiz.js?v=0.1.28-tp82vr";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -4136,12 +4136,15 @@ function settingsView() {
 // ----- a welcome present: one of the cheapest characters, chosen once and kept -----
 const GIFT_CHOICES = 6;
 const giftChoices = () => ALL_CHARACTERS.filter((c) => c.cost > 0 && !myShop().owned.includes(`character:${c.id}`)).slice(0, GIFT_CHOICES);
-const presentWaiting = () => !state.user.welcome && giftChoices().length > 0;
+// A student who joined before themes were part of the present still gets theirs: the theme step alone.
+const themeOwed = () => Boolean(state.user.welcome) && !state.user.themeGift && giftThemes().length > 0;
+const presentWaiting = () => (!state.user.welcome && giftChoices().length > 0) || themeOwed();
 
 // The present comes from 말풍이 (the first character) in three steps on one screen: a wrapped box
 // handed over, a friend to choose, then a theme to choose (any of them: taste differs).
-const giftThemes = () => CONCEPTS.filter((x) => x.id === "basic" || x.cost > 0);
+const giftThemes = () => CONCEPTS.filter((x) => (x.id === "basic" && !state.user.welcome) || (x.cost > 0 && !myShop().owned.includes(`concept:${x.id}`)));
 function giftPicker() {
+  const late = themeOwed(); // already has a character: only the theme is given
   const stage = state.giftStage || "hello";
   const picked = giftChoices().find((c) => c.id === state.giftPick);
   const host = (say) => h("div", { class: "gift-host" }, h("p", { class: "talk-say" }, say), h("span", { class: "gift-me", "aria-hidden": "true" }, portrait("bubble")));
@@ -4151,10 +4154,10 @@ function giftPicker() {
       if (!box || box.classList.contains("open")) return;
       box.classList.add("open");
       sfx.cheer("bubble");
-      setTimeout(() => { state.giftStage = "friend"; render(); }, 950);
+      setTimeout(() => { state.giftStage = late ? "theme" : "friend"; render(); }, 950);
     };
     return h("div", { class: "step gift hello" },
-      h("p", { class: "talk-say" }, t("만나서 반가워! 나는 말풍이야. 너를 위해 선물을 준비했어!")),
+      h("p", { class: "talk-say" }, late ? t("그동안 함께해 줘서 고마워! 선물을 하나 준비했어!") : t("만나서 반가워! 나는 말풍이야. 너를 위해 선물을 준비했어!")),
       // 말풍이 itself, large, holding the box up toward the student: the box is the thing to press.
       h("div", { class: "gift-give" },
         h("button", { class: "gift-box", "aria-label": t("선물 열기"), onclick: open }, art("gift")),
@@ -4170,26 +4173,38 @@ function giftPicker() {
       picked ? t("{name} 받기", { name: t(picked.name) }) : t("캐릭터를 골라 주세요")));
   const theme = giftThemes().find((x) => x.id === state.giftTheme);
   return h("div", { class: "step gift" },
-    host(t("하나 더 있어! 마음에 드는 테마도 골라 봐. 누르면 바로 입혀 볼 수 있어.")),
+    host(late ? t("마음에 드는 테마를 골라 봐. 누르면 바로 입혀 볼 수 있어.") : t("하나 더 있어! 마음에 드는 테마도 골라 봐. 누르면 바로 입혀 볼 수 있어.")),
     h("div", { class: "gift-grid themes" }, giftThemes().map((item) =>
       h("button", { class: "gift-card", "aria-pressed": String(theme === item), onclick: () => {
         state.giftTheme = item.id;
         state.user.shop = { ...myShop(), concept: item.id }; // tried on at once: the screen itself is the preview
         render();
       } }, grow().conceptArt(item), h("b", null, t(item.name))))),
-    h("button", { class: "btn wide", disabled: !theme || !picked, onclick: takePresent }, theme ? t("{name} 받기", { name: t(theme.name) }) : t("테마를 골라 주세요")));
+    h("button", { class: "btn wide", disabled: !theme || (!picked && !late), onclick: takePresent }, theme ? t("{name} 받기", { name: t(theme.name) }) : t("테마를 골라 주세요")));
 }
 
 function takePresent() {
   const item = giftChoices().find((c) => c.id === state.giftPick);
   const theme = giftThemes().find((x) => x.id === state.giftTheme);
-  if (!item || !theme) return;
+  if (!theme) return;
+  if (themeOwed()) { // the theme alone, for a student who already has their character
+    const mine = myShop();
+    state.user.shop = { ...mine, owned: mine.owned.includes(`concept:${theme.id}`) ? mine.owned : [...mine.owned, `concept:${theme.id}`], concept: theme.id };
+    state.user.themeGift = theme.id;
+    state.giftPick = state.giftTheme = state.giftStage = null;
+    api.saveProfile({ shop: state.user.shop, themeGift: theme.id }).catch(console.error);
+    render();
+    celebrate(0, t(theme.name), "✓");
+    return confetti(80, 1);
+  }
+  if (!item) return;
   const shop = myShop();
   const got = [`character:${item.id}`, theme.id !== "basic" && `concept:${theme.id}`].filter((key) => key && !shop.owned.includes(key));
   state.user.shop = { ...shop, owned: [...shop.owned, ...got], character: item.id, concept: theme.id };
   state.user.welcome = item.id;
+  state.user.themeGift = theme.id;
   state.giftPick = state.giftTheme = state.giftStage = null;
-  api.saveProfile({ shop: state.user.shop, welcome: item.id }).catch(console.error);
+  api.saveProfile({ shop: state.user.shop, welcome: item.id, themeGift: theme.id }).catch(console.error);
   publishRank();
   render();
   celebrate(0, t(item.name), "✓");
