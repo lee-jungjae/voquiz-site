@@ -5,7 +5,7 @@ import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, theme
 import { cleanEntry } from "./clean.js";
 import { mascot, portrait, reaction, giftArt } from "./mascot.js";
 import { CHARACTERS, baseOf, lookOf } from "./characters.js";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, wearCost, wearSpecial } from "./goods.js";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, skinName, wearCost, wearSpecial } from "./goods.js";
 import { initGrow } from "./grow.js";
 import { logoIcon, wordmark } from "./logo.js";
 import { art, artToCss } from "./art.js";
@@ -210,9 +210,9 @@ function openDailyGift() {
           h("small", null, day === pos ? t("오늘") : day === pos + 1 ? t("내일") : String(day)));
       }));
   };
-  const tomorrow = (run) => h("p", { class: "run-next" }, art("spark"), (run + 1) % 7 === 0 ? t("내일 오면 황금 뽑기권을 받아요!") : t("내일 오면 보너스 +{p} 더!", { p: runBonus(run + 1) }));
+  const tomorrow = (run) => h("p", { class: "run-next" }, art("spark"), (run + 1) % 7 === 0 ? t("내일 오면 황금 티켓을 받아요!") : t("내일 오면 보너스 +{p} 더!", { p: runBonus(run + 1) }));
   const runBox = h("div", { class: "run-box" }, h("b", null, t("연속 {n}일", { n: runOf() })), strip(runOf()), tomorrow(runOf()));
-  const title = h("h2", null, extra ? t("한 번 더 뽑기") : t("오늘의 선물"), extra && h("em", { class: "plus-badge" }, "PLUS"));
+  const title = h("h2", null, extra ? t("한 번 더 고르기") : t("오늘의 선물"), extra && h("em", { class: "plus-badge" }, "PLUS"));
   const text = h("p", null, t("상자 하나를 골라요. 안에 든 포인트가 모두 달라요!"));
   // After a pick: "great", or straight on to the next pick when there is one left today.
   const done = h("button", { class: "btn wide", hidden: true, onclick: () => (giftWaiting() ? openDailyGift() : close()) }, t("좋아요!"));
@@ -251,10 +251,10 @@ function openDailyGift() {
         }
         title.textContent = prize === best && prize >= 100 ? t("대박! +{p}포인트!", { p: prize }) : prize === best ? t("최고의 상자! +{p}포인트!", { p: prize }) : t("+{p}포인트!", { p: prize });
         const again = giftWaiting();
-        text.textContent = again ? t("플러스라서 한 번 더 뽑을 수 있어요!")
-          : !extra && run % 7 === 0 ? t("연속 {n}일! 황금 뽑기권도 받았어요.", { n: run })
+        text.textContent = again ? t("플러스라서 한 번 더 고를 수 있어요!")
+          : !extra && run % 7 === 0 ? t("연속 {n}일! 황금 티켓도 받았어요.", { n: run })
             : prize === best ? t("세 상자 중에 가장 큰 선물을 골랐어요!") : t("내일은 어떤 상자를 고를까요?");
-        if (again) done.textContent = t("한 번 더 뽑기");
+        if (again) done.textContent = t("한 번 더 고르기");
         done.hidden = false;
         done.focus();
       }, 800);
@@ -309,7 +309,7 @@ function plusSection() {
   const perks = [
     t("단어 검색 무제한 (무료는 하루 {n}개)", { n: FREE_SEARCHES }),
     t("캐릭터마다 다른 전용 애니메이션"),
-    t("매일 선물 뽑기 한 번 더 (하루 {n}번)", { n: tuning("gift").plusPicks }),
+    t("매일 선물 한 번 더 고르기 (하루 {n}번)", { n: tuning("gift").plusPicks }),
   ];
   const until = state.plan?.until ? new Date(state.plan.until) : null;
   return h("section", { class: `block plus${isPlus() ? " on" : ""}` },
@@ -891,27 +891,88 @@ function awardSearch(word) {
   if (reached) setTimeout(happyMoment, 2600);
 }
 // Today's search points, word by word (opened from the pill on the home screen).
-function searchPointsSheet() {
+// A sheet in which the student's character does the talking: its line in a bubble, a picture of
+// how things stand, at most one small line of explanation, and the buttons. (Today's search
+// points, the week's goal.)
+function talkSheet({ label, say, body, note, actions }) {
   document.getElementById("sheet")?.remove();
   const close = () => el.remove();
-  const log = searchLogToday();
-  const total = searchPointsToday() + searchBonusToday();
-  const left = Math.max(0, Math.ceil((SEARCH_DAILY_MAX - searchPointsToday()) / SEARCH_POINTS));
   const el = h("div", { id: "sheet", class: "sheet-wrap", onclick: (e) => { if (e.target === el) close(); } },
-    h("div", { class: "sheet points-sheet", role: "dialog", "aria-modal": "true", "aria-label": t("오늘 검색 포인트") },
-      h("h2", null, t("오늘 검색 포인트"), " ", h("b", { class: "points-total" }, `+${total}`)),
-      h("p", null, t("그날 처음 찾는 단어마다 +{p}점, 하루 {m}점까지 받아요.", { p: SEARCH_POINTS, m: SEARCH_DAILY_MAX }), " ",
-        myShop().owned.includes("bg:sunrise")
-          ? (sunriseOn() ? t("황금 햇살 배경을 쓰는 중이라 단어마다 +{p}점을 더 받아요.", { p: SUNRISE_BONUS }) : t("황금 햇살 배경을 쓰면 단어마다 +{p}점을 더 받아요.", { p: SUNRISE_BONUS }))
-          : ""),
-      log.length
-        ? h("ol", { class: "points-log" }, log.map(([word, points, bonus]) =>
-            h("li", null, h("span", { class: "points-word" }, word), h("b", null, `+${points}`), bonus > 0 && h("em", { title: t("황금 햇살 보너스") }, art("sun"), ` +${bonus}`))))
-        : h("p", { class: "points-none" }, total > 0 ? t("이 기기에서 찾은 기록이 없어요. 포인트는 그대로 받았어요.") : t("오늘은 아직 찾은 단어가 없어요.")),
-      h("p", { class: "small muted" }, left > 0 ? t("오늘 {n}개 더 찾으면 검색 포인트를 다 받아요.", { n: left }) : t("오늘 검색 포인트를 다 받았어요!")),
-      h("button", { class: "btn wide", onclick: close }, t("확인"))));
+    h("div", { class: "sheet talk-sheet", role: "dialog", "aria-modal": "true", "aria-label": label },
+      h("div", { class: "talk-top" }, h("p", { class: "talk-say" }, say), h("span", { class: "talk-me", "aria-hidden": "true" }, portrait(myLook()))),
+      body,
+      note && h("p", { class: "small muted talk-note" }, note),
+      actions.map(({ label: text, kind, run }) =>
+        h("button", { class: kind === "main" ? "btn wide" : "link", onclick: () => { if (run() !== false) close(); } }, text))));
   document.body.append(el);
   el.querySelector("button.btn")?.focus();
+  return el;
+}
+// Today's search points (opened from the pill on the home screen): a coin for every word that
+// still pays today, filled as they are found, and the words found so far.
+function searchPointsSheet() {
+  const log = searchLogToday();
+  const got = searchPointsToday(), extra = searchBonusToday();
+  const coins = Math.ceil(SEARCH_DAILY_MAX / SEARCH_POINTS), have = Math.floor(got / SEARCH_POINTS), left = Math.max(0, coins - have);
+  talkSheet({
+    label: t("오늘 검색 포인트"),
+    say: left === 0 ? t("오늘 검색 포인트 다 모았어! 최고야!") : have === 0 ? t("새 단어를 찾을 때마다 +{p}점이야!", { p: SEARCH_POINTS }) : t("{n}개만 더 찾으면 오늘 포인트 다 모아!", { n: left }),
+    body: [
+      h("div", { class: "pt-total" }, h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), h("b", null, String(got + extra)), h("span", null, `/ ${SEARCH_DAILY_MAX}`),
+        extra > 0 && h("em", { title: t("황금 햇살 보너스") }, art("sun"), `+${extra}`)),
+      h("div", { class: "pt-coins", role: "img", "aria-label": `${have} / ${coins}` }, Array.from({ length: coins }, (_, i) => h("i", { class: i < have ? "on" : "" }))),
+      log.length > 0 && h("div", { class: "pt-words" }, log.slice(-12).map(([word, points, bonus]) => h("span", null, word, h("b", null, `+${points + (bonus || 0)}`)))),
+    ],
+    note: log.length === 0 && got > 0 ? t("이 기기에서 찾은 기록이 없어요. 포인트는 그대로 받았어요.") : null,
+    actions: [{ label: t("확인"), kind: "main", run: () => true }],
+  });
+}
+// The week's goal: choosing it, and afterwards how far along it is (a road to a flag, with the
+// bonus that waits there).
+function weeklyGoalSheet() {
+  if (weekLocked()) {
+    const goal = weekGoal(), count = weekCount(), left = goal - count, p = weekBonus(goal), done = left <= 0;
+    return talkSheet({
+      label: t("이번 주 목표"),
+      say: done ? t("목표 달성! 정말 멋져!")
+        : count === 0 ? t("첫 단어부터 같이 가자!")
+        : left <= 3 ? t("거의 다 왔어! {l}개만 더!", { l: left })
+        : count * 2 >= goal ? t("벌써 절반 넘었어! {l}개 남았어.", { l: left })
+        : t("잘하고 있어! {l}개 남았어.", { l: left }),
+      body: [
+        h("div", { class: "pt-total" }, h("b", null, String(count)), h("span", null, `/ ${goal}`)),
+        h("div", { class: `goal-road${done ? " done" : ""}`, role: "img", "aria-label": `${count} / ${goal}` },
+          h("i", { class: "goal-fill", style: `width:${Math.min(100, (count / goal) * 100)}%` }),
+          h("span", { class: "goal-end" }, art(done ? "party" : "flag"), h("b", null, h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `+${p}`))),
+      ],
+      note: t("다음 주 월요일에 새 목표를 정해요."),
+      actions: [{ label: done ? t("야호!") : t("힘낼게요!"), kind: "main", run: () => true }],
+    });
+  }
+  let chosen = weekGoal();
+  const row = h("div", { class: "goal-picks" }, WEEK_GOALS.map((goal) =>
+    h("button", {
+      class: "goal-pick", "aria-pressed": String(chosen === goal),
+      onclick: (e) => {
+        chosen = goal;
+        for (const pick of row.children) pick.setAttribute("aria-pressed", String(pick === e.currentTarget));
+      },
+    }, h("b", null, String(goal)), h("small", null, h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `+${weekBonus(goal)}`))));
+  talkSheet({
+    label: t("이번 주 목표"),
+    say: t("이번 주에 단어 몇 개 익혀 볼까?"),
+    body: row,
+    note: t("퀴즈에서 다 익힌 단어를 세요. 정하면 이번 주에는 못 바꿔요."),
+    actions: [
+      { label: t("이 목표로 정하기"), kind: "main", run: () => {
+        saveWeekly({ goal: chosen, set: weekKey() });
+        render();
+        toastText(t("이번 주 목표: {n}개", { n: chosen }));
+        checkWeekly();
+      } },
+      { label: t("나중에 정하기"), run: () => true },
+    ],
+  });
 }
 
 // Today's search goal, shown right under the search bar.
@@ -972,52 +1033,6 @@ function earnSunrise() {
 }
 // The goal is chosen once a week: after that it stands until next Monday, so it means something.
 const weekLocked = () => state.user.weekly?.set === weekKey();
-function weeklyGoalSheet() {
-  if (weekLocked()) {
-    // Once chosen, the pill cheers the student on, or congratulates them when the goal is reached.
-    const goal = weekGoal(), count = weekCount(), left = goal - count, p = weekBonus(goal);
-    const next = t("다음 주 월요일에 새 목표를 정할 수 있어요.");
-    if (left <= 0) {
-      return sheet({
-        art: art("party"), title: t("이번 주 목표 달성!"),
-        text: `${t("이번 주에 단어를 {c}개나 익혔어요. 목표 {n}개를 해냈어요, 정말 멋져요! 보너스 +{p}포인트도 받았어요.", { c: count, n: goal, p })} ${next}`,
-        actions: [{ label: t("야호!"), kind: "main", run: () => true }],
-      });
-    }
-    const cheer = count === 0 ? t("퀴즈로 첫 단어부터 익혀 봐요. {n}개까지 함께 가요!", { n: goal })
-      : left <= 3 ? t("거의 다 왔어요! {l}개만 더 익히면 목표 달성이에요.", { l: left })
-      : count * 2 >= goal ? t("벌써 절반을 넘었어요! {l}개만 더 익히면 돼요.", { l: left })
-      : t("잘하고 있어요! 벌써 {c}개 익혔어요. {l}개 더 익혀 봐요.", { c: count, l: left });
-    return sheet({
-      art: art("flag"), title: t("이번 주 {c} / {n}개", { c: count, n: goal }),
-      text: `${cheer} ${t("목표를 채우면 +{p}포인트!", { p })}`,
-      actions: [{ label: t("힘낼게요!"), kind: "main", run: () => true }],
-    });
-  }
-  let chosen = weekGoal();
-  sheet({
-    art: art("target"), title: t("이번 주 목표"),
-    text: t("일주일(월~일) 동안 다 익힐 단어 수를 정해요. 퀴즈에서 3번 연속(쓰기 1번 포함) 맞히면 익힌 단어예요. 목표를 채우면 보너스 포인트를 받고, 목표가 클수록 더 많이 받아요. 한 번 정하면 이번 주에는 바꿀 수 없어요."),
-    actions: [
-      { label: t("이 목표로 정하기"), kind: "main", run: () => {
-        saveWeekly({ goal: chosen, set: weekKey() });
-        render();
-        toastText(t("이번 주 목표: {n}개", { n: chosen }));
-        checkWeekly();
-      } },
-      { label: t("나중에 정하기"), run: () => true },
-    ],
-  });
-  const row = h("div", { class: "goal-picks" }, WEEK_GOALS.map((goal) =>
-    h("button", {
-      class: "goal-pick", "aria-pressed": String(chosen === goal),
-      onclick: (e) => {
-        chosen = goal;
-        for (const pick of row.children) pick.setAttribute("aria-pressed", String(pick === e.currentTarget));
-      },
-    }, h("b", null, String(goal)), h("small", null, `+${weekBonus(goal)}`))));
-  document.querySelector("#sheet .sheet p")?.after(row);
-}
 
 // Two small pills under the search box, the same shape: today's search points, and this week's
 // words against the goal. (How many searches are left, and tips, are the character's to say.)
@@ -1033,7 +1048,7 @@ function dailyGoal() {
     h("button", { class: `goal${count >= goal ? " done" : ""}`, title: weekLocked() ? t("이번 주 목표") : t("이번 주 목표 정하기"), onclick: weeklyGoalSheet },
       ring(count / goal),
       h("span", { class: "goal-text" }, h("small", null, weekLocked() ? t("이번 주 익힌 단어") : t("이번 주 목표")), h("b", null, `${count} / ${goal}`)),
-      !weekLocked() && h("span", { class: "goal-set" }, t("정하기"))))];
+      !weekLocked() && h("span", { class: "goal-set", "aria-hidden": "true" }, "›")))];
 }
 
 // Every change to the score is shown in one place: right under the score in the header.
@@ -1851,7 +1866,7 @@ function petOffer() {
   return [
     claimable().length > 0 && { say: t("받을 수 있는 캐릭터가 있어!"), label: t("캐릭터 받기"), act: openShop },
     grow().waiting().length > 0 && { say: t("레벨 선물이 기다려! 받으러 갈까?"), label: t("레벨 선물 받기"), act: () => grow().openLevels() },
-    grow().canDraw() && { say: t("뽑기를 돌릴 수 있어!"), label: t("뽑기 하러 가기"), act: () => grow().openGacha() },
+    grow().canDraw() && { say: t("캡슐 하나 열 수 있어!"), label: t("캡슐 열러 가기"), act: () => grow().openGacha() },
     eve && { say: eve.text, label: eve.tab === "rank" ? t("순위 보러 가기") : t("퀴즈 하러 가기"), act: () => goTab(eve.tab) },
   ].find(Boolean) || null;
 }
@@ -2063,7 +2078,7 @@ function syncYard() {
     gift() && { waits: true, text: t("오늘의 선물 받을래?"), act: () => (giftWaiting() ? openDailyGift() : takeSantaGift()) },
     claimable().length > 0 && state.tab !== "shop" && { waits: true, text: t("받을 수 있는 캐릭터가 있어!"), act: openShop },
     grow().waiting().length > 0 && { waits: true, text: t("레벨 선물이 기다려!"), act: () => grow().openLevels() },
-    grow().canDraw() && state.tab !== "shop" && { waits: true, text: t("뽑기를 돌릴 수 있어!"), act: () => grow().openGacha() },
+    grow().canDraw() && state.tab !== "shop" && { waits: true, text: t("캡슐 하나 열 수 있어!"), act: () => grow().openGacha() },
     eveLine() && { waits: true, text: eveLine().text, act: to(eveLine().tab) },
     duel().badge() > 0 && state.tab !== "quiz" && { waits: true, text: t("대결 신청이 왔어!"), act: to("quiz") },
     friends().gifts() > 0 && { waits: true, text: t("친구가 선물을 보냈어!"), act: () => friends().collect() },
@@ -2795,7 +2810,7 @@ async function settleLeague() {
       upGift > 0 && t("승급 선물 +{p}포인트", { p: upGift }),
       medalGift > 0 && t("{r}등 메달 선물 +{p}포인트", { r: rank, p: medalGift }),
     ].filter(Boolean).join(" · ");
-    const art = medalGift > 0 || (rank >= 1 && rank <= 3 && done.earned > 0) ? h("span", { class: "sheet-medal" }, medal(rank), art(TIERS[next].icon)) : art(TIERS[next].icon);
+    const tierArt = medalGift > 0 || (rank >= 1 && rank <= 3 && done.earned > 0) ? h("span", { class: "sheet-medal" }, medal(rank), art(TIERS[next].icon)) : art(TIERS[next].icon);
     const celebrateWeek = () => {
       // The new week opens with a celebration: paper, a fanfare, and the presents arriving.
       confettiRain();
@@ -2803,12 +2818,12 @@ async function settleLeague() {
       if (upGift + medalGift > 0) award(upGift + medalGift, t("주간 리그 선물"), false, { league: false });
     };
     if (result === "up") {
-      sheet({ art, title: t("{name}로 승급!", { name: tierName(next) }),
+      sheet({ art: tierArt, title: t("{name}로 승급!", { name: tierName(next) }),
         text: `${t("지난주 {old}에서 {r}등을 했어요. 정말 멋져요!", { old: tierName(tier), r: rank })} ${gifts}`,
         actions: [{ label: t("야호!"), kind: "main", run: () => true }] });
       celebrateWeek();
     } else if (result === "stay" && medalGift > 0) {
-      sheet({ art, title: t("{name} {r}등!", { name: tierName(next), r: rank }),
+      sheet({ art: tierArt, title: t("{name} {r}등!", { name: tierName(next), r: rank }),
         text: `${t("지난주에 {r}등을 했어요. 정말 멋져요!", { r: rank })} ${gifts}`,
         actions: [{ label: t("야호!"), kind: "main", run: () => true }] });
       celebrateWeek();
@@ -3555,7 +3570,7 @@ function shopShown() {
 function tryLook() {
   const on = state.tryOn, shop = myShop();
   const wears = Object.values(shop.wear || {}).filter((w) => shop.owned.includes(`wear:${w}`));
-  if (on?.kind === "character") return on.id;
+  if (on?.kind === "character") return lookOf(on.id, on.skin || "");
   if (on?.kind === "wear") { const w = wearById(on.id); return lookOf(shop.character, shop.skin?.[shop.character] || "", [...wears.filter((x) => wearById(x)?.slot !== w.slot), w.id]); }
   if (on?.kind === "skin") { const skin = SKINS.find((x) => skinKey(x) === on.id); return lookOf(skin.of, skin.id, wears); }
   return myLook();
@@ -3577,14 +3592,24 @@ function tryBar() {
       : h("span", { class: "tagline" }, t("가지고 있어요"))
     : on.kind === "wear" && !wearSpecial(item) ? h("button", { class: "mini buy", disabled: points < wearCost(item), title: points < wearCost(item) ? t("포인트 부족") : null, onclick: () => grow().buyWear(item) },
         h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `${wearCost(item)} · `, t("사기"))
-      : !list ? h("span", { class: "tagline earn" }, lock(), t("뽑기에서만 나와요"))
+      : !list ? h("span", { class: "tagline earn" }, lock(), t("캡슐 전용"))
       : item.level ? h("span", { class: "tagline earn" }, lock(), t("Lv.{n} 선물", { n: item.level }))
       : item.earn ? h("span", { class: "tagline earn" }, lock(), t("도전 과제"))
         : h("button", { class: "mini buy", disabled: points < item.cost, title: points < item.cost ? t("포인트 부족") : null, onclick: () => buy(on.kind, item) },
             h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `${item.cost} · `, t("사기"));
-  return h("div", { class: "try-bar", role: "status" },
+  // Rule (design.md): what goes ON the character (a character, a skin, a prop) is tried in a big
+  // preview sheet; what changes the whole screen (theme, colour, background, lettering) keeps the
+  // small bar, because the screen itself is the preview.
+  const big = ["character", "wear", "skin"].includes(on.kind);
+  return h("div", { class: `try-bar${big ? " big" : ""}`, role: "status" },
     ["character", "wear", "skin"].includes(on.kind) && h("span", { class: "try-art", "aria-hidden": "true" }, portrait(tryLook())),
-    h("div", { class: "try-text" }, h("small", null, t("미리 보는 중")), h("b", null, t(item.name))),
+    h("div", { class: "try-text" }, h("small", null, t("미리 보는 중")), h("b", null, on.kind === "skin" ? skinName(item, t) : t(item.name))),
+    // A character's skins can be looked at before it is bought: the plain look, then its three skins.
+    on.kind === "character" && h("div", { class: "try-skins", role: "group", "aria-label": t("스킨") },
+      [null, ...SKINS.filter((x) => x.of === on.id)].map((skin) => h("button", {
+        class: "try-skin", "aria-pressed": String((on.skin || null) === (skin?.id || null)), title: skin ? skinName(skin, t) : t("기본 모습"),
+        onclick: () => { state.tryOn = { ...on, skin: skin?.id }; render(); },
+      }, portrait(lookOf(on.id, skin?.id || ""))))),
     how,
     h("button", { class: "mini", onclick: () => { state.tryOn = null; render(); } }, t("그만 보기")));
 }
@@ -3742,7 +3767,7 @@ function shelf(kind, heading, items) {
           class: "preview", "aria-hidden": "true", "data-bg": kind === "bg" ? item.id : null,
           style: kind === "theme" ? `background:${themeColor(item.id)}` : null,
         }),
-        kind === "font" && h("div", { class: "preview font-sample", "aria-hidden": "true", style: loadFont(item.id)?.family ? `font-family:"${item.family}", sans-serif` : null }, h("b", null, "Aa 가나"), h("small", null, "word 단어")),
+        kind === "font" && h("div", { class: "preview font-sample", "aria-hidden": "true", style: loadFont(item.id)?.family ? `font-family:${loadFont(item.id).family}, sans-serif` : null }, h("b", null, { en: "Aa Bb", zh: "Aa 你好" }[getLang()] || "Aa 가나"), h("small", null, { en: "word quiz", zh: "word 单词" }[getLang()] || "word 단어")),
         h("div", { class: "swatch-name" }, t(item.name), kind === "character" && h("small", null, t(item.vibe))),
         // An earned character not yet owned shows what to do and how far along it is, instead of its line.
         quest && !owned && h("p", { class: "swatch-line quest-text" }, QUESTS[item.earn.by].text(item.earn.goal)),
@@ -3780,7 +3805,7 @@ function shopSection() {
   const shown = ALL_CHARACTERS.filter((c) => inKind(c, kind)).sort((a, b) => rank(a) - rank(b));
   const kinds = [["all", t("전체")], ["quest", t("도전 과제")], ...SHOP_KINDS.map((k) => [k, t(k)]), ["special", t("스페셜")]];
   // Four tabs: the whole themes, the colours and the backgrounds are three shelves of one tab.
-  const tabs = [["gacha", t("뽑기"), null], ["character", t("캐릭터"), CHARACTERS.length], ["wear", t("꾸미기"), WEARS.length + SKINS.length], ["concept", t("테마"), CONCEPTS.length + THEMES.length + BACKGROUNDS.length + FONTS.length]];
+  const tabs = [["gacha", t("캡슐"), null], ["character", t("캐릭터"), CHARACTERS.length], ["wear", t("꾸미기"), WEARS.length], ["concept", t("테마"), CONCEPTS.length + THEMES.length + BACKGROUNDS.length + FONTS.length]];
   if (state.shopTab === "theme" || state.shopTab === "bg") state.shopTab = "concept";
   const tab = tabs.some(([id]) => id === state.shopTab) ? state.shopTab : "character";
   ["theme", "bg"].forEach((id) => tab === "concept" && state.shopViewed?.add(id));
@@ -3792,7 +3817,7 @@ function shopSection() {
   return h("section", { class: "shop" },
     h("div", { class: "segment many", role: "tablist" }, tabs.map(([id, label, count]) =>
       h("button", { role: "tab", "aria-selected": String(tab === id), onclick: () => { markShopSeen(); Object.assign(state, { shopTab: id, confirmBuy: null }); render(); } },
-        label, count != null && h("small", null, String(count)), (id === "gacha" ? grow().canDraw() : id === "concept" ? newCount("concept") + newCount("theme") + newCount("bg") > 0 : newCount(id) > 0) && h("em", { class: "new-dot", title: id === "gacha" ? t("뽑을 수 있어요") : t("새로 나왔어요") }, "N")))),
+        label, count != null && h("small", null, String(count)), (id === "gacha" ? grow().canDraw() : id === "concept" ? newCount("concept") + newCount("theme") + newCount("bg") > 0 : newCount(id) > 0) && h("em", { class: "new-dot", title: id === "gacha" ? t("열 수 있는 캡슐이 있어요") : t("새로 나왔어요") }, "N")))),
     tab === "gacha" && grow().gachaBox(),
     tab === "character" && h("div", { class: "chips one-line shop-kinds", role: "group", "aria-label": t("캐릭터 종류") }, kinds.map(([id, label]) =>
       h("button", { class: "chip", "aria-pressed": String(kind === id), onclick: () => { Object.assign(state, { shopKind: id, confirmBuy: null }); render(); } },
@@ -4269,7 +4294,7 @@ function render() {
           topSearch() && searchForm(true),
           h("button", { class: "points", id: "points", title: t("포인트샵 열기"), "aria-pressed": String(state.tab === "shop"), "aria-label": t("단어포인트"), onclick: openShop }, h("i", { "aria-hidden": "true" }, "P"), h("span", null, String(state.user.points || 0)), // One mark for the shop: a character is ready to be taken, or something in it is new.
             (claimable().length > 0 || (state.tab !== "shop" && (grow().canDraw() || newCount("character") + newCount("theme") + newCount("bg") > 0)))
-              && h("em", { class: "dot new", title: claimable().length > 0 ? t("받을 수 있는 캐릭터가 있어요") : grow().canDraw() ? t("뽑을 수 있어요") : t("새로 나왔어요") }, "N")),
+              && h("em", { class: "dot new", title: claimable().length > 0 ? t("받을 수 있는 캐릭터가 있어요") : grow().canDraw() ? t("열 수 있는 캡슐이 있어요") : t("새로 나왔어요") }, "N")),
           h("button", { class: "gear people", "aria-label": t("친구"), title: t("친구"), "aria-pressed": String(state.tab === "friends"), onclick: () => openPage("friends") },
             icon("friends"), friends().badge() > 0 && h("em", { class: "dot" }, String(friends().badge()))),
           h("button", { class: "gear", "aria-label": t("설정"), title: t("설정"), "aria-pressed": String(state.tab === "settings"), onclick: openSettings }, icon("settings"))),
@@ -4292,7 +4317,28 @@ function render() {
   if (keepFocus) document.getElementById(keepFocus)?.focus();
   animateLoading();
   if (WEB) { if (!playing()) comboFx(0); syncYard(); }
+  fitLabels();
 }
+
+// One-line labels stay on one line: a label that does not fit gets smaller letters instead of a
+// second line (which would make its row taller on a narrow screen). See app.css ".fit1".
+const FIT = ".goal-text small, .swatch-name, .tagline.earn, .wear-count, .try-text b, .try-text small, .gacha-name, .heart-count small, .run-next";
+function fitLabels(root = document) {
+  for (const el of root.querySelectorAll(FIT)) {
+    el.style.fontSize = ""; el.style.letterSpacing = "";
+    if (!el.clientWidth) continue;
+    let size = parseFloat(getComputedStyle(el).fontSize);
+    const least = Math.max(8.5, size * 0.72);
+    while (el.scrollWidth > el.clientWidth && size > least) { size -= 0.5; el.style.fontSize = `${size}px`; }
+    if (el.scrollWidth > el.clientWidth) el.style.letterSpacing = "-.03em";
+  }
+}
+if (typeof window !== "undefined") window.addEventListener("resize", () => fitLabels());
+// Sheets and popups are drawn outside render(): fit their labels when they appear.
+let fitSoon = 0;
+document.fonts?.ready.then(() => fitLabels());
+document.fonts?.addEventListener?.("loadingdone", () => fitLabels());
+new MutationObserver(() => { clearTimeout(fitSoon); fitSoon = setTimeout(fitLabels, 50); }).observe(document.body, { childList: true, subtree: true });
 
 // A word picked with right-click → "VOQUIZ" arrives through session storage.
 async function takePendingTerm() {

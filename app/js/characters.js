@@ -10,7 +10,7 @@
 //   group   the grades it was designed for (anyone may buy any)   vibe  its personality
 // Names, groups and vibes are Korean keys for i18n.
 import { MORE_CHARACTERS } from "./characters-more.js";
-import { WEARS, skinById } from "./goods.js";
+import { WEARS, skinById, addSkins } from "./goods.js";
 
 export const DEFAULT_CHARACTER = "bubble";
 
@@ -168,6 +168,7 @@ export const CHARACTERS = [
 
 // Sixty more, sorted by kind (see characters-more.js).
 CHARACTERS.push(...MORE_CHARACTERS);
+addSkins(CHARACTERS);
 
 // A look is a character with what it wears: "rabbit~moon~glasses.balloon" (the character, its
 // coat of paint, the things worn; the last two may be left out). Whatever draws a character by

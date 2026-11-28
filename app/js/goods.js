@@ -41,20 +41,15 @@ export const CONCEPTS = [
 ];
 export const conceptById = (id) => CONCEPTS.find((x) => x.id === id) || CONCEPTS[0];
 
+import { stroke, star, twinkle, heart } from "./wear-art.js";
+import { HEAD_WEARS } from "./wears-head.js";
+import { FACE_WEARS } from "./wears-face.js";
+import { HOLD_WEARS } from "./wears-hold.js";
+import { AROUND_WEARS } from "./wears-around.js";
+
 // ----- things to wear -----
 // slot: only one thing of a slot is worn at a time (head, eyes, cheek, hand, neck, back, aura). layer "back" is drawn behind the body.
 // rare: 1 common, 2 rare, 3 very rare (which machine it comes out of, and how often).
-const stroke = (d, colour, width = 2.6) => `<path d="${d}" fill="none" stroke="${colour}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"/>`;
-const star = (x, y, r, fill) => {
-  const points = Array.from({ length: 10 }, (_, i) => {
-    const a = (i / 10) * Math.PI * 2 - Math.PI / 2, d = i % 2 ? r * 0.45 : r;
-    return `${(x + Math.cos(a) * d).toFixed(1)} ${(y + Math.sin(a) * d).toFixed(1)}`;
-  });
-  return `<path d="M${points.join(" L")} z" fill="${fill}"/>`;
-};
-const twinkle = (x, y, r, fill) => `<path d="M${x} ${y - r} q${r * 0.2} ${r * 0.8} ${r} ${r} q-${r * 0.8} ${r * 0.2} -${r} ${r} q-${r * 0.2} -${r * 0.8} -${r} -${r} q${r * 0.8} -${r * 0.2} ${r} -${r} z" fill="${fill}"/>`;
-const heart = (x, y, s, fill, more = "") => `<path d="M${x} ${y + s} l-${s} -${s} a${s * 0.56} ${s * 0.56} 0 0 1 ${s} -${s * 0.56} a${s * 0.56} ${s * 0.56} 0 0 1 ${s} ${s * 0.56} z" fill="${fill}"${more}/>`;
-
 export const WEARS = [
   // on the head: hats and hair (the top of the head is near y 50)
   { id: "cap", name: "야구 모자", slot: "head", rare: 1, added: 21,
@@ -120,6 +115,8 @@ export const WEARS = [
   { id: "sparkle", name: "반짝반짝", slot: "aura", rare: 2, art: twinkle(52, 46, 6, "#ffd84d") + twinkle(152, 96, 5, "#ffd84d") + twinkle(44, 104, 4, "#ffe89a") + twinkle(158, 44, 3.6, "#ffe89a") },
   { id: "lovely", name: "하트 뿅뿅", slot: "aura", rare: 3, art: heart(50, 40, 6, "#ff7aa8") + heart(154, 34, 4.6, "#ffa6c4") + heart(160, 92, 5.4, "#ff7aa8") + heart(42, 98, 4, "#ffa6c4") },
 ];
+// More of each place (at least twenty a place), drawn in their own files.
+WEARS.push(...HEAD_WEARS, ...FACE_WEARS, ...HOLD_WEARS, ...AROUND_WEARS);
 export const SLOTS = [["head", "머리"], ["eyes", "눈"], ["cheek", "볼"], ["hand", "손"], ["neck", "목"], ["back", "몸"], ["aura", "주변"]];
 export const wearById = (id) => WEARS.find((x) => x.id === id);
 
@@ -142,6 +139,34 @@ export const SKINS = [
       back: '<path d="M134 104 q20 -2 15 -24" fill="none" stroke="#262a44" stroke-width="5" stroke-linecap="round"/>',
       deco: '<path d="M78 56 l1 -8 l7 5 z M122 56 l-1 -8 l-7 5 z" fill="#9aa5ff"/><path d="M68 91 h-10 M69 96 l-9 3 M132 91 h10 M131 96 l9 3" fill="none" stroke="#c0c7ff" stroke-width="1.8" stroke-linecap="round"/>' + twinkle(118, 64, 3, "#ffe89a") } },
 ];
+// Every character has three coats of paint. The hand-made ones above come first; the rest are
+// made here from three styles, so a new character gets its skins by itself. A style repaints the
+// body and whatever part of the character was drawn in its own body colours (ears, tails).
+// Rule for new skins: rare 2 comes from the everyday capsule, rare 3 from the golden one.
+const STYLES = [
+  { id: "night", name: "밤하늘 {name}", rare: 3, paint: { fill: "#3b3f5c", stroke: "#262a44", limb: "#262a44" } },
+  { id: "candy", name: "솜사탕 {name}", rare: 2, paint: { fill: "#ffd6e8", stroke: "#f092bd", limb: "#e0569a" } },
+  { id: "mint", name: "민트 {name}", rare: 2, paint: { fill: "#c9f2e3", stroke: "#7fd1b4", limb: "#3fae8b" } },
+];
+const SKINS_EACH = 3;
+const NOT_FOR = { rabbit: ["candy"], chick: ["candy"] }; // too close to how they already look
+export function addSkins(characters) {
+  for (const who of characters) {
+    const have = SKINS.filter((x) => x.of === who.id);
+    for (const style of STYLES) {
+      if (have.length >= SKINS_EACH) break;
+      if (have.some((x) => x.id === style.id) || NOT_FOR[who.id]?.includes(style.id)) continue;
+      const repaint = (art) => ["fill", "stroke", "limb"].reduce((out, part) => (who[part] ? out.split(who[part]).join(style.paint[part]) : out), art);
+      const paint = { ...style.paint };
+      for (const part of ["back", "deco", "topper"]) if (who[part]) paint[part] = repaint(who[part]);
+      if (style.id === "night") paint.deco = (paint.deco || "") + twinkle(117, 70, 2.6, "#ffe89a") + twinkle(85, 99, 2, "#fff3b0");
+      const skin = { id: style.id, of: who.id, style: style.name, who: who.name, name: style.name.replace("{name}", who.name), rare: style.rare, paint };
+      SKINS.push(skin); have.push(skin);
+    }
+  }
+}
+// A skin's name in the student's language (made skins are named from their style and character).
+export const skinName = (skin, t) => (skin.style ? t(skin.style, { name: t(skin.who) }) : t(skin.name));
 export const skinById = (of, id) => SKINS.find((x) => x.of === of && x.id === id);
 export const skinKey = (skin) => `skin:${skin.of}-${skin.id}`;
 
@@ -157,11 +182,11 @@ export const skinKey = (skin) => `skin:${skin.of}-${skin.id}`;
 //   ["ticket", kind]          a ticket for another turn
 // When there is nothing left of a kind to give, the capsule pays `again` points instead.
 export const MACHINES = {
-  basic: { name: "캡슐 뽑기", ticket: "뽑기권", hearts: 10, again: 40, // not for points: it would often give back fewer than it took
+  basic: { name: "기본 캡슐", ticket: "캡슐 티켓", hearts: 10, again: 40, // not for points: it would often give back fewer than it took
     inside: [[["points", 20, 120], 55], [["wear", 2], 24], [["ticket", "basic"], 8], [["bg", false], 5], [["theme"], 4], [["skin", 2], 3], [["ticket", "gold"], 1]] },
   // The golden machine gives things only, never points (and a golden ticket now and then). When
   // there is nothing left to win it cannot be turned.
-  gold: { name: "황금 뽑기", ticket: "황금 뽑기권", points: 600, again: 0, thingsOnly: true,
+  gold: { name: "황금 캡슐", ticket: "황금 티켓", points: 600, again: 0, thingsOnly: true,
     inside: [[["wear", 3], 25], [["skin", 3], 20], [["concept"], 20], [["bg", true], 15], [["character"], 10], [["ticket", "gold"], 10]] },
 };
 export const MACHINE_KINDS = ["basic", "gold"];

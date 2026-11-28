@@ -3659,3 +3659,71 @@ html[data-concept="aurora"] .use b { color: #f08a7a; }
 .heart-slots i, .gachas .heart-slots i { width: 100%; height: auto; aspect-ratio: 1; max-width: 17px; justify-self: center; }
 .gachas .heart-slots { margin: 6px auto; }
 .heart-strip .heart-count { flex: 1; min-width: 0; }
+
+/* ----- a sheet in which the character talks (today's search points, the week's goal) ----- */
+.sheet.talk-sheet { justify-items: center; gap: 12px; }
+.talk-top { display: grid; justify-items: center; gap: 0; }
+.talk-say { position: relative; margin: 0 0 10px; padding: 8px 16px; border-radius: 16px; background: var(--text); color: var(--bg); font-size: 15px; font-weight: 700; line-height: 1.35; text-align: center; }
+.sheet.talk-sheet .talk-say { color: var(--bg); margin-bottom: 10px; }
+.talk-say::after { content: ""; position: absolute; left: 50%; bottom: -5px; width: 12px; height: 12px; translate: -50% 0; rotate: 45deg; border-radius: 2px; background: inherit; }
+.talk-me { width: 96px; }
+.talk-me .mascot { width: 100%; }
+.talk-note { margin: 0; text-align: center; }
+.pt-total { display: flex; align-items: baseline; justify-content: center; gap: 6px; font-variant-numeric: tabular-nums; }
+.pt-total .coin-i { width: 26px; height: 26px; align-self: center; }
+.pt-total b { font-size: 34px; font-weight: 800; line-height: 1; }
+.pt-total span { font-size: 16px; font-weight: 700; color: var(--muted); }
+.pt-total em { display: inline-flex; align-items: center; gap: 2px; margin-left: 4px; padding: 1px 8px; border-radius: 999px; background: color-mix(in srgb, #ffd84d 30%, var(--bg)); font-style: normal; font-size: 13px; font-weight: 800; }
+.pt-coins { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 5px; width: 100%; max-width: 300px; }
+.pt-coins i { aspect-ratio: 1; border-radius: 50%; background: var(--surface); border: 2px dashed var(--border); }
+.pt-coins i.on { background: #ffd166; border: 2px solid #e6a700; box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .1); animation: pop .3s both; }
+.pt-words { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; max-height: 96px; overflow: auto; }
+.pt-words span { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; background: var(--surface); font-size: 13px; }
+.pt-words b { color: var(--good); font-weight: 800; }
+.goal-road { position: relative; width: 100%; max-width: 320px; height: 18px; margin: 26px 34px 6px 0; border-radius: 999px; background: var(--surface); border: 2px solid var(--border); }
+.goal-fill { position: absolute; left: 0; top: 0; bottom: 0; min-width: 14px; border-radius: 999px; background: var(--accent); transition: width .6s cubic-bezier(.2, .8, .2, 1); }
+.goal-road.done .goal-fill { background: #e6a700; }
+.goal-end { position: absolute; right: -34px; top: 50%; translate: 0 -62%; display: grid; justify-items: center; gap: 0; }
+.goal-end .art-i { width: 34px; height: 34px; }
+.goal-end b { display: inline-flex; align-items: center; gap: 2px; font-size: 12px; font-weight: 800; white-space: nowrap; }
+.goal-end .coin-i { width: 13px; height: 13px; }
+.talk-sheet .goal-picks { width: 100%; }
+.goal-pick { justify-items: center; min-width: 0; }
+.goal-pick small { display: flex; align-items: center; justify-content: center; gap: 2px; white-space: nowrap; }
+.goal-pick small .coin-i, .goal-pick small svg { width: 11px; height: 11px; flex: none; }
+
+/* One-line labels (0.1.28): these never wrap; app.js fitLabels() makes the letters smaller when a
+   label is too long for its place, so rows keep their height on a narrow screen. */
+.goal-text small, .swatch-name, .tagline.earn, .wear-count, .try-text b, .try-text small, .gacha-name, .heart-count small, .run-next {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; overflow-wrap: normal; max-width: 100%; }
+.swatch-name, .swatch:has(.portrait) .swatch-name { white-space: nowrap; }
+.swatch-name small, .swatch:has(.portrait) .swatch-name small { display: block; margin: 2px auto 0; padding: 0; background: none; font-size: 10px; overflow: hidden; text-overflow: ellipsis; }
+.goal .goal-set { border: 0; padding: 0; font-size: 18px; line-height: 1; }
+.swatch .mini, .swatch .btn { white-space: nowrap; }
+
+/* A character's skins in the try-on bar (0.1.28): four small faces above the bar's line. */
+.try-bar { flex-wrap: wrap; }
+.try-skins { order: -1; flex: 0 0 100%; display: flex; justify-content: center; gap: 8px; padding-bottom: 6px; border-bottom: 1px dashed var(--border); }
+.try-skin { width: 46px; height: 46px; border-radius: 14px; border: 2px solid transparent; background: var(--surface); display: grid; place-items: center; padding: 0; }
+.try-skin .mascot { width: 40px; }
+.try-skin[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--bg)); }
+
+/* Try-on, big (0.1.28): a character, a skin or a prop is shown large in a sheet at the bottom. */
+.try-bar.big { display: grid; grid-template-columns: 1fr auto auto; grid-template-areas: "art art art" "skins skins skins" "text how close"; align-items: center; gap: 8px 10px; }
+.try-bar.big .try-art { grid-area: art; justify-self: center; width: 148px; margin: -4px 0 -8px; }
+.try-bar.big .try-skins { grid-area: skins; order: 0; border: 0; padding: 0; }
+.try-bar.big .try-text { grid-area: text; }
+.try-bar.big > :nth-last-child(2) { grid-area: how; }
+.try-bar.big > :last-child { grid-area: close; }
+
+/* The dress-up stage follows the look in use (it was a fixed pink that clashed with some themes). */
+.wear-stage { background: color-mix(in srgb, var(--accent) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent); }
+/* Try-on as a sheet (0.1.28): a character, a skin or a prop is looked at large. */
+.try-bar.big { bottom: 0; margin: 12px -8px 0; padding: 14px 14px 12px; border-radius: 26px 26px 18px 18px; box-shadow: 0 -12px 34px rgba(0, 0, 0, .16); }
+.try-bar.big .try-art { width: 176px; margin: -2px 0 -6px; }
+/* The subject chip of the academic word keeps dark letters on its light pill in dark looks. */
+.dw-field { color: #5a3d00; background: #fff7dc; }
+.daily-word.done .dw-field { background: var(--bg); color: var(--muted); }
+
+.swatch .perk { color: color-mix(in srgb, var(--accent) 55
+.swatch .perk { color: color-mix(in srgb, var(--accent) 55%, var(--text)); }
