@@ -41,6 +41,16 @@ const ART = {
   rocket: `<path d="M12 2.500c3.500 2.500 5 6 5 9.500v4.500H7V12c0-3.500 1.500-7 5-9.500z" fill="#fff" ${O}/><circle cx="12" cy="9.500" r="2" fill="#9aa5ff" ${O}/><path d="M7 13l-3 3.500V19l3-1.500zm10 0 3 3.500V19l-3-1.500z" fill="#ff8fb8" ${O}/><path d="M10 16.500c0 2.500 1 4 2 5 1-1 2-2.500 2-5z" fill="#ffd84d" ${O}/>`,
   planet: `<circle cx="12" cy="12" r="6" fill="#ffa45c" ${O}/><ellipse cx="12" cy="12" rx="10" ry="3" ${L} transform="rotate(-18 12 12)"/>`,
   gem: `<path d="M7 4h10l4 5-9 11L3 9z" fill="#7cc6fe" ${O}/><path d="M3 9h18M9 9l3 11 3-11M7 4l2 5M17 4l-2 5" ${L}/>`,
+  // ----- more scenery for the road of levels -----
+  tree: `<rect x="10.800" y="14.500" width="2.400" height="6.500" rx="1" fill="#b98a5a" ${O}/><path d="M12 3c4 0 7 3 7 6.500S16 16 12 16s-7-3-7-6.500S8 3 12 3z" fill="#8fcf6b" ${O}/>`,
+  butterfly: `<path d="M12 12C9 6 4 6 4 10c0 3 3 4 8 2zm0 0c3-6 8-6 8-2 0 3-3 4-8 2zm0 0c-3 1-5 3-4 5.500 1 2 3.500 0 4-5.500zm0 0c3 1 5 3 4 5.500-1 2-3.500 0-4-5.500z" fill="#ff8fb8" ${O}/><path d="M12 8v10" ${L}/>`,
+  shell: `<path d="M12 20C6 20 3 15 3 11a9 9 0 0 1 18 0c0 4-3 9-9 9z" fill="#ffc2d8" ${O}/><path d="M12 20V6M12 20 6.500 8M12 20l5.500-12M12 20 4 12.500M12 20l8-7.500" ${L}/>`,
+  fish: `<path d="M3 12c3-5 9-6 13-2l5-3v10l-5-3c-4 4-10 3-13-2z" fill="#ffa45c" ${O}/><circle cx="8" cy="11" r="1" fill="${INK}"/>`,
+  pine: `<rect x="10.800" y="16" width="2.400" height="5" rx="1" fill="#b98a5a" ${O}/><path d="M12 2.500 6.500 10h3L5 16.500h14L14.500 10h3z" fill="#5fae6a" ${O}/>`,
+  snowman: `<circle cx="12" cy="15.500" r="5.500" fill="#fff" ${O}/><circle cx="12" cy="7.500" r="3.800" fill="#fff" ${O}/><circle cx="10.700" cy="7" r=".7" fill="${INK}"/><circle cx="13.300" cy="7" r=".7" fill="${INK}"/><path d="M12 8.200l2.500.8-2.500.5z" fill="#ffa45c"/>`,
+  moon: `<path d="M19.500 14.500A8 8 0 1 1 9.500 4.500a6.500 6.500 0 0 0 10 10z" fill="#ffe89a" ${O}/>`,
+  balloon: `<path d="M12 2.500a7 7 0 0 1 7 7c0 3.500-3 6-5 7.500h-4c-2-1.500-5-4-5-7.500a7 7 0 0 1 7-7z" fill="#ff8fb8" ${O}/><path d="M12 2.500c-2 2-2.500 5-2.500 7s.5 5 1.500 7.500M12 2.500c2 2 2.500 5 2.500 7s-.5 5-1.500 7.500" ${L}/><rect x="10" y="18.500" width="4" height="3" rx=".8" fill="#b98a5a" ${O}/>`,
+  mountain: `<path d="M2.500 20 9 7l4 7 2.500-4 6 10z" fill="#9aa5ff" ${O}/><path d="M9 7l-2 4 2 1 2-1z" fill="#fff" ${O}/>`,
   // ----- the lands of the league -----
   flower: `${petals("#ff8fb8")}<circle cx="12" cy="12" r="3" fill="#ffd84d" ${O}/>`,
   island: `<path d="M3 18.500c2-4 5-6 9-6s7 2 9 6z" fill="#ffd84d" ${O}/><path d="M12 12.500c0-3 .5-5 1.500-7" ${L}/><path d="M13.500 5.500c-2.500-1.500-5-1-6.500 1 2 .5 4.500.2 6.500-1zm0 0c2.500-1.500 5-.5 6 1.500-2 .3-4.500-.2-6-1.500z" fill="#8fcf6b" ${O}/><path d="M2.500 21h19" ${L}/>`,
