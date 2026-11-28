@@ -528,7 +528,8 @@ async function loadLevels(rows) {
 function levelMini(who) {
   if (!who || who.bot) return null;
   const lv = who.me ? grow().level() : state.levels?.get(levelKey(who));
-  return lv ? h("em", { class: "lv-mini", title: `Lv.${lv}`, "aria-label": `Lv.${lv}` }, String(lv)) : null;
+  // tinted by the land of the level road it stands in (1-10, 11-20 …)
+  return lv ? h("em", { class: `lv-mini z${Math.min(4, Math.floor((lv - 1) / 10))}`, title: `Lv.${lv}`, "aria-label": `Lv.${lv}` }, String(lv)) : null;
 }
 function publishRank() {
   if (!state.user) return;
