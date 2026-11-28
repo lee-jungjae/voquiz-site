@@ -1,32 +1,32 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp7q09";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7q09";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7q09";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.28-tp7q09";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp7q09";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7q09";
-import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7q09";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey } from "./goods.js?v=0.1.28-tp7q09";
-import { initGrow } from "./grow.js?v=0.1.28-tp7q09";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7q09";
-import { art, artToCss } from "./art.js?v=0.1.28-tp7q09";
+import { api, DEMO } from "./api.js?v=0.1.28-tp7qig";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7qig";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7qig";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.28-tp7qig";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp7qig";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7qig";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7qig";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey } from "./goods.js?v=0.1.28-tp7qig";
+import { initGrow } from "./grow.js?v=0.1.28-tp7qig";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7qig";
+import { art, artToCss } from "./art.js?v=0.1.28-tp7qig";
 artToCss();
-import { film } from "./film.js?v=0.1.28-tp7q09";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7q09";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7q09";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp7q09";
-import { clockNow } from "./clock.js?v=0.1.28-tp7q09";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7q09";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7q09";
-import { initDuel } from "./duel.js?v=0.1.28-tp7q09";
-import { initFriends } from "./friends.js?v=0.1.28-tp7q09";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp7q09";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7q09";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7q09";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7q09";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7q09";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7q09";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7q09";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7q09";
+import { film } from "./film.js?v=0.1.28-tp7qig";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7qig";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7qig";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp7qig";
+import { clockNow } from "./clock.js?v=0.1.28-tp7qig";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7qig";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7qig";
+import { initDuel } from "./duel.js?v=0.1.28-tp7qig";
+import { initFriends } from "./friends.js?v=0.1.28-tp7qig";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp7qig";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7qig";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7qig";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7qig";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7qig";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7qig";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7qig";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7qig";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -190,6 +190,13 @@ function openDailyGift() {
   }
   let taken = false;
   const extra = giftPicks() > 0; // a second pick of the day (Plus)
+  // Days in a row: each day in a row adds a little to the present, and every seventh day adds a
+  // ticket for the capsule machine. The strip shows the week of it, and what tomorrow brings.
+  const runOf = () => { const b = state.user.gift || {}; return isToday(b.day) ? b.run || 1 : b.day === dayOf(clockNow() - 86400000) ? (b.run || 1) + 1 : 1; };
+  const runBonus = (run) => (run % 7 === 0 ? 0 : Math.min(30, ((run - 1) % 7) * 5));
+  const strip = (run) => h("div", { class: "run-strip", role: "img", "aria-label": t("연속 {n}일", { n: run }) },
+    Array.from({ length: 7 }, (_, i) => h("i", { class: `${i < ((run - 1) % 7) + 1 ? "on" : ""}${i === 6 ? " last" : ""}` }, i === 6 ? grow().ticketArt("basic") : String(i + 1))));
+  const runBox = h("div", { class: "run-box" }, h("b", null, t("연속 {n}일", { n: runOf() })), strip(runOf()));
   const close = () => { el.remove(); render(); };
   const title = h("h2", null, extra ? t("한 번 더 뽑기") : t("오늘의 선물"), extra && h("em", { class: "plus-badge" }, "PLUS"));
   const text = h("p", null, t("상자 하나를 골라요. 안에 든 포인트가 모두 달라요!"));
@@ -208,6 +215,10 @@ function openDailyGift() {
       state.user.gift = { day: keepDay(before.day), picks: giftPicks() + 1, run, best: Math.max(before.best || 0, run) };
       api.saveProfile({ gift: state.user.gift }).catch(console.error);
       award(prize, t("오늘의 선물")); // paid at once, so closing the panel now loses nothing
+      if (!extra) {
+        if (run % 7 === 0) grow().give([{ ticket: "basic", n: 1 }]);
+        else if (runBonus(run) > 0) setTimeout(() => award(runBonus(run), t("연속 {n}일 보너스", { n: run })), 1200);
+      }
       if (prize >= 100) sfx.cheer(myShop().character); else sfx.chirp(myShop().character);
       boxes.forEach((box, n) => { box.disabled = true; box.classList.add(n === i ? "mine" : "other"); });
       el.classList.add("opened");
@@ -215,7 +226,10 @@ function openDailyGift() {
       const best = Math.max(...inside);
       const again = giftWaiting();
       text.textContent = again ? t("플러스라서 한 번 더 뽑을 수 있어요!")
-        : prize === best ? t("세 상자 중에 가장 큰 선물을 골랐어요!") : t("내일은 어떤 상자를 고를까요?");
+        : !extra && run % 7 === 0 ? t("연속 {n}일! 뽑기권도 받았어요.", { n: run })
+          : (run + 1) % 7 === 0 ? t("내일도 오면 뽑기권을 받아요!")
+            : t("내일도 오면 보너스 +{p}!", { p: runBonus(run + 1) });
+      void best;
       if (again) done.textContent = t("한 번 더 뽑기");
       later.hidden = true;
       done.hidden = false;
@@ -224,7 +238,7 @@ function openDailyGift() {
   }, giftArt(), h("b", { class: "gift-prize" }, `+${prize}`)));
   const el = h("div", { id: "sheet", class: "sheet-wrap", onclick: (e) => { if (e.target === el) close(); } },
     h("div", { class: "sheet gift-sheet", role: "dialog", "aria-modal": "true", "aria-label": t("오늘의 선물") },
-      title, text, h("div", { class: "gift-boxes" }, boxes), done, later));
+      title, text, h("div", { class: "gift-boxes" }, boxes), !extra && runBox, done, later));
   document.body.append(el);
   return t("상자 하나를 골라 봐!");
 }
@@ -527,6 +541,7 @@ async function search(term) {
       state.entry = result.word;
       state.listWord = null; // beside the word list, the newest word shows again
       if (firstToday) awardSearch(result.word.headword);
+      dailyWordBonus(result.word);
       checkWeekly();
       // Nobody had looked this word up before: it goes down as this student's discovery.
       if (result.discovered) setTimeout(() => award(DISCOVERY_POINTS, t("처음 발견한 단어!"), true), firstToday ? 1300 : 0);
@@ -756,12 +771,52 @@ function searchPointsToday() {
 // the day's limit), and today's words with what each paid: [[word, points, bonus], ...].
 const searchBonusToday = () => (isToday(state.user.search?.day) ? state.user.search.bonus || 0 : 0);
 const searchLogToday = () => (isToday(state.user.search?.day) && Array.isArray(state.user.search.log) ? state.user.search.log : []);
+// The word of the day: one word from the list of the student's grade, the same all day (chosen by
+// the date). Looking it up pays a bonus of its own, once a day, on top of the search points and
+// whether or not the day's search points are used up. Kept in `search` ({ dw: true } for the day).
+const DAILY_WORD_POINTS = 20;
+function dailyWord() {
+  const list = gradeList(Math.min(12, Math.max(3, state.user?.grade || 3)));
+  if (!list.length) return "";
+  let n = 7;
+  for (const ch of `${todayKey()}:${state.user?.grade || 3}`) n = (n * 31 + ch.charCodeAt(0)) % 1000003;
+  return list[n % list.length][0];
+}
+const dailyWordDone = () => Boolean(isToday(state.user.search?.day) && state.user.search.dw);
+function dailyWordBonus(word) {
+  const today = dailyWord().toLowerCase();
+  if (!today || dailyWordDone()) return;
+  if (![word?.term_norm, word?.headword, word?.counterpart].some((x) => String(x || "").toLowerCase() === today)) return;
+  state.user.search = { day: keepDay(state.user.search?.day), points: searchPointsToday(), bonus: searchBonusToday(), log: searchLogToday(), dw: true };
+  setTimeout(() => award(DAILY_WORD_POINTS, t("오늘의 단어 보너스"), true), 2300);
+}
+// On the first screen, where it cannot be missed: the word, and what looking it up pays.
+function dailyWordCard() {
+  const word = dailyWord();
+  if (!word || !state.user?.grade) return null;
+  const done = dailyWordDone();
+  return h("button", { class: `daily-word${done ? " done" : ""}`, title: t("오늘의 단어 찾아보기"), onclick: () => search(word) },
+    art("star"),
+    h("span", { class: "dw-text" }, h("small", null, t("오늘의 단어")), h("b", null, word)),
+    done ? h("span", { class: "dw-got" }, h("i", { class: "check-i", "aria-hidden": "true" }), t("받았어요"))
+      : h("span", { class: "dw-pay" }, h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `+${DAILY_WORD_POINTS}`));
+}
+// The evening before the week closes (Saturday, Sunday): what is still within reach.
+function eveLine() {
+  const day = nowDate().getDay();
+  if (day !== 6 && day !== 0) return null;
+  const left = weekGoal() - weekCount();
+  if (left > 0 && left <= 10) return { text: day === 0 ? t("오늘까지 {n}개만 더 익히면 주간 목표 달성!", { n: left }) : t("내일까지 {n}개만 더 익히면 주간 목표 달성!", { n: left }), tab: "quiz" };
+  if (day === 0 && weekEarned() > 0) return { text: t("오늘 밤 이번 주 리그가 끝나요. 순위 볼래?"), tab: "rank" };
+  return null;
+}
 function awardSearch(word) {
   const sofar = searchPointsToday();
   const add = Math.min(SEARCH_POINTS, SEARCH_DAILY_MAX - sofar);
   if (add <= 0) return;
   const bonus = sunriseOn() ? SUNRISE_BONUS : 0;
   state.user.search = {
+    dw: dailyWordDone(),
     day: keepDay(state.user.search?.day), points: sofar + add, bonus: searchBonusToday() + bonus,
     log: [...searchLogToday(), [String(word || "").slice(0, 24), add, bonus]].slice(-40),
   };
@@ -1758,7 +1813,7 @@ function todayRow() {
 // Under the word box of the first screen: only how the day and the week stand. What to do next
 // (the present, a quiz, the word of the day, a character to take) is the yard character's to say.
 function webActions() {
-  return [todayRow()];
+  return [dailyWordCard(), todayRow(), grow().levelHint()];
 }
 function webQuiet() {
   const recent = WIDE() ? [] : state.words.slice(0, 8);
@@ -1849,6 +1904,8 @@ function syncYard() {
     gift() && { waits: true, text: t("오늘의 선물 받을래?"), act: () => (giftWaiting() ? openDailyGift() : takeSantaGift()) },
     claimable().length > 0 && state.tab !== "shop" && { waits: true, text: t("받을 수 있는 캐릭터가 있어!"), act: openShop },
     grow().waiting().length > 0 && { waits: true, text: t("레벨 선물이 기다려!"), act: () => grow().openLevels() },
+    grow().canDraw() && state.tab !== "shop" && { waits: true, text: t("뽑기를 돌릴 수 있어!"), act: () => grow().openGacha() },
+    eveLine() && { waits: true, text: eveLine().text, act: to(eveLine().tab) },
     duel().badge() > 0 && state.tab !== "quiz" && { waits: true, text: t("대결 신청이 왔어!"), act: to("quiz") },
     friends().gifts() > 0 && { waits: true, text: t("친구가 선물을 보냈어!"), act: () => friends().collect() },
     friends().badge() > friends().gifts() && state.tab !== "friends" && { waits: true, text: t("친구 신청이 왔어!"), act: () => friends().open() },
@@ -1900,6 +1957,9 @@ function searchHome() {
     duel().banner(),
     friends().banner(),
     h("p", { class: "hello" }, greeting()),
+    dailyWordCard(),
+    grow().levelHint(),
+    eveLine() && h("button", { class: "eve-line", onclick: () => goTab(eveLine().tab) }, art("flag"), eveLine().text),
     limitReached()
       ? [h("p", { class: "small" }, t("오늘 검색 {n}개를 모두 썼어요. 이미 찾은 단어는 단어장에서 볼 수 있어요.", { n: FREE_SEARCHES })),
          h("p", { class: "small" }, h("button", { class: "link", onclick: () => { state.plusOpen = true; openSettings(); } }, t("플러스로 전환하면 무제한으로 찾을 수 있어요")))]
@@ -1912,6 +1972,7 @@ function searchHome() {
       resting: limitReached() ? t("오늘은 여기까지! 내일 또 만나요") : null,
       greet: quotaLine(), onGreet: () => { state.quotaSaid = quotaKey(); }, // marked as said only once it has spoken
     }),
+    h("button", { class: "chip dress-go", onclick: () => grow().openWardrobe() }, t("내 캐릭터 꾸미기")),
     recent.length > 0
       ? [h("div", { class: "hint" }, t("최근 찾은 단어")),
          h("div", { class: "chips center recent" }, recent.map((w) => h("button", { class: "chip", onclick: () => open(w) }, w.headword))),
@@ -3523,8 +3584,11 @@ function shopSection() {
   const rank = (c) => (!c.earn ? 3 : ownsCharacter(c) ? 2 : questDone(c) ? 0 : 1);
   const shown = ALL_CHARACTERS.filter((c) => inKind(c, kind)).sort((a, b) => rank(a) - rank(b));
   const kinds = [["all", t("전체")], ["quest", t("도전 과제")], ...SHOP_KINDS.map((k) => [k, t(k)]), ["special", t("스페셜")]];
-  const tabs = [["gacha", t("뽑기"), null], ["character", t("캐릭터"), CHARACTERS.length], ["wear", t("꾸미기"), WEARS.length + SKINS.length], ["concept", t("테마"), CONCEPTS.length], ["theme", t("색상"), THEMES.length], ["bg", t("배경"), BACKGROUNDS.length]];
+  // Four tabs: the whole themes, the colours and the backgrounds are three shelves of one tab.
+  const tabs = [["gacha", t("뽑기"), null], ["character", t("캐릭터"), CHARACTERS.length], ["wear", t("꾸미기"), WEARS.length + SKINS.length], ["concept", t("테마"), CONCEPTS.length + THEMES.length + BACKGROUNDS.length]];
+  if (state.shopTab === "theme" || state.shopTab === "bg") state.shopTab = "concept";
   const tab = tabs.some(([id]) => id === state.shopTab) ? state.shopTab : "character";
+  ["theme", "bg"].forEach((id) => tab === "concept" && state.shopViewed?.add(id));
   (state.shopViewed ||= new Set()).add(tab); // looked at now: its NEW marks go when the student moves on
   const whole = conceptById(myShop().concept);
   // While a whole theme is on, the colour and the background are the theme's own.
@@ -3532,16 +3596,14 @@ function shopSection() {
   return h("section", { class: "shop" },
     h("div", { class: "segment many", role: "tablist" }, tabs.map(([id, label, count]) =>
       h("button", { role: "tab", "aria-selected": String(tab === id), onclick: () => { markShopSeen(); Object.assign(state, { shopTab: id, confirmBuy: null }); render(); } },
-        label, count != null && h("small", null, String(count)), (id === "gacha" ? grow().canDraw() : newCount(id) > 0) && h("em", { class: "new-dot", title: id === "gacha" ? t("뽑을 수 있어요") : t("새로 나왔어요") }, "N")))),
+        label, count != null && h("small", null, String(count)), (id === "gacha" ? grow().canDraw() : id === "concept" ? newCount("concept") + newCount("theme") + newCount("bg") > 0 : newCount(id) > 0) && h("em", { class: "new-dot", title: id === "gacha" ? t("뽑을 수 있어요") : t("새로 나왔어요") }, "N")))),
     tab === "gacha" && grow().gachaBox(),
     tab === "character" && h("div", { class: "chips one-line shop-kinds", role: "group", "aria-label": t("캐릭터 종류") }, kinds.map(([id, label]) =>
       h("button", { class: "chip", "aria-pressed": String(kind === id), onclick: () => { Object.assign(state, { shopKind: id, confirmBuy: null }); render(); } },
         label, h("small", null, String(ALL_CHARACTERS.filter((c) => inKind(c, id)).length))))),
     tab === "character" && shelf("character", null, shown),
     tab === "wear" && grow().wardrobe(),
-    tab === "concept" && [h("p", { class: "small muted whole-note" }, t("테마를 바꾸면 앱의 색, 배경, 분위기가 한꺼번에 바뀌어요.")), shelf("concept", null, CONCEPTS)],
-    tab === "theme" && [wholeNote(), shelf("theme", null, THEMES)],
-    tab === "bg" && [wholeNote(), shelf("bg", null, BACKGROUNDS)]);
+    tab === "concept" && [shelf("concept", t("테마"), CONCEPTS), wholeNote(), shelf("theme", t("색상"), THEMES), shelf("bg", t("배경"), BACKGROUNDS)]);
 }
 
 // Tapping the score: go to Settings and bring the theme shop into view.
@@ -3999,8 +4061,8 @@ function render() {
           wide && tabBar,
           topSearch() && searchForm(true),
           h("button", { class: "points", id: "points", title: t("포인트샵 열기"), "aria-pressed": String(state.tab === "shop"), "aria-label": t("단어포인트"), onclick: openShop }, h("i", { "aria-hidden": "true" }, "P"), h("span", null, String(state.user.points || 0)), // One mark for the shop: a character is ready to be taken, or something in it is new.
-            (claimable().length > 0 || (state.tab !== "shop" && newCount("character") + newCount("theme") + newCount("bg") > 0))
-              && h("em", { class: "dot new", title: claimable().length > 0 ? t("받을 수 있는 캐릭터가 있어요") : t("새로 나왔어요") }, "N")),
+            (claimable().length > 0 || (state.tab !== "shop" && (grow().canDraw() || newCount("character") + newCount("theme") + newCount("bg") > 0)))
+              && h("em", { class: "dot new", title: claimable().length > 0 ? t("받을 수 있는 캐릭터가 있어요") : grow().canDraw() ? t("뽑을 수 있어요") : t("새로 나왔어요") }, "N")),
           h("button", { class: "gear people", "aria-label": t("친구"), title: t("친구"), "aria-pressed": String(state.tab === "friends"), onclick: () => openPage("friends") },
             icon("friends"), friends().badge() > 0 && h("em", { class: "dot" }, String(friends().badge()))),
           h("button", { class: "gear", "aria-label": t("설정"), title: t("설정"), "aria-pressed": String(state.tab === "settings"), onclick: openSettings }, icon("settings"))),

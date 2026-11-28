@@ -1,8 +1,8 @@
 // The weekly league: this week's points of real students, with a few of the app's own characters
 // playing along so that there is always someone just ahead to catch. The characters are shown as
 // characters (their own name and a "character" tag), never as students.
-import { CHARACTERS } from "./characters.js?v=0.1.28-tp7q09";
-import { clockNow } from "./clock.js?v=0.1.28-tp7q09";
+import { CHARACTERS } from "./characters.js?v=0.1.28-tp7qig";
+import { clockNow } from "./clock.js?v=0.1.28-tp7qig";
 
 function hash(text) {
   let n = 2166136261;
