@@ -341,18 +341,30 @@ export function initGrow(c) {
       title: active ? null : t("눌러서 미리 보기"), onclick: (e) => { if (!e.target.closest("button") && !active) c.tryOn(kind, id); } }, art, h("div", { class: "swatch-name" }, name, sub && h("small", null, sub)), action);
     const lock = () => h("span", { class: "tagline earn" }, h("i", { class: "lock-i", "aria-hidden": "true" }), t("뽑기에서 나와요"));
     const worn = Object.values(wearing()).length > 0 || Boolean(shop().skin?.[me]);
+    // Six places on the character, one thing in each: the places are drawn under the character,
+    // filled or empty, and a press on one shows the things that go there.
+    const place = SLOTS.some(([id]) => id === state.wearSlot) ? state.wearSlot : null;
+    const count = SLOTS.filter(([id]) => wearing()[id] && owned(`wear:${wearing()[id]}`)).length;
+    const shown = WEARS.filter((w) => !place || w.slot === place);
     return [
-      h("div", { class: "wear-me" },
+      h("div", { class: "wear-stage" },
         h("span", { class: "wear-me-art", "aria-hidden": "true" }, c.portrait(myLook())),
-        h("div", null,
-          h("b", null, t("내 캐릭터 꾸미기")),
-          h("p", { class: "small muted" }, t("소품과 스킨은 뽑기 기계에서 나오거나 레벨 선물로 받아요.")),
-          worn && h("button", { class: "link small", onclick: () => { const skin = { ...(shop().skin || {}) }; delete skin[me]; c.saveShop({ ...shop(), wear: {}, skin }); } }, t("모두 벗기")))),
-      h("h4", null, t("소품"), h("small", null, ` ${WEARS.filter((w) => owned(`wear:${w.id}`)).length} / ${WEARS.length}`)),
-      h("div", { class: "shelf" }, WEARS.map((w) => {
+        h("div", { class: "wear-slots", role: "tablist", "aria-label": t("소품 자리") }, SLOTS.map(([id, name]) => {
+          const worn = wearing()[id] && owned(`wear:${wearing()[id]}`) ? wearById(wearing()[id]) : null;
+          return h("button", { class: `wear-slot${worn ? " full" : ""}`, role: "tab", "aria-selected": String(place === id), title: worn ? `${t(name)}: ${t(worn.name)}` : t(name),
+            onclick: () => { state.wearSlot = place === id ? null : id; c.render(); } },
+            h("span", { class: "wear-slot-art", "aria-hidden": "true" }, worn ? c.portrait(lookOf(me, "", [worn.id])) : null),
+            h("small", null, t(name)));
+        })),
+        h("p", { class: "small wear-count" }, h("b", null, `${count} / ${SLOTS.length}`), " ", t("자리마다 하나씩, 여섯 자리를 함께 꾸밀 수 있어요."),
+          worn && [" ", h("button", { class: "link small", onclick: () => { const skin = { ...(shop().skin || {}) }; delete skin[me]; c.saveShop({ ...shop(), wear: {}, skin }); } }, t("모두 벗기"))])),
+      h("h4", null, place ? t("{name}에 하는 소품", { name: t(slotName[place]) }) : t("소품"), h("small", null, ` ${shown.filter((w) => owned(`wear:${w.id}`)).length} / ${shown.length}`),
+        place && h("button", { class: "link small wear-all", onclick: () => { state.wearSlot = null; c.render(); } }, t("모두 보기"))),
+      h("div", { class: "shelf" }, shown.map((w) => {
         const has = owned(`wear:${w.id}`), on = has && wearing()[w.slot] === w.id;
+        const other = has && !on && wearing()[w.slot] && owned(`wear:${wearing()[w.slot]}`); // the place is taken: this would take its place
         return tile(on, has, c.portrait(lookOf(me, "", [w.id])), t(w.name), t(slotName[w.slot]),
-          has ? h("button", { class: "mini", onclick: () => putOn(w) }, on ? t("벗기") : t("착용하기")) : lock(), "wear", w.id);
+          has ? h("button", { class: "mini", onclick: () => putOn(w) }, on ? t("벗기") : other ? t("바꿔 착용") : t("착용하기")) : lock(), "wear", w.id);
       })),
       h("h4", null, t("스킨"), h("small", null, ` ${SKINS.filter((s) => owned(skinKey(s))).length} / ${SKINS.length}`)),
       h("div", { class: "shelf" }, SKINS.map((s) => {

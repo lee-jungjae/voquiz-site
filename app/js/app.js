@@ -11,6 +11,7 @@ import { logoIcon, wordmark } from "./logo.js";
 import { art, artToCss } from "./art.js";
 import { academicWords } from "./academic.js";
 artToCss();
+setTimeout(() => peekSoon(true), 0);
 import { film } from "./film.js";
 import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js";
 import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js";
@@ -1907,7 +1908,7 @@ function yardSheet() {
 const OWN_ART = ".feedback .art .mascot, .score-art .mascot, .versus .side.me .face .mascot, .lane.me .runner .mascot, .league-join-art .mascot, .celebrate .mascot";
 const syncStage = () => stageYard(WIDE() ? document.querySelector(OWN_ART) : null);
 // Catching a visitor: a few points, CATCH_DAILY times a day on this computer.
-const CATCH_POINTS = 2, CATCH_DAILY = 10, CATCH_KEY = "wb_catch";
+const CATCH_MOST = 5, CATCH_DAILY = 10, CATCH_KEY = "wb_catch"; // a catch is worth 1 to CATCH_MOST points, by chance
 const catchKept = () => { try { return JSON.parse(localStorage.getItem(CATCH_KEY) || "{}") || {}; } catch { return {}; } };
 function catchesToday() {
   const kept = catchKept();
@@ -1918,10 +1919,40 @@ function catchVisitor(id) {
   sfx.chirp(id);
   if (n >= CATCH_DAILY) return "♥";
   localStorage.setItem(CATCH_KEY, JSON.stringify({ day: keepDay(catchKept().day), n: n + 1 }));
-  award(CATCH_POINTS, t("{name} 발견!", { name: ALL_CHARACTERS.find((c) => c.id === id)?.name || "" }));
-  return `+${CATCH_POINTS}`;
+  const worth = randomInt(1, CATCH_MOST);
+  award(worth, t("{name} 발견!", { name: t(ALL_CHARACTERS.find((c) => c.id === id)?.name || "") }));
+  return `+${worth}`;
 }
-if (DEMO) globalThis.voquizVisit = visitNow; // for trying a visitor out in the demo
+// In the side panel and on a phone there is no yard: there a character looks out from the right
+// edge now and then, for a few seconds. Catching it (a tap) is the same catch as in the yard.
+let peekTimer = null;
+function peekSoon(first) {
+  clearTimeout(peekTimer);
+  peekTimer = setTimeout(peekNow, (first ? 12 : 30) * 1000 + Math.random() * 25000);
+}
+function peekNow() {
+  peekSoon();
+  const ok = !WIDE() && state.user?.grade && state.member && hasChosenLang() && state.update !== "force" && !presentWaiting()
+    && !playing() && !document.getElementById("sheet") && !document.hidden && !document.querySelector(".peek") && catchesToday() < CATCH_DAILY;
+  if (!ok) return;
+  const lead = myShop().character;
+  const mine = ALL_CHARACTERS.filter((c) => c.id !== lead && (ownsCharacter(c) || (c.cost === 0 && !c.earn)));
+  const pool = mine.length ? mine : ALL_CHARACTERS.filter((c) => c.id !== lead);
+  const who = pool[Math.floor(Math.random() * pool.length)];
+  if (!who) return;
+  const side = Math.random() < 0.5 ? "left" : "right";
+  const el = h("button", { class: `peek ${side}`, style: `bottom:${90 + Math.floor(Math.random() * 180)}px`, "aria-label": t("{name} 발견!", { name: t(who.name) }),
+    onclick: () => {
+      if (el.classList.contains("caught")) return;
+      const worth = catchVisitor(who.id);
+      el.classList.add("caught");
+      el.append(h("b", { class: "peek-worth" }, worth));
+      setTimeout(() => el.remove(), 900);
+    } }, portrait(who.id));
+  document.body.append(el);
+  setTimeout(() => { if (!el.classList.contains("caught")) { el.classList.add("away"); setTimeout(() => el.remove(), 500); } }, 5200);
+}
+if (DEMO) { globalThis.voquizVisit = visitNow; globalThis.voquizPeek = peekNow; } // for trying a visitor out in the demo
 
 function syncYard() {
   if (yardHeld) return;
@@ -2344,20 +2375,47 @@ function startChallenge() {
   const grade = Math.min(12, Math.max(3, state.user.grade));
   state.user.challenge = { best: bestStreak(), day: keepDay(state.user.challenge?.day), tries: triesUsed() + 1 };
   api.saveProfile({ challenge: state.user.challenge }).catch(console.error); // at once, so that closing the panel does not give the run back
-  state.challenge = { grade, queue: shuffle(gradeList(grade)), streak: 0, levels: 0, earned: 0, phase: "ask" };
+  state.challenge = { grade, queue: challengeQueue(grade), streak: 0, levels: 0, earned: 0, phase: "ask" };
   nextChallengeWord();
   render();
 }
 
+// The order of a grade's words in a run: the words this student has met least in the challenge
+// come first, and words already learned (in the word list) come late, so that a run brings new
+// words instead of the same ones again. How often each word has come up is kept on this
+// computer, by account. Within the same count the order is random.
+const metKey = () => `wb_met_${state.user?.id || "x"}`;
+let metCache = null;
+function metCounts() {
+  if (metCache?.key !== metKey()) {
+    let map = {};
+    try { map = JSON.parse(localStorage.getItem(metKey()) || "{}") || {}; } catch { map = {}; }
+    metCache = { key: metKey(), map };
+  }
+  return metCache.map;
+}
+function challengeSeen(english) {
+  const map = metCounts();
+  map[english] = Math.min(99, (map[english] || 0) + 1);
+  try { localStorage.setItem(metKey(), JSON.stringify(map)); } catch { /* the store is full: the order is simply random again */ }
+}
+function challengeQueue(grade) {
+  const map = metCounts();
+  const learned = new Set(state.words.filter(isLearned).map((w) => w.term_norm));
+  const weight = ([english]) => (map[english] || 0) + (learned.has(english) ? 2 : 0);
+  // popped from the end: the heaviest (most met) first in the list, the least met last
+  return shuffle(gradeList(grade)).sort((a, b) => weight(b) - weight(a));
+}
 function nextChallengeWord() {
   const c = state.challenge;
   if (!c.queue.length) {
     if (c.grade >= 12) return finishChallenge(true);
     c.grade += 1;
     c.levels += 1;
-    c.queue = shuffle(gradeList(c.grade));
+    c.queue = challengeQueue(c.grade);
   }
   const [english, korean] = c.queue.pop();
+  challengeSeen(english);
   // Wrong choices: three other words of the grade whose meaning differs from the answer's and from
   // each other's, so that no two choices are both right (big and large are both 큰).
   const hasDefs = Boolean(WORD_DEFS[english]);

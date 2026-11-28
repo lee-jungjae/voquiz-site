@@ -45,7 +45,7 @@ export function themeColor(id) {
 
 // Paints the page with the chosen theme colour and background, or, when a whole theme is on
 // (goods.js, CONCEPTS), with every colour of that theme; its backdrop takes the background's place.
-const PAINTED = ["bg", "surface", "text", "muted", "line", "border", "accent", "accent-dark", "accent-soft", "lime", "good", "good-soft", "bad", "bad-soft", "shadow", "shadow-lg"];
+const PAINTED = ["on-accent", "bg", "surface", "text", "muted", "line", "border", "accent", "accent-dark", "accent-soft", "lime", "good", "good-soft", "bad", "bad-soft", "shadow", "shadow-lg"];
 export function applyShop(shop) {
   const { theme, bg, concept } = { ...DEFAULT_SHOP, ...(shop || {}) };
   const root = document.documentElement;
@@ -53,6 +53,7 @@ export function applyShop(shop) {
   for (const name of PAINTED) root.style.removeProperty(`--${name}`);
   if (whole.vars) {
     for (const [name, value] of Object.entries(whole.vars)) root.style.setProperty(`--${name}`, value);
+    root.style.setProperty("--on-accent", whole.dark ? "#14121f" : "#fff"); // what is written on the accent colour
     root.dataset.concept = whole.id;
     root.style.colorScheme = whole.dark ? "dark" : "light";
     document.body.dataset.bg = "plain";
