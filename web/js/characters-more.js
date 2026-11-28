@@ -263,15 +263,18 @@ export const MORE_CHARACTERS = [
       '<rect x="64" y="52" width="72" height="13" rx="6.5" fill="#fff" stroke="#e6e9f2" stroke-width="2"/>' +
       '<circle cx="146" cy="50" r="8" fill="#fff" stroke="#e6e9f2" stroke-width="2"/>',
   }),
-  // The grapes (its id is still "rose", from when it was one): a bunch of purple grapes round
-  // the face, a stalk and a leaf on top. While it is the character in use, one miss in the
-  // streak challenge is forgiven, like the skeleton (see app.js, missChallenge).
-  c("rose", "포도", "식물·과일", "귀여움", 1500, B.round, "#a78bea", "#6a4fc0", {
-    special: true, added: 20, stroke: "#7a5fd0", tiles: ["♥", "가", "A"],
-    back: [[70, 60, 15], [100, 54, 15], [130, 60, 15], [58, 84, 14], [142, 84, 14], [72, 106, 14], [128, 106, 14], [100, 112, 14]]
-      .map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#9274e0" stroke="#7a5fd0" stroke-width="2.4"/><path d="M${x - r * 0.5} ${y - r * 0.3} q${r * 0.2} -${r * 0.4} ${r * 0.6} -${r * 0.5}" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".55"/>`).join(""),
-    deco: line("M78 68 q4 -9 13 -11", "#fff", 3.4).replace("/>", ' opacity=".6"/>'),
-    topper: line("M100 46 q-1 -8 4 -14", "#8a6a3a", 3.6) + shape("M103 36 q16 -14 30 -2 q-10 14 -30 2 z", "#6dbb74") + line("M106 36 q12 -4 22 0", "#4f9a58", 1.8),
+  // The tangerine (its id is still "rose", from when it was one): a round orange fruit with the
+  // dimples of its peel, a green star where the stalk was and one leaf. While it is the character
+  // in use, one miss in the streak challenge is forgiven, like the skeleton (see app.js, missChallenge).
+  c("rose", "귤", "식물·과일", "귀여움", 1500, "M62 84 a38 33 0 1 0 76 0 a38 33 0 1 0 -76 0 z", "#ffa63d", "#d9741a", {
+    special: true, added: 20, stroke: "#e8851f", tiles: ["♥", "가", "A"],
+    deco:
+      dots([[72, 70, 1.4], [80, 62, 1.2], [124, 66, 1.4], [130, 78, 1.2], [70, 100, 1.3], [128, 102, 1.3], [118, 110, 1.2], [84, 110, 1.2]], "#e8851f") +
+      line("M74 74 q4 -12 16 -16", "#fff", 4).replace("/>", ' opacity=".6"/>'),
+    topper:
+      shape("M100 52 l-9 -3 l5 6 l-6 5 l10 -2 l10 2 l-6 -5 l5 -6 z", "#4f9a58") +
+      line("M100 51 q0 -6 3 -10", "#7a5a2e", 3.2) +
+      shape("M103 42 q14 -12 26 -2 q-10 12 -26 2 z", "#6dbb74") + line("M106 42 q10 -3 19 0", "#4f9a58", 1.6),
   }),
   // ===================== earned, not bought =====================
   // Each is given for a fair amount of one part of the app (earn: what is counted, and how much;

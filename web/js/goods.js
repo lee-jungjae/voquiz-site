@@ -86,7 +86,7 @@ export const WEARS = [
   { id: "sparkle", name: "반짝반짝", slot: "aura", rare: 2, art: twinkle(52, 46, 6, "#ffd84d") + twinkle(152, 96, 5, "#ffd84d") + twinkle(44, 104, 4, "#ffe89a") + twinkle(158, 44, 3.6, "#ffe89a") },
   { id: "lovely", name: "하트 뿅뿅", slot: "aura", rare: 3, art: heart(50, 40, 6, "#ff7aa8") + heart(154, 34, 4.6, "#ffa6c4") + heart(160, 92, 5.4, "#ff7aa8") + heart(42, 98, 4, "#ffa6c4") },
 ];
-export const SLOTS = [["eyes", "눈"], ["cheek", "볼"], ["hand", "손"], ["neck", "목"], ["back", "날개·망토"], ["aura", "주변"]];
+export const SLOTS = [["eyes", "눈"], ["cheek", "볼"], ["hand", "손"], ["neck", "목"], ["back", "몸"], ["aura", "주변"]];
 export const wearById = (id) => WEARS.find((x) => x.id === id);
 
 // ----- another look for one character -----
@@ -122,12 +122,15 @@ export const skinKey = (skin) => `skin:${skin.of}-${skin.id}`;
 //   ["ticket", kind]          a ticket for another turn
 // When there is nothing left of a kind to give, the capsule pays `again` points instead.
 export const MACHINES = {
-  basic: { name: "캡슐 뽑기", ticket: "뽑기권", hearts: 10, points: 150, again: 40,
+  basic: { name: "캡슐 뽑기", ticket: "뽑기권", hearts: 10, again: 40, // not for points: it would often give back fewer than it took
     inside: [[["points", 20, 120], 55], [["wear", 2], 24], [["ticket", "basic"], 8], [["bg", false], 5], [["theme"], 4], [["skin", 2], 3], [["ticket", "gold"], 1]] },
-  gold: { name: "황금 뽑기", ticket: "황금 뽑기권", points: 600, again: 250,
-    inside: [[["points", 150, 400], 30], [["wear", 3], 20], [["skin", 3], 15], [["concept"], 15], [["bg", true], 10], [["character"], 6], [["ticket", "gold"], 4]] },
+  gold: { name: "황금 뽑기", ticket: "황금 뽑기권", points: 600, again: 700, // points won are always more than a turn costs
+    inside: [[["points", 700, 1200], 30], [["wear", 3], 20], [["skin", 3], 15], [["concept"], 15], [["bg", true], 10], [["character"], 6], [["ticket", "gold"], 4]] },
 };
 export const MACHINE_KINDS = ["basic", "gold"];
+// Every prop can also be bought with points, by how rare it is.
+export const WEAR_COST = { 1: 200, 2: 400, 3: 800 };
+export const wearCost = (wear) => WEAR_COST[wear.rare] || WEAR_COST[1];
 export const HEARTS_FOR_DRAW = MACHINES.basic.hearts;
 
 // ----- levels -----
