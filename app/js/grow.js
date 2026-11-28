@@ -266,9 +266,9 @@ export function initGrow(c) {
     const el = h("div", { id: "sheet", class: "sheet-wrap", onclick: (e) => { if (e.target === el) close(); } },
       h("div", { class: "sheet lv-sheet", role: "dialog", "aria-modal": "true", "aria-label": t("내 레벨") },
         h("div", { class: "lv-top" },
-          big,
-          h("span", { class: "lv-me", "aria-hidden": "true" }, c.portrait(myLook())),
           h("p", { class: "lv-say" }, state.lvSay),
+          // the badge and the character stand together, whatever the width; the rays are behind the badge
+          h("div", { class: "lv-duo" }, big, h("span", { class: "lv-me", "aria-hidden": "true" }, c.portrait(myLook()))),
           h("p", { class: "small lv-next" }, next ? t("다음 레벨까지 {n}개", { n: next - xp() }) : t("최고 레벨!"))),
         road,
         held > 0 && h("button", { class: "btn wide ghost lv-go", onclick: () => { el.remove(); c.openGacha(); } }, ticketArt(tickets().gold ? "gold" : "basic"), t("뽑기 기계로 가기"), h("b", null, `×${held}`)),
