@@ -3648,3 +3648,14 @@ html[data-concept="aurora"] .use b { color: #f08a7a; }
 .lv-badge text { fill: #fff; }
 .lv-pill .lv-seal { fill: #fff; }
 .lv-pill .lv-badge text { fill: var(--accent); }
+
+/* the four tabs of the shop always fit the width, in every language (no sideways scrolling) */
+.shop .segment.many { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: visible; }
+.shop .segment.many button { min-width: 0; padding-left: 2px; padding-right: 2px; white-space: nowrap; }
+@media (max-width: 480px) { .shop .segment.many small { display: none; } .shop .segment.many button { font-size: 14px; } }
+
+/* ten hearts always stand in one row */
+.heart-slots, .gachas .heart-slots { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 2px; width: 100%; max-width: 210px; min-height: 0; align-items: center; }
+.heart-slots i, .gachas .heart-slots i { width: 100%; height: auto; aspect-ratio: 1; max-width: 17px; justify-self: center; }
+.gachas .heart-slots { margin: 6px auto; }
+.heart-strip .heart-count { flex: 1; min-width: 0; }
