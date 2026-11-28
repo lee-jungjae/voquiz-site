@@ -1,34 +1,34 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp7scs";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7scs";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7scs";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.28-tp7scs";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp7scs";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7scs";
-import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7scs";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey } from "./goods.js?v=0.1.28-tp7scs";
-import { initGrow } from "./grow.js?v=0.1.28-tp7scs";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7scs";
-import { art, artToCss } from "./art.js?v=0.1.28-tp7scs";
-import { academicWords } from "./academic.js?v=0.1.28-tp7scs";
+import { api, DEMO } from "./api.js?v=0.1.28-tp7sog";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7sog";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7sog";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.28-tp7sog";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp7sog";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7sog";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7sog";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey } from "./goods.js?v=0.1.28-tp7sog";
+import { initGrow } from "./grow.js?v=0.1.28-tp7sog";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7sog";
+import { art, artToCss } from "./art.js?v=0.1.28-tp7sog";
+import { academicWords } from "./academic.js?v=0.1.28-tp7sog";
 artToCss();
 setTimeout(() => peekSoon(true), 0);
-import { film } from "./film.js?v=0.1.28-tp7scs";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7scs";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7scs";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp7scs";
-import { clockNow } from "./clock.js?v=0.1.28-tp7scs";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7scs";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7scs";
-import { initDuel } from "./duel.js?v=0.1.28-tp7scs";
-import { initFriends } from "./friends.js?v=0.1.28-tp7scs";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp7scs";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7scs";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7scs";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7scs";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7scs";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7scs";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7scs";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7scs";
+import { film } from "./film.js?v=0.1.28-tp7sog";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7sog";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7sog";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp7sog";
+import { clockNow } from "./clock.js?v=0.1.28-tp7sog";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7sog";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7sog";
+import { initDuel } from "./duel.js?v=0.1.28-tp7sog";
+import { initFriends } from "./friends.js?v=0.1.28-tp7sog";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp7sog";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7sog";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7sog";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7sog";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7sog";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7sog";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7sog";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7sog";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -196,10 +196,20 @@ function openDailyGift() {
   // ticket for the capsule machine. The strip shows the week of it, and what tomorrow brings.
   const runOf = () => { const b = state.user.gift || {}; return isToday(b.day) ? b.run || 1 : b.day === dayOf(clockNow() - 86400000) ? (b.run || 1) + 1 : 1; };
   const runBonus = (run) => (run % 7 === 0 ? 0 : Math.min(30, ((run - 1) % 7) * 5));
-  const strip = (run) => h("div", { class: "run-strip", role: "img", "aria-label": t("연속 {n}일", { n: run }) },
-    Array.from({ length: 7 }, (_, i) => h("i", { class: `${i < ((run - 1) % 7) + 1 ? "on" : ""}${i === 6 ? " last" : ""}` }, i === 6 ? grow().ticketArt("basic") : String(i + 1))));
-  const runBox = h("div", { class: "run-box" }, h("b", null, t("연속 {n}일", { n: runOf() })), strip(runOf()));
-  const close = () => { el.remove(); render(); };
+  // The week of it, day by day with what each day adds: the days done, today, and tomorrow, which
+  // is the one made to stand out (it is why to come back).
+  const strip = (run) => {
+    const pos = ((run - 1) % 7) + 1;
+    return h("div", { class: "run-strip", role: "img", "aria-label": t("연속 {n}일", { n: run }) },
+      Array.from({ length: 7 }, (_, i) => {
+        const day = i + 1;
+        return h("i", { class: `${day < pos ? "on" : day === pos ? "on today" : day === pos + 1 ? "next" : ""}${day === 7 ? " last" : ""}` },
+          h("small", null, day === pos ? t("오늘") : day === pos + 1 ? t("내일") : String(day)),
+          day === 7 ? grow().ticketArt("basic") : day === 1 ? art("gift") : h("b", null, `+${(day - 1) * 5}`));
+      }));
+  };
+  const tomorrow = (run) => h("p", { class: "run-next" }, art("spark"), (run + 1) % 7 === 0 ? t("내일 오면 뽑기권을 받아요!") : t("내일 오면 보너스 +{p} 더!", { p: runBonus(run + 1) }));
+  const runBox = h("div", { class: "run-box" }, h("b", null, t("연속 {n}일", { n: runOf() })), strip(runOf()), tomorrow(runOf()));
   const title = h("h2", null, extra ? t("한 번 더 뽑기") : t("오늘의 선물"), extra && h("em", { class: "plus-badge" }, "PLUS"));
   const text = h("p", null, t("상자 하나를 골라요. 안에 든 포인트가 모두 달라요!"));
   // After a pick: "great", or straight on to the next pick when there is one left today.
@@ -1855,7 +1865,7 @@ function todayRow() {
 // Under the word box of the first screen: only how the day and the week stand. What to do next
 // (the present, a quiz, the word of the day, a character to take) is the yard character's to say.
 function webActions() {
-  return [todayRow(), dailyWordCard()];
+  return [dailyWordCard(), todayRow()];
 }
 function webQuiet() {
   const recent = WIDE() ? [] : state.words.slice(0, 8);
@@ -2096,8 +2106,8 @@ function searchView() {
   return [
     home && h("p", { class: "dk-hello" }, greeting()),
     !topSearch() && searchForm(),
+    !WIDE() && !state.busy && !state.entry && !state.notice && dailyWordCard(), // right under the word box: it is a word to look up
     home ? webActions() : !WIDE() && dailyGoal(),
-    !WIDE() && !state.busy && !state.entry && !state.notice && dailyWordCard(), // beside the day's meters, not in the middle of the screen
     noticeBox(),
     state.busy && loadingView(),
     state.entry && entryCard(state.entry),

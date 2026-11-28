@@ -4,9 +4,9 @@
 // file is what is done with them and how it is shown. Everything is kept with the account:
 // `level` { xp, got }, `bag` { tickets: { basic, gold } }, `hearts` { n, all }, and in `shop`: what
 // is owned ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
-import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7scs";
-import { lookOf } from "./characters.js?v=0.1.28-tp7scs";
-import { art } from "./art.js?v=0.1.28-tp7scs"; // eslint-disable-line no-unused-vars
+import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7sog";
+import { lookOf } from "./characters.js?v=0.1.28-tp7sog";
+import { art } from "./art.js?v=0.1.28-tp7sog"; // eslint-disable-line no-unused-vars
 
 const TWICE_POINTS = 100; // a present the student already has turns into points
 
@@ -169,17 +169,50 @@ export function initGrow(c) {
     return h("button", { class: `lv-chip${gifts ? " has-gift" : ""}`, title: label, "aria-label": label, onclick: () => openLevels() },
       badge(lv, progress(), "", need()), gifts > 0 && h("em", { class: "lv-dot", "aria-hidden": "true" }));
   }
-  // The road of levels, as a map: a path that winds upward through five lands, a stone for every
-  // level (level 1 at the bottom), the student's character on the stone it has reached, and each
-  // stone's present drawn beside it. just: the level whose present was taken a moment ago.
+  // What the character says at the top of the road, a different thing each time it is opened: a
+  // cheer in its own manner (by its vibe: cute, cool, calm, wild), or one any character may say.
+  // {n}: the words still to learn for the next level (such lines are left out at the last level).
+  const CHEERS = {
+    "귀여움": ["히히, {n}개만 더 하면 다음 레벨이야! 같이 가자!", "네가 오니까 길이 반짝반짝해!", "한 걸음씩! 내가 옆에서 통통 뛸게!"],
+    "멋짐": ["좋은 흐름이야. {n}개만 더 가면 다음 레벨이지.", "여기까지 온 것, 꽤 멋진걸.", "정상은 저 위야. 천천히, 확실하게 가자."],
+    "엽기": ["우와아! {n}개 남았다! 으라차차!", "이 길 끝에 뭐가 있을까? 궁금해서 못 참겠어!", "넘어져도 데굴데굴 굴러서 가면 돼!"],
+    "쿨함": ["{n}개 남았네. 너라면 금방이지.", "서두를 것 없어. 네 속도로 가.", "오늘도 왔구나. 그거면 충분해."],
+    all: ["오늘도 한 칸 올라가 보자!", "여기까지 온 네가 자랑스러워!", "{n}개만 더! 넌 할 수 있어!"],
+  };
+  function cheer(left) {
+    if (left == null) return t("꼭대기까지 왔어! 정말 대단해!");
+    const vibe = c.CHARACTERS.find((x) => x.id === shop().character)?.vibe;
+    const mine = CHEERS[vibe] || [];
+    const pool = [...mine, ...mine, ...CHEERS.all]; // its own manner twice as often
+    let line = pool[Math.floor(Math.random() * pool.length)];
+    if (line === state.cheerSaid) line = pool[(pool.indexOf(line) + 1) % pool.length];
+    state.cheerSaid = line;
+    return t(line, { n: left });
+  }
+  // The road of levels, as a world to climb: five lands one above the other (a meadow, an island,
+  // the sea, the snow, the sky), a stone for every level (level 1 at the bottom), the student's
+  // character on the stone it has reached, each stone's present drawn beside it.
+  // Nothing may lie on anything else, so everything has a place of its own:
+  //   stones      zigzag: odd levels on the left (30%), even on the right (70%)
+  //   presents    on the other half of the stone's own row
+  //   scenery     in the outer margin of the stone's own side
+  //   gates       between two lands there is a stretch without stones: the land's big picture
+  //               and its clouds are there, on the two sides the road does not use
+  // just: the level whose present was taken a moment ago.
   function openLevels(same, just) {
     const old = document.getElementById("sheet");
     const at = same ? old?.querySelector(".lv-road")?.scrollTop : null;
     old?.remove();
     const close = () => { el.remove(); c.render(); };
     const lv = level(), got = taken(), next = lv < LEVEL_MAX ? needFor(lv + 1) : null;
-    const STEP = 92, PAD = 96, tall = (LEVEL_MAX - 1) * STEP + PAD * 2;
-    const xOf = (n) => 50 + 26 * Math.sin((n - 1) * 0.95), yOf = (n) => PAD + (LEVEL_MAX - n) * STEP;
+    const ZONE = 10, LANDS_N = LEVEL_MAX / ZONE;
+    const STEP = 104, GATE = 124, PAD = 100;
+    const xOf = (n) => (n % 2 ? 30 : 70);
+    const yOf = (n) => PAD + (LEVEL_MAX - n) * STEP + Math.floor((LEVEL_MAX - n) / ZONE) * GATE;
+    const tall = yOf(1) + PAD;
+    const landTop = (z) => (z === LANDS_N - 1 ? 0 : yOf(z * ZONE + ZONE) - STEP / 2); // a land begins under its last stone's row… and takes the gate below it
+    const LANDS = [["flower", "sprout", "leaf"], ["island", "sun", "star"], ["whale", "gem", "wind"], ["snow", "cloud", "spark"], ["rainbow", "planet", "rocket"]];
+    const GATES = [null, ["island", "sun"], ["whale", "wind"], ["snow", "cloud"], ["rainbow", "rocket"]]; // what stands at the way into each land
     const line = Array.from({ length: LEVEL_MAX }, (_, i) => {
       const n = i + 1;
       if (n === 1) return `M${xOf(1)} ${yOf(1)}`;
@@ -191,37 +224,43 @@ export function initGrow(c) {
       p.setAttribute("preserveAspectRatio", "none");
       return p;
     };
-    const ZONE = 10; // a land every ten levels: a meadow, an island, the sea, the snow, the sky
-    const LANDS = [["flower", "sprout", "leaf"], ["island", "sun", "star"], ["whale", "gem", "wind"], ["snow", "cloud", "spark"], ["rainbow", "planet", "rocket"]];
-    const sky = (n) => [ // what drifts by: a cloud every few levels, and stars that twinkle in the highest land
-      n % 4 === 2 && h("i", { class: "lv-cloud", "aria-hidden": "true", style: `top:${yOf(n) - STEP * 0.5}px;left:${(n * 37) % 70 + 8}%;animation-delay:-${(n % 5) * 1.3}s` }, art("cloud")),
-      n > 40 && h("i", { class: "lv-twinkle", "aria-hidden": "true", style: `top:${yOf(n) - STEP * 0.3}px;left:${(n * 53) % 80 + 8}%;animation-delay:-${(n % 4) * 0.5}s` }, art("spark")),
-    ];
+    if (at == null || !state.lvSay) state.lvSay = cheer(next ? next - xp() : null); // a new cheer each time the road is opened (not when a present is taken)
+    const walk = at == null && !just && lv > 1; // the character walks in from the stone before
+    const here = h("span", { class: `lv-here${walk ? " walking" : ""}`, style: `left:${xOf(walk ? lv - 1 : lv)}%;top:${yOf(walk ? lv - 1 : lv)}px`, "aria-hidden": "true" }, c.portrait(myLook()));
     const road = h("div", { class: "lv-road lv-map" }, h("div", { class: "lv-map-in", style: `height:${tall}px` },
-      Array.from({ length: LEVEL_MAX / ZONE }, (_, z) => h("i", { class: `lv-zone z${z}`, "aria-hidden": "true", style: `top:${z === LEVEL_MAX / ZONE - 1 ? 0 : yOf((z + 1) * ZONE) - STEP / 2}px;height:${z === LEVEL_MAX / ZONE - 1 ? yOf(z * ZONE) + STEP / 2 : ZONE * STEP}px` })),
-      h("i", { class: "lv-goal", "aria-hidden": "true", style: `top:${yOf(LEVEL_MAX) - 58}px;left:${xOf(LEVEL_MAX)}%` }, art("crown")),
-      Array.from({ length: LEVEL_MAX }, (_, i) => sky(i + 1)), // behind the road
+      Array.from({ length: LANDS_N }, (_, z) => h("i", { class: `lv-zone z${z}`, "aria-hidden": "true", style: `top:${landTop(z)}px;height:${(z === 0 ? tall : landTop(z - 1)) - landTop(z)}px` })),
+      // the gates: on the lower left and the upper right of the stretch, where the road does not go
+      GATES.map((gate, z) => {
+        if (!gate) return null;
+        const y = (yOf(z * ZONE) + yOf(z * ZONE + 1)) / 2;
+        return [
+          h("i", { class: `lv-mark big m-${gate[0]}`, "aria-hidden": "true", style: `top:${y + 22}px;left:18%` }, art(gate[0])),
+          h("i", { class: `lv-mark m-${gate[1]}`, "aria-hidden": "true", style: `top:${y - 26}px;left:80%` }, art(gate[1])),
+          h("i", { class: "lv-cloud", "aria-hidden": "true", style: `top:${y - 54}px;left:56%;animation-delay:-${z * 1.7}s` }, art(z === LANDS_N - 1 ? "spark" : "cloud")),
+        ];
+      }),
+      h("i", { class: "lv-goal", "aria-hidden": "true", style: `top:${yOf(LEVEL_MAX) - 60}px;left:${xOf(LEVEL_MAX)}%` }, art("crown")),
+      h("i", { class: "lv-mark m-flag", "aria-hidden": "true", style: `top:${yOf(1)}px;left:72%` }, art("flag")),
       path("all"), path("done", lv), path("mid", lv),
       Array.from({ length: LEVEL_MAX }, (_, i) => {
         const n = i + 1;
         const { big, gifts } = levelGift(n);
         const where = n === 1 ? "start" : got.has(n) ? "got" : n <= lv ? "ready" : "locked";
-        const side = xOf(n) > 50 ? "left" : "right";
+        const left = xOf(n) < 50; // the stone's side; its present is on the other
         const near = Math.abs(n - lv);
+        const land = LANDS[Math.min(LANDS_N - 1, Math.floor((n - 1) / ZONE))];
         return [
-          // the scenery of the land, on the stone's own side of the map (the present is on the other)
-          h("i", { class: `lv-scene s${n % 3}${n % 4 === 0 ? " sway" : ""}`, "aria-hidden": "true", style: `top:${yOf(n) + (n % 2 ? STEP * 0.42 : -STEP * 0.1)}px;${side === "left" ? `right:${3 + (n % 3) * 3}%` : `left:${3 + (n % 3) * 3}%`}` },
-            art(LANDS[Math.min(LANDS.length - 1, Math.floor((n - 1) / ZONE))][n % 3])),
+          h("i", { class: `lv-scene s${n % 3}${n % 4 === 0 ? " sway" : ""}`, "aria-hidden": "true", style: `top:${yOf(n)}px;${left ? "left:3%" : "right:3%"}` }, art(land[n % 3])),
           h("button", { class: `lv-step lv-stone ${where}${big ? " big" : ""}${n === lv ? " here" : ""}${n === just ? " just" : ""}`, style: `left:${xOf(n)}%;top:${yOf(n)}px;${at == null && near < 7 ? `animation-delay:${near * 60}ms` : ""}`, disabled: where !== "ready",
             title: where === "ready" ? t("받기") : t("단어 {n}개", { n: needFor(n) }), "aria-label": `Lv.${n}`, onclick: () => claim(n) },
             where === "got" ? h("i", { class: "check-i", "aria-hidden": "true" }) : String(n),
             n === just && h("span", { class: "lv-confetti", "aria-hidden": "true" }, Array.from({ length: 12 }, (_, k) => h("i", { style: `--a:${k * 30}deg;--c:${["#ff8fb8", "#ffd84d", "#7fd6c2", "#9aa5ff", "#ffa45c"][k % 5]};--d:${46 + (k % 3) * 14}px` })))),
-          n === lv && h("span", { class: "lv-here", style: `left:${xOf(n)}%;top:${yOf(n)}px`, "aria-hidden": "true" }, c.portrait(myLook())),
-          n > 1 && h("div", { class: `lv-tag ${side} ${where}${big ? " big" : ""}`, style: `top:${yOf(n)}px;${side === "left" ? `right:${100 - xOf(n) + 11}%` : `left:${xOf(n) + 11}%`}` },
-            h("span", { class: "lv-gifts" }, gifts.map(giftArt)),
-            where === "ready" && h("button", { class: "mini buy", onclick: () => claim(n) }, t("받기"))),
+          where === "ready" && h("button", { class: "lv-claim", style: `left:${xOf(n)}%;top:${yOf(n) + (big ? 44 : 38)}px`, onclick: () => claim(n) }, t("받기")),
+          n > 1 && h("div", { class: `lv-tag ${left ? "right" : "left"} ${where}${big ? " big" : ""}`, style: `top:${yOf(n)}px;${left ? "left:52%" : "right:52%"}` },
+            h("span", { class: "lv-gifts" }, gifts.map(giftArt))),
         ];
-      })));
+      }),
+      here));
     const held = tickets().basic + tickets().gold;
     const big = badge(lv, at == null ? 0 : progress(), "big", need());
     const el = h("div", { id: "sheet", class: "sheet-wrap", onclick: (e) => { if (e.target === el) close(); } },
@@ -229,18 +268,23 @@ export function initGrow(c) {
         h("div", { class: "lv-top" },
           big,
           h("span", { class: "lv-me", "aria-hidden": "true" }, c.portrait(myLook())),
+          h("p", { class: "lv-say" }, state.lvSay),
           h("p", { class: "small lv-next" }, next ? t("다음 레벨까지 {n}개", { n: next - xp() }) : t("최고 레벨!"))),
         road,
         held > 0 && h("button", { class: "btn wide ghost lv-go", onclick: () => { el.remove(); c.openGacha(); } }, ticketArt(tickets().gold ? "gold" : "basic"), t("뽑기 기계로 가기"), h("b", null, `×${held}`)),
         h("button", { class: "btn wide", onclick: close }, t("닫기"))));
     document.body.append(el);
     if (at != null) road.scrollTop = at;
-    else {   // my stone a little below the middle: the next gifts show above, the waiting ones just below
-      const me = road.querySelector(".lv-step.here") || road.querySelector(".lv-step.ready");
-      const goal = () => (me ? me.offsetTop - road.clientHeight * 0.55 : 0);
-      const put = () => { road.scrollTo({ top: goal(), behavior: "smooth" }); };
+    else {   // my stone a little below the middle: the next presents show above, the waiting ones just below
+      const goal = () => Math.max(0, yOf(lv) - road.clientHeight * 0.55);
       road.scrollTop = goal() + 260; // the map comes up from a little below, to where the character stands
-      requestAnimationFrame(() => { put(); const r = ringDash(progress(), need()), ring = big.querySelector(".lv-ring"); ring.setAttribute("stroke-dasharray", r.dash); ring.setAttribute("stroke-dashoffset", r.off); });
+      requestAnimationFrame(() => {
+        road.scrollTo({ top: goal(), behavior: "smooth" });
+        const r = ringDash(progress(), need()), ring = big.querySelector(".lv-ring");
+        ring.setAttribute("stroke-dasharray", r.dash);
+        ring.setAttribute("stroke-dashoffset", r.off);
+        if (walk) setTimeout(() => { here.style.left = `${xOf(lv)}%`; here.style.top = `${yOf(lv)}px`; setTimeout(() => here.classList.remove("walking"), 950); }, 450);
+      });
     }
   }
 
@@ -293,31 +337,56 @@ export function initGrow(c) {
     const back = () => { el.remove(); c.render(); };
     const thing = got.item ? itemOf(got.item) : null;
     const colour = kind === "gold" ? "gold" : got.item ? "pink" : got.ticket ? "blue" : "yellow";
+    // The show, on a dark stage under turning lights: the machine rattles as its handle goes
+    // round, a capsule rolls out and lands in the middle, it rocks harder and harder (longer, and
+    // in gold light, when what is inside is rare), then a flash, and the prize in a burst of
+    // confetti. A press on the stage skips to the prize.
+    const rare = kind === "gold" || Boolean(got.item);
     const machine = machineArt(kind, "big");
     const ball = h("div", { class: `capsule-big ${colour}`, hidden: true, "aria-hidden": "true" }, h("i"), h("u"));
+    const flash = h("i", { class: "g-flash", "aria-hidden": "true" });
+    const burst = h("span", { class: "g-burst", hidden: true, "aria-hidden": "true" }, Array.from({ length: 18 }, (_, k) => h("i", { style: `--a:${k * 20}deg;--c:${["#ff8fb8", "#ffd84d", "#7fd6c2", "#9aa5ff", "#ffa45c", "#fff"][k % 6]};--d:${70 + (k % 4) * 22}px` })));
+    const prizeArt = h("div", { class: `prize-art on-stage${got.points ? " points" : ""}`, hidden: true }, got.points ? [coin(), h("b", null, `+${got.points}`)] : got.ticket ? ticketArt(got.ticket) : thing?.art());
+    const stage = h("div", { class: `g-stage${rare ? " rare" : ""}${kind === "gold" ? " gold" : ""}` }, h("i", { class: "g-rays", "aria-hidden": "true" }), machine, ball, prizeArt, burst, flash);
     const prizeBox = h("div", { class: "prize", hidden: true },
-      h("div", { class: `prize-art${got.points ? " points" : ""}` }, got.points ? [coin(), h("b", null, `+${got.points}`)] : got.ticket ? ticketArt(got.ticket) : thing?.art()),
       h("b", { class: "prize-name" }, got.points ? t("{n}포인트", { n: got.points }) : got.ticket ? t(MACHINES[got.ticket].ticket) : thing?.name),
       h("small", null, twice ? t("이미 다 가지고 있어서 포인트로 받았어요.") : got.item ? t(KIND_NAMES[thing?.kind] || "선물") : got.ticket ? t("한 번 더 뽑을 수 있어요!") : ""));
     const more = h("button", { class: "btn wide", hidden: true, onclick: () => { el.remove(); draw(kind, pay); } }, t("한 번 더 뽑기"));
     const use = h("button", { class: "btn wide ghost", hidden: true, onclick: () => { el.remove(); useNow(got.item); } }, t("지금 써 보기"));
     const done = h("button", { class: "link", hidden: true, onclick: back }, t("닫기"));
     const el = h("div", { id: "sheet", class: "sheet-wrap" },
-      h("div", { class: "sheet gacha-sheet", role: "dialog", "aria-modal": "true", "aria-label": t(MACHINES[kind].name) }, machine, ball, prizeBox, more, use, done));
+      h("div", { class: "sheet gacha-sheet", role: "dialog", "aria-modal": "true", "aria-label": t(MACHINES[kind].name) }, stage, prizeBox, more, use, done));
     document.body.append(el);
     const still = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    const step = (ms, fn) => setTimeout(() => { if (el.isConnected) fn(); }, still ? Math.min(ms, 200) : ms);
-    requestAnimationFrame(() => machine.classList.add("turning"));
-    step(1500, () => { machine.remove(); ball.hidden = false; });
-    step(2000, () => { ball.classList.add("open"); c.sfx.cheer(shop().character); });
-    step(2450, () => {
+    const timers = [];
+    let shown = false;
+    const reveal = () => {
+      if (shown || !el.isConnected) return;
+      shown = true;
+      timers.forEach(clearTimeout);
+      machine.remove();
       ball.hidden = true;
+      stage.classList.add("won");
+      flash.classList.add("go");
+      prizeArt.hidden = false;
+      burst.hidden = false;
       prizeBox.hidden = false;
+      c.sfx.cheer(shop().character);
       if (got.points) c.countUp(got.points);
       more.hidden = !canPay(kind, pay);
       use.hidden = !(got.item && ["wear", "skin", "concept", "bg", "theme", "character"].includes(thing?.kind));
       done.hidden = false;
-    });
+    };
+    stage.onclick = reveal; // skip
+    if (still) return void setTimeout(reveal, 200);
+    const step = (ms, fn) => timers.push(setTimeout(() => { if (el.isConnected && !shown) fn(); }, ms));
+    const rock = rare ? 1700 : 1000; // how long the capsule rocks before it opens
+    requestAnimationFrame(() => machine.classList.add("turning"));
+    step(350, () => c.sfx.chirp(shop().character));
+    step(1650, () => { machine.classList.add("gone"); ball.hidden = false; });
+    step(2150, () => ball.classList.add(rare ? "rock-long" : "rock"));
+    step(2150 + rock, () => ball.classList.add("open"));
+    step(2150 + rock + 300, reveal);
   }
   // Puts a prize to use at once: wears it, or applies the theme, background, colour or character.
   function useNow(key) {
