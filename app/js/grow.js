@@ -312,9 +312,9 @@ export function initGrow(c) {
   // The things of a kind that a capsule may hold: null for points and tickets (there are always
   // more of those), otherwise the keys of that kind.
   function keysOf(what) {
-    if (what[0] === "wear") return WEARS.filter((w) => w.rare <= what[1]).map((w) => `wear:${w.id}`);
-    if (what[0] === "skin") return SKINS.filter((x) => x.rare <= what[1]).map(skinKey);
-    if (what[0] === "concept") return CONCEPTS.filter((x) => x.cost > 0 && !x.special).map((x) => `concept:${x.id}`);
+    if (what[0] === "wear") return WEARS.filter((w) => w.rare <= what[1] && !w.level).map((w) => `wear:${w.id}`); // what a level gives is not in the machines
+    if (what[0] === "skin") return SKINS.filter((x) => x.rare <= what[1] && !x.level).map(skinKey);
+    if (what[0] === "concept") return CONCEPTS.filter((x) => x.cost > 0 && !x.special && !x.level).map((x) => `concept:${x.id}`);
     if (what[0] === "bg") return c.BACKGROUNDS.filter((x) => x.cost > 0 && !x.earn && Boolean(x.special) === what[1]).map((x) => `bg:${x.id}`);
     if (what[0] === "theme") return c.THEMES.filter((x) => x.cost > 0 && !x.special).map((x) => `theme:${x.id}`);
     if (what[0] === "character") return c.CHARACTERS.filter((x) => x.special && !x.earn && x.id !== "santa").map((x) => `character:${x.id}`);
@@ -437,8 +437,9 @@ export function initGrow(c) {
     const me = shop().character;
     const slotName = Object.fromEntries(SLOTS);
     const tile = (active, has, art, name, sub, action, kind, id) => h("div", { class: `swatch wear-tile${kind === "wear" && wearSpecial(wearById(id)) ? " special" : ""}${active ? " active" : ""}${has ? "" : " locked"}${state.tryOn?.kind === kind && state.tryOn.id === id ? " trying" : ""}`,
-      title: active ? null : t("눌러서 미리 보기"), onclick: (e) => { if (!e.target.closest("button") && !active) c.tryOn(kind, id); } }, kind === "wear" && wearSpecial(wearById(id)) && h("span", { class: "ribbon" }, t("스페셜")), art, h("div", { class: "swatch-name" }, name, sub && h("small", null, sub)), action);
-    const lock = () => h("span", { class: "tagline earn" }, h("i", { class: "lock-i", "aria-hidden": "true" }), t("뽑기에서만 나와요"));
+      title: active ? null : t("눌러서 미리 보기"), onclick: (e) => { if (!e.target.closest("button") && !active) c.tryOn(kind, id); } }, kind === "wear" && wearSpecial(wearById(id)) && h("span", { class: "ribbon" }, wearById(id).level ? t("레벨 선물") : t("스페셜")),
+      kind === "skin" && SKINS.find((x) => skinKey(x) === id)?.level && h("span", { class: "ribbon" }, t("레벨 선물")), art, h("div", { class: "swatch-name" }, name, sub && h("small", null, sub)), action);
+    const lock = (item) => h("span", { class: "tagline earn" }, h("i", { class: "lock-i", "aria-hidden": "true" }), item?.level ? t("Lv.{n} 선물", { n: item.level }) : t("뽑기에서만 나와요"));
     const worn = Object.values(wearing()).length > 0 || Boolean(shop().skin?.[me]);
     // Six places on the character, one thing in each: the places are drawn under the character,
     // filled or empty, and a press on one shows the things that go there.
@@ -470,7 +471,7 @@ export function initGrow(c) {
         const other = has && !on && wearing()[w.slot] && owned(`wear:${wearing()[w.slot]}`); // the place is taken: this would take its place
         return tile(on, has, c.portrait(lookOf(me, "", [w.id])), t(w.name), t(slotName[w.slot]),
           has ? h("button", { class: "mini", onclick: () => putOn(w) }, on ? t("벗기") : other ? t("바꿔 착용") : t("착용하기"))
-            : wearSpecial(w) ? lock()
+            : wearSpecial(w) ? lock(w)
             : state.confirmBuy === `wear:${w.id}` ? h("button", { class: "mini buy", onclick: () => buyWear(w) }, t("살까요?"))
               : h("button", { class: "mini price", disabled: (state.user.points || 0) < wearCost(w), title: (state.user.points || 0) < wearCost(w) ? t("포인트 부족") : null, onclick: () => { state.confirmBuy = `wear:${w.id}`; c.render(); } }, h("i", { "aria-hidden": "true" }, "P"), String(wearCost(w))), "wear", w.id);
       })),
@@ -479,7 +480,7 @@ export function initGrow(c) {
         const has = owned(skinKey(s)), mine = hasCharacter(s.of), on = has && shop().skin?.[s.of] === s.id;
         const who = t(c.CHARACTERS.find((x) => x.id === s.of)?.name || "");
         return tile(on && me === s.of, has, c.portrait(lookOf(s.of, s.id)), t(s.name), t("{name} 전용", { name: who }),
-          !has ? lock() : !mine ? h("span", { class: "tagline" }, t("{name}가 있어야 해요", { name: who }))
+          !has ? lock(s) : !mine ? h("span", { class: "tagline" }, t("{name}가 있어야 해요", { name: who }))
             : h("button", { class: "mini", onclick: () => paint(s) }, on ? t("기본 모습으로") : t("적용하기")), "skin", skinKey(s));
       })),
     ];

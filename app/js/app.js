@@ -3532,6 +3532,7 @@ function tryBar() {
     : on.kind === "wear" && !wearSpecial(item) ? h("button", { class: "mini buy", disabled: points < wearCost(item), title: points < wearCost(item) ? t("포인트 부족") : null, onclick: () => grow().buyWear(item) },
         h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `${wearCost(item)} · `, t("사기"))
       : !list ? h("span", { class: "tagline earn" }, lock(), t("뽑기에서만 나와요"))
+      : item.level ? h("span", { class: "tagline earn" }, lock(), t("Lv.{n} 선물", { n: item.level }))
       : item.earn ? h("span", { class: "tagline earn" }, lock(), t("도전 과제"))
         : h("button", { class: "mini buy", disabled: points < item.cost, title: points < item.cost ? t("포인트 부족") : null, onclick: () => buy(on.kind, item) },
             h("i", { class: "coin-i", "aria-hidden": "true" }, "P"), `${item.cost} · `, t("사기"));
@@ -3666,6 +3667,7 @@ function shelf(kind, heading, items) {
         ? h("span", { class: "tagline" }, t("사용 중"))
         : owned
           ? h("button", { class: "mini", onclick: () => { if (kind === "character") sfx.chirp(item.id); saveShop({ ...shop, [kind]: item.id, ...(kind === "theme" || kind === "bg" ? { concept: "basic" } : {}) }); } }, t("적용하기"))
+          : item.level ? h("span", { class: "tagline earn" }, h("i", { class: "lock-i", "aria-hidden": "true" }), t("Lv.{n} 선물", { n: item.level }))
           : item.earn
             // Earned, not bought: a button once it is earned, until then how far along the student is.
             ? kind === "character"
@@ -3686,6 +3688,7 @@ function shelf(kind, heading, items) {
         onclick: (e) => { if (e.target.closest("button")) return; if (kind === "character") sfx.chirp(item.id); if (!active) tryOn(kind, item.id); } },
         fresh && h("span", { class: "new-mark" }, "NEW"),
         item.special && h("span", { class: "ribbon" }, t("스페셜")),
+        item.level && h("span", { class: "ribbon" }, t("레벨 선물")),
         quest && h("span", { class: "ribbon quest" }, t("도전 과제")),
         kind === "character" && portrait(item.id),
         kind === "concept" && grow().conceptArt(item),
