@@ -1,5 +1,6 @@
 // Theme shop: things a student can buy with word points and switch between in Settings.
-import { conceptById } from "./goods.js?v=0.1.28-tp7wtk";
+import { conceptById } from "./goods.js?v=0.1.28-tp7y1u";
+import { getLang } from "./i18n.js?v=0.1.28-tp7y1u";
 // `accent` is used on light screens, `onDark` on dark ones. Names are Korean keys for i18n.
 // Prices climb from "a day or two" to `special` items that take about a week of steady use
 // (a busy day of searching, uncovering and quizzing earns roughly 200 points).
@@ -32,27 +33,37 @@ export const BACKGROUNDS = [
 // Items carry `added`: the catalogue revision they arrived in. The shop marks an item NEW until
 // the student has opened its tab once since then. Raise this when adding items, and give them
 // the new number.
-export const CATALOG_REV = 21;
+export const CATALOG_REV = 22;
 
 // Lettering for the whole app. Free to choose. Every one is an open font (SIL Open Font License)
-// served by Google Fonts; it is fetched only once it is chosen or tried on. `family` is its name
-// there. Chinese falls back to the device's own lettering.
+// served by Google Fonts; it is fetched only once it is chosen or tried on. A font here is a feel
+// (soft, round, handwritten, bookish) with a family for each script, so it reads naturally in
+// Korean, English and Chinese: the language in use decides which family comes first.
+// [family at Google Fonts, has a bold weight]
 export const FONTS = [
   { id: "system", name: "기본 글꼴", cost: 0 },
-  { id: "gowun", name: "고운돋움", cost: 0, family: "Gowun Dodum", added: 21 },
-  { id: "jua", name: "주아", cost: 0, family: "Jua", added: 21 },
-  { id: "gaegu", name: "개구", cost: 0, family: "Gaegu", added: 21 },
-  { id: "myeongjo", name: "나눔명조", cost: 0, family: "Nanum Myeongjo", added: 21 },
+  { id: "gowun", name: "부드러운 글씨", cost: 0, ko: ["Gowun Dodum", false], en: ["Nunito", true], zh: ["Noto Sans SC", true], added: 21 },
+  { id: "jua", name: "동글동글 글씨", cost: 0, ko: ["Jua", false], en: ["Fredoka", true], zh: ["ZCOOL KuaiLe", false], added: 21 },
+  { id: "gaegu", name: "손글씨", cost: 0, ko: ["Gaegu", true], en: ["Patrick Hand", false], zh: ["Long Cang", false], added: 21 },
+  { id: "myeongjo", name: "책 글씨", cost: 0, ko: ["Nanum Myeongjo", true], en: ["Lora", true], zh: ["Noto Serif SC", true], added: 21 },
 ];
+// Which families a font uses in the language in use, first choice first. Korean is always there
+// (the dictionary shows Korean in every language).
+const fontOrder = () => ({ en: ["en", "ko"], zh: ["zh", "ko"] }[getLang()] || ["ko"]);
 export function loadFont(id) {
   const font = FONTS.find((x) => x.id === id);
-  if (!font?.family || document.getElementById(`wb-font-${id}`)) return font;
-  const link = document.createElement("link");
-  link.id = `wb-font-${id}`;
-  link.rel = "stylesheet";
-  link.href = `https://fonts.googleapis.com/css2?family=${font.family.replaceAll(" ", "+")}:wght@400;700&display=swap`;
-  document.head.append(link);
-  return font;
+  if (!font?.ko) return font;
+  const used = fontOrder().map((script) => font[script]);
+  for (const [family, bold] of used) {
+    const mark = `wb-font-${family.replaceAll(" ", "-")}`;
+    if (document.getElementById(mark)) continue;
+    const link = document.createElement("link");
+    link.id = mark;
+    link.rel = "stylesheet";
+    link.href = `https://fonts.googleapis.com/css2?family=${family.replaceAll(" ", "+")}${bold ? ":wght@400;700" : ""}&display=swap`;
+    document.head.append(link);
+  }
+  return { ...font, family: used.map(([family]) => `"${family}"`).join(", ") };
 }
 
 export const DEFAULT_SHOP = { owned: [], theme: "purple", bg: "plain", character: "bubble", concept: "basic", font: "system" };
@@ -71,7 +82,7 @@ export function applyShop(shop) {
   const { theme, bg, concept, font } = { ...DEFAULT_SHOP, ...(shop || {}) };
   const root = document.documentElement;
   const lettering = loadFont(font);
-  if (lettering?.family) { root.dataset.font = lettering.id; root.style.setProperty("--font", `"${lettering.family}"`); }
+  if (lettering?.family) { root.dataset.font = lettering.id; root.style.setProperty("--font", lettering.family); }
   else { delete root.dataset.font; root.style.removeProperty("--font"); }
   const whole = conceptById(concept);
   for (const name of PAINTED) root.style.removeProperty(`--${name}`);

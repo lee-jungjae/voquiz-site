@@ -4,9 +4,9 @@
 // file is what is done with them and how it is shown. Everything is kept with the account:
 // `level` { xp, got }, `bag` { tickets: { basic, gold } }, `hearts` { n, all }, and in `shop`: what
 // is owned ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
-import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, wearSpecial, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7wtk";
-import { lookOf } from "./characters.js?v=0.1.28-tp7wtk";
-import { art } from "./art.js?v=0.1.28-tp7wtk"; // eslint-disable-line no-unused-vars
+import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, skinName, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, wearSpecial, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7y1u";
+import { lookOf } from "./characters.js?v=0.1.28-tp7y1u";
+import { art } from "./art.js?v=0.1.28-tp7y1u"; // eslint-disable-line no-unused-vars
 
 const TWICE_POINTS = 100; // a present the student already has turns into points
 
@@ -46,7 +46,7 @@ export function initGrow(c) {
   function itemOf(key) {
     const [kind, id] = String(key).split(":");
     if (kind === "wear") { const w = wearById(id); return w && { kind, name: t(w.name), art: () => c.portrait(lookOf(shop().character, "", [id])) }; }
-    if (kind === "skin") { const s = SKINS.find((x) => skinKey(x) === key); return s && { kind, name: t(s.name), art: () => c.portrait(lookOf(s.of, s.id)) }; }
+    if (kind === "skin") { const s = SKINS.find((x) => skinKey(x) === key); return s && { kind, name: skinName(s, t), art: () => c.portrait(lookOf(s.of, s.id)) }; }
     if (kind === "concept") { const x = CONCEPTS.find((y) => y.id === id); return x && { kind, name: t(x.name), art: () => conceptArt(x) }; }
     if (kind === "bg") { const x = c.BACKGROUNDS.find((y) => y.id === id); return x && { kind, name: t(x.name), art: () => h("i", { class: "prize-swatch", "data-bg": id, "aria-hidden": "true" }) }; }
     if (kind === "theme") { const x = c.THEMES.find((y) => y.id === id); return x && { kind, name: t(x.name), art: () => h("i", { class: "prize-swatch", style: `background:${c.themeColor(id)}`, "aria-hidden": "true" }) }; }
@@ -141,7 +141,7 @@ export function initGrow(c) {
     const got = grant(levelGift(n).gifts);
     c.sfx.cheer(shop().character);
     // points announce themselves (the points pill): one message at a time
-    if (got.some((g) => g.ticket)) c.toastText(t("뽑기권을 받았어요! 뽑기 기계에서 써 보세요."));
+    if (got.some((g) => g.ticket)) c.toastText(t("캡슐 티켓을 받았어요! 상점에서 캡슐을 열어 보세요."));
     else if (!got.every((g) => g.points)) c.toastText(t("Lv.{n} 선물: {what}", { n, what: got.filter((g) => !g.points).map(giftText).join(", ") }));
     openLevels(true, n);
   }
@@ -314,7 +314,11 @@ export function initGrow(c) {
   // more of those), otherwise the keys of that kind.
   function keysOf(what) {
     if (what[0] === "wear") return WEARS.filter((w) => w.rare <= what[1] && !w.level).map((w) => `wear:${w.id}`); // what a level gives is not in the machines
-    if (what[0] === "skin") return SKINS.filter((x) => x.rare <= what[1] && !x.level).map(skinKey);
+    if (what[0] === "skin") { // skins of the characters the student has come first
+      const all = SKINS.filter((x) => x.rare <= what[1] && !x.level);
+      const mine = all.filter((x) => hasCharacter(x.of) && !owned(skinKey(x)));
+      return (mine.length ? mine : all).map(skinKey);
+    }
     if (what[0] === "concept") return CONCEPTS.filter((x) => x.cost > 0 && !x.special && !x.level).map((x) => `concept:${x.id}`);
     if (what[0] === "bg") return c.BACKGROUNDS.filter((x) => x.cost > 0 && !x.earn && Boolean(x.special) === what[1]).map((x) => `bg:${x.id}`);
     if (what[0] === "theme") return c.THEMES.filter((x) => x.cost > 0 && !x.special).map((x) => `theme:${x.id}`);
@@ -365,8 +369,8 @@ export function initGrow(c) {
     const stage = h("div", { class: `g-stage${rare ? " rare" : ""}${kind === "gold" ? " gold" : ""}` }, h("i", { class: "g-rays", "aria-hidden": "true" }), machine, ball, prizeArt, burst, flash);
     const prizeBox = h("div", { class: "prize", hidden: true },
       h("b", { class: "prize-name" }, got.points ? t("{n}포인트", { n: got.points }) : got.ticket ? t(MACHINES[got.ticket].ticket) : thing?.name),
-      h("small", null, twice ? t("이미 다 가지고 있어서 포인트로 받았어요.") : got.item ? t(KIND_NAMES[thing?.kind] || "선물") : got.ticket ? t("한 번 더 뽑을 수 있어요!") : ""));
-    const more = h("button", { class: "btn wide", hidden: true, onclick: () => { el.remove(); draw(kind, pay); } }, t("한 번 더 뽑기"));
+      h("small", null, twice ? t("이미 다 가지고 있어서 포인트로 받았어요.") : got.item ? t(KIND_NAMES[thing?.kind] || "선물") : got.ticket ? t("한 번 더 열 수 있어요!") : ""));
+    const more = h("button", { class: "btn wide", hidden: true, onclick: () => { el.remove(); draw(kind, pay); } }, t("한 번 더 열기"));
     const use = h("button", { class: "btn wide ghost", hidden: true, onclick: () => { el.remove(); useNow(got.item); } }, t("지금 써 보기"));
     const done = h("button", { class: "link", hidden: true, onclick: back }, t("닫기"));
     const el = h("div", { id: "sheet", class: "sheet-wrap" },
@@ -433,6 +437,13 @@ export function initGrow(c) {
     if (next[skin.of] === skin.id) delete next[skin.of]; else next[skin.of] = skin.id;
     c.saveShop({ ...shop(), skin: next });
   }
+  // Under "all" only the skins that matter now are shown (my character's, and the ones I have);
+  // the Skins chip shows the skins of every character I have (a character's skins are shown where it is bought).
+  function skinsShown(place) {
+    const me = shop().character, rank = (x) => (x.of === me ? 0 : hasCharacter(x.of) ? 1 : 2);
+    const list = SKINS.filter((x) => owned(skinKey(x)) || (place === "skin" ? hasCharacter(x.of) : x.of === me));
+    return [...list].sort((x, y) => rank(x) - rank(y));
+  }
   const hasCharacter = (id) => { const x = c.CHARACTERS.find((y) => y.id === id); return Boolean(x) && ((x.cost === 0 && !x.earn) || owned(`character:${id}`)); };
   function wardrobe() {
     const me = shop().character;
@@ -440,7 +451,7 @@ export function initGrow(c) {
     const tile = (active, has, art, name, sub, action, kind, id) => h("div", { class: `swatch wear-tile${kind === "wear" && wearSpecial(wearById(id)) ? " special" : ""}${active ? " active" : ""}${has ? "" : " locked"}${state.tryOn?.kind === kind && state.tryOn.id === id ? " trying" : ""}`,
       title: active ? null : t("눌러서 미리 보기"), onclick: (e) => { if (!e.target.closest("button") && !active) c.tryOn(kind, id); } }, kind === "wear" && wearSpecial(wearById(id)) && h("span", { class: "ribbon" }, wearById(id).level ? t("레벨 선물") : t("스페셜")),
       kind === "skin" && SKINS.find((x) => skinKey(x) === id)?.level && h("span", { class: "ribbon" }, t("레벨 선물")), art, h("div", { class: "swatch-name" }, name, sub && h("small", null, sub)), action);
-    const lock = (item) => h("span", { class: "tagline earn" }, h("i", { class: "lock-i", "aria-hidden": "true" }), item?.level ? t("Lv.{n} 선물", { n: item.level }) : t("뽑기에서만 나와요"));
+    const lock = (item) => h("span", { class: "tagline earn" }, h("i", { class: "lock-i", "aria-hidden": "true" }), item?.level ? t("Lv.{n} 선물", { n: item.level }) : t("캡슐 전용"));
     const worn = Object.values(wearing()).length > 0 || Boolean(shop().skin?.[me]);
     // Six places on the character, one thing in each: the places are drawn under the character,
     // filled or empty, and a press on one shows the things that go there.
@@ -462,9 +473,9 @@ export function initGrow(c) {
           worn && [" ", h("button", { class: "link small", onclick: () => { const skin = { ...(shop().skin || {}) }; delete skin[me]; c.saveShop({ ...shop(), wear: {}, skin }); } }, t("모두 벗기"))])),
       // One chip for each place (and one for the skins), with how many there are and how many are owned.
       h("div", { class: "chips one-line shop-kinds wear-kinds", role: "group", "aria-label": t("소품 자리") },
-        [[null, t("전체"), WEARS.filter((w) => owned(`wear:${w.id}`)).length + SKINS.filter((x) => owned(skinKey(x))).length, WEARS.length + SKINS.length],
+        [[null, t("전체"), WEARS.filter((w) => owned(`wear:${w.id}`)).length + SKINS.filter((x) => owned(skinKey(x))).length, WEARS.length + skinsShown("skin").length],
           ...SLOTS.map(([id, name]) => [id, t(name), WEARS.filter((w) => w.slot === id && owned(`wear:${w.id}`)).length, WEARS.filter((w) => w.slot === id).length]),
-          ["skin", t("스킨"), SKINS.filter((x) => owned(skinKey(x))).length, SKINS.length]].map(([id, label, have, all]) =>
+          ["skin", t("스킨"), SKINS.filter((x) => owned(skinKey(x))).length, skinsShown("skin").length]].map(([id, label, have, all]) =>
           h("button", { class: "chip", "aria-pressed": String(place === id), onclick: () => { state.wearSlot = id; c.render(); } }, label, h("small", null, `${have}/${all}`)))),
       place !== "skin" && h("h4", null, place ? t("{name} 소품", { name: t(slotName[place]) }) : t("소품")),
       place !== "skin" && h("div", { class: "shelf" }, shown.map((w) => {
@@ -477,10 +488,10 @@ export function initGrow(c) {
               : h("button", { class: "mini price", disabled: (state.user.points || 0) < wearCost(w), title: (state.user.points || 0) < wearCost(w) ? t("포인트 부족") : null, onclick: () => { state.confirmBuy = `wear:${w.id}`; c.render(); } }, h("i", { "aria-hidden": "true" }, "P"), String(wearCost(w))), "wear", w.id);
       })),
       (!place || place === "skin") && h("h4", null, t("스킨")),
-      (!place || place === "skin") && h("div", { class: "shelf" }, SKINS.map((s) => {
+      (!place || place === "skin") && h("div", { class: "shelf" }, skinsShown(place).map((s) => {
         const has = owned(skinKey(s)), mine = hasCharacter(s.of), on = has && shop().skin?.[s.of] === s.id;
         const who = t(c.CHARACTERS.find((x) => x.id === s.of)?.name || "");
-        return tile(on && me === s.of, has, c.portrait(lookOf(s.of, s.id)), t(s.name), t("{name} 전용", { name: who }),
+        return tile(on && me === s.of, has, c.portrait(lookOf(s.of, s.id)), skinName(s, t), t("{name} 전용", { name: who }),
           !has ? lock(s) : !mine ? h("span", { class: "tagline" }, t("{name}가 있어야 해요", { name: who }))
             : h("button", { class: "mini", onclick: () => paint(s) }, on ? t("기본 모습으로") : t("적용하기")), "skin", skinKey(s));
       })),
@@ -508,9 +519,9 @@ export function initGrow(c) {
           Array.from({ length: HEARTS_FOR_DRAW }, (_, i) => h("i", { class: i < n ? "on" : "", style: `--i:${i}` }))),
         kind === "gold" && h("p", { class: "small muted" }, t("스킨, 테마, 스페셜 캐릭터가 들어 있어요.")),
         h("div", { class: "gacha-pays" },
-          kind === "basic" && way("hearts", heartArt(), t("하트 {n}개로 뽑기", { n: HEARTS_FOR_DRAW }), `${Math.min(n, 99)} / ${HEARTS_FOR_DRAW}`),
-          way("ticket", ticketArt(kind), t("{name}으로 뽑기", { name: t(machine.ticket) }), `×${held[kind]}`),
-          machine.points && way("points", coin(), thingsLeft(kind) ? t("포인트로 뽑기") : t("모두 모았어요!"), String(machine.points)))));
+          kind === "basic" && way("hearts", heartArt(), t("하트 {n}개로 열기", { n: HEARTS_FOR_DRAW }), `${Math.min(n, 99)} / ${HEARTS_FOR_DRAW}`),
+          way("ticket", ticketArt(kind), t("{name}으로 열기", { name: t(machine.ticket) }), `×${held[kind]}`),
+          machine.points && way("points", coin(), thingsLeft(kind) ? t("포인트로 열기") : t("모두 모았어요!"), String(machine.points)))));
   }
 
   // At the top of the friends screen: the ten places that fill up with the hearts friends send,
@@ -521,9 +532,9 @@ export function initGrow(c) {
       h("div", { class: "heart-count" },
         h("div", { class: "heart-slots", role: "img", "aria-label": `${t("하트")} ${n} / ${HEARTS_FOR_DRAW}` },
           Array.from({ length: HEARTS_FOR_DRAW }, (_, i) => h("i", { class: i < n ? "on" : "", style: `--i:${i}` }))),
-        h("small", null, ready ? t("뽑기를 돌릴 수 있어요!") : t("뽑기까지 하트 {n}개", { n: HEARTS_FOR_DRAW - n }))),
-      h("button", { class: "heart-go", title: t("하트 {n}개로 뽑기", { n: HEARTS_FOR_DRAW }), onclick: () => c.openGacha() },
-        svg("0 0 120 150", "gm basic mini", machineMini()), h("b", null, ready ? t("뽑기") : `${n} / ${HEARTS_FOR_DRAW}`)));
+        h("small", null, ready ? t("캡슐을 열 수 있어요!") : t("캡슐까지 하트 {n}개", { n: HEARTS_FOR_DRAW - n }))),
+      h("button", { class: "heart-go", title: t("하트 {n}개로 열기", { n: HEARTS_FOR_DRAW }), onclick: () => c.openGacha() },
+        svg("0 0 120 150", "gm basic mini", machineMini()), h("b", null, ready ? t("캡슐") : `${n} / ${HEARTS_FOR_DRAW}`)));
   }
   const canDraw = () => MACHINE_KINDS.some((kind) => ["hearts", "ticket"].some((pay) => canPay(kind, pay)));
 
