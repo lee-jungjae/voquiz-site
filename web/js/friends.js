@@ -39,6 +39,7 @@ export function initFriends(c) {
     lastFetch = Date.now();
     try {
       state.friends = await api.listFriends();
+      c.loadLevels((state.friends || []).map((f) => f.other)); // not awaited
       state.friendSetup = false;
       await loadGifts();
     } catch (err) {
@@ -294,7 +295,7 @@ export function initFriends(c) {
         ? h("div", { class: "empty small" }, t("아직 친구가 없어요. 이메일로 신청하거나 초대 코드를 보내 보세요."),
             h("p", { style: "margin-top:12px" }, h("button", { class: "btn", onclick: show("add") }, t("친구 추가"))))
         : friends.map((f) => h("div", { class: "duel-row" },
-            h("span", { class: "who" }, who(f.other), h("small", null, [f.other.grade && `G${f.other.grade}`, f.other.no_duels && t("대결 안 받음")].filter(Boolean).join(" · "))),
+            h("span", { class: "who" }, h("span", { class: "who-line" }, c.levelMini(f.other), who(f.other)), h("small", null, [f.other.grade && `G${f.other.grade}`, f.other.no_duels && t("대결 안 받음")].filter(Boolean).join(" · "))),
             ui.confirm === f.id
               ? [h("button", { class: "mini danger", onclick: () => run(() => api.removeFriend(f.id), t("친구 목록에서 지웠어요.")) }, t("정말 삭제")),
                  h("button", { class: "link", onclick: () => { ui.confirm = null; c.render(); } }, t("취소"))]

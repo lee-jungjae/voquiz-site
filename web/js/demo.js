@@ -1,8 +1,8 @@
 // Demo backend: no server, no Claude. Everything stays in this browser's localStorage.
 // Used automatically while js/config.js is empty, so the UI can be tried right away.
-import { parsePartial } from "./partial.js?v=0.1.28-tp7var";
-import { bandOf } from "./levels.js?v=0.1.28-tp7var";
-import { FULL } from "./demo_levels.js?v=0.1.28-tp7var";
+import { parsePartial } from "./partial.js?v=0.1.28-tp7vev";
+import { bandOf } from "./levels.js?v=0.1.28-tp7vev";
+import { FULL } from "./demo_levels.js?v=0.1.28-tp7vev";
 
 const USER_KEY = "wb_demo_user";
 const WORDS_KEY = "wb_demo_words";
@@ -202,6 +202,10 @@ export async function saveProfile(data) {
 }
 
 export async function publishRank() {}
+// Pretend levels for the pretend classmates (the same one for the same name every time).
+export async function levelsOf(who) {
+  return (who || []).map((w) => ({ nickname: w.nickname, tag: w.tag, level: 1 + ([...String(w.nickname)].reduce((sum, ch) => sum + ch.charCodeAt(0), 0) + (w.tag || 0)) % 24 }));
+}
 
 // A few pretend classmates, so the rankings have something to show.
 export async function getRankings(grade, friends = false) {

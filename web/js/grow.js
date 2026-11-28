@@ -4,9 +4,9 @@
 // file is what is done with them and how it is shown. Everything is kept with the account:
 // `level` { xp, got }, `bag` { tickets: { basic, gold } }, `hearts` { n, all }, and in `shop`: what
 // is owned ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
-import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, wearSpecial, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7var";
-import { lookOf } from "./characters.js?v=0.1.28-tp7var";
-import { art } from "./art.js?v=0.1.28-tp7var"; // eslint-disable-line no-unused-vars
+import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, wearSpecial, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7vev";
+import { lookOf } from "./characters.js?v=0.1.28-tp7vev";
+import { art } from "./art.js?v=0.1.28-tp7vev"; // eslint-disable-line no-unused-vars
 
 const TWICE_POINTS = 100; // a present the student already has turns into points
 
@@ -107,6 +107,7 @@ export function initGrow(c) {
     state.user.level = { ...kept(), xp: now };
     keep();
     const from = levelFor(before), to = levelFor(now);
+    if (to > from) c.publish?.(); // others see the new level
     return Array.from({ length: to - from }, (_, i) => from + i + 1);
   }
   // A word has just been learned: after its own celebration, the level's (when one was reached).

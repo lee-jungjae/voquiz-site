@@ -1,34 +1,34 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp7var";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7var";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7var";
-import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp7var";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp7var";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7var";
-import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7var";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp7var";
-import { initGrow } from "./grow.js?v=0.1.28-tp7var";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7var";
-import { art, artToCss } from "./art.js?v=0.1.28-tp7var";
-import { academicWords, academicField } from "./academic.js?v=0.1.28-tp7var";
+import { api, DEMO } from "./api.js?v=0.1.28-tp7vev";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7vev";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7vev";
+import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp7vev";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp7vev";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7vev";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7vev";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp7vev";
+import { initGrow } from "./grow.js?v=0.1.28-tp7vev";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7vev";
+import { art, artToCss } from "./art.js?v=0.1.28-tp7vev";
+import { academicWords, academicField } from "./academic.js?v=0.1.28-tp7vev";
 artToCss();
 setTimeout(() => peekSoon(true), 0);
-import { film } from "./film.js?v=0.1.28-tp7var";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7var";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7var";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp7var";
-import { clockNow } from "./clock.js?v=0.1.28-tp7var";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7var";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7var";
-import { initDuel } from "./duel.js?v=0.1.28-tp7var";
-import { initFriends } from "./friends.js?v=0.1.28-tp7var";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp7var";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7var";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7var";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7var";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7var";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7var";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7var";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7var";
+import { film } from "./film.js?v=0.1.28-tp7vev";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7vev";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7vev";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp7vev";
+import { clockNow } from "./clock.js?v=0.1.28-tp7vev";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7vev";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7vev";
+import { initDuel } from "./duel.js?v=0.1.28-tp7vev";
+import { initFriends } from "./friends.js?v=0.1.28-tp7vev";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp7vev";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7vev";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7vev";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7vev";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7vev";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7vev";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7vev";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7vev";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -514,12 +514,29 @@ const nameOf = (nickname, tag) => nickname || `${t("탐험가")} ${tag}`;
 const displayName = () => nameOf(state.user.nickname, myTag());
 
 // Keeps this student's line on the rankings up to date. Best effort: the app works without it.
+// Other students' levels, where they are listed (the rankings, the friends list): a small number
+// before the name. They are fetched for the names on the screen and kept by name and tag.
+const levelKey = (who) => `${who?.nickname}#${who?.tag}`;
+async function loadLevels(rows) {
+  const who = (rows || []).filter((r) => r && r.nickname && !r.bot && !r.me && !(state.levels ||= new Map()).has(levelKey(r))).map((r) => ({ nickname: r.nickname, tag: r.tag }));
+  if (!who.length) return;
+  try {
+    for (const row of await api.levelsOf(who.slice(0, 300))) state.levels.set(levelKey(row), row.level);
+    render();
+  } catch (err) { console.error(err); }
+}
+function levelMini(who) {
+  if (!who || who.bot) return null;
+  const lv = who.me ? grow().level() : state.levels?.get(levelKey(who));
+  return lv ? h("em", { class: "lv-mini", title: `Lv.${lv}`, "aria-label": `Lv.${lv}` }, String(lv)) : null;
+}
 function publishRank() {
   if (!state.user) return;
   api.publishRank({
     nickname: state.user.nickname || "", tag: myTag(), points: state.user.points || 0,
     grade: state.user.grade || null, best_streak: state.user.challenge?.best || 0,
     week_start: weekKey(), week_points: weekEarned(), tier: myTier(), character: myShop().character, motto: state.user.motto || "",
+    level: grow().level(),
   }).catch(() => {});
 }
 
@@ -2691,6 +2708,7 @@ async function openRankings() {
     state.rankings = await api.getRankings(state.rankGrade, onlyFriends);
     // Duels won come from their own function, which may not be installed yet.
     state.rankings.duel = await api.duelRankings(onlyFriends).catch(() => []);
+    loadLevels(Object.values(state.rankings).filter(Array.isArray).flat()); // not awaited: the board shows first
     noteClimb();
   } catch (err) {
     console.error(err);
@@ -2977,7 +2995,7 @@ function rankView() {
     row.rank <= 3 && row.score > 0 ? medal(row.rank) : h("span", { class: "place" }, String(row.rank)),
     h("span", { class: "ava", "aria-hidden": "true" }, portrait(row.me ? myLook() : row.character || "bubble")),
     h("span", { class: "who" },
-      h("span", { class: "who-name" }, row.bot ? row.nickname : nameOf(row.nickname, row.tag),
+      h("span", { class: "who-name" }, levelMini(row), row.bot ? row.nickname : nameOf(row.nickname, row.tag),
         row.me && h("small", null, t("나")), row.bot && h("small", { class: "bot" }, getLang() === "en" ? "character" : t("캐릭터"))),
       row.me
         ? h("button", { class: "who-motto edit", title: t("한마디 바꾸기"), onclick: () => { state.mottoEdit = !state.mottoEdit; render(); } },
@@ -3322,7 +3340,7 @@ function friends() {
     h, t, state, api, render, fail, nameOf, toastText, openPage, storeUrl, logoIcon, displayName, award, locale,
     today: todayKey,
     startDuel: (other) => duel().start({ other }),
-    addHearts: (n) => grow().addHearts(n), heartBox: () => grow().heartBox(),
+    addHearts: (n) => grow().addHearts(n), heartBox: () => grow().heartBox(), loadLevels, levelMini,
   }));
 }
 // Levels, the capsule machines, what the character wears, hearts (grow.js).
@@ -3331,7 +3349,7 @@ function grow() {
   return (growModule ||= initGrow({
     h, t, state, api, render, award, celebrate, toastText, sfx, isLearned, myShop, saveShop, portrait, themeColor,
     CHARACTERS, THEMES, BACKGROUNDS,
-    spend: (n) => { state.user.points -= n; countUp(-n); }, countUp,
+    spend: (n) => { state.user.points -= n; countUp(-n); }, countUp, publish: () => publishRank(),
     openGacha: () => { document.getElementById("sheet")?.remove(); loadQuestStats(); Object.assign(state, { tab: "shop", shopTab: "gacha", confirmBuy: null, notice: null }); render(); },
     tryOn,
     openShopTab: (tab) => { document.getElementById("sheet")?.remove(); Object.assign(state, { tab: "shop", shopTab: tab, confirmBuy: null, notice: null }); render(); },
