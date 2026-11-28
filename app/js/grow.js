@@ -283,9 +283,9 @@ export function initGrow(c) {
     if (at != null) road.scrollTop = at;
     else {   // my stone a little below the middle: the next presents show above, the waiting ones just below
       const goal = () => Math.max(0, yOf(lv) - road.clientHeight * 0.55);
-      road.scrollTop = goal() + 260; // the map comes up from a little below, to where the character stands
+      road.scrollTop = goal(); // already where the character stands when the sheet comes up: the sheet and its picture arrive as one
       requestAnimationFrame(() => {
-        road.scrollTo({ top: goal(), behavior: "smooth" });
+        road.scrollTop = goal();
         const r = ringDash(progress(), need()), ring = big.querySelector(".lv-ring");
         ring.setAttribute("stroke-dasharray", r.dash);
         ring.setAttribute("stroke-dashoffset", r.off);
