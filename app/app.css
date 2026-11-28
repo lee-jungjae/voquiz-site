@@ -3863,3 +3863,24 @@ b:has(> .coin-i:first-child) > .coin-i { margin: 0; vertical-align: 0; }
 .step.gift .gift-me .mascot { width: 120px; display: block; }
 .step.gift:not(.hello) .gift-me .mascot { width: 76px; }
 .step.gift:not(.hello) > .btn.wide { position: sticky; bottom: 0; flex: none; box-shadow: 0 -10px 16px 6px var(--bg); }
+.film-next { width: 30px; height: 30px; border-radius: 50%; background: #fff; color: #2e2a47; font-size: 18px; font-weight: 900; line-height: 1; display: grid; place-items: center; padding-bottom: 2px; box-shadow: 0 2px 6px rgba(0, 0, 0, .1); }
+
+/* The first step of the welcome present: the character, large, holds the box out. */
+.step.gift.hello > .talk-say { color: var(--bg); max-width: 300px; margin: 0 auto; }
+.gift-give { position: relative; display: grid; justify-items: center; margin-top: 6px; }
+.gift-give .gift-giver .mascot { width: 210px; position: static; display: block; margin: 0; animation: none; }
+.gift-give .gift-giver .m-tiles { display: none; }
+.gift-give .gift-box { position: relative; z-index: 1; width: 112px; height: 112px; margin-bottom: -34px; border-radius: 0; background: none; filter: drop-shadow(0 8px 10px rgba(40, 30, 90, .22)); animation: giftOffer 1.8s ease-in-out infinite; }
+.gift-give .gift-box .art-i, .gift-give .gift-box svg { width: 112px; height: 112px; }
+.gift-give .gift-box.open { animation: giftOpen .95s cubic-bezier(.3, 1.4, .4, 1) both; }
+.step.gift:not(.hello) .gift-me .mascot { width: 96px; }
+@keyframes giftOffer { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-12px) rotate(2deg) scale(1.05); } }
+.gift-give .gift-giver { display: block; width: 230px; }
+.gift-give .gift-giver .mascot, .gift-give .gift-giver .mascot svg { width: 230px !important; height: auto; max-width: none; }
+.gift-give .gift-box { border: 0 !important; background: transparent !important; box-shadow: none !important; padding: 0; margin-bottom: -58px; }
+.step.gift.hello { overflow: hidden; }
+.gift-give .gift-giver { width: 400px; margin: -64px -200px -56px; justify-self: center; pointer-events: none; }
+.gift-give .gift-giver .mascot, .gift-give .gift-giver .mascot svg { width: 400px !important; }
+.gift-give .gift-box { width: 128px; height: 128px; margin-bottom: -22px; }
+.gift-give .gift-box .art-i, .gift-give .gift-box svg { width: 128px; height: 128px; }
+.gift-give .gift-giver { margin-bottom: -14px; }

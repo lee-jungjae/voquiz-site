@@ -4154,8 +4154,11 @@ function giftPicker() {
       setTimeout(() => { state.giftStage = "friend"; render(); }, 950);
     };
     return h("div", { class: "step gift hello" },
-      host(t("만나서 반가워! 나는 말풍이야. 너를 위해 선물을 준비했어!")),
-      h("button", { class: "gift-box", "aria-label": t("선물 열기"), onclick: open }, art("gift")),
+      h("p", { class: "talk-say" }, t("만나서 반가워! 나는 말풍이야. 너를 위해 선물을 준비했어!")),
+      // 말풍이 itself, large, holding the box up toward the student: the box is the thing to press.
+      h("div", { class: "gift-give" },
+        h("button", { class: "gift-box", "aria-label": t("선물 열기"), onclick: open }, art("gift")),
+        h("span", { class: "gift-giver", "aria-hidden": "true" }, reaction("bubble", "cheer"))),
       h("button", { class: "btn wide", onclick: open }, t("선물 열기")));
   }
   if (stage === "friend") return h("div", { class: "step gift" },

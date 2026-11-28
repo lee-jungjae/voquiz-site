@@ -148,7 +148,7 @@ function make() {
   root.dataset.mood = "problem";
   root.innerHTML = `<div class="film-words"><span class="film-chip"></span><p class="film-caption"></p></div>
     <div class="film-box"><div class="film-stage" aria-hidden="true"></div></div>
-    <div class="film-controls"><div class="film-dots">${STORIES.map(() => '<button type="button"><span><i></i></span></button>').join("")}</div><button type="button" class="film-pause"></button></div>`;
+    <div class="film-controls"><div class="film-dots">${STORIES.map(() => '<button type="button"><span><i></i></span></button>').join("")}</div><button type="button" class="film-pause"></button><button type="button" class="film-next">›</button></div>`;
   const stage = root.querySelector(".film-stage"), chip = root.querySelector(".film-chip"), caption = root.querySelector(".film-caption"), pause = root.querySelector(".film-pause");
   const dots = [...root.querySelectorAll(".film-dots button")];
   let index = calm ? 1 : 0, timers = [], paused = false, running = false, seen = false, lang = "";
@@ -218,6 +218,9 @@ function make() {
     if (paused) stop(); else show(index);
   });
   pause.hidden = calm;
+  // On to the next story without waiting for this one to end.
+  const next = root.querySelector(".film-next");
+  next.addEventListener("click", () => dots[((SCENES[index]?.story ?? 0) + 1) % STORIES.length].click());
 
   // the stage is drawn at 480 wide and scaled to its box
   const box = stage.parentElement;
@@ -238,6 +241,8 @@ function make() {
     root.setAttribute("aria-label", t("VOQUIZ를 소개하는 짧은 애니메이션"));
     dots.forEach((dot, n) => { dot.title = t(STORIES[n].name); dot.setAttribute("aria-label", dot.title); });
     setPaused(paused);
+    root.querySelector(".film-next").setAttribute("aria-label", t("다음 장면"));
+    root.querySelector(".film-next").title = t("다음 장면");
     if (lang === getLang()) return;
     const start = !lang;
     lang = getLang();

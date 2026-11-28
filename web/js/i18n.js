@@ -1272,6 +1272,7 @@ const T = {
   "첫 번째 선물! 함께할 친구를 하나 골라 줘.": ["Your first present! Pick a friend to come along.", "第一份礼物！选一个陪你的朋友吧。"],
   "하나 더 있어! 마음에 드는 테마도 골라 봐. 누르면 바로 입혀 볼 수 있어.": ["One more! Pick a theme you like. Tap one to try it on.", "还有一个！选一个喜欢的主题吧。点一下就能试用。"],
   "테마를 골라 주세요": ["Pick a theme", "请选择主题"],
+  "다음 장면": ["Next scene", "下一个场景"],
   "알아 두기": ["Good to know", "小贴士"],
   "이렇게 써요": ["How to use it", "这样用"],
   "포인트샵 열기": ["Open the point shop", "打开积分商店"],

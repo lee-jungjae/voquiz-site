@@ -5,7 +5,7 @@
 // things that float up, and sometimes a line of speech (often it just shows the feeling).
 // Left alone, it lives a little life of its own: it glances about, hums and yawns, wanders from
 // side to side, rolls, sits down for a song, or lies down for a nap until someone taps it awake.
-import { characterById } from "./characters.js?v=0.1.28-tp82g3";
+import { characterById } from "./characters.js?v=0.1.28-tp82ly";
 
 // The face is the same for every character; moods swap its eyes and mouth.
 const FACE = `
