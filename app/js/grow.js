@@ -178,7 +178,7 @@ export function initGrow(c) {
     old?.remove();
     const close = () => { el.remove(); c.render(); };
     const lv = level(), got = taken(), next = lv < LEVEL_MAX ? needFor(lv + 1) : null;
-    const STEP = 92, PAD = 60, tall = (LEVEL_MAX - 1) * STEP + PAD * 2;
+    const STEP = 92, PAD = 96, tall = (LEVEL_MAX - 1) * STEP + PAD * 2;
     const xOf = (n) => 50 + 26 * Math.sin((n - 1) * 0.95), yOf = (n) => PAD + (LEVEL_MAX - n) * STEP;
     const line = Array.from({ length: LEVEL_MAX }, (_, i) => {
       const n = i + 1;
@@ -191,10 +191,17 @@ export function initGrow(c) {
       p.setAttribute("preserveAspectRatio", "none");
       return p;
     };
-    const ZONE = 10; // a land every ten levels
+    const ZONE = 10; // a land every ten levels: a meadow, an island, the sea, the snow, the sky
+    const LANDS = [["flower", "sprout", "leaf"], ["island", "sun", "star"], ["whale", "gem", "wind"], ["snow", "cloud", "spark"], ["rainbow", "planet", "rocket"]];
+    const sky = (n) => [ // what drifts by: a cloud every few levels, and stars that twinkle in the highest land
+      n % 4 === 2 && h("i", { class: "lv-cloud", "aria-hidden": "true", style: `top:${yOf(n) - STEP * 0.5}px;left:${(n * 37) % 70 + 8}%;animation-delay:-${(n % 5) * 1.3}s` }, art("cloud")),
+      n > 40 && h("i", { class: "lv-twinkle", "aria-hidden": "true", style: `top:${yOf(n) - STEP * 0.3}px;left:${(n * 53) % 80 + 8}%;animation-delay:-${(n % 4) * 0.5}s` }, art("spark")),
+    ];
     const road = h("div", { class: "lv-road lv-map" }, h("div", { class: "lv-map-in", style: `height:${tall}px` },
       Array.from({ length: LEVEL_MAX / ZONE }, (_, z) => h("i", { class: `lv-zone z${z}`, "aria-hidden": "true", style: `top:${z === LEVEL_MAX / ZONE - 1 ? 0 : yOf((z + 1) * ZONE) - STEP / 2}px;height:${z === LEVEL_MAX / ZONE - 1 ? yOf(z * ZONE) + STEP / 2 : ZONE * STEP}px` })),
-      path("all"), path("done", lv),
+      h("i", { class: "lv-goal", "aria-hidden": "true", style: `top:${yOf(LEVEL_MAX) - 58}px;left:${xOf(LEVEL_MAX)}%` }, art("crown")),
+      Array.from({ length: LEVEL_MAX }, (_, i) => sky(i + 1)), // behind the road
+      path("all"), path("done", lv), path("mid", lv),
       Array.from({ length: LEVEL_MAX }, (_, i) => {
         const n = i + 1;
         const { big, gifts } = levelGift(n);
@@ -202,11 +209,13 @@ export function initGrow(c) {
         const side = xOf(n) > 50 ? "left" : "right";
         const near = Math.abs(n - lv);
         return [
-          // a little thing of the land, on the stone's own side of the map
-          n % 2 === 0 && h("i", { class: `lv-deco d${(n / 2) % 4}`, "aria-hidden": "true", style: `top:${yOf(n) + STEP / 2}px;${side === "left" ? "right:6%" : "left:6%"}` }),
+          // the scenery of the land, on the stone's own side of the map (the present is on the other)
+          h("i", { class: `lv-scene s${n % 3}${n % 4 === 0 ? " sway" : ""}`, "aria-hidden": "true", style: `top:${yOf(n) + (n % 2 ? STEP * 0.42 : -STEP * 0.1)}px;${side === "left" ? `right:${3 + (n % 3) * 3}%` : `left:${3 + (n % 3) * 3}%`}` },
+            art(LANDS[Math.min(LANDS.length - 1, Math.floor((n - 1) / ZONE))][n % 3])),
           h("button", { class: `lv-step lv-stone ${where}${big ? " big" : ""}${n === lv ? " here" : ""}${n === just ? " just" : ""}`, style: `left:${xOf(n)}%;top:${yOf(n)}px;${at == null && near < 7 ? `animation-delay:${near * 60}ms` : ""}`, disabled: where !== "ready",
             title: where === "ready" ? t("받기") : t("단어 {n}개", { n: needFor(n) }), "aria-label": `Lv.${n}`, onclick: () => claim(n) },
-            where === "got" ? h("i", { class: "check-i", "aria-hidden": "true" }) : String(n)),
+            where === "got" ? h("i", { class: "check-i", "aria-hidden": "true" }) : String(n),
+            n === just && h("span", { class: "lv-confetti", "aria-hidden": "true" }, Array.from({ length: 12 }, (_, k) => h("i", { style: `--a:${k * 30}deg;--c:${["#ff8fb8", "#ffd84d", "#7fd6c2", "#9aa5ff", "#ffa45c"][k % 5]};--d:${46 + (k % 3) * 14}px` })))),
           n === lv && h("span", { class: "lv-here", style: `left:${xOf(n)}%;top:${yOf(n)}px`, "aria-hidden": "true" }, c.portrait(myLook())),
           n > 1 && h("div", { class: `lv-tag ${side} ${where}${big ? " big" : ""}`, style: `top:${yOf(n)}px;${side === "left" ? `right:${100 - xOf(n) + 11}%` : `left:${xOf(n) + 11}%`}` },
             h("span", { class: "lv-gifts" }, gifts.map(giftArt)),
@@ -228,8 +237,9 @@ export function initGrow(c) {
     if (at != null) road.scrollTop = at;
     else {   // my stone a little below the middle: the next gifts show above, the waiting ones just below
       const me = road.querySelector(".lv-step.here") || road.querySelector(".lv-step.ready");
-      const put = () => { if (me) road.scrollTop = me.offsetTop - road.clientHeight * 0.55; };
-      put();
+      const goal = () => (me ? me.offsetTop - road.clientHeight * 0.55 : 0);
+      const put = () => { road.scrollTo({ top: goal(), behavior: "smooth" }); };
+      road.scrollTop = goal() + 260; // the map comes up from a little below, to where the character stands
       requestAnimationFrame(() => { put(); const r = ringDash(progress(), need()), ring = big.querySelector(".lv-ring"); ring.setAttribute("stroke-dasharray", r.dash); ring.setAttribute("stroke-dashoffset", r.off); });
     }
   }
