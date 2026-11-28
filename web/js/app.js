@@ -1,34 +1,34 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp7w7d";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7w7d";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7w7d";
-import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp7w7d";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp7w7d";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7w7d";
-import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7w7d";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp7w7d";
-import { initGrow } from "./grow.js?v=0.1.28-tp7w7d";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7w7d";
-import { art, artToCss } from "./art.js?v=0.1.28-tp7w7d";
-import { academicWords, academicField } from "./academic.js?v=0.1.28-tp7w7d";
+import { api, DEMO } from "./api.js?v=0.1.28-tp7wtk";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7wtk";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7wtk";
+import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp7wtk";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp7wtk";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7wtk";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7wtk";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp7wtk";
+import { initGrow } from "./grow.js?v=0.1.28-tp7wtk";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7wtk";
+import { art, artToCss } from "./art.js?v=0.1.28-tp7wtk";
+import { academicWords, academicField } from "./academic.js?v=0.1.28-tp7wtk";
 artToCss();
 setTimeout(() => peekSoon(true), 0);
-import { film } from "./film.js?v=0.1.28-tp7w7d";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7w7d";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7w7d";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp7w7d";
-import { clockNow } from "./clock.js?v=0.1.28-tp7w7d";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7w7d";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7w7d";
-import { initDuel } from "./duel.js?v=0.1.28-tp7w7d";
-import { initFriends } from "./friends.js?v=0.1.28-tp7w7d";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp7w7d";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7w7d";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7w7d";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7w7d";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7w7d";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7w7d";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7w7d";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7w7d";
+import { film } from "./film.js?v=0.1.28-tp7wtk";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7wtk";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7wtk";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp7wtk";
+import { clockNow } from "./clock.js?v=0.1.28-tp7wtk";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7wtk";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7wtk";
+import { initDuel } from "./duel.js?v=0.1.28-tp7wtk";
+import { initFriends } from "./friends.js?v=0.1.28-tp7wtk";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp7wtk";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7wtk";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7wtk";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7wtk";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7wtk";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7wtk";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7wtk";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7wtk";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -205,12 +205,12 @@ function openDailyGift() {
         const day = i + 1;
         return h("i", { class: `${day < pos ? "on" : day === pos ? "on today" : day === pos + 1 ? "next" : ""}${day === 7 ? " last" : ""}` },
           // what the day adds, standing on a step that is higher every day
-          h("span", { class: "run-add" }, day === 7 ? grow().ticketArt("basic") : day === 1 ? art("gift") : [h("em", { class: "coin-i", "aria-hidden": "true" }, "P"), h("b", null, `+${(day - 1) * 5}`)]),
+          h("span", { class: "run-add" }, day === 7 ? grow().ticketArt("gold") : day === 1 ? art("gift") : [h("em", { class: "coin-i", "aria-hidden": "true" }, "P"), h("b", null, `+${(day - 1) * 5}`)]),
           h("u", { style: `height:${8 + day * 6}px` }),
           h("small", null, day === pos ? t("오늘") : day === pos + 1 ? t("내일") : String(day)));
       }));
   };
-  const tomorrow = (run) => h("p", { class: "run-next" }, art("spark"), (run + 1) % 7 === 0 ? t("내일 오면 뽑기권을 받아요!") : t("내일 오면 보너스 +{p} 더!", { p: runBonus(run + 1) }));
+  const tomorrow = (run) => h("p", { class: "run-next" }, art("spark"), (run + 1) % 7 === 0 ? t("내일 오면 황금 뽑기권을 받아요!") : t("내일 오면 보너스 +{p} 더!", { p: runBonus(run + 1) }));
   const runBox = h("div", { class: "run-box" }, h("b", null, t("연속 {n}일", { n: runOf() })), strip(runOf()), tomorrow(runOf()));
   const title = h("h2", null, extra ? t("한 번 더 뽑기") : t("오늘의 선물"), extra && h("em", { class: "plus-badge" }, "PLUS"));
   const text = h("p", null, t("상자 하나를 골라요. 안에 든 포인트가 모두 달라요!"));
@@ -239,7 +239,7 @@ function openDailyGift() {
       setTimeout(() => {
         award(prize, t("오늘의 선물"));
         if (!extra) {
-          if (run % 7 === 0) grow().give([{ ticket: "basic", n: 1 }]);
+          if (run % 7 === 0) grow().give([{ ticket: "gold", n: 1 }]); // the seventh day in a row: a golden ticket
           else if (runBonus(run) > 0) setTimeout(() => award(runBonus(run), t("연속 {n}일 보너스", { n: run })), 1500);
         }
         boxes.forEach((box, n) => { box.classList.remove("rock"); box.classList.add(n === i ? "mine" : "other"); });
@@ -252,7 +252,7 @@ function openDailyGift() {
         title.textContent = prize === best && prize >= 100 ? t("대박! +{p}포인트!", { p: prize }) : prize === best ? t("최고의 상자! +{p}포인트!", { p: prize }) : t("+{p}포인트!", { p: prize });
         const again = giftWaiting();
         text.textContent = again ? t("플러스라서 한 번 더 뽑을 수 있어요!")
-          : !extra && run % 7 === 0 ? t("연속 {n}일! 뽑기권도 받았어요.", { n: run })
+          : !extra && run % 7 === 0 ? t("연속 {n}일! 황금 뽑기권도 받았어요.", { n: run })
             : prize === best ? t("세 상자 중에 가장 큰 선물을 골랐어요!") : t("내일은 어떤 상자를 고를까요?");
         if (again) done.textContent = t("한 번 더 뽑기");
         done.hidden = false;

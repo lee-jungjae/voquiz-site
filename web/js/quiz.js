@@ -1,4 +1,4 @@
-import { clockNow } from "./clock.js?v=0.1.28-tp7w7d";
+import { clockNow } from "./clock.js?v=0.1.28-tp7wtk";
 // Quiz rules (no UI, no network).
 // - A quiz covers the words in the chosen range PLUS every word still marked "needs review".
 // - A wrong answer marks the word "needs review" and resets its streak.
