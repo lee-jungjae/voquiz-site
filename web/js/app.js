@@ -1,34 +1,34 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp7vev";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7vev";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7vev";
-import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp7vev";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp7vev";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7vev";
-import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7vev";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp7vev";
-import { initGrow } from "./grow.js?v=0.1.28-tp7vev";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7vev";
-import { art, artToCss } from "./art.js?v=0.1.28-tp7vev";
-import { academicWords, academicField } from "./academic.js?v=0.1.28-tp7vev";
+import { api, DEMO } from "./api.js?v=0.1.28-tp7viw";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7viw";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7viw";
+import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp7viw";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp7viw";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7viw";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7viw";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp7viw";
+import { initGrow } from "./grow.js?v=0.1.28-tp7viw";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7viw";
+import { art, artToCss } from "./art.js?v=0.1.28-tp7viw";
+import { academicWords, academicField } from "./academic.js?v=0.1.28-tp7viw";
 artToCss();
 setTimeout(() => peekSoon(true), 0);
-import { film } from "./film.js?v=0.1.28-tp7vev";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7vev";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7vev";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp7vev";
-import { clockNow } from "./clock.js?v=0.1.28-tp7vev";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7vev";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7vev";
-import { initDuel } from "./duel.js?v=0.1.28-tp7vev";
-import { initFriends } from "./friends.js?v=0.1.28-tp7vev";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp7vev";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7vev";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7vev";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7vev";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7vev";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7vev";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7vev";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7vev";
+import { film } from "./film.js?v=0.1.28-tp7viw";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7viw";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7viw";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp7viw";
+import { clockNow } from "./clock.js?v=0.1.28-tp7viw";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7viw";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7viw";
+import { initDuel } from "./duel.js?v=0.1.28-tp7viw";
+import { initFriends } from "./friends.js?v=0.1.28-tp7viw";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp7viw";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7viw";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7viw";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7viw";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7viw";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7viw";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7viw";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7viw";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -528,7 +528,8 @@ async function loadLevels(rows) {
 function levelMini(who) {
   if (!who || who.bot) return null;
   const lv = who.me ? grow().level() : state.levels?.get(levelKey(who));
-  return lv ? h("em", { class: "lv-mini", title: `Lv.${lv}`, "aria-label": `Lv.${lv}` }, String(lv)) : null;
+  // tinted by the land of the level road it stands in (1-10, 11-20 …)
+  return lv ? h("em", { class: `lv-mini z${Math.min(4, Math.floor((lv - 1) / 10))}`, title: `Lv.${lv}`, "aria-label": `Lv.${lv}` }, String(lv)) : null;
 }
 function publishRank() {
   if (!state.user) return;

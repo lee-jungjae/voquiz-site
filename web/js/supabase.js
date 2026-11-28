@@ -1,7 +1,7 @@
 // Minimal Supabase client over fetch (no build step, no bundled library).
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js?v=0.1.28-tp7vev";
-import { parsePartial } from "./partial.js?v=0.1.28-tp7vev";
-import { syncClock, clockNow } from "./clock.js?v=0.1.28-tp7vev";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js?v=0.1.28-tp7viw";
+import { parsePartial } from "./partial.js?v=0.1.28-tp7viw";
+import { syncClock, clockNow } from "./clock.js?v=0.1.28-tp7viw";
 
 const SESSION_KEY = "wb_session";
 let session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");

@@ -3630,3 +3630,11 @@ html[data-concept="aurora"] .use b { color: #f08a7a; }
 .lv-mini { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; margin-right: 6px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-style: normal; font-size: 11px; font-weight: 800; font-variant-numeric: tabular-nums; vertical-align: 2px; }
 .who-line { display: inline-flex; align-items: center; min-width: 0; }
 .who-line .lv-mini { flex: none; vertical-align: 0; }
+
+/* the level before a name: small and quiet, tinted by the land of the level (as on the road) */
+.lv-mini { min-width: 16px; height: 16px; padding: 0 4px; margin-right: 5px; border-radius: 6px; background: color-mix(in srgb, #8fcf6b 30%, var(--bg)); color: color-mix(in srgb, #2f6b2f 70%, var(--text)); font-size: 10px; font-weight: 700; vertical-align: 2px; }
+.lv-mini.z1 { background: color-mix(in srgb, #ffd84d 34%, var(--bg)); color: color-mix(in srgb, #8a5a00 70%, var(--text)); }
+.lv-mini.z2 { background: color-mix(in srgb, #7cc6fe 32%, var(--bg)); color: color-mix(in srgb, #0b5a8a 70%, var(--text)); }
+.lv-mini.z3 { background: color-mix(in srgb, #b9aef0 34%, var(--bg)); color: color-mix(in srgb, #4a3fa0 70%, var(--text)); }
+.lv-mini.z4 { background: color-mix(in srgb, #ff8fb8 30%, var(--bg)); color: color-mix(in srgb, #a02a5c 70%, var(--text)); }
+.who-line .lv-mini { vertical-align: 0; }
