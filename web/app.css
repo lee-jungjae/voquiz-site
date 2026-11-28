@@ -3360,3 +3360,42 @@ html[data-concept="space"] .use b, html[data-concept="night"] .use b { color: #f
 .gachas .gacha-pay .tix { font-size: 12px; }
 .gachas .gacha-pay .coin-i { width: 18px; height: 18px; }
 @media (min-width: 860px) { .dk .gachas { max-width: 620px; } .dk .gachas .gacha-stage { width: 150px; } }
+
+/* ----- the road of levels: the scenery of each land, and what moves ----- */
+.lv-top { position: relative; isolation: isolate; padding-top: 6px; }
+.lv-top::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 46px; width: 190px; height: 190px; translate: -62% -50%; border-radius: 50%; background: repeating-conic-gradient(color-mix(in srgb, #ffd84d 34%, transparent) 0 12deg, transparent 12deg 24deg); -webkit-mask: radial-gradient(circle, #000 30%, transparent 68%); mask: radial-gradient(circle, #000 30%, transparent 68%); animation: lv-rays 24s linear infinite; }
+@keyframes lv-rays { to { rotate: 360deg; } }
+.lv-zone::after { content: ""; position: absolute; left: -12%; right: -12%; bottom: -20px; height: 40px; border-radius: 50%; background: inherit; }
+.lv-zone.z0::after { display: none; }
+.lv-zone.z0 { background: color-mix(in srgb, #8fcf6b 22%, var(--surface)); }
+.lv-zone.z1 { background: color-mix(in srgb, #ffd84d 24%, var(--surface)); }
+.lv-zone.z2 { background: color-mix(in srgb, #7cc6fe 24%, var(--surface)); }
+.lv-zone.z3 { background: color-mix(in srgb, #cfe3f5 55%, var(--surface)); }
+.lv-zone.z4 { background: color-mix(in srgb, #9aa5ff 26%, var(--surface)); }
+.lv-scene { position: absolute; width: 34px; height: 34px; translate: 0 -50%; pointer-events: none; }
+.lv-scene.s1 { width: 44px; height: 44px; rotate: -8deg; }
+.lv-scene.s2 { width: 28px; height: 28px; rotate: 10deg; }
+.lv-scene .art-i, .lv-cloud .art-i, .lv-twinkle .art-i, .lv-goal .art-i { display: block; width: 100%; height: 100%; }
+.lv-scene.sway { transform-origin: 50% 100%; animation: lv-sway 3.6s ease-in-out infinite; }
+@keyframes lv-sway { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+.lv-cloud { position: absolute; width: 58px; height: 58px; opacity: .92; pointer-events: none; animation: lv-drift 9s ease-in-out infinite alternate; }
+@keyframes lv-drift { from { transform: translateX(-14px); } to { transform: translateX(18px); } }
+.lv-twinkle { position: absolute; width: 18px; height: 18px; pointer-events: none; animation: lv-twinkle 1.8s ease-in-out infinite; }
+@keyframes lv-twinkle { 0%, 100% { transform: scale(.5); opacity: .35; } 50% { transform: scale(1.1); opacity: 1; } }
+.lv-goal { position: absolute; z-index: 1; width: 62px; height: 62px; translate: -50% -50%; pointer-events: none; animation: here-bob 2.2s ease-in-out infinite; }
+.lv-path.mid path { stroke: #fff; stroke-width: 2; stroke-dasharray: 2 9; stroke-linecap: round; opacity: .85; }
+.lv-path.done path { opacity: .8; stroke-width: 11; }
+.lv-path.all path { stroke: color-mix(in srgb, var(--text) 16%, transparent); stroke-width: 11; stroke-dasharray: none; }
+.lv-stone { box-shadow: 0 3px 0 rgba(0, 0, 0, .08); }
+.lv-stone::before { content: ""; position: absolute; left: 7px; top: 5px; width: 13px; height: 7px; border-radius: 50%; background: #fff; opacity: .55; rotate: -24deg; pointer-events: none; }
+.lv-stone.locked { background: color-mix(in srgb, var(--bg) 80%, var(--surface)); }
+.lv-tag.ready .gift-b, .lv-tag.big.locked .gift-b { animation: gift-bob 1.6s ease-in-out infinite; }
+.lv-tag.ready .gift-b:nth-child(2), .lv-tag.big.locked .gift-b:nth-child(2) { animation-delay: -.5s; }
+@keyframes gift-bob { 50% { transform: translateY(-4px); } }
+.lv-confetti { position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none; }
+.lv-confetti i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 2px; background: var(--c); animation: lv-confetti .9s cubic-bezier(.2, .8, .3, 1) forwards; }
+.lv-confetti i:nth-child(odd) { border-radius: 50%; }
+@keyframes lv-confetti { from { transform: rotate(var(--a)) translateY(0) scale(.4); opacity: 1; } 70% { opacity: 1; } to { transform: rotate(var(--a)) translateY(calc(var(--d) * -1)) scale(1); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .lv-top::before, .lv-scene.sway, .lv-cloud, .lv-twinkle, .lv-goal, .lv-tag .gift-b, .lv-confetti i { animation: none !important; } }
+.lv-goal { width: 52px; height: 52px; }
+.lv-cloud { opacity: .85; }
