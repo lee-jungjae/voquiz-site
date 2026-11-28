@@ -143,8 +143,10 @@ export const skinKey = (skin) => `skin:${skin.of}-${skin.id}`;
 export const MACHINES = {
   basic: { name: "캡슐 뽑기", ticket: "뽑기권", hearts: 10, again: 40, // not for points: it would often give back fewer than it took
     inside: [[["points", 20, 120], 55], [["wear", 2], 24], [["ticket", "basic"], 8], [["bg", false], 5], [["theme"], 4], [["skin", 2], 3], [["ticket", "gold"], 1]] },
-  gold: { name: "황금 뽑기", ticket: "황금 뽑기권", points: 600, again: 700, // points won are always more than a turn costs
-    inside: [[["points", 700, 1200], 30], [["wear", 3], 20], [["skin", 3], 15], [["concept"], 15], [["bg", true], 10], [["character"], 6], [["ticket", "gold"], 4]] },
+  // The golden machine gives things only, never points (and a golden ticket now and then). When
+  // there is nothing left to win it cannot be turned.
+  gold: { name: "황금 뽑기", ticket: "황금 뽑기권", points: 600, again: 0, thingsOnly: true,
+    inside: [[["wear", 3], 25], [["skin", 3], 20], [["concept"], 20], [["bg", true], 15], [["character"], 10], [["ticket", "gold"], 10]] },
 };
 export const MACHINE_KINDS = ["basic", "gold"];
 // The rule for props (kept as new ones are added): the common and the rare ones (rare 1, 2)

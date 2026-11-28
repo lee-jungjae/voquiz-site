@@ -4,9 +4,9 @@
 // file is what is done with them and how it is shown. Everything is kept with the account:
 // `level` { xp, got }, `bag` { tickets: { basic, gold } }, `hearts` { n, all }, and in `shop`: what
 // is owned ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
-import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, wearSpecial, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7ubs";
-import { lookOf } from "./characters.js?v=0.1.28-tp7ubs";
-import { art } from "./art.js?v=0.1.28-tp7ubs"; // eslint-disable-line no-unused-vars
+import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, wearSpecial, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7ugm";
+import { lookOf } from "./characters.js?v=0.1.28-tp7ugm";
+import { art } from "./art.js?v=0.1.28-tp7ugm"; // eslint-disable-line no-unused-vars
 
 const TWICE_POINTS = 100; // a present the student already has turns into points
 
@@ -335,7 +335,7 @@ export function initGrow(c) {
   }
   const hearts = () => ({ n: 0, all: 0, ...(state.user?.hearts || {}) });
   // A turn is paid with ten hearts (the everyday machine only), a ticket, or points.
-  const canPay = (kind, pay) => (pay === "hearts" ? kind === "basic" && hearts().n >= HEARTS_FOR_DRAW : pay === "ticket" ? tickets()[kind] > 0 : Boolean(MACHINES[kind].points) && thingsLeft(kind) && (state.user.points || 0) >= MACHINES[kind].points); // points: only where a turn has a price, and while there is a thing left to win (points won are more than the price)
+  const canPay = (kind, pay) => (pay === "hearts" ? kind === "basic" && hearts().n >= HEARTS_FOR_DRAW : pay === "ticket" ? tickets()[kind] > 0 && (!MACHINES[kind].thingsOnly || thingsLeft(kind)) : Boolean(MACHINES[kind].points) && thingsLeft(kind) && (state.user.points || 0) >= MACHINES[kind].points); // points: only where a turn has a price, and while there is a thing left to win (points won are more than the price)
   // One turn: it is paid, the prize is decided and kept first, and only then shown (the handle
   // turns, a capsule rolls out and opens), so nothing is lost if the window is closed half way.
   function draw(kind, pay) {
@@ -508,7 +508,7 @@ export function initGrow(c) {
         h("div", { class: "gacha-pays" },
           kind === "basic" && way("hearts", heartArt(), t("하트 {n}개로 뽑기", { n: HEARTS_FOR_DRAW }), `${Math.min(n, 99)} / ${HEARTS_FOR_DRAW}`),
           way("ticket", ticketArt(kind), t("{name}으로 뽑기", { name: t(machine.ticket) }), `×${held[kind]}`),
-          machine.points && way("points", coin(), thingsLeft(kind) ? t("포인트로 뽑기") : t("모두 모았어요! 뽑기권으로만 뽑을 수 있어요."), String(machine.points)))));
+          machine.points && way("points", coin(), thingsLeft(kind) ? t("포인트로 뽑기") : t("모두 모았어요!"), String(machine.points)))));
   }
 
   // At the top of the friends screen: the ten places that fill up with the hearts friends send,
