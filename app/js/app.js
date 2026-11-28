@@ -3691,6 +3691,7 @@ function shopSection() {
   ["theme", "bg"].forEach((id) => tab === "concept" && state.shopViewed?.add(id));
   (state.shopViewed ||= new Set()).add(tab); // looked at now: its NEW marks go when the student moves on
   const whole = conceptById(myShop().concept);
+  const look = ["concept", "theme", "bg"].includes(state.lookKind) ? state.lookKind : "all";
   // While a whole theme is on, the colour and the background are the theme's own.
   const wholeNote = () => whole.vars && h("p", { class: "small muted whole-note" }, t("지금은 ‘{name}’ 테마를 쓰고 있어요. 여기서 하나를 고르면 기본 테마로 돌아가요.", { name: t(whole.name) }));
   return h("section", { class: "shop" },
@@ -3703,7 +3704,15 @@ function shopSection() {
         label, h("small", null, String(ALL_CHARACTERS.filter((c) => inKind(c, id)).length))))),
     tab === "character" && shelf("character", null, shown),
     tab === "wear" && grow().wardrobe(),
-    tab === "concept" && [shelf("concept", t("테마"), CONCEPTS), wholeNote(), shelf("theme", t("색상"), THEMES), shelf("bg", t("배경"), BACKGROUNDS)]);
+    // The same chips as the other tabs: everything, or one kind of look at a time.
+    tab === "concept" && h("div", { class: "chips one-line shop-kinds", role: "group", "aria-label": t("테마") },
+      [["all", t("전체"), CONCEPTS.length + THEMES.length + BACKGROUNDS.length], ["concept", t("테마"), CONCEPTS.length], ["theme", t("색상"), THEMES.length], ["bg", t("배경"), BACKGROUNDS.length]].map(([id, label, count]) =>
+        h("button", { class: "chip", "aria-pressed": String(look === id), onclick: () => { Object.assign(state, { lookKind: id, confirmBuy: null }); render(); } }, label, h("small", null, String(count))))),
+    tab === "concept" && [
+      (look === "all" || look === "concept") && shelf("concept", look === "all" ? t("테마") : null, CONCEPTS),
+      look !== "concept" && wholeNote(),
+      (look === "all" || look === "theme") && shelf("theme", look === "all" ? t("색상") : null, THEMES),
+      (look === "all" || look === "bg") && shelf("bg", look === "all" ? t("배경") : null, BACKGROUNDS)]);
 }
 
 // Tapping the score: go to Settings and bring the theme shop into view.
