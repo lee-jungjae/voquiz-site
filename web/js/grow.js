@@ -4,9 +4,9 @@
 // file is what is done with them and how it is shown. Everything is kept with the account:
 // `level` { xp, got }, `bag` { tickets: { basic, gold } }, `hearts` { n, all }, and in `shop`: what
 // is owned ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
-import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7s3c";
-import { lookOf } from "./characters.js?v=0.1.28-tp7s3c";
-import { art } from "./art.js?v=0.1.28-tp7s3c"; // eslint-disable-line no-unused-vars
+import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7s7h";
+import { lookOf } from "./characters.js?v=0.1.28-tp7s7h";
+import { art } from "./art.js?v=0.1.28-tp7s7h"; // eslint-disable-line no-unused-vars
 
 const TWICE_POINTS = 100; // a present the student already has turns into points
 

@@ -1,34 +1,34 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp7s3c";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7s3c";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7s3c";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.28-tp7s3c";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp7s3c";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7s3c";
-import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7s3c";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey } from "./goods.js?v=0.1.28-tp7s3c";
-import { initGrow } from "./grow.js?v=0.1.28-tp7s3c";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7s3c";
-import { art, artToCss } from "./art.js?v=0.1.28-tp7s3c";
-import { academicWords } from "./academic.js?v=0.1.28-tp7s3c";
+import { api, DEMO } from "./api.js?v=0.1.28-tp7s7h";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7s7h";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7s7h";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.28-tp7s7h";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp7s7h";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7s7h";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7s7h";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey } from "./goods.js?v=0.1.28-tp7s7h";
+import { initGrow } from "./grow.js?v=0.1.28-tp7s7h";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7s7h";
+import { art, artToCss } from "./art.js?v=0.1.28-tp7s7h";
+import { academicWords } from "./academic.js?v=0.1.28-tp7s7h";
 artToCss();
 setTimeout(() => peekSoon(true), 0);
-import { film } from "./film.js?v=0.1.28-tp7s3c";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7s3c";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7s3c";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp7s3c";
-import { clockNow } from "./clock.js?v=0.1.28-tp7s3c";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7s3c";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7s3c";
-import { initDuel } from "./duel.js?v=0.1.28-tp7s3c";
-import { initFriends } from "./friends.js?v=0.1.28-tp7s3c";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp7s3c";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7s3c";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7s3c";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7s3c";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7s3c";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7s3c";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7s3c";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7s3c";
+import { film } from "./film.js?v=0.1.28-tp7s7h";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7s7h";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7s7h";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp7s7h";
+import { clockNow } from "./clock.js?v=0.1.28-tp7s7h";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7s7h";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7s7h";
+import { initDuel } from "./duel.js?v=0.1.28-tp7s7h";
+import { initFriends } from "./friends.js?v=0.1.28-tp7s7h";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp7s7h";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7s7h";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7s7h";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7s7h";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7s7h";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7s7h";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7s7h";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7s7h";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -3691,6 +3691,7 @@ function shopSection() {
   ["theme", "bg"].forEach((id) => tab === "concept" && state.shopViewed?.add(id));
   (state.shopViewed ||= new Set()).add(tab); // looked at now: its NEW marks go when the student moves on
   const whole = conceptById(myShop().concept);
+  const look = ["concept", "theme", "bg"].includes(state.lookKind) ? state.lookKind : "all";
   // While a whole theme is on, the colour and the background are the theme's own.
   const wholeNote = () => whole.vars && h("p", { class: "small muted whole-note" }, t("지금은 ‘{name}’ 테마를 쓰고 있어요. 여기서 하나를 고르면 기본 테마로 돌아가요.", { name: t(whole.name) }));
   return h("section", { class: "shop" },
@@ -3703,7 +3704,15 @@ function shopSection() {
         label, h("small", null, String(ALL_CHARACTERS.filter((c) => inKind(c, id)).length))))),
     tab === "character" && shelf("character", null, shown),
     tab === "wear" && grow().wardrobe(),
-    tab === "concept" && [shelf("concept", t("테마"), CONCEPTS), wholeNote(), shelf("theme", t("색상"), THEMES), shelf("bg", t("배경"), BACKGROUNDS)]);
+    // The same chips as the other tabs: everything, or one kind of look at a time.
+    tab === "concept" && h("div", { class: "chips one-line shop-kinds", role: "group", "aria-label": t("테마") },
+      [["all", t("전체"), CONCEPTS.length + THEMES.length + BACKGROUNDS.length], ["concept", t("테마"), CONCEPTS.length], ["theme", t("색상"), THEMES.length], ["bg", t("배경"), BACKGROUNDS.length]].map(([id, label, count]) =>
+        h("button", { class: "chip", "aria-pressed": String(look === id), onclick: () => { Object.assign(state, { lookKind: id, confirmBuy: null }); render(); } }, label, h("small", null, String(count))))),
+    tab === "concept" && [
+      (look === "all" || look === "concept") && shelf("concept", look === "all" ? t("테마") : null, CONCEPTS),
+      look !== "concept" && wholeNote(),
+      (look === "all" || look === "theme") && shelf("theme", look === "all" ? t("색상") : null, THEMES),
+      (look === "all" || look === "bg") && shelf("bg", look === "all" ? t("배경") : null, BACKGROUNDS)]);
 }
 
 // Tapping the score: go to Settings and bring the theme shop into view.
