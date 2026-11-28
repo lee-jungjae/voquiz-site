@@ -3,14 +3,13 @@
 
 export const ICON_SVG = `
 <svg viewBox="0 0 128 128" aria-hidden="true">
-  <rect width="128" height="128" rx="28" fill="#655f9f"/>
-  <path d="M64 30 v-10 M64 22 q-11 -9 -16 0 q9 6 16 0 M64 22 q11 -9 16 0 q-9 6 -16 0" fill="#bbd86b" stroke="#23552b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M50 30 h28 a30 30 0 0 1 30 30 v10 a30 30 0 0 1 -30 30 h-22 l-17 15 l3 -17 a30 30 0 0 1 -22 -28 v-10 a30 30 0 0 1 30 -30 z" fill="#d6d2f0"/>
+  <rect width="128" height="128" rx="28" fill="#655f9f"/><g transform="translate(0 -7)">
+  <path d="M20 60 c0 -22 18 -33 44 -33 s44 11 44 33 v10 a30 30 0 0 1 -30 30 h-22 l-17 15 l3 -17 a30 30 0 0 1 -22 -28 z" fill="#d6d2f0"/>
   <ellipse cx="39" cy="79" rx="8" ry="5" fill="#ff8fab" opacity=".75"/><ellipse cx="89" cy="79" rx="8" ry="5" fill="#ff8fab" opacity=".75"/>
   <circle cx="48" cy="66" r="7" fill="#2e2a47"/><circle cx="80" cy="66" r="7" fill="#2e2a47"/>
   <circle cx="50.5" cy="63.5" r="2.4" fill="#fff"/><circle cx="82.5" cy="63.5" r="2.4" fill="#fff"/>
   <path d="M57 77 q7 7 14 0" fill="none" stroke="#2e2a47" stroke-width="3.4" stroke-linecap="round"/>
-</svg>`;
+</g></svg>`;
 
 // The letters take the text colour of where they are placed (the theme colour in the header).
 export const WORDMARK_SVG = `
@@ -30,7 +29,6 @@ export const WORDMARK_SVG = `
   <circle cx="53" cy="20.5" r="1" fill="#fff"/><circle cx="65" cy="20.5" r="1" fill="#fff"/>
   <path d="M55 27.5 q3 3.2 6 0" fill="none" stroke="#2e2a47" stroke-width="2" stroke-linecap="round"/>
   <ellipse cx="47.5" cy="27" rx="3" ry="2" fill="#ff8fab" opacity=".8"/><ellipse cx="68.500" cy="27" rx="3" ry="2" fill="#ff8fab" opacity=".8"/>
-  <path d="M58 5 q-7 -9 -11 -2 q6 5 11 2 M58 5 q7 -9 11 -2 q-6 5 -11 2" fill="#bbd86b" stroke="#23552b" stroke-width="2" stroke-linejoin="round"/>
   <path d="M160 -7 l1.6 3.4 l3.4 1.6 l-3.4 1.6 l-1.6 3.4 l-1.6 -3.4 l-3.4 -1.6 l3.4 -1.6 z" fill="#ffd166"/>
 </svg>`;
 
