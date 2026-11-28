@@ -1314,7 +1314,7 @@ function noteBox(sense, i = 0) {
   if (!lines.length) return null;
   const fresh = levelFresh(i).note;
   return h("div", { class: `sense-note${fresh ? " fresh" : ""}` },
-    h("span", { class: "sense-label" }, t("알아 두기"), fresh && levelTag()),
+    h("span", { class: "sense-label" }, t("알아 두기")),
     lines.map((text, n) => h("p", { class: n ? "sense-line second" : "sense-line" }, text)));
 }
 // How the word is used in one meaning: its sentence frames and partner words (balance A on B), each
@@ -1324,7 +1324,7 @@ function useRows(c, patterns, i = 0) {
   if (!list.length) return null;
   const fresh = levelFresh(i).patterns; // the patterns this level adds
   return h("div", { class: "sense-use" },
-    h("span", { class: "sense-label" }, t("이렇게 써요"), fresh.size > 0 && levelTag(`+${fresh.size}`)),
+    h("span", { class: "sense-label" }, t("이렇게 써요")),
     list.map((p) => h("p", { class: `use-row${fresh.has(p.en) ? " fresh" : ""}` },
       h("b", null, c.language === "ko" ? p.ko : p.en), h("span", null, c.language === "ko" ? p.en : p.ko))));
 }
@@ -1487,7 +1487,6 @@ function hero(c, word) {
     !manySenses(c) && !duo && h("div", { class: "cp" }, h("small", null, "⇄"), c.counterpart),
     h("div", { class: "meta" }, [c.pronunciation, !manySenses(c) && !duo && c.part_of_speech].filter(Boolean).join("  ·  "), sayButtons(c)),
     word && levelBar(word), // always here: under the word, above its meanings
-    word && levelDiffLine(word),
     manySenses(c) ? sensesList(c, word?.term_norm || c.headword)
     : duo ? h("div", { class: "duo-rows" }, duoSense(c, { ...(c.senses?.[0] || {}), definition_ko: c.definition_ko, definition_en: c.definition_en, part_of_speech: c.part_of_speech, counterpart: c.counterpart }, true))
     : [
@@ -1570,7 +1569,7 @@ function sensesList(c, key) {
           second && h("p", { class: "sense-def second" }, second),
           noteBox(sense, i),
           (sense.example_ko || sense.example_en) && h("div", { class: "sense-ex" },
-            h("span", { class: "sense-label" }, t("예문"), levelFresh(i).example && levelTag()),
+            h("span", { class: "sense-label" }, t("예문")),
             pair(sense.example_ko, sense.example_en).map((text, n) => h("p", { class: n ? "sense-line second" : "sense-line" }, text))),
           useRows(c, sense.patterns, i),
           // Words that are only spelled alike (가정: a home, a supposition) each come from somewhere else.
@@ -1660,21 +1659,8 @@ function levelParts(word) {
 }
 const NO_FRESH = { note: false, patterns: new Set(), example: false };
 const levelFresh = (i) => (state.entry && levelParts(state.entry)?.[i]) || NO_FRESH;
-const levelTag = (text) => h("em", { class: "lv-new" }, text || shownBand(state.entry).label);
-function levelDiffLine(word) {
-  const parts = levelParts(word);
-  if (!parts) return null;
-  const notes = parts.filter((p) => p.note).length, gone = parts.filter((p) => p.noteGone).length;
-  const patterns = parts.reduce((sum, p) => sum + p.patterns.size, 0), examples = parts.filter((p) => p.example).length;
-  const chips = [
-    notes > 0 && t("알아 두기 +{n}", { n: notes }),
-    gone > 0 && t("알아 두기 없음"),
-    patterns > 0 && t("이렇게 써요 +{n}", { n: patterns }),
-    examples > 0 && t("예문 {n}개 바뀜", { n: examples }),
-  ].filter(Boolean);
-  if (!chips.length) return null;
-  return h("div", { class: "level-diff", role: "status" }, h("b", null, t("{level}에서 달라지는 것", { level: shownBand(word).label })), chips.map((text) => h("span", null, text)));
-}
+// (A line of counts under the level bar and a tag on every changed part were tried and taken out:
+// too much on the screen. What a level adds is only tinted, quietly.)
 function levelBar(word) {
   const own = bandOf(state.user.grade), at = shownBand(word), i = BANDS.indexOf(at), busy = Boolean(levelOf(word)?.busy);
   return h("div", { class: `level-bar${busy ? " busy" : ""}` },
