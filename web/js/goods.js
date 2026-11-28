@@ -53,16 +53,26 @@ export const CONCEPTS = [
   { id: "neon", name: "네온 시티", cost: 900, added: 22, dark: true,
     vars: { bg: "#0d0b1a", surface: "#1a1630", text: "#f1eeff", muted: "#a59fce", line: "#2a2448", border: "#3a3263", accent: "#ff5fdc", "accent-dark": "#ff8fe8", "accent-soft": "#2c1640", lime: "#3df5d0", good: "#3df5a0", "good-soft": "#10302a", bad: "#ff8a8a", "bad-soft": "#3a1a26",
       shadow: "0 1px 2px rgba(0, 0, 0, .5), 0 4px 12px rgba(0, 0, 0, .4)", "shadow-lg": "0 6px 16px rgba(0, 0, 0, .6)" } },
+  // Clean and grown-up (0.1.28): made with teachers in mind, with no playful backdrop.
+  { id: "slate", name: "슬레이트", cost: 500, added: 22,
+    vars: { bg: "#ffffff", surface: "#f1f4f6", text: "#1f2a33", muted: "#5f6f7c", line: "#e3e8ec", border: "#cbd4db", accent: "#0f766e", "accent-dark": "#0b5c56", "accent-soft": "#d9efec", lime: "#f2c94c", good: "#0f766e", "good-soft": "#d9efec", bad: "#b4442f", "bad-soft": "#f8e3de" } },
+  { id: "ivory", name: "아이보리 노트", cost: 500, added: 22,
+    vars: { bg: "#fbf8f0", surface: "#f1ecdf", text: "#1e2a44", muted: "#6a7088", line: "#e7e0cf", border: "#d3c9b2", accent: "#27407a", "accent-dark": "#1c3060", "accent-soft": "#e2e7f3", lime: "#e9c46a", good: "#2f6f55", "good-soft": "#e0eee6", bad: "#a1453a", "bad-soft": "#f4e1dc" } },
+  { id: "magazine", name: "매거진", cost: 600, added: 22,
+    vars: { bg: "#ffffff", surface: "#f4f2ee", text: "#111111", muted: "#6a6a6a", line: "#e6e3dd", border: "#d6d2ca", accent: "#d7263d", "accent-dark": "#b01c30", "accent-soft": "#fbe3e6", lime: "#ffd23f", good: "#1a7f4b", "good-soft": "#e3f3ea", bad: "#b01c30", "bad-soft": "#fbe3e6" } },
+  { id: "chalk", name: "칠판", cost: 700, added: 22, dark: true,
+    vars: { bg: "#1f3a32", surface: "#284a40", text: "#f3f1e6", muted: "#b5c7bb", line: "#2f5549", border: "#3f6a5c", accent: "#f2d16b", "accent-dark": "#f7e29c", "accent-soft": "#3a4d33", lime: "#f2a7a7", good: "#9fe0b0", "good-soft": "#25503f", bad: "#f2a7a7", "bad-soft": "#4a3535",
+      shadow: "0 1px 2px rgba(0, 0, 0, .4), 0 4px 12px rgba(0, 0, 0, .3)", "shadow-lg": "0 6px 16px rgba(0, 0, 0, .5)" } },
   { id: "rainbow", name: "무지개 젤리", cost: 1500, special: true, added: 20,
     vars: { bg: "#ffffff", surface: "#f6f3ff", text: "#2a2350", muted: "#6f6a94", line: "#ebe6fb", border: "#d9d1f7", accent: "#7a5cff", "accent-dark": "#5f43e0", "accent-soft": "#efeaff", lime: "#9af0c4", good: "#1f8a5c", "good-soft": "#e1f8ec", bad: "#5f43e0", "bad-soft": "#efeaff" } },
 ];
 export const conceptById = (id) => CONCEPTS.find((x) => x.id === id) || CONCEPTS[0];
 
-import { stroke, star, twinkle, heart } from "./wear-art.js?v=0.1.28-tp7yxy";
-import { HEAD_WEARS } from "./wears-head.js?v=0.1.28-tp7yxy";
-import { FACE_WEARS } from "./wears-face.js?v=0.1.28-tp7yxy";
-import { HOLD_WEARS } from "./wears-hold.js?v=0.1.28-tp7yxy";
-import { AROUND_WEARS } from "./wears-around.js?v=0.1.28-tp7yxy";
+import { stroke, star, twinkle, heart } from "./wear-art.js?v=0.1.28-tp7z2l";
+import { HEAD_WEARS } from "./wears-head.js?v=0.1.28-tp7z2l";
+import { FACE_WEARS } from "./wears-face.js?v=0.1.28-tp7z2l";
+import { HOLD_WEARS } from "./wears-hold.js?v=0.1.28-tp7z2l";
+import { AROUND_WEARS } from "./wears-around.js?v=0.1.28-tp7z2l";
 
 // ----- things to wear -----
 // slot: only one thing of a slot is worn at a time (head, eyes, cheek, hand, neck, back, aura). layer "back" is drawn behind the body.

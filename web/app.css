@@ -3757,3 +3757,15 @@ html[data-concept="neon"] .use b { color: #ff8a8a; }
 .lv-mini.z2 { color: color-mix(in srgb, #0b5a8a 40%, var(--text)); }
 .lv-mini.z3 { color: color-mix(in srgb, #4a3fa0 40%, var(--text)); }
 .lv-mini.z4 { color: color-mix(in srgb, #a02a5c 40%, var(--text)); }
+
+/* Clean themes (0.1.28): slate, ivory note, magazine, chalkboard. Shape and lettering, no pattern. */
+html[data-concept="slate"] .btn, html[data-concept="slate"] .chip, html[data-concept="slate"] .mini, html[data-concept="slate"] .swatch, html[data-concept="slate"] .goal, html[data-concept="slate"] .search { border-radius: 10px; }
+html[data-concept="ivory"] body { background: repeating-linear-gradient(0deg, transparent 0 31px, rgba(39, 64, 122, .07) 31px 32px), var(--bg); }
+html[data-concept="ivory"] h2, html[data-concept="ivory"] h3, html[data-concept="ivory"] .page-title, html[data-concept="ivory"] .hello,
+html[data-concept="magazine"] h2, html[data-concept="magazine"] h3, html[data-concept="magazine"] .page-title, html[data-concept="magazine"] .hello { font-family: Georgia, "Nanum Myeongjo", "AppleMyungjo", "Songti SC", serif; letter-spacing: 0; }
+html[data-concept="magazine"] .page-title, html[data-concept="magazine"] .hello { font-weight: 900; letter-spacing: -.01em; }
+html[data-concept="magazine"] .page-title { padding-bottom: 6px; border-bottom: 3px solid var(--text); }
+html[data-concept="magazine"] .btn, html[data-concept="magazine"] .chip, html[data-concept="magazine"] .mini, html[data-concept="magazine"] .swatch, html[data-concept="magazine"] .goal, html[data-concept="magazine"] .search, html[data-concept="magazine"] .try-bar { border-radius: 3px; }
+html[data-concept="magazine"] .segment button[aria-selected="true"], html[data-concept="magazine"] .segment button[aria-pressed="true"] { box-shadow: inset 0 -3px 0 var(--accent); }
+html[data-concept="chalk"] body { background: radial-gradient(at 20% 0%, rgba(255, 255, 255, .07) 0, transparent 46%), radial-gradient(at 90% 100%, rgba(255, 255, 255, .05) 0, transparent 40%), var(--bg); }
+html[data-concept="chalk"] .use b { color: #f2a7a7; }
