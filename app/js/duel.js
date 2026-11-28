@@ -294,7 +294,7 @@ export function initDuel(c) {
           at: d.finished_at || d.created_at,
           row: (when) => h("button", { class: `play-row duel ${r}`, title: t("결과 다시 보기"), onclick: () => openDetail(d) },
             h("span", { class: "play-who" },
-              face(d.my_character || c.myShop().character, r === "lose" ? "comfort" : "cheer", false, true),
+              face(mine(d.my_character), r === "lose" ? "comfort" : "cheer", false, true),
               h("span", { class: "them" }, face(d.their_character || "bubble", r === "win" ? "comfort" : "cheer", false, true))),
             h("span", { class: "play-what" }, h("b", null, t("대결"), " · ", who(d.other)), h("small", null, `${when} · ${lengthLabel(d.seconds || 180)}`)),
             h("b", { class: "play-score" }, `${d.my_score} : ${d.their_score}`),
@@ -626,7 +626,7 @@ export function initDuel(c) {
       h("div", { class: `duel-result detail ${win ? "win" : draw ? "draw" : "lose"}` },
         h("div", { class: "duel-title" }, win ? t("승리!") : draw ? t("무승부!") : t("아쉬워요!")),
         h("div", { class: "versus" },
-          h("div", { class: "side me" }, face(r.my_character || c.myShop().character, win || draw ? "cheer" : "comfort"), h("em", null, String(r.my_score)), h("b", null, c.displayName())),
+          h("div", { class: "side me" }, face(mine(r.my_character), win || draw ? "cheer" : "comfort"), h("em", null, String(r.my_score)), h("b", null, c.displayName())),
           h("div", { class: "vs" }, ":"),
           h("div", { class: "side them" }, face(r.their_character || "bubble", win ? "comfort" : "cheer"), h("em", null, String(r.their_score)), h("b", null, who(r.other)))),
         h("p", { class: "duel-sum" }, win ? t("{n}개 차이로 이겼어요!", { n: gap }) : draw ? t("똑같이 맞혔어요.") : t("{name}이(가) {n}개 더 맞혔어요.", { name: who(r.other), n: gap })),
@@ -649,6 +649,8 @@ export function initDuel(c) {
 
   // ---------- screens ----------
 
+  // My side of a duel: the character as it is dressed now, unless the duel was played with another one.
+  const mine = (played) => (played && played !== c.myShop().character ? played : c.myLook());
   const face = (character, mood, mystery, still) =>
     h("div", { class: `face${mystery ? " mystery" : ""}`, "aria-hidden": "true" }, c.reaction(character, mood, Boolean(still)), mystery && h("i", null, "?"));
 
@@ -656,7 +658,7 @@ export function initDuel(c) {
     const d = state.duel;
     return h("div", { class: "duel-intro" },
       h("div", { class: "versus" },
-        h("div", { class: "side me" }, face(c.myShop().character, "cheer"), h("b", null, c.displayName())),
+        h("div", { class: "side me" }, face(c.myLook(), "cheer"), h("b", null, c.displayName())),
         h("div", { class: "vs" }, "VS"),
         h("div", { class: "side them" }, face(d.their ? d.their.character : "bubble", "cheer", !d.their), h("b", null, who(d.other)))),
       h("p", { class: "duel-time" }, stopwatch(22), h("b", null, lengthLabel(d.seconds))),
@@ -674,7 +676,7 @@ export function initDuel(c) {
         h("div", { class: "runner", id, style: `left:${raceAt(d, n)}` }, c.portrait(character), h("b", null, String(n)))));
     return h("div", { class: "race" },
       d.their && lane("race-them", who(d.other), d.ghost, d.their.character, "them"),
-      lane("race-me", t("나"), d.score, c.myShop().character, "me"),
+      lane("race-me", t("나"), d.score, c.myLook(), "me"),
       h("p", { class: "race-line", id: "race-line" }, raceLine(d)));
   }
 
@@ -713,7 +715,7 @@ export function initDuel(c) {
         h("div", { class: "duel-result" },
           h("div", { class: "duel-title" }, t("도전장을 보냈어요!")),
           h("div", { class: "versus sent" },
-            h("div", { class: "side me" }, face(c.myShop().character, "cheer"), h("b", null, t("내 기록 {n}개", { n: d.score }))),
+            h("div", { class: "side me" }, face(c.myLook(), "cheer"), h("b", null, t("내 기록 {n}개", { n: d.score }))),
             h("div", { class: "letter", "aria-hidden": "true" }, "✉"),
             h("div", { class: "side them" }, face("bubble", "cheer", true), h("b", null, who(d.other)))),
           h("p", { class: "muted" }, t("{name}이(가) 7일 안에 도전을 받으면 결과를 알려 드릴게요.", { name: who(d.other) })),
@@ -727,7 +729,7 @@ export function initDuel(c) {
       h("div", { class: `duel-result ${win ? "win" : draw ? "draw" : "lose"}` },
         h("div", { class: "duel-title" }, win ? t("승리!") : draw ? t("무승부!") : t("아쉬워요!")),
         h("div", { class: "versus" },
-          h("div", { class: "side me" }, face(c.myShop().character, win || draw ? "cheer" : "comfort"), h("em", null, String(d.score)), h("b", null, c.displayName())),
+          h("div", { class: "side me" }, face(c.myLook(), win || draw ? "cheer" : "comfort"), h("em", null, String(d.score)), h("b", null, c.displayName())),
           h("div", { class: "vs" }, ":"),
           h("div", { class: "side them" }, face(d.their.character, win ? "comfort" : "cheer"), h("em", null, String(d.their.score)), h("b", null, who(d.other)))),
         (d.marks.length > 0 || d.their.marks.length > 0) && chart(d.marks, d.their.marks, d.seconds, who(d.other)),

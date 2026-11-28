@@ -68,11 +68,13 @@ function draw(character) {
   <g class="m-bob">
     <path class="m-arm l"${limb} d="M72 80 Q50 72 58 52"/>
     <path class="m-arm r"${limb} d="M128 80 Q150 72 142 52"/>
+    ${c.wearBack ? `<g class="m-wear back">${c.wearBack}</g>` : ""}
     ${c.back || ""}
     <path class="m-body" d="${c.body}"${c.fill || c.stroke ? ` style="${paint(c.fill, c.stroke, c.strokeWidth)}"` : ""}/>
     ${c.deco || ""}
     ${c.topper || ""}
     ${FACE}
+    ${c.wearFront ? `<g class="m-wear">${c.wearFront}</g>` : ""}
   </g>
 </svg>`;
 }

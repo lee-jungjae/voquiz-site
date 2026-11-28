@@ -45,6 +45,7 @@ export function initDesktop(c) {
       c.icon(id), label, id === "quiz" && c.duelBadge() > 0 && h("em", { class: "dot" }, String(c.duelBadge())), pop(n));
     return h("header", { class: "dk-top" },
       h("div", { class: "dk-left" },
+        c.levelChip(),
         h("button", { class: "dk-logo", title: t("처음 화면으로"), "aria-label": t("처음 화면으로"), onclick: c.goHome }, c.logoIcon(28), c.wordmark(24)),
         h("nav", { class: "dk-nav" }, item("search", t("사전"), 0), item("quiz", t("퀴즈"), 1), item("rank", t("랭킹"), 2))),
       bare ? h("span", { class: "dk-gap" }) : c.searchForm(true),

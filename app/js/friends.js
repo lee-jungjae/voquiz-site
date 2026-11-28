@@ -27,8 +27,8 @@ export function initFriends(c) {
     invite_used: t("이미 다른 친구가 쓴 초대 코드예요."),
     invite_self: t("내 초대 코드는 내가 쓸 수 없어요."),
     invite_once: t("초대 코드는 한 번만 입력할 수 있어요."),
-    gift_already: t("오늘은 이미 선물했어요. 내일 또 보낼 수 있어요."),
-    gift_not_friend: t("친구에게만 선물할 수 있어요."),
+    gift_already: t("오늘은 이미 하트를 보냈어요. 내일 또 보낼 수 있어요."),
+    gift_not_friend: t("친구에게만 하트를 보낼 수 있어요."),
   });
   const explain = (err) => ERRORS()[err?.code] || t("문제가 생겼어요. 잠시 후 다시 시도해 주세요.");
 
@@ -69,7 +69,7 @@ export function initFriends(c) {
       await api.sendPointGift(f.other.id, c.today());
       mark();
       ui.notice = null;
-      c.toastText(t("{name}에게 10포인트를 선물했어요!", { name: who(f.other) }));
+      c.toastText(t("{name}에게 ♥ 하트를 보냈어요!", { name: who(f.other) }));
     } catch (err) {
       console.error(err);
       if (err?.status === 401) { ui.busy = false; await c.fail(err); return c.render(); }
@@ -80,17 +80,36 @@ export function initFriends(c) {
     c.render();
   }
   // Collects every gift that waits: the points arrive, and the app says who they came from.
-  async function collect() {
-    if (ui.busy || !waiting().length) return;
+  // Takes the hearts that wait: all of them, or one friend's (from: that friend's id). back: a
+  // heart goes back to each friend whose heart was taken (unless they had one from me today).
+  // A heart is not points: ten of them are an egg (grow.js).
+  async function collect(from, back) {
+    const mine = waiting().filter((g) => !from || g.from.id === from);
+    if (ui.busy || !mine.length) return;
     ui.busy = true;
     try {
-      const result = await api.claimPointGifts();
-      const from = (result.gifts || []).map((g) => who(g.from));
-      if (result.points > 0) {
-        c.award(result.points, t("친구의 선물"), false, { league: false }); // a present, not a score: it stays out of the weekly league
-        c.toastText(from.length > 1
-          ? t("{name} 외 {m}명의 선물 {n}점을 받았어요!", { name: from[0], m: from.length - 1, n: result.points })
-          : t("{name}의 선물 {n}점을 받았어요!", { name: from[0], n: result.points }));
+      const result = await api.claimPointGifts(from || null);
+      const got = result.gifts || [];
+      if (got.length) {
+        c.addHearts(got.length);
+        const names = [...new Set(got.map((g) => who(g.from)))];
+        c.toastText(names.length > 1
+          ? t("{name} 외 {m}명의 하트 {n}개를 받았어요!", { name: names[0], m: names.length - 1, n: got.length })
+          : got.length > 1 ? t("{name}의 하트 {n}개를 받았어요!", { name: names[0], n: got.length }) : t("{name}의 하트를 받았어요!", { name: names[0] }));
+      }
+      if (back) {
+        const givers = new Set(got.map((g) => g.from.id));
+        let sent = 0;
+        for (const f of all().filter((x) => x.status === "accepted" && givers.has(x.other.id) && !given(x))) {
+          try {
+            await api.sendPointGift(f.other.id, c.today());
+            state.gifts = { ...gifts(), sent: [...(gifts().sent || []), f.other.id] };
+            sent += 1;
+          } catch (err) {
+            if (err?.code !== "gift_already") console.error(err);
+          }
+        }
+        if (sent) setTimeout(() => c.toastText(sent > 1 ? t("하트 {n}개를 다시 보냈어요!", { n: sent }) : t("하트를 다시 보냈어요!")), 1700);
       }
       await loadGifts();
     } catch (err) {
@@ -153,12 +172,12 @@ export function initFriends(c) {
     if (!first && !gift) return null;
     return h("div", { class: "duel-banners" },
       // A gift from a friend: pressing it collects it (and every other one that waits).
-      gift && h("button", { class: "duel-banner gift", onclick: collect },
+      gift && h("button", { class: "duel-banner gift", onclick: () => collect() },
         h("span", { class: "duel-vs", "aria-hidden": "true" }, "♥"),
         h("span", { class: "duel-text" },
-          h("b", null, t("{name}의 선물이 왔어요", { name: who(gift.from) })),
-          h("small", null, waiting().length > 1 ? t("외 {n}명", { n: waiting().length - 1 }) : `+${gift.points}`)),
-        h("span", { class: "go" }, t("선물 받기"))),
+          h("b", null, t("{name}의 하트가 왔어요", { name: who(gift.from) })),
+          waiting().length > 1 && h("small", null, t("외 {n}명", { n: waiting().length - 1 }))),
+        h("span", { class: "go" }, t("하트 받기"))),
       first && h("button", { class: "duel-banner friend", onclick: open },
         h("span", { class: "duel-vs", "aria-hidden": "true" }, "+"),
         h("span", { class: "duel-text" },
@@ -248,13 +267,18 @@ export function initFriends(c) {
     const sent = all().filter((f) => f.status === "outgoing");
     const left = unused().length;
 
-    const total = (list) => list.reduce((sum, g) => sum + g.points, 0);
+    // The hearts that wait, friend by friend (a friend may have sent on several days).
+    const byFriend = () => {
+      const rows = new Map();
+      for (const g of waiting()) rows.set(g.from.id, { from: g.from, n: (rows.get(g.from.id)?.n || 0) + 1 });
+      return [...rows.values()];
+    };
     // The badge of an item that waits (a gift to collect, a request to answer).
     const fresh = () => h("em", { class: "row-new", title: t("새로 왔어요"), "aria-label": t("새로 왔어요") }, "N");
     const giftRow = (g, when) => h("div", { class: `duel-row gift${when ? "" : " hot"}` },
       h("span", { class: "gift-mark", "aria-hidden": "true" }, "♥"),
       h("span", { class: "who" }, h("span", null, who(g.from), !when && fresh()), when && h("small", null, new Date(g.at).toLocaleDateString(c.locale(), { month: "long", day: "numeric" }))),
-      h("b", { class: "gift-points" }, `+${g.points}`));
+      h("b", { class: "gift-points", "aria-hidden": "true" }, "♥"));
     const tabs = [
       ["friends", t("친구 목록"), friends.length, 0],
       !state.giftSetup && ["gifts", t("선물 받기"), null, waiting().length],
@@ -265,7 +289,7 @@ export function initFriends(c) {
 
     // ----- the list of friends -----
     const friendsTab = () => h("section", { class: "duel-list" },
-      !state.giftSetup && friends.length > 0 && h("p", { class: "small muted gift-hint" }, t("하루에 한 번, 친구마다 ♥ 10포인트를 선물할 수 있어요.")),
+      !state.giftSetup && friends.length > 0 && h("p", { class: "small muted gift-hint" }, t("하루에 한 번, 친구마다 ♥ 하트를 보낼 수 있어요. 내 포인트는 줄지 않아요.")),
       friends.length === 0
         ? h("div", { class: "empty small" }, t("아직 친구가 없어요. 이메일로 신청하거나 초대 코드를 보내 보세요."),
             h("p", { style: "margin-top:12px" }, h("button", { class: "btn", onclick: show("add") }, t("친구 추가"))))
@@ -275,36 +299,40 @@ export function initFriends(c) {
               ? [h("button", { class: "mini danger", onclick: () => run(() => api.removeFriend(f.id), t("친구 목록에서 지웠어요.")) }, t("정말 삭제")),
                  h("button", { class: "link", onclick: () => { ui.confirm = null; c.render(); } }, t("취소"))]
               : [!state.giftSetup && h("button", { class: `gift-heart${given(f) ? " sent" : ""}`, disabled: given(f) || ui.busy,
-                   title: given(f) ? t("오늘은 이미 선물했어요. 내일 또 보낼 수 있어요.") : t("10포인트 선물하기"), "aria-label": given(f) ? t("오늘은 이미 선물했어요. 내일 또 보낼 수 있어요.") : t("10포인트 선물하기"),
-                   onclick: () => give(f) }, h("i", { "aria-hidden": "true" }, "♥"), given(f) ? t("보냄") : "+10"),
+                   title: given(f) ? t("오늘은 이미 하트를 보냈어요. 내일 또 보낼 수 있어요.") : t("하트 보내기"), "aria-label": given(f) ? t("오늘은 이미 하트를 보냈어요. 내일 또 보낼 수 있어요.") : t("하트 보내기"),
+                   onclick: () => give(f) }, h("i", { "aria-hidden": "true" }, "♥"), given(f) ? t("보냄") : t("보내기")),
                  h("button", { class: "mini buy", disabled: Boolean(f.other.no_duels), onclick: () => c.startDuel(f.other) }, t("대결")),
                  h("button", { class: "link", onclick: () => { ui.confirm = f.id; c.render(); } }, t("삭제"))])));
 
     // ----- gifts: what waits, what came in the last seven days (who and when), whom I gave to today -----
     const givenToday = friends.filter(given);
     const giftsTab = () => [
+      c.heartBox(),
       h("section", { class: "duel-list gifts" },
-        h("h3", null, t("받은 선물"), waiting().length > 0 && h("small", null, String(waiting().length))),
-        // Every gift that waits is collected at once, so they are one item: who they are from, and
-        // the button that takes them (a heart, and the points that arrive).
+        h("h3", null, t("받은 하트"), waiting().length > 0 && h("small", null, String(waiting().length))),
+        // Each friend's hearts are an item of their own: taken, or taken with one sent back.
+        waiting().length > 1 && h("div", { class: "gift-all" },
+          h("button", { class: "mini", disabled: ui.busy, onclick: () => collect(null, false) }, t("모두 받기")),
+          h("button", { class: "mini buy", disabled: ui.busy, onclick: () => collect(null, true) }, h("i", { "aria-hidden": "true" }, "♥"), t("모두 받고 보내기"))),
         waiting().length > 0
-          ? h("div", { class: "duel-row hot gift take" },
-              h("span", { class: "gift-mark", "aria-hidden": "true" }, "♥"),
-              h("span", { class: "who" },
-                h("span", null, who(waiting()[0].from), waiting().length > 1 && ` ${t("외 {n}명", { n: waiting().length - 1 })}`, fresh()),
-                waiting().length > 1 && h("small", null, waiting().map((g) => who(g.from)).join(", "))),
-              h("button", { class: "gift-take", disabled: ui.busy, onclick: collect },
-                h("i", { "aria-hidden": "true" }, "♥"), waiting().length > 1 ? t("모두 받기") : t("선물 받기"), h("b", null, `+${total(waiting())}`)))
-          : h("div", { class: "empty small" }, t("받을 선물이 없어요."))),
+          ? byFriend().map(({ from, n }) => {
+              const friend = friends.find((f) => f.other.id === from.id);
+              return h("div", { class: "duel-row hot gift take" },
+                h("span", { class: "gift-mark", "aria-hidden": "true" }, "♥"),
+                h("span", { class: "who" }, h("span", null, who(from), n > 1 && ` ×${n}`, fresh())),
+                h("button", { class: "mini", disabled: ui.busy, onclick: () => collect(from.id, false) }, t("받기")),
+                friend && !given(friend) && h("button", { class: "mini buy", disabled: ui.busy, onclick: () => collect(from.id, true) }, h("i", { "aria-hidden": "true" }, "♥"), t("받고 보내기")));
+            })
+          : h("div", { class: "empty small" }, t("받을 하트가 없어요."))),
       h("section", { class: "duel-list" },
-        h("h3", null, t("최근 받은 선물")),
-        (gifts().got || []).length > 0 ? gifts().got.slice(0, 12).map((g) => giftRow(g, true)) : h("div", { class: "empty small" }, t("최근 7일 동안 받은 선물이 없어요."))),
+        h("h3", null, t("최근 받은 하트")),
+        (gifts().got || []).length > 0 ? gifts().got.slice(0, 12).map((g) => giftRow(g, true)) : h("div", { class: "empty small" }, t("최근 7일 동안 받은 하트가 없어요."))),
       givenToday.length > 0 && h("section", { class: "duel-list" },
-        h("h3", null, t("오늘 보낸 선물"), h("small", { class: "plain" }, String(givenToday.length))),
+        h("h3", null, t("오늘 보낸 하트"), h("small", { class: "plain" }, String(givenToday.length))),
         givenToday.map((f) => h("div", { class: "duel-row gift" },
           h("span", { class: "gift-mark", "aria-hidden": "true" }, "♥"),
           h("span", { class: "who" }, who(f.other)),
-          h("b", { class: "gift-points" }, "+10")))),
+          h("b", { class: "gift-points", "aria-hidden": "true" }, "♥")))),
     ];
 
     // ----- adding friends: requests to answer, asking by email, requests I sent, invitations -----

@@ -462,11 +462,11 @@ export async function sendPointGift(friend, day) {
   box.sent[friend] = day;
   write(GIFTS_KEY, box);
 }
-export async function claimPointGifts() {
+export async function claimPointGifts(from) {
   const box = giftBox();
-  const gifts = box.waiting;
+  const gifts = box.waiting.filter((g) => !from || g.from.id === from);
   box.got = [...gifts.map((g) => ({ points: g.points, at: new Date().toISOString(), from: g.from })), ...box.got].slice(0, 20);
-  box.waiting = [];
+  box.waiting = box.waiting.filter((g) => !gifts.includes(g));
   write(GIFTS_KEY, box);
   return { points: gifts.reduce((sum, g) => sum + g.points, 0), gifts };
 }
