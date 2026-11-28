@@ -1,5 +1,5 @@
 // Theme shop: things a student can buy with word points and switch between in Settings.
-import { conceptById } from "./goods.js?v=0.1.28-tp7rak";
+import { conceptById } from "./goods.js?v=0.1.28-tp7rpc";
 // `accent` is used on light screens, `onDark` on dark ones. Names are Korean keys for i18n.
 // Prices climb from "a day or two" to `special` items that take about a week of steady use
 // (a busy day of searching, uncovering and quizzing earns roughly 200 points).
@@ -45,7 +45,7 @@ export function themeColor(id) {
 
 // Paints the page with the chosen theme colour and background, or, when a whole theme is on
 // (goods.js, CONCEPTS), with every colour of that theme; its backdrop takes the background's place.
-const PAINTED = ["bg", "surface", "text", "muted", "line", "border", "accent", "accent-dark", "accent-soft", "lime", "good", "good-soft", "bad", "bad-soft", "shadow", "shadow-lg"];
+const PAINTED = ["on-accent", "bg", "surface", "text", "muted", "line", "border", "accent", "accent-dark", "accent-soft", "lime", "good", "good-soft", "bad", "bad-soft", "shadow", "shadow-lg"];
 export function applyShop(shop) {
   const { theme, bg, concept } = { ...DEFAULT_SHOP, ...(shop || {}) };
   const root = document.documentElement;
@@ -53,6 +53,7 @@ export function applyShop(shop) {
   for (const name of PAINTED) root.style.removeProperty(`--${name}`);
   if (whole.vars) {
     for (const [name, value] of Object.entries(whole.vars)) root.style.setProperty(`--${name}`, value);
+    root.style.setProperty("--on-accent", whole.dark ? "#14121f" : "#fff"); // what is written on the accent colour
     root.dataset.concept = whole.id;
     root.style.colorScheme = whole.dark ? "dark" : "light";
     document.body.dataset.bg = "plain";
