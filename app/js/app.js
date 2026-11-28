@@ -200,12 +200,14 @@ function openDailyGift() {
   // is the one made to stand out (it is why to come back).
   const strip = (run) => {
     const pos = ((run - 1) % 7) + 1;
-    return h("div", { class: "run-strip", role: "img", "aria-label": t("연속 {n}일", { n: run }) },
+    return h("div", { class: "run-strip steps", role: "img", "aria-label": t("연속 {n}일", { n: run }) },
       Array.from({ length: 7 }, (_, i) => {
         const day = i + 1;
         return h("i", { class: `${day < pos ? "on" : day === pos ? "on today" : day === pos + 1 ? "next" : ""}${day === 7 ? " last" : ""}` },
-          h("small", null, day === pos ? t("오늘") : day === pos + 1 ? t("내일") : String(day)),
-          day === 7 ? grow().ticketArt("basic") : day === 1 ? art("gift") : h("b", null, `+${(day - 1) * 5}`));
+          // what the day adds, standing on a step that is higher every day
+          h("span", { class: "run-add" }, day === 7 ? grow().ticketArt("basic") : day === 1 ? art("gift") : [h("em", { class: "coin-i", "aria-hidden": "true" }, "P"), h("b", null, `+${(day - 1) * 5}`)]),
+          h("u", { style: `height:${8 + day * 6}px` }),
+          h("small", null, day === pos ? t("오늘") : day === pos + 1 ? t("내일") : String(day)));
       }));
   };
   const tomorrow = (run) => h("p", { class: "run-next" }, art("spark"), (run + 1) % 7 === 0 ? t("내일 오면 뽑기권을 받아요!") : t("내일 오면 보너스 +{p} 더!", { p: runBonus(run + 1) }));
@@ -226,26 +228,36 @@ function openDailyGift() {
       const run = isToday(before.day) ? before.run || 1 : before.day === dayOf(clockNow() - 86400000) ? (before.run || 1) + 1 : 1;
       state.user.gift = { day: keepDay(before.day), picks: giftPicks() + 1, run, best: Math.max(before.best || 0, run) };
       api.saveProfile({ gift: state.user.gift }).catch(console.error);
-      award(prize, t("오늘의 선물")); // paid at once, so closing the panel now loses nothing
-      if (!extra) {
-        if (run % 7 === 0) grow().give([{ ticket: "basic", n: 1 }]);
-        else if (runBonus(run) > 0) setTimeout(() => award(runBonus(run), t("연속 {n}일 보너스", { n: run })), 1200);
-      }
-      if (prize >= 100) sfx.cheer(myShop().character); else sfx.chirp(myShop().character);
-      boxes.forEach((box, n) => { box.disabled = true; box.classList.add(n === i ? "mine" : "other"); });
-      el.classList.add("opened");
-      title.textContent = t("+{p}포인트!", { p: prize });
+      // The box rocks for a moment before it opens (the choice is already kept: closing now loses
+      // only the look of it). A big present (100 or more, or the biggest of the three) is opened
+      // with lights and confetti, and the character cheers.
       const best = Math.max(...inside);
-      const again = giftWaiting();
-      text.textContent = again ? t("플러스라서 한 번 더 뽑을 수 있어요!")
-        : !extra && run % 7 === 0 ? t("연속 {n}일! 뽑기권도 받았어요.", { n: run })
-          : (run + 1) % 7 === 0 ? t("내일도 오면 뽑기권을 받아요!")
-            : t("내일도 오면 보너스 +{p}!", { p: runBonus(run + 1) });
-      void best;
-      if (again) done.textContent = t("한 번 더 뽑기");
+      const big = prize >= 100 || prize === best;
+      boxes.forEach((box, n) => { box.disabled = true; if (n === i) box.classList.add("rock"); });
       later.hidden = true;
-      done.hidden = false;
-      done.focus();
+      sfx.chirp(myShop().character);
+      setTimeout(() => {
+        award(prize, t("오늘의 선물"));
+        if (!extra) {
+          if (run % 7 === 0) grow().give([{ ticket: "basic", n: 1 }]);
+          else if (runBonus(run) > 0) setTimeout(() => award(runBonus(run), t("연속 {n}일 보너스", { n: run })), 1500);
+        }
+        boxes.forEach((box, n) => { box.classList.remove("rock"); box.classList.add(n === i ? "mine" : "other"); });
+        el.classList.add("opened");
+        if (big) {
+          el.classList.add("jackpot");
+          boxes[i].append(h("span", { class: "g-burst", "aria-hidden": "true" }, Array.from({ length: 18 }, (_, k) => h("i", { style: `--a:${k * 20}deg;--c:${["#ff8fb8", "#ffd84d", "#7fd6c2", "#9aa5ff", "#ffa45c", "#fff"][k % 6]};--d:${60 + (k % 4) * 20}px` }))));
+          sfx.cheer(myShop().character);
+        }
+        title.textContent = prize === best && prize >= 100 ? t("대박! +{p}포인트!", { p: prize }) : prize === best ? t("최고의 상자! +{p}포인트!", { p: prize }) : t("+{p}포인트!", { p: prize });
+        const again = giftWaiting();
+        text.textContent = again ? t("플러스라서 한 번 더 뽑을 수 있어요!")
+          : !extra && run % 7 === 0 ? t("연속 {n}일! 뽑기권도 받았어요.", { n: run })
+            : prize === best ? t("세 상자 중에 가장 큰 선물을 골랐어요!") : t("내일은 어떤 상자를 고를까요?");
+        if (again) done.textContent = t("한 번 더 뽑기");
+        done.hidden = false;
+        done.focus();
+      }, 800);
     },
   }, giftArt(), h("b", { class: "gift-prize" }, `+${prize}`)));
   const el = h("div", { id: "sheet", class: "sheet-wrap", onclick: (e) => { if (e.target === el) close(); } },

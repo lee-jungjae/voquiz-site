@@ -442,7 +442,7 @@ export function initGrow(c) {
           ...SLOTS.map(([id, name]) => [id, t(name), WEARS.filter((w) => w.slot === id && owned(`wear:${w.id}`)).length, WEARS.filter((w) => w.slot === id).length]),
           ["skin", t("스킨"), SKINS.filter((x) => owned(skinKey(x))).length, SKINS.length]].map(([id, label, have, all]) =>
           h("button", { class: "chip", "aria-pressed": String(place === id), onclick: () => { state.wearSlot = id; c.render(); } }, label, h("small", null, `${have}/${all}`)))),
-      place !== "skin" && h("h4", null, place ? t("{name}에 하는 소품", { name: t(slotName[place]) }) : t("소품")),
+      place !== "skin" && h("h4", null, place ? t("{name} 소품", { name: t(slotName[place]) }) : t("소품")),
       place !== "skin" && h("div", { class: "shelf" }, shown.map((w) => {
         const has = owned(`wear:${w.id}`), on = has && wearing()[w.slot] === w.id;
         const other = has && !on && wearing()[w.slot] && owned(`wear:${wearing()[w.slot]}`); // the place is taken: this would take its place

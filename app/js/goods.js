@@ -86,7 +86,7 @@ export const WEARS = [
   { id: "sparkle", name: "반짝반짝", slot: "aura", rare: 2, art: twinkle(52, 46, 6, "#ffd84d") + twinkle(152, 96, 5, "#ffd84d") + twinkle(44, 104, 4, "#ffe89a") + twinkle(158, 44, 3.6, "#ffe89a") },
   { id: "lovely", name: "하트 뿅뿅", slot: "aura", rare: 3, art: heart(50, 40, 6, "#ff7aa8") + heart(154, 34, 4.6, "#ffa6c4") + heart(160, 92, 5.4, "#ff7aa8") + heart(42, 98, 4, "#ffa6c4") },
 ];
-export const SLOTS = [["eyes", "눈"], ["cheek", "볼"], ["hand", "손"], ["neck", "목"], ["back", "등"], ["aura", "주변"]];
+export const SLOTS = [["eyes", "눈"], ["cheek", "볼"], ["hand", "손"], ["neck", "목"], ["back", "날개·망토"], ["aura", "주변"]];
 export const wearById = (id) => WEARS.find((x) => x.id === id);
 
 // ----- another look for one character -----
