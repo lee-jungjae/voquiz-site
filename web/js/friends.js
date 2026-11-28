@@ -12,11 +12,14 @@ export function initFriends(c) {
   const who = (other) => c.nameOf(other.nickname, other.tag);
   // A name as it is shown in a row: the level first, small, the same everywhere (as in the rankings).
   const named = (other) => c.h("span", { class: "who-line" }, c.levelMini(other), who(other));
-  // When a friend was last here, in hours at the finest ("within an hour", never "now" or a clock time).
+  // When a friend was last here (never "now" or a clock time).
   const seen = (other) => {
     const hours = state.seen?.get(other.id);
     if (hours == null) return null;
-    const text = hours < 1 ? t("1시간 이내") : hours < 24 ? t("{n}시간 전", { n: hours }) : hours < 48 ? t("어제") : hours < 24 * 30 ? t("{n}일 전", { n: Math.floor(hours / 24) }) : t("오래전");
+    // Hours on the first day ("within 3 hours"), then days, then weeks; after a month, no record.
+    const days = Math.floor(hours / 24);
+    const text = hours < 24 ? t("{n}시간 이내", { n: hours + 1 }) : days < 2 ? t("어제") : days < 7 ? t("{n}일 전", { n: days })
+      : days < 30 ? t("{n}주 전", { n: Math.floor(days / 7) }) : t("최근 접속 기록 없음");
     return c.h("span", { class: `seen${hours < 1 ? " now" : ""}` }, ` · ${text}`);
   };
   const all = () => state.friends || [];
