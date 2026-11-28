@@ -3797,3 +3797,11 @@ b:has(> .coin-i:first-child) > .coin-i { margin: 0; vertical-align: 0; }
 .star { font-size: 0 !important; display: inline-grid; place-items: center; }
 .star::before { content: ""; width: 21px; height: 21px; background: currentColor; -webkit-mask: var(--i-star-line) center / contain no-repeat; mask: var(--i-star-line) center / contain no-repeat; }
 .star[aria-pressed="true"]::before { -webkit-mask-image: var(--i-star); mask-image: var(--i-star); }
+
+/* Small drawn pictures on dark themes (0.1.28): their outline turns light so they do not sink into the background. */
+.art-i [stroke="#3b3550"] { stroke: var(--art-ink, light-dark(#3b3550, #ece9fb)); }
+.art-i [fill="#3b3550"] { fill: var(--art-ink, light-dark(#3b3550, #ece9fb)); }
+/* ...except where the picture sits on a colour of its own that stays light on every theme */
+.league-badge, .league-chip, .league-join, .league-card, .qz-run, .stage-up-icon, .f-ok, .play-new, .run-strip > i.on, .lv-stone { --art-ink: #3b3550; }
+.tier-dot, .tier-ladder .league-badge { --art-ink: #3b3550; }
+.tier-dot.now em { color: color-mix(in srgb, var(--league-ink) 55%, var(--text)); }
