@@ -133,7 +133,29 @@ export async function saveProfile(data) {
 
 // What this student shows on the rankings. Kept in its own table so that names and points can be
 // ranked across students without exposing anyone's account.
+// The level is published too (0023_levels_shown.sql). Before that file is run the table has no
+// place for it: the rest is published as before.
 export async function publishRank(row) {
+  if (!("level" in row)) return publishRow(row);
+  try {
+    return await publishRow(row);
+  } catch (err) {
+    if (err.status !== 400) throw err;
+    const { level, ...rest } = row;
+    return publishRow(rest);
+  }
+}
+// The levels of the students in a list (rows with nickname and tag) -> [{ nickname, tag, level }].
+// Empty before 0023_levels_shown.sql.
+export async function levelsOf(who) {
+  try {
+    return (await authed("/rest/v1/rpc/levels_of", { method: "POST", body: { p_who: who } })) || [];
+  } catch (err) {
+    if (err?.status === 404 || err?.code === "PGRST202") return [];
+    throw err;
+  }
+}
+async function publishRow(row) {
   const send = (body) => authed("/rest/v1/profiles?on_conflict=user_id", {
     method: "POST",
     headers: { Prefer: "resolution=merge-duplicates,return=minimal" },

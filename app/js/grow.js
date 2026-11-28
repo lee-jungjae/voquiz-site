@@ -107,6 +107,7 @@ export function initGrow(c) {
     state.user.level = { ...kept(), xp: now };
     keep();
     const from = levelFor(before), to = levelFor(now);
+    if (to > from) c.publish?.(); // others see the new level
     return Array.from({ length: to - from }, (_, i) => from + i + 1);
   }
   // A word has just been learned: after its own celebration, the level's (when one was reached).

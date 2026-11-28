@@ -514,12 +514,29 @@ const nameOf = (nickname, tag) => nickname || `${t("탐험가")} ${tag}`;
 const displayName = () => nameOf(state.user.nickname, myTag());
 
 // Keeps this student's line on the rankings up to date. Best effort: the app works without it.
+// Other students' levels, where they are listed (the rankings, the friends list): a small number
+// before the name. They are fetched for the names on the screen and kept by name and tag.
+const levelKey = (who) => `${who?.nickname}#${who?.tag}`;
+async function loadLevels(rows) {
+  const who = (rows || []).filter((r) => r && r.nickname && !r.bot && !r.me && !(state.levels ||= new Map()).has(levelKey(r))).map((r) => ({ nickname: r.nickname, tag: r.tag }));
+  if (!who.length) return;
+  try {
+    for (const row of await api.levelsOf(who.slice(0, 300))) state.levels.set(levelKey(row), row.level);
+    render();
+  } catch (err) { console.error(err); }
+}
+function levelMini(who) {
+  if (!who || who.bot) return null;
+  const lv = who.me ? grow().level() : state.levels?.get(levelKey(who));
+  return lv ? h("em", { class: "lv-mini", title: `Lv.${lv}`, "aria-label": `Lv.${lv}` }, String(lv)) : null;
+}
 function publishRank() {
   if (!state.user) return;
   api.publishRank({
     nickname: state.user.nickname || "", tag: myTag(), points: state.user.points || 0,
     grade: state.user.grade || null, best_streak: state.user.challenge?.best || 0,
     week_start: weekKey(), week_points: weekEarned(), tier: myTier(), character: myShop().character, motto: state.user.motto || "",
+    level: grow().level(),
   }).catch(() => {});
 }
 
@@ -2691,6 +2708,7 @@ async function openRankings() {
     state.rankings = await api.getRankings(state.rankGrade, onlyFriends);
     // Duels won come from their own function, which may not be installed yet.
     state.rankings.duel = await api.duelRankings(onlyFriends).catch(() => []);
+    loadLevels(Object.values(state.rankings).filter(Array.isArray).flat()); // not awaited: the board shows first
     noteClimb();
   } catch (err) {
     console.error(err);
@@ -2977,7 +2995,7 @@ function rankView() {
     row.rank <= 3 && row.score > 0 ? medal(row.rank) : h("span", { class: "place" }, String(row.rank)),
     h("span", { class: "ava", "aria-hidden": "true" }, portrait(row.me ? myLook() : row.character || "bubble")),
     h("span", { class: "who" },
-      h("span", { class: "who-name" }, row.bot ? row.nickname : nameOf(row.nickname, row.tag),
+      h("span", { class: "who-name" }, levelMini(row), row.bot ? row.nickname : nameOf(row.nickname, row.tag),
         row.me && h("small", null, t("나")), row.bot && h("small", { class: "bot" }, getLang() === "en" ? "character" : t("캐릭터"))),
       row.me
         ? h("button", { class: "who-motto edit", title: t("한마디 바꾸기"), onclick: () => { state.mottoEdit = !state.mottoEdit; render(); } },
@@ -3322,7 +3340,7 @@ function friends() {
     h, t, state, api, render, fail, nameOf, toastText, openPage, storeUrl, logoIcon, displayName, award, locale,
     today: todayKey,
     startDuel: (other) => duel().start({ other }),
-    addHearts: (n) => grow().addHearts(n), heartBox: () => grow().heartBox(),
+    addHearts: (n) => grow().addHearts(n), heartBox: () => grow().heartBox(), loadLevels, levelMini,
   }));
 }
 // Levels, the capsule machines, what the character wears, hearts (grow.js).
@@ -3331,7 +3349,7 @@ function grow() {
   return (growModule ||= initGrow({
     h, t, state, api, render, award, celebrate, toastText, sfx, isLearned, myShop, saveShop, portrait, themeColor,
     CHARACTERS, THEMES, BACKGROUNDS,
-    spend: (n) => { state.user.points -= n; countUp(-n); }, countUp,
+    spend: (n) => { state.user.points -= n; countUp(-n); }, countUp, publish: () => publishRank(),
     openGacha: () => { document.getElementById("sheet")?.remove(); loadQuestStats(); Object.assign(state, { tab: "shop", shopTab: "gacha", confirmBuy: null, notice: null }); render(); },
     tryOn,
     openShopTab: (tab) => { document.getElementById("sheet")?.remove(); Object.assign(state, { tab: "shop", shopTab: tab, confirmBuy: null, notice: null }); render(); },

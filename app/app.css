@@ -3625,3 +3625,8 @@ html[data-concept="aurora"] .use b { color: #f08a7a; }
 .lv-new { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 999px; background: var(--lime); color: #2c3a10; font-style: normal; font-size: 10px; font-weight: 800; line-height: 1.6; vertical-align: 1px; }
 .sense-note.fresh { padding: 8px 12px; border-left-width: 4px; border-radius: 0 12px 12px 0; background: color-mix(in srgb, var(--lime) 18%, var(--bg)); }
 .use-row.fresh b::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 1px color-mix(in srgb, var(--lime) 60%, var(--text)); vertical-align: 2px; }
+
+/* another student's level, before the name: a small number, nothing more */
+.lv-mini { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; margin-right: 6px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-style: normal; font-size: 11px; font-weight: 800; font-variant-numeric: tabular-nums; vertical-align: 2px; }
+.who-line { display: inline-flex; align-items: center; min-width: 0; }
+.who-line .lv-mini { flex: none; vertical-align: 0; }
