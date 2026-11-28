@@ -187,7 +187,7 @@ export function initFriends(c) {
     return h("div", { class: "duel-banners" },
       // A gift from a friend: pressing it collects it (and every other one that waits).
       gift && h("button", { class: "duel-banner gift", onclick: () => collect() },
-        h("span", { class: "duel-vs", "aria-hidden": "true" }, "♥"),
+        h("span", { class: "duel-vs", "aria-hidden": "true" }, h("i", { class: "heart-i" })),
         h("span", { class: "duel-text" },
           h("b", null, t("{name}의 하트가 왔어요", { name: who(gift.from) })),
           waiting().length > 1 && h("small", null, t("외 {n}명", { n: waiting().length - 1 }))),
@@ -290,9 +290,9 @@ export function initFriends(c) {
     // The badge of an item that waits (a gift to collect, a request to answer).
     const fresh = () => h("em", { class: "row-new", title: t("새로 왔어요"), "aria-label": t("새로 왔어요") }, "N");
     const giftRow = (g, when) => h("div", { class: `duel-row gift${when ? "" : " hot"}` },
-      h("span", { class: "gift-mark", "aria-hidden": "true" }, "♥"),
+      h("span", { class: "gift-mark", "aria-hidden": "true" }, h("i", { class: "heart-i" })),
       h("span", { class: "who" }, h("span", null, named(g.from), !when && fresh()), when && h("small", null, new Date(g.at).toLocaleDateString(c.locale(), { month: "long", day: "numeric" }))),
-      h("b", { class: "gift-points", "aria-hidden": "true" }, "♥"));
+      h("b", { class: "gift-points", "aria-hidden": "true" }, h("i", { class: "heart-i" })));
     const tabs = [
       ["friends", t("친구 목록"), friends.length, 0],
       !state.giftSetup && ["gifts", t("선물 받기"), null, waiting().length],
@@ -331,7 +331,7 @@ export function initFriends(c) {
           ? byFriend().map(({ from, n }) => {
               const friend = friends.find((f) => f.other.id === from.id);
               return h("div", { class: "duel-row hot gift take" },
-                h("span", { class: "gift-mark", "aria-hidden": "true" }, "♥"),
+                h("span", { class: "gift-mark", "aria-hidden": "true" }, h("i", { class: "heart-i" })),
                 h("span", { class: "who" }, h("span", null, named(from), n > 1 && ` ×${n}`, fresh())),
                 h("button", { class: "mini", disabled: ui.busy, onclick: () => collect(from.id, false) }, t("받기")),
                 friend && !given(friend) && h("button", { class: "mini buy", disabled: ui.busy, onclick: () => collect(from.id, true) }, h("i", { class: "heart-i", "aria-hidden": "true" }), t("받고 보내기")));
@@ -343,9 +343,9 @@ export function initFriends(c) {
       givenToday.length > 0 && h("section", { class: "duel-list" },
         h("h3", null, t("오늘 보낸 하트"), h("small", { class: "plain" }, String(givenToday.length))),
         givenToday.map((f) => h("div", { class: "duel-row gift" },
-          h("span", { class: "gift-mark", "aria-hidden": "true" }, "♥"),
+          h("span", { class: "gift-mark", "aria-hidden": "true" }, h("i", { class: "heart-i" })),
           h("span", { class: "who" }, named(f.other)),
-          h("b", { class: "gift-points", "aria-hidden": "true" }, "♥")))),
+          h("b", { class: "gift-points", "aria-hidden": "true" }, h("i", { class: "heart-i" }))))),
     ];
 
     // ----- adding friends: requests to answer, asking by email, requests I sent, invitations -----

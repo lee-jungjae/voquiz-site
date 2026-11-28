@@ -1,4 +1,4 @@
-import { stroke, star, twinkle, heart } from "./wear-art.js?v=0.1.28-tp7zjj";
+import { stroke, star, twinkle, heart } from "./wear-art.js?v=0.1.28-tp7zq2";
 // More things for the eyes and the cheeks. Rule: rare 1 (200 points) and rare 2 (400 points) can be bought; rare 3 comes from capsules only.
 
 // The outline of a chunky five-pointed star (for star-shaped lenses).

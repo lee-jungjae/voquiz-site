@@ -18,7 +18,7 @@ export const CHARACTERS = [
   // The original: a speech bubble (no sprout since 0.1.28: it read as a fruit and sat under every hat). Its colours follow the theme (set in app.css).
   {
     id: "bubble", name: "말풍이", group: "", vibe: "귀여움", cost: 0,
-    body: "M88 50 h24 a26 26 0 0 1 26 26 v10 a26 26 0 0 1 -26 26 h-20 l-14 12 l2 -13 a26 26 0 0 1 -18 -25 v-10 a26 26 0 0 1 26 -26 z",
+    body: "M62 76 c0 -19 16 -29 38 -29 s38 10 38 29 v10 a26 26 0 0 1 -26 26 h-20 l-14 12 l2 -13 a26 26 0 0 1 -18 -25 z",
     deco: '<path class="m-shine" d="M80 60 q10 -7 22 -6"/>',
   },
 

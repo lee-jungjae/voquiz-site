@@ -10,7 +10,7 @@
 //  - leaving: when the window becomes a phone's, everybody runs to the dictionary tab (leaveYard).
 // The app only says who is there and what a tap does; everything that moves is in here.
 // The page needs an element with the id "yard" (the web version's index.html has one).
-import { portrait, giftArt } from "./mascot.js?v=0.1.28-tp7zjj";
+import { portrait, giftArt } from "./mascot.js?v=0.1.28-tp7zq2";
 
 const still = () => Boolean(globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
 const rand = (a, b) => a + Math.random() * (b - a);
