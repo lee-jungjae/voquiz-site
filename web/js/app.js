@@ -1,32 +1,32 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp7qig";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7qig";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7qig";
-import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.28-tp7qig";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp7qig";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7qig";
-import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7qig";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey } from "./goods.js?v=0.1.28-tp7qig";
-import { initGrow } from "./grow.js?v=0.1.28-tp7qig";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7qig";
-import { art, artToCss } from "./art.js?v=0.1.28-tp7qig";
+import { api, DEMO } from "./api.js?v=0.1.28-tp7qlm";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7qlm";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7qlm";
+import { THEMES, BACKGROUNDS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor } from "./shop.js?v=0.1.28-tp7qlm";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp7qlm";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7qlm";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7qlm";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey } from "./goods.js?v=0.1.28-tp7qlm";
+import { initGrow } from "./grow.js?v=0.1.28-tp7qlm";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7qlm";
+import { art, artToCss } from "./art.js?v=0.1.28-tp7qlm";
 artToCss();
-import { film } from "./film.js?v=0.1.28-tp7qig";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7qig";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7qig";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp7qig";
-import { clockNow } from "./clock.js?v=0.1.28-tp7qig";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7qig";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7qig";
-import { initDuel } from "./duel.js?v=0.1.28-tp7qig";
-import { initFriends } from "./friends.js?v=0.1.28-tp7qig";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp7qig";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7qig";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7qig";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7qig";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7qig";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7qig";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7qig";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7qig";
+import { film } from "./film.js?v=0.1.28-tp7qlm";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7qlm";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7qlm";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp7qlm";
+import { clockNow } from "./clock.js?v=0.1.28-tp7qlm";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7qlm";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7qlm";
+import { initDuel } from "./duel.js?v=0.1.28-tp7qlm";
+import { initFriends } from "./friends.js?v=0.1.28-tp7qlm";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp7qlm";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7qlm";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7qlm";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7qlm";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7qlm";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7qlm";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7qlm";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7qlm";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -1972,7 +1972,6 @@ function searchHome() {
       resting: limitReached() ? t("오늘은 여기까지! 내일 또 만나요") : null,
       greet: quotaLine(), onGreet: () => { state.quotaSaid = quotaKey(); }, // marked as said only once it has spoken
     }),
-    h("button", { class: "chip dress-go", onclick: () => grow().openWardrobe() }, t("내 캐릭터 꾸미기")),
     recent.length > 0
       ? [h("div", { class: "hint" }, t("최근 찾은 단어")),
          h("div", { class: "chips center recent" }, recent.map((w) => h("button", { class: "chip", onclick: () => open(w) }, w.headword))),

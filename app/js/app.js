@@ -1972,7 +1972,6 @@ function searchHome() {
       resting: limitReached() ? t("오늘은 여기까지! 내일 또 만나요") : null,
       greet: quotaLine(), onGreet: () => { state.quotaSaid = quotaKey(); }, // marked as said only once it has spoken
     }),
-    h("button", { class: "chip dress-go", onclick: () => grow().openWardrobe() }, t("내 캐릭터 꾸미기")),
     recent.length > 0
       ? [h("div", { class: "hint" }, t("최근 찾은 단어")),
          h("div", { class: "chips center recent" }, recent.map((w) => h("button", { class: "chip", onclick: () => open(w) }, w.headword))),
