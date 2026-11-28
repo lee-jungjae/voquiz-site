@@ -3274,3 +3274,5 @@ html[data-concept="rainbow"] nav { border-top: 2px solid; border-image: linear-g
 .dress-go { display: block; margin: 2px auto 0; color: var(--muted); opacity: 0; pointer-events: none; transition: opacity .4s; }
 .dress-go.show { opacity: .75; pointer-events: auto; }
 .dress-go.show:hover { opacity: 1; }
+.dress-go.gift-go { color: var(--accent); font-weight: 700; }
+.dress-go.gift-go.show { opacity: 1; }
