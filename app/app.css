@@ -3611,3 +3611,4 @@ html[data-font] body, html[data-font] body *:not(.font-sample):not(.font-sample 
 .next-i { display: block; width: 18px; height: 18px; background: currentColor; -webkit-mask: var(--i-next) center / contain no-repeat; mask: var(--i-next) center / contain no-repeat; }
 .dw-skip { display: grid; place-items: center; width: 40px; padding: 0; border-radius: 14px; }
 .dw-skip:active .next-i { rotate: 180deg; transition: rotate .25s; }
+.dw-text b { text-overflow: clip; } /* the word is always whole: it wraps, it is never cut */
