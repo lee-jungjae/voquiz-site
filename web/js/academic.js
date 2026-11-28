@@ -5,7 +5,7 @@
 // The words are in academic-data.js (1,000 a grade: 200 a field), built by tools/academic_build.rb
 // from the levelled lists in prefill/academic/. They were written and levelled with Claude and
 // checked for form only; they are not a published list. See academic-words.md.
-import { ACADEMIC } from "./academic-data.js?v=0.1.28-tp7zz1";
+import { ACADEMIC } from "./academic-data.js?v=0.1.28-tp80ao";
 
 export const FIELDS = [["science", "과학"], ["math", "수학"], ["social", "사회"], ["language", "언어"], ["arts", "예술·기술"]];
 

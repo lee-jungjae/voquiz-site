@@ -4,9 +4,9 @@
 // file is what is done with them and how it is shown. Everything is kept with the account:
 // `level` { xp, got }, `bag` { tickets: { basic, gold } }, `hearts` { n, all }, and in `shop`: what
 // is owned ("wear:glasses", "skin:rabbit-moon", "concept:space"), `wear` { slot: id }, `skin` { character: id }.
-import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, skinName, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, wearSpecial, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp7zz1";
-import { lookOf } from "./characters.js?v=0.1.28-tp7zz1";
-import { art } from "./art.js?v=0.1.28-tp7zz1"; // eslint-disable-line no-unused-vars
+import { CONCEPTS, WEARS, SLOTS, wearById, SKINS, skinKey, skinName, MACHINES, MACHINE_KINDS, HEARTS_FOR_DRAW, wearCost, wearSpecial, LEVEL_MAX, needFor, levelFor, levelGift } from "./goods.js?v=0.1.28-tp80ao";
+import { lookOf } from "./characters.js?v=0.1.28-tp80ao";
+import { art } from "./art.js?v=0.1.28-tp80ao"; // eslint-disable-line no-unused-vars
 
 const TWICE_POINTS = 100; // a present the student already has turns into points
 
@@ -166,7 +166,7 @@ export function initGrow(c) {
     if (!state.user?.grade) return null;
     const lv = level(), next = lv < LEVEL_MAX ? needFor(lv + 1) : null;
     const gifts = waiting().length;
-    const label = next ? `${t("내 레벨")} ${lv} · ${t("다음 레벨까지 {n}개", { n: next - xp() })}` : `${t("내 레벨")} ${lv}`;
+    const label = next ? `${t("내 레벨")} ${lv} · ${t("단어 {n}개만 더 익히면 다음 레벨", { n: next - xp() })}` : `${t("내 레벨")} ${lv}`;
     return h("button", { class: `lv-chip${gifts ? " has-gift" : ""}`, title: label, "aria-label": label, onclick: () => openLevels() },
       badge(lv, progress(), "", need()), gifts > 0 && h("em", { class: "lv-dot", "aria-hidden": "true" }));
   }
@@ -277,7 +277,7 @@ export function initGrow(c) {
           h("p", { class: "lv-say" }, state.lvSay),
           // the badge and the character stand together, whatever the width; the rays are behind the badge
           h("div", { class: "lv-duo" }, big, h("span", { class: "lv-me", "aria-hidden": "true" }, c.portrait(myLook()))),
-          h("p", { class: "small lv-next" }, next ? t("다음 레벨까지 {n}개", { n: next - xp() }) : t("최고 레벨!"))),
+          h("p", { class: "small lv-next" }, next ? t("단어 {n}개만 더 익히면 다음 레벨", { n: next - xp() }) : t("최고 레벨!"))),
         road,
         h("button", { class: "btn wide", onclick: close }, t("닫기"))));
     document.body.append(el);

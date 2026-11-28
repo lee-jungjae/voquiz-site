@@ -91,7 +91,7 @@ function shuffled(list) {
 
 // Turns each quiz word into a question: "type" (write the word) or "choice" (pick it from four).
 // Choices need three other words from the student's list; with fewer, every question is typed.
-// Kinds alternate, starting with a typed question, so a quiz of two or more is always a mix.
+// Kinds alternate, starting with a choice (the easier kind first), so a quiz of two or more is always a mix.
 // A word with several meanings is asked about one of them, picked at random each time, so that
 // over a few quizzes every meaning comes up (`sense` is null for a word with one meaning).
 export function makeQuestions(cards, pool) {
@@ -101,7 +101,7 @@ export function makeQuestions(cards, pool) {
     const others = pool.filter((w) => w.term_norm !== word.term_norm);
     // One answer away from being learned but never typed yet: this one has to be typed.
     const mustType = !word.typed_ok && word.streak >= MASTER_STREAK - 1;
-    if (others.length < 3 || i % 2 === 0 || mustType) return { word, kind: "type", sense };
+    if (others.length < 3 || i % 2 === 1 || mustType) return { word, kind: "type", sense };
     return { word, kind: "choice", sense, options: shuffled([word, ...shuffled(others).slice(0, 3)]) };
   });
 }

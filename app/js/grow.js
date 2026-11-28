@@ -166,7 +166,7 @@ export function initGrow(c) {
     if (!state.user?.grade) return null;
     const lv = level(), next = lv < LEVEL_MAX ? needFor(lv + 1) : null;
     const gifts = waiting().length;
-    const label = next ? `${t("내 레벨")} ${lv} · ${t("다음 레벨까지 {n}개", { n: next - xp() })}` : `${t("내 레벨")} ${lv}`;
+    const label = next ? `${t("내 레벨")} ${lv} · ${t("단어 {n}개만 더 익히면 다음 레벨", { n: next - xp() })}` : `${t("내 레벨")} ${lv}`;
     return h("button", { class: `lv-chip${gifts ? " has-gift" : ""}`, title: label, "aria-label": label, onclick: () => openLevels() },
       badge(lv, progress(), "", need()), gifts > 0 && h("em", { class: "lv-dot", "aria-hidden": "true" }));
   }
@@ -277,7 +277,7 @@ export function initGrow(c) {
           h("p", { class: "lv-say" }, state.lvSay),
           // the badge and the character stand together, whatever the width; the rays are behind the badge
           h("div", { class: "lv-duo" }, big, h("span", { class: "lv-me", "aria-hidden": "true" }, c.portrait(myLook()))),
-          h("p", { class: "small lv-next" }, next ? t("다음 레벨까지 {n}개", { n: next - xp() }) : t("최고 레벨!"))),
+          h("p", { class: "small lv-next" }, next ? t("단어 {n}개만 더 익히면 다음 레벨", { n: next - xp() }) : t("최고 레벨!"))),
         road,
         h("button", { class: "btn wide", onclick: close }, t("닫기"))));
     document.body.append(el);

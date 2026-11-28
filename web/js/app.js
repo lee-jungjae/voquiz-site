@@ -1,34 +1,34 @@
-import { api, DEMO } from "./api.js?v=0.1.28-tp7zz1";
-import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp7zz1";
-import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp7zz1";
-import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp7zz1";
-import { cleanEntry } from "./clean.js?v=0.1.28-tp7zz1";
-import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp7zz1";
-import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp7zz1";
-import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, skinName, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp7zz1";
-import { initGrow } from "./grow.js?v=0.1.28-tp7zz1";
-import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp7zz1";
-import { art, artToCss } from "./art.js?v=0.1.28-tp7zz1";
-import { academicWords, academicField } from "./academic.js?v=0.1.28-tp7zz1";
+import { api, DEMO } from "./api.js?v=0.1.28-tp80ao";
+import { STORE_URL, DOWNLOAD_URL, HOME_URL } from "./config.js?v=0.1.28-tp80ao";
+import { t, tIn, getLang, setLang, tryLang, hasChosenLang, locale, LANGS, sentences } from "./i18n.js?v=0.1.28-tp80ao";
+import { THEMES, BACKGROUNDS, FONTS, DEFAULT_SHOP, CATALOG_REV, applyShop, themeColor, loadFont } from "./shop.js?v=0.1.28-tp80ao";
+import { cleanEntry } from "./clean.js?v=0.1.28-tp80ao";
+import { mascot, portrait, reaction, giftArt } from "./mascot.js?v=0.1.28-tp80ao";
+import { CHARACTERS, baseOf, lookOf } from "./characters.js?v=0.1.28-tp80ao";
+import { CONCEPTS, WEARS, SKINS, conceptById, wearById, skinKey, skinName, wearCost, wearSpecial } from "./goods.js?v=0.1.28-tp80ao";
+import { initGrow } from "./grow.js?v=0.1.28-tp80ao";
+import { logoIcon, wordmark } from "./logo.js?v=0.1.28-tp80ao";
+import { art, artToCss } from "./art.js?v=0.1.28-tp80ao";
+import { academicWords, academicField } from "./academic.js?v=0.1.28-tp80ao";
 artToCss();
 setTimeout(() => peekSoon(true), 0);
-import { film } from "./film.js?v=0.1.28-tp7zz1";
-import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp7zz1";
-import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp7zz1";
-import { initDesktop } from "./desktop.js?v=0.1.28-tp7zz1";
-import { clockNow } from "./clock.js?v=0.1.28-tp7zz1";
-import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp7zz1";
-import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp7zz1";
-import { initDuel } from "./duel.js?v=0.1.28-tp7zz1";
-import { initFriends } from "./friends.js?v=0.1.28-tp7zz1";
-import { MOTTOS } from "./mottos.js?v=0.1.28-tp7zz1";
-import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp7zz1";
-import { SIGNATURES } from "./signatures.js?v=0.1.28-tp7zz1";
-import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp7zz1";
-import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp7zz1";
-import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp7zz1";
-import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp7zz1";
-import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp7zz1";
+import { film } from "./film.js?v=0.1.28-tp80ao";
+import { showYard, leaveYard, cheerYard, stageYard, visitNow } from "./yard.js?v=0.1.28-tp80ao";
+import { confetti, fireworks, stamp, miss as missFx, combo as comboFx } from "./fx.js?v=0.1.28-tp80ao";
+import { initDesktop } from "./desktop.js?v=0.1.28-tp80ao";
+import { clockNow } from "./clock.js?v=0.1.28-tp80ao";
+import { BANDS, bandOf } from "./levels.js?v=0.1.28-tp80ao";
+import { CHARACTER_LINES } from "./character-lines.js?v=0.1.28-tp80ao";
+import { initDuel } from "./duel.js?v=0.1.28-tp80ao";
+import { initFriends } from "./friends.js?v=0.1.28-tp80ao";
+import { MOTTOS } from "./mottos.js?v=0.1.28-tp80ao";
+import { leagueCharacters, place, outcome, TIERS, MOVE } from "./league.js?v=0.1.28-tp80ao";
+import { SIGNATURES } from "./signatures.js?v=0.1.28-tp80ao";
+import { sfx, soundOn, setSound } from "./sound.js?v=0.1.28-tp80ao";
+import { tuning, setTuning } from "./tuning.js?v=0.1.28-tp80ao";
+import { WORD_LISTS } from "./wordlists.js?v=0.1.28-tp80ao";
+import { WORD_DEFS } from "./worddefs.js?v=0.1.28-tp80ao";
+import { buildQuizSet, quizPool, makeQuestions, askedContent, applyAnswer, isCorrect, spellingDiff, MASTER_STREAK, RETEST_DAYS, isLearned, canRetest, retestPatch } from "./quiz.js?v=0.1.28-tp80ao";
 
 const app = document.getElementById("app");
 // The web version (site/web): the same app in a browser tab. Its page marks itself with class="web".
@@ -2199,7 +2199,7 @@ function searchView() {
     home && h("p", { class: "dk-hello" }, greeting()),
     !topSearch() && searchForm(),
     !WIDE() && !state.busy && !state.entry && !state.notice && dailyWordCard(), // right under the word box: it is a word to look up
-    home ? webActions() : !WIDE() && dailyGoal(),
+    home ? webActions() : !WIDE() && !state.entry && !state.busy && dailyGoal(), // not over a result: the meaning comes first
     noticeBox(),
     state.busy && loadingView(),
     state.entry && entryCard(state.entry),
@@ -3222,6 +3222,14 @@ function wordIn(c, lang) {
 // The last three seconds of a question in the desktop frame: the edges of the window beat red.
 const hurry = (deadline) => WIDE() && h("i", { class: "fx-hurry", "aria-hidden": "true", style: `animation-delay:${Math.max(0, deadline - Date.now() - 3000)}ms` });
 
+// Leaving in the middle asks once: the points paid at the start do not come back.
+function quitQuizAsk() {
+  sheet({
+    art: art("door"), title: t("퀴즈를 그만할까요?"),
+    text: t("지금 그만하면 시작할 때 쓴 포인트는 돌아오지 않아요."),
+    actions: [{ label: t("계속 풀기"), kind: "main", run() {} }, { label: t("그만하기"), run() { state.quiz = null; render(); } }],
+  });
+}
 function quizAsk() {
   const quiz = state.quiz;
   const word = quiz.cards[quiz.index];
@@ -3256,7 +3264,7 @@ function quizAsk() {
          h("p", { class: "small muted center act-note" }, t("한국어와 영어 중 어느 쪽으로 써도 정답이에요."))],
     h("p", { class: "center act-note" },
       h("button", { class: "link", onclick: () => submitAnswer("") }, t("모르겠어요")), "  ·  ",
-      h("button", { class: "link", onclick: () => { state.quiz = null; render(); } }, t("그만하기"))),
+      h("button", { class: "link", onclick: quitQuizAsk }, t("그만하기"))),
   ];
 }
 
@@ -3808,9 +3816,10 @@ const kindOf = (c) => FIRST_KINDS[c.id] || (SHOP_KINDS.includes(c.group) ? c.gro
 function shopSection() {
   const kind = state.shopKind || "all";
   const inKind = (c, id) => id === "all" || (id === "special" ? Boolean(c.special) : id === "quest" ? Boolean(c.earn) : kindOf(c) === id);
-  // Among the earned ones: those ready to take first, then those still to earn, then the ones already owned.
-  const rank = (c) => (!c.earn ? 3 : ownsCharacter(c) ? 2 : questDone(c) ? 0 : 1);
-  const shown = ALL_CHARACTERS.filter((c) => inKind(c, kind)).sort((a, b) => rank(a) - rank(b));
+  // What a student can do something with comes first: a quest character ready to take, then the ones
+  // already owned, then the ones to buy from the cheapest up, and last the quests still to finish.
+  const rank = (c) => (ownsCharacter(c) ? 1 : c.earn ? (questDone(c) ? 0 : 4) : c.special ? 3 : 2);
+  const shown = ALL_CHARACTERS.filter((c) => inKind(c, kind)).sort((a, b) => rank(a) - rank(b) || (rank(a) === 2 ? (a.cost || 0) - (b.cost || 0) : 0));
   const kinds = [["all", t("전체")], ["quest", t("도전 과제")], ...SHOP_KINDS.map((k) => [k, t(k)]), ["special", t("스페셜")]];
   // Four tabs: the whole themes, the colours and the backgrounds are three shelves of one tab.
   const tabs = [["gacha", t("캡슐"), null], ["character", t("캐릭터"), CHARACTERS.length], ["wear", t("꾸미기"), WEARS.length], ["concept", t("테마"), CONCEPTS.length + THEMES.length + BACKGROUNDS.length + FONTS.length]];
